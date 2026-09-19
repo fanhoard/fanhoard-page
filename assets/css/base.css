@@ -1,0 +1,189 @@
+/* ==========================================================================
+   FANHOARD BASE STYLES
+   assets/css/base.css
+   Layer 2: Global reset, element defaults, FOUC transition, focus rings,
+            and shell controls (buttons & badges).
+   ========================================================================== */
+
+/* ── Global Reset & Box Sizing ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-size: var(--step-0, 1rem);
+  line-height: var(--lh-normal, 1.5);
+  color: var(--text-main, #0f172a);
+  background-color: var(--surface-base, #ffffff);
+  min-height: 100vh;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── FOUC & Hydration Loading Pattern ── */
+body {
+  opacity: 0;
+  transition: opacity var(--duration-normal, 250ms) var(--ease-out, ease-out);
+}
+
+body.is-loaded {
+  opacity: 1;
+}
+
+/* ── Typography Defaults ── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading, 'FoglihtenNo07calt', Georgia, serif);
+  font-weight: var(--font-bold, 700);
+  line-height: var(--lh-tight, 1.25);
+  color: var(--text-main, #0f172a);
+  margin-top: 0;
+  margin-bottom: var(--space-3, 12px);
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: var(--space-4, 16px);
+}
+
+a {
+  color: var(--color-brand-primary, #0d9488);
+  text-decoration: none;
+  transition: color var(--duration-fast, 150ms) var(--ease-out, ease-out);
+}
+
+a:hover {
+  color: var(--color-brand-hover, #0f766e);
+}
+
+/* ── Universal Accessibility Focus Rings (WCAG 2.4.7) ── */
+:focus-visible {
+  outline: 2px solid var(--color-brand-primary, #0d9488);
+  outline-offset: 2px;
+}
+
+/* ── Shell Controls: Buttons (WCAG 2.2 AA Contrast ≥ 4.5:1) ── */
+.btn-primary,
+button.btn-primary,
+a.btn-primary,
+.button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2, 8px);
+  padding: var(--space-2, 8px) var(--space-4, 16px);
+  background-color: var(--color-brand-primary, #0d9488);
+  color: #ffffff;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: var(--step-0, 1rem);
+  font-weight: var(--font-semibold, 600);
+  line-height: 1.5;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: background-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
+              border-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
+              transform var(--duration-fast, 150ms) var(--ease-out, ease-out);
+}
+
+.btn-primary:hover,
+button.btn-primary:hover,
+a.btn-primary:hover,
+.button-primary:hover {
+  background-color: var(--color-brand-hover, #0f766e);
+  color: #ffffff;
+}
+
+.btn-primary:active,
+button.btn-primary:active,
+a.btn-primary:active,
+.button-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary,
+button.btn-secondary,
+a.btn-secondary,
+.button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2, 8px);
+  padding: var(--space-2, 8px) var(--space-4, 16px);
+  background-color: var(--surface-card, #ffffff);
+  color: var(--text-main, #0f172a);
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: var(--step-0, 1rem);
+  font-weight: var(--font-medium, 500);
+  line-height: 1.5;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--border-subtle, #cbd5e1);
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: background-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
+              border-color var(--duration-fast, 150ms) var(--ease-out, ease-out);
+}
+
+.btn-secondary:hover,
+button.btn-secondary:hover,
+a.btn-secondary:hover,
+.button-secondary:hover {
+  background-color: var(--surface-hover, #f1f5f9);
+  border-color: var(--border-strong, #94a3b8);
+}
+
+/* ── Shell Controls: Badges (WCAG 2.2 AA Contrast ≥ 4.5:1) ── */
+.badge,
+.badge-alt {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1, 4px);
+  padding: var(--space-1, 4px) var(--space-3, 12px);
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: var(--step--1, 0.875rem);
+  font-weight: var(--font-semibold, 600);
+  line-height: 1.25;
+  border-radius: var(--radius-full, 9999px);
+  background-color: var(--surface-hover, #f1f5f9);
+  color: var(--color-brand-primary, #0d9488);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  white-space: nowrap;
+}
+
+.badge-alt {
+  background-color: var(--color-brand-primary, #0d9488);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+/* ── Universal Reduced-Motion Guard (WCAG 2.3.3) ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+}

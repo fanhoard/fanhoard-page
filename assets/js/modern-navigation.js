@@ -206,7 +206,6 @@
         try {
           const a = document.createElement('a');
           a.className = `${this.itemClass} ${item.customClass || this.defaultButtonClass}`;
-          a.setAttribute('role', 'menuitem');
           const baseUrl = item.go_url || item.url || '/';
           a.dataset.baseUrl = baseUrl;
           if (item.url) a.dataset.link = item.url;

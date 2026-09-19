@@ -15,7 +15,7 @@ header {
 .logo {
   font-family:'FoglihtenNo07calt',monospace;
   font-size:26px; padding:20px 0 0;
-  color:var(--fv-brand-teal-light);
+  color:var(--color-brand-primary, #0d9488);
   white-space:nowrap; display:flex; align-items:center;
   margin-left:10px; pointer-events:none;
 }
@@ -26,10 +26,10 @@ nav { width:100%; margin-top:7px; contain: layout style; }
 nav ul {
   display:flex; list-style:none; margin:0;
   padding:7px 7px 0;
-  overflow-x:auto !important; /* บังคับให้แถบเมนูแนวนอนสกรอลล์ได้เสมอ ไม่ถูกบล็อก */
+  overflow-x:auto;
   white-space:nowrap;
   scrollbar-width:none;
-  border-bottom:0.8px solid rgba(19,180,127,0.3);
+  border-bottom:0.8px solid rgba(13,148,136,0.3);
   overscroll-behavior-x:contain; touch-action:pan-x;
   -webkit-overflow-scrolling:touch; 
   contain: layout style; 
@@ -46,39 +46,29 @@ nav ul li button {
   touch-action: manipulation; 
   transition: background 200ms ease-in-out, border-color 200ms ease-in-out, color 200ms ease-in-out;
 }
-nav ul li button:active { background: #f0f0f0; }
+nav ul li button:active { background: var(--fv-surface-hover, #f0f0f0); }
 
 nav ul li button.active {
-  color:var(--fv-brand-teal-light);
+  color:var(--color-brand-primary, #0d9488);
   background:var(--fv-surface-teal-hover);
-  border-color:rgba(0,206,176,0.51);
-  
-  /* ขาเข้าปุ่ม: ย่อขนาดลงจังหวะกดนิดนึงให้ดูมีน้ำหนัก (เพิ่มมิติ) */
+  border-color:rgba(13,148,136,0.51);
   transform: scale(0.98);
   transition: transform 150ms ease-out, background 150ms ease-out, border-color 150ms ease-out;
 }
 
-/* --- ส่วนของเส้นใต้ (Indicator) --- */
 nav ul li button::after {
   content:''; position:absolute; left:50%; bottom:0;
-  width:40%; height:3px; background:var(--fv-brand-teal-light);
+  width:40%; height:3px; background:var(--color-brand-primary, #0d9488);
   border-radius:10px 10px 0 0; 
-  
-  /* เริ่มต้นให้หดเหลือ 0 จากตรงกลาง */
   transform: translateX(-50%) scaleX(0);
   will-change: transform;
-  
   transition: transform 200ms ease-in;
 }
 
 nav ul li button.active::after {
-  /* ขยายขนาดกลับมาปกติ */
   transform: translateX(-50%) scaleX(1);
-  
-  /* ขาเข้า: ใส่ลูกเล่นเด้งดึ๋งด้วย cubic-bezier (Back Out) */
   transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
 
 .navbar-toggle {
   display:flex; flex-direction:column; gap:4px; cursor:pointer;
@@ -87,7 +77,7 @@ nav ul li button.active::after {
   z-index:var(--fv-z-overlay);
 }
 
-.error-message { position:fixed; top:50%; right:20px; background:#ff4444; color:#fff; padding:15px 20px; border-radius:5px; z-index:var(--z-toast, 700); }
+.error-message { position:fixed; top:50%; right:20px; background:#dc2626; color:#fff; padding:15px 20px; border-radius:5px; z-index:var(--z-toast, 700); }
 
 @media (min-width:600px)  { nav { margin-top:5px; } }
 @media (min-width:1024px) { nav { margin-top:5px; } }
@@ -96,4 +86,9 @@ nav ul li button.active::after {
   nav ul li button { padding:8px 10px; font-size:0.85em; }
   .navbar-toggle { left:12px; top:20px; }
 }
-@media print { header, nav, .navbar-toggle { display:none!important; } }
+
+@media (prefers-reduced-motion: reduce) {
+  nav ul li button, nav ul li button::after { transition: none; }
+}
+
+@media print { header, nav, .navbar-toggle { display:none; } }

@@ -1,0 +1,111 @@
+/* ==========================================================================
+   FANHOARD LAYOUT STYLES
+   assets/css/layout.css
+   Layer 3: Containers, grid utilities, landmarks, and navigation/shell wrappers.
+   ========================================================================== */
+
+/* ── Page Containers ── */
+.container,
+.page-container {
+  width: 100%;
+  max-width: var(--container-max-w, 1200px);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-4, 16px);
+  padding-right: var(--space-4, 16px);
+}
+
+.container-narrow {
+  width: 100%;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-4, 16px);
+  padding-right: var(--space-4, 16px);
+}
+
+.container-wide {
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-4, 16px);
+  padding-right: var(--space-4, 16px);
+}
+
+/* ── Grid Utilities ── */
+.grid {
+  display: grid;
+  gap: var(--space-6, 24px);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6, 24px);
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6, 24px);
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6, 24px);
+}
+
+.grid-auto-fit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-6, 24px);
+}
+
+@media (max-width: 768px) {
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Skip Link Utility (WCAG 2.4.1) ── */
+.skip-link,
+.fv-skip-link {
+  position: absolute;
+  top: -9999px;
+  left: 16px;
+  z-index: var(--z-toast, 700);
+  padding: var(--space-3, 12px) var(--space-4, 16px);
+  background-color: var(--surface-card, #ffffff);
+  color: var(--color-brand-primary, #0d9488);
+  border: 2px solid var(--color-brand-primary, #0d9488);
+  border-radius: var(--radius-md, 8px);
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: var(--step-0, 1rem);
+  font-weight: var(--font-bold, 700);
+  text-decoration: none;
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0,0,0,0.1));
+  transition: top var(--duration-fast, 150ms) var(--ease-out, ease-out);
+}
+
+.skip-link:focus,
+.fv-skip-link:focus {
+  top: 16px;
+  outline: none;
+}
+
+/* ── Landmark & Shell Structures ── */
+main,
+#main {
+  display: block;
+  min-height: 60vh;
+}
+
+.shell-header {
+  width: 100%;
+  background-color: var(--surface-base, #ffffff);
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+}

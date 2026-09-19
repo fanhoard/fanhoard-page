@@ -9,7 +9,7 @@ nav {
   position: fixed; top:0; left:0;
   width:100%; height:var(--fv-nav-top-h);
   padding:0;
-  background: rgba(253,254,255,0.85);
+  background: var(--fv-surface-nav, rgba(253,254,255,0.85));
   box-shadow: 0 0 8px rgba(0,0,0,0.08);
   z-index: var(--fv-z-nav);
   touch-action: none;
@@ -24,17 +24,17 @@ nav {
   padding:6px; z-index:var(--fv-z-overlay);
   -webkit-tap-highlight-color:transparent;
   border-radius:var(--fv-radius-sm);
-  transition:all 0.2s cubic-bezier(0.4,0,0.2,1);
+  transition: background-color 0.2s cubic-bezier(0.4,0,0.2,1), transform 0.2s cubic-bezier(0.4,0,0.2,1);
   display:flex; align-items:center; justify-content:center;
 }
 .back-button:active        { background:rgba(0,0,0,0.07); }
 .back-button:active svg    { transform:scale(0.9); }
-.back-button svg           { width:auto; height:26px; color:var(--fv-brand-teal); transition:all 0.2s cubic-bezier(0.4,0,0.2,1); }
+.back-button svg           { width:auto; height:26px; color:var(--color-brand-primary, #0d9488); transition: color 0.2s ease, transform 0.2s ease; }
 
 .page-title {
   grid-column: 2;
-  font-size:1.06rem!important; font-weight:bold;
-  color: var(--fv-brand-teal);
+  font-size: 1.06rem; font-weight: bold;
+  color: var(--color-brand-primary, #0d9488);
   background: var(--fv-gradient-teal);
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
   text-align:center; font-family:inherit;
@@ -43,3 +43,7 @@ nav {
 }
 
 .date { font-size:0.8rem; font-weight:var(--fv-font-medium); }
+
+@media (prefers-reduced-motion: reduce) {
+  .back-button, .back-button svg { transition: none; }
+}
