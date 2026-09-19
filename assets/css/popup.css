@@ -623,7 +623,7 @@
 .fp-overlay {
   position: fixed;
   inset: 0;
-  z-index: var(--fv-z-overlay, 17000);
+  z-index: var(--fv-z-overlay, 500);
   opacity: 0;
   transition: opacity 0ms;
   will-change: opacity;

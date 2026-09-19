@@ -87,7 +87,7 @@ nav ul li button.active::after {
   z-index:var(--fv-z-overlay);
 }
 
-.error-message { position:fixed; top:50%; right:20px; background:#ff4444; color:#fff; padding:15px 20px; border-radius:5px; z-index:1000; }
+.error-message { position:fixed; top:50%; right:20px; background:#ff4444; color:#fff; padding:15px 20px; border-radius:5px; z-index:var(--z-toast, 700); }
 
 @media (min-width:600px)  { nav { margin-top:5px; } }
 @media (min-width:1024px) { nav { margin-top:5px; } }

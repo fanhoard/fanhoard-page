@@ -168,9 +168,9 @@
 
     // ── Z-index layers (one per mode, separated by 100 for safety) ──
     Z_INDEX: Object.freeze({
-      topbar:     17500,
-      fullscreen: 17000,  // matches --fv-z-overlay (17000) for back-compat
-      scoped:     1600,
+      topbar:     500,
+      fullscreen: 500,  // matches --fv-z-overlay (500)
+      scoped:     100,
       inline:     0,      // inline participates in normal flow
     }),
 

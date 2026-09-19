@@ -51,7 +51,7 @@
         bottom: calc(120px + env(safe-area-inset-bottom, 0px)); 
         left: 50%;
         transform: translateX(-50%);
-        z-index: 1500000;
+        z-index: var(--z-toast, 700);
 
         display: inline-flex;
         align-items: center;

@@ -8,20 +8,20 @@
 
   // ── Z-Index Layers ─────────────────────────────────────────────────────────
   // Stackable popups increment within their layer. The base is always
-  // higher than the highest FanHoard z-index (--fv-z-toast: 19000).
+  // higher than the highest FanHoard z-index (--z-toast: 700).
 
   const Z_INDEX = Object.freeze({
-    TOOLTIP       : 20000,
-    POPOVER       : 21000,
-    TOAST         : 22000,
-    DRAWER        : 23000,
-    SHEET         : 24000,
-    DIALOG        : 25000,
-    ALERT_CONFIRM : 26000,
-    BLOCKING      : 27000,
-    FULLSCREEN    : 28000,
-    BASE_OFFSET   : 20000,  // starting point for auto-stacking
-    STACK_STEP    : 100,    // each stacked popup increments by this
+    TOOLTIP       : 400,
+    POPOVER       : 300,
+    TOAST         : 700,
+    DRAWER        : 500,
+    SHEET         : 500,
+    DIALOG        : 600,
+    ALERT_CONFIRM : 600,
+    BLOCKING      : 600,
+    FULLSCREEN    : 600,
+    BASE_OFFSET   : 500,  // starting point for auto-stacking
+    STACK_STEP    : 1,    // each stacked popup increments by this
   });
 
   // ── Animation timings (ms) ────────────────────────────────────────────────

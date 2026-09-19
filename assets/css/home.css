@@ -520,7 +520,7 @@ section.o:has(details[open]) { padding-bottom:2.1rem!important; }
   position: fixed;
   top: 8px;
   left: 8px;
-  z-index: 99999;
+  z-index: var(--z-toast, 700);
   width: auto;
   height: auto;
   padding: 10px 20px;

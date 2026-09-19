@@ -302,7 +302,7 @@
     left: 0;
     right: 0;
     height: 3px;
-    z-index: 17500;
+    z-index: var(--fv-z-overlay, 500);
     background: transparent;
     pointer-events: none;
     /* WHY `contain: layout style` instead of `contain: strict`:
