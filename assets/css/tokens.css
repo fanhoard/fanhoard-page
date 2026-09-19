@@ -406,3 +406,19 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ── FOUC Prevention & Smooth Load Pattern (WCAG 2.2 AA) ── */
+body {
+  opacity: 0;
+  transition: opacity var(--duration-fast, 150ms) var(--ease-out, ease-out);
+}
+
+body.is-loaded,
+body.loaded {
+  opacity: 1;
+}
+
+noscript body,
+body.no-js {
+  opacity: 1 !important;
+}

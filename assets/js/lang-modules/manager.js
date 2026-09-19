@@ -88,7 +88,7 @@
         State.isInitialized = true;
         
         setTimeout(() => {
-          if (document.body && document.body.style.opacity === '0') {
+          if (document.body) { document.body.classList.add('is-loaded'); if (document.body.style.opacity === '0') {
             document.body.style.transition = 'opacity 0.28s cubic-bezier(.47,1.64,.41,.8)';
             document.body.style.opacity = '1';
           }

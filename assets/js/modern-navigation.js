@@ -925,4 +925,19 @@
     _internal: { controller }
   };
 
+
+  /* FOUC Remediation — Trigger .is-loaded class */
+  function markBodyLoaded() {
+    if (document.body && !document.body.classList.contains('is-loaded')) {
+      document.body.classList.add('is-loaded');
+    }
+  }
+
+  if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    markBodyLoaded();
+  } else {
+    document.addEventListener('DOMContentLoaded', markBodyLoaded, { once: true });
+  }
+  setTimeout(markBodyLoaded, 150);
+
 })();

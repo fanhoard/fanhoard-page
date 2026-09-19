@@ -291,7 +291,7 @@
       State.isInitialized = true;
       
       // Fade in
-      if (document.body && document.body.style.opacity === '0') {
+      if (document.body) { document.body.classList.add('is-loaded'); if (document.body.style.opacity === '0') {
         document.body.style.opacity = '1';
       }
       
