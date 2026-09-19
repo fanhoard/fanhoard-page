@@ -101,25 +101,37 @@
   </style>
 </head>
 
-<body>
+<body class="fv-body">
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PJ397CLS" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
-  <a href="#main" class="skip-link">Skip to main content</a>
+  <a href="#fv-main" class="skip-link" data-translate="home-skip-link">Skip to main content</a>
 
-  <main id="main" class="fv-app" data-page="404">
-    <div class="wrap">
-      <div class="badge brand-name">FanHoard</div>
-      <!-- h1 เป็น visual "404" — เหมาะสมสำหรับ error page -->
-      <h1>404</h1>
-      <h2>Oops! Lost your way?</h2>
-      <p>This page doesn't exist. Maybe it moved, or maybe the URL's off. Either way, let's get you somewhere better.</p>
-      <div class="actions">
-        <a wave href="/home" class="btn-primary">Take Me Home</a>
-        <a wave href="/data/verse/discover/?type=symbols__&page=1" class="btn-secondary">Explore FanHoard</a>
-      </div>
-      <div class="note">Something wrong? Try again later.</div>
-    </div>
-  </main>
+  <div class="fv-page-shell">
+    <header class="fv-header" role="banner">
+      <nav class="fv-nav" role="navigation" aria-label="Main Navigation"></nav>
+    </header>
+
+    <main id="fv-main" class="fv-main fv-app" role="main" tabindex="-1" data-page="404">
+      <section class="fv-section fv-hero">
+        <div class="container-lg">
+          <div class="wrap">
+            <div class="badge brand-name">FanHoard</div>
+            <!-- h1 เป็น visual "404" — เหมาะสมสำหรับ error page -->
+            <h1>404</h1>
+            <h2>Oops! Lost your way?</h2>
+            <p>This page doesn't exist. Maybe it moved, or maybe the URL's off. Either way, let's get you somewhere better.</p>
+            <div class="actions">
+              <a wave href="/home" class="btn-primary">Take Me Home</a>
+              <a wave href="/data/verse/discover/?type=symbols__&page=1" class="btn-secondary">Explore FanHoard</a>
+            </div>
+            <div class="note">Something wrong? Try again later.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="fv-footer" id="fv-footer-mount" role="contentinfo"></footer>
+  </div>
 
   <script src="/assets/js/lang-core.js?v=1.0.0"></script>
   <script src="/assets/js/language.js?v=1.0.0-20250322"></script>
