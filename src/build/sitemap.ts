@@ -120,6 +120,9 @@ export function generateSitemap(): void {
 
   const htmlFiles = findHtmlFiles(CONFIG.srcDir, [
     'dist',
+    'coverage',
+    'test-results',
+    'e2e',
     'node_modules',
     '.git',
     'scripts',

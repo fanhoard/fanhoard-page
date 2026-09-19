@@ -54,6 +54,9 @@ export const CONFIG: BuildConfig = {
   defaultLang: 'en',
   excludeDirs: [
     'dist',
+    'coverage',
+    'test-results',
+    'e2e',
     'node_modules',
     '.git',
     'scripts',
