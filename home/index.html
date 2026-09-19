@@ -188,7 +188,7 @@
 
 <body>
   <!-- Skip to content for keyboard accessibility -->
-  <a href="#fv-main" class="fv-sr-only fv-skip-link" data-translate="home-skip-link">Skip to main content</a>
+  <a href="#fv-main" class="skip-link fv-skip-link" data-translate="home-skip-link">Skip to main content</a>
 
   <div id="fv-app" class="fv-app" data-page="home">
 
@@ -200,9 +200,9 @@
 
     <!-- Page Shell -->
     <div class="fv-page-shell">
-      <main id="fv-main">
+      <main id="fv-main" class="fv-main">
 
-        <div class="blur-overlay-top" style="opacity:0;"></div>
+        <div class="blur-overlay-top"></div>
 
         <div class="hio">
           <div class="img-d1">
@@ -223,25 +223,22 @@
             <span></span> <strong></strong> <strong></strong>
           </p>
           <div class="hero-btns">
-            <a wave="c=#90969F"
-              href="/data/verse/discover/?type=emojis__&page=1"
-              class="button button-secondary oc"
+            <a href="/data/verse/discover/?type=emojis__&page=1"
+              class="button button-secondary btn btn-secondary oc"
               data-translate="home-hero-btn-emoji">
               <span class="btn-icon" data-translate-slot="1">
                 <img class="im" src="https://twemoji.maxcdn.com/v/latest/svg/2764.svg" alt="heart" width="20" height="20">
               </span>
               <span></span>
             </a>
-            <a wave="c=#90969F"
-              href="/data/verse/discover/?type=symbols__&page=1"
-              class="button button-secondary oc"
+            <a href="/data/verse/discover/?type=symbols__&page=1"
+              class="button button-secondary btn btn-secondary oc"
               data-translate="home-hero-btn-symbol">
               <span class="btn-icon" data-translate-slot="1">✦</span>
               <span></span>
             </a>
-            <a wave="c=#90969F"
-              href="/data/verse/discover/?type=fancy"
-              class="button button-secondary oc"
+            <a href="/data/verse/discover/?type=fancy"
+              class="button button-secondary btn btn-secondary oc"
               data-translate="home-hero-btn-fancy">
               <span class="btn-icon" data-translate-slot="1">Aa</span>
               <span></span>
@@ -253,57 +250,61 @@
           <div id="app"></div>
 
           <!-- FEATURES SECTION -->
-            <h2 id="features-heading" data-translate="home-features-title"></h2>
+          <h2 id="features-heading" data-translate="home-features-title"></h2>
 
-          <section>
-            <span class="feature-icon" aria-hidden="true">🔍</span>
-            <div>
-              <h3 data-translate="home-feature1-title"></h3>
-              <div data-translate="home-feature1-desc"></div>
-            </div>
-          </section>
-          <section>
-            <span class="feature-icon" aria-hidden="true">📋</span>
-            <div>
-              <h3 data-translate="home-feature2-title"></h3>
-              <div data-translate="home-feature2-desc"></div>
-            </div>
-          </section>
-          <section class="m">
-            <span class="feature-icon" aria-hidden="true">✨</span>
-            <div>
-              <h3 data-translate="home-feature3-title"></h3>
-              <div data-translate="home-feature3-desc"></div>
-            </div>
-          </section>
+          <div class="features-grid">
+            <section class="feature-card">
+              <span class="feature-icon" aria-hidden="true">🔍</span>
+              <div>
+                <h3 data-translate="home-feature1-title"></h3>
+                <div data-translate="home-feature1-desc"></div>
+              </div>
+            </section>
+            <section class="feature-card">
+              <span class="feature-icon" aria-hidden="true">📋</span>
+              <div>
+                <h3 data-translate="home-feature2-title"></h3>
+                <div data-translate="home-feature2-desc"></div>
+              </div>
+            </section>
+            <section class="feature-card">
+              <span class="feature-icon" aria-hidden="true">✨</span>
+              <div>
+                <h3 data-translate="home-feature3-title"></h3>
+                <div data-translate="home-feature3-desc"></div>
+              </div>
+            </section>
+          </div>
 
           <!-- FAQ SECTION -->
-            <h2 id="faq-heading" data-translate="home-faq-title"></h2>
+          <h2 id="faq-heading" data-translate="home-faq-title"></h2>
 
-          <section class="o">
-            <details class="faq-item">
-              <summary class="faq-question" id="faq1-title" data-translate="home-faq-q1" aria-expanded="false" aria-controls="faq1-answer"></summary>
-              <div class="faq-answer" id="faq1-answer" role="region" aria-labelledby="faq1-title">
-                <div data-translate="home-faq-a1"></div>
-              </div>
-            </details>
-          </section>
-          <section class="o">
-            <details class="faq-item">
-              <summary class="faq-question" id="faq2-title" data-translate="home-faq-q2" aria-expanded="false" aria-controls="faq2-answer"></summary>
-              <div class="faq-answer" id="faq2-answer" role="region" aria-labelledby="faq2-title">
-                <div data-translate="home-faq-a2"></div>
-              </div>
-            </details>
-          </section>
-          <section class="o">
-            <details class="faq-item">
-              <summary class="faq-question" id="faq3-title" data-translate="home-faq-q3" aria-expanded="false" aria-controls="faq3-answer"></summary>
-              <div class="faq-answer" id="faq3-answer" role="region" aria-labelledby="faq3-title">
-                <div data-translate="home-faq-a3"></div>
-              </div>
-            </details>
-          </section>
+          <div class="faq-grid">
+            <section class="o faq-card">
+              <details class="faq-item">
+                <summary class="faq-question" id="faq1-title" data-translate="home-faq-q1" aria-expanded="false" aria-controls="faq1-answer"></summary>
+                <div class="faq-answer" id="faq1-answer" role="region" aria-labelledby="faq1-title">
+                  <div data-translate="home-faq-a1"></div>
+                </div>
+              </details>
+            </section>
+            <section class="o faq-card">
+              <details class="faq-item">
+                <summary class="faq-question" id="faq2-title" data-translate="home-faq-q2" aria-expanded="false" aria-controls="faq2-answer"></summary>
+                <div class="faq-answer" id="faq2-answer" role="region" aria-labelledby="faq2-title">
+                  <div data-translate="home-faq-a2"></div>
+                </div>
+              </details>
+            </section>
+            <section class="o faq-card">
+              <details class="faq-item">
+                <summary class="faq-question" id="faq3-title" data-translate="home-faq-q3" aria-expanded="false" aria-controls="faq3-answer"></summary>
+                <div class="faq-answer" id="faq3-answer" role="region" aria-labelledby="faq3-title">
+                  <div data-translate="home-faq-a3"></div>
+                </div>
+              </details>
+            </section>
+          </div>
         </div>
 
       </main>
