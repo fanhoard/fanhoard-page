@@ -1,8 +1,9 @@
-/* variables.css — redirect ไป tokens.css
-   ค่าต่างๆ ย้ายไปอยู่ใน tokens.css แล้ว
-   ไฟล์นี้เก็บไว้เพื่อ backward compat */
+/* variables.css — token forwarder & backward-compat
+   Imports tokens.css as the single source of truth for design tokens. */
+@import './tokens.css';
+
 :root {
- --main-color: var(--fv-gradient-teal);
- --main-color0: linear-gradient(180deg, rgba(122, 46, 226, 0.5), rgba(58, 141, 247, 0.4));
- --main-active-color: linear-gradient(45deg, #9700FF, #B100FF);
+  --main-color: var(--fv-gradient-teal);
+  --main-color0: linear-gradient(180deg, rgba(122, 46, 226, 0.5), rgba(58, 141, 247, 0.4));
+  --main-active-color: linear-gradient(45deg, #9700FF, #B100FF);
 }
