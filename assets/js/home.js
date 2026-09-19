@@ -468,3 +468,36 @@ try {
     });
   }
 } catch(e) {}
+
+/**
+ * FAQ Accordion ARIA & Toggle State Manager
+ * Syncs aria-expanded on summary elements when native HTML5 details elements toggle.
+ */
+function initFaqAccordions() {
+  const syncAccordionAria = () => {
+    document.querySelectorAll('details.faq-item, details').forEach(details => {
+      const summary = details.querySelector('summary');
+      if (summary) {
+        summary.setAttribute('aria-expanded', details.open ? 'true' : 'false');
+      }
+    });
+  };
+
+  syncAccordionAria();
+
+  document.addEventListener('toggle', (event) => {
+    if (event.target && event.target.tagName === 'DETAILS') {
+      const details = event.target;
+      const summary = details.querySelector('summary');
+      if (summary) {
+        summary.setAttribute('aria-expanded', details.open ? 'true' : 'false');
+      }
+    }
+  }, true);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initFaqAccordions, { once: true });
+} else {
+  initFaqAccordions();
+}

@@ -685,7 +685,7 @@ Search ของ FanHoard ออกแบบให้ "instant" — ผู้ใ
 
 เนื้อหาที่ไม่จำเป็นทันทีจะถูกซ่อนจนกว่าผู้ใช้ต้องการ:
 
-- **FAQ** — ใช้ pure-CSS accordion (`<input type="checkbox">` + `:checked`)
+- **FAQ** — ใช้ native accessible `<details>` / `<summary>` accordion
 - **Settings** — ซ่อน advanced options ใน "Advanced" section
 - **Carousels** — แสดงไม่กี่ items แรก ที่เหลือ scroll ดู
 - **Popups** — โหลด lazy เมื่อจะใช้
@@ -1132,9 +1132,10 @@ FanHoard ใช้ ARIA อย่างครอบคลุม:
 </nav>
 
 <!-- FAQ -->
-<input type="checkbox" id="faq1" class="faq-toggle" hidden />
-<label for="faq1" class="faq-question">Question?</label>
-<div class="faq-answer" role="region" aria-labelledby="faq1">Answer</div>
+<details class="faq-item">
+  <summary class="faq-question" id="faq1-title" aria-expanded="false" aria-controls="faq1-answer">Question?</summary>
+  <div class="faq-answer" id="faq1-answer" role="region" aria-labelledby="faq1-title">Answer</div>
+</details>
 
 <!-- Footer -->
 <footer role="contentinfo" aria-label="Site footer">
