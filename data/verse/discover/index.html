@@ -8,7 +8,7 @@
   <title>Discover Emoji &amp; Symbols | FanHoard Verse</title>
   <meta name="description" content="Browse and discover emojis, symbols, and special characters by category. Copy with one tap — free forever.">
 
-  <meta name="theme-color" content="#13b47f" />
+  <meta name="theme-color" content="#0d9488" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
@@ -65,7 +65,7 @@
       align-items: center;
       justify-content: center;
       gap: 22px;
-      background: var(--fv-surface-page, #ffffff);
+      background: var(--surface-primary, var(--fv-surface-page, #ffffff));
       contain: layout style;
       transform: translateZ(0);
       font-family: var(--fv-font-stack, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
@@ -94,12 +94,12 @@
       display: block;
     }
     #fv-boot-loader .fv-boot-track {
-      stroke: #e8f5ef;
+      stroke: var(--surface-tertiary, var(--border-subtle, #e8f5ef));
       stroke-width: 3.5;
       fill: none;
     }
     #fv-boot-loader .fv-boot-arc {
-      stroke: var(--fv-brand-teal-light, #13b47f);
+      stroke: var(--color-brand-primary, #0d9488);
       stroke-width: 3.5;
       stroke-linecap: round;
       stroke-dasharray: 88 132;
@@ -114,7 +114,7 @@
     #fv-boot-loader .fv-boot-msg {
       font-size: 16px;
       font-weight: 600;
-      color: #3c4043;
+      color: var(--text-primary, #3c4043);
       text-align: center;
       line-height: 1.4;
       min-width: 100px;
@@ -137,11 +137,12 @@
 </head>
 
 <body>
+  <a href="#fv-main" class="skip-link fv-skip-link" data-translate="home-skip-link">Skip to main content</a>
   <!-- ═════════════════════════════════════════════════════════════════════════
        BOOT LOADER — shown immediately, covers everything until NavCore ready
        v2.1: เหลือแค่ spinner + ข้อความเดียว
        ═════════════════════════════════════════════════════════════════════════ -->
-  <div id="fv-boot-loader" role="status" aria-live="polite" aria-label="Loading">
+  <div id="fv-boot-loader" role="status" aria-live="polite" aria-busy="true" aria-label="Loading">
     <div class="fv-boot-spinner" aria-hidden="true">
       <svg viewBox="0 0 52 52">
         <circle class="fv-boot-track" cx="26" cy="26" r="22"></circle>
@@ -186,6 +187,7 @@
       window.__removeBootLoader = function () {
         var el = document.getElementById('fv-boot-loader');
         if (!el) return;
+        el.setAttribute('aria-busy', 'false');
         el.classList.add('fv-boot-hidden');
         setTimeout(function () {
           try {
