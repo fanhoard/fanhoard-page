@@ -8,7 +8,28 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { flattenJson } from './marker-parser';
-import { transformHtml, setConfig, BuildConfig } from './html-transformer';
+import { transformHtml, setConfig, setPageBundleMap, BuildConfig } from './html-transformer';
+
+/**
+ * Build a map from page source paths to the hashed Vite bundle URL emitted for
+ * that page (from dist/manifest.json), so the SSG can mirror Vite's HTML output
+ * for module scripts in localized pages.
+ */
+function buildPageBundleMap(): Record<string, string> {
+  const manifestPath = path.join(CONFIG.distDir, 'manifest.json');
+  if (!fs.existsSync(manifestPath)) return {};
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as Record<
+    string,
+    { file?: string; isEntry?: boolean }
+  >;
+  const map: Record<string, string> = {};
+  for (const [key, entry] of Object.entries(manifest)) {
+    if (key.endsWith('.html') && entry.isEntry && entry.file) {
+      map[key] = '/' + entry.file;
+    }
+  }
+  return map;
+}
 import {
   findHtmlFiles,
   copyDir,
@@ -181,6 +202,13 @@ export async function runSSG(): Promise<void> {
   // 4. Transform & write
   if (!DRY_RUN) {
     ensureDir(CONFIG.distDir);
+  }
+
+  // 3.5 Map pages to their Vite bundle (after `vite build` emitted dist pages)
+  const pageBundleMap = buildPageBundleMap();
+  setPageBundleMap(pageBundleMap);
+  if (Object.keys(pageBundleMap).length) {
+    console.log(`[vite]   Bundling module scripts for ${Object.keys(pageBundleMap).length} page(s)`);
   }
 
   let totalPages = 0;

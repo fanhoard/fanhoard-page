@@ -226,14 +226,33 @@
   // ══════════════════════════════════════════════════════════════════════════════
 
   function fetchText(url) {
+    if (window.ReleaseCacheService && window.ReleaseCacheService.has(url)) {
+      return Promise.resolve(window.ReleaseCacheService.get(url));
+    }
     return fetch(url + '?_=' + Date.now(), { cache: 'no-store' })
       .then(function(r) { return r.ok ? r.text() : null; })
+      .then(function(text) {
+        if (text && window.ReleaseCacheService) {
+          window.ReleaseCacheService.set(url, text);
+        }
+        return text;
+      })
       .catch(function() { return null; });
   }
 
   function fetchJSON(url) {
+    if (window.ReleaseCacheService && window.ReleaseCacheService.has(url)) {
+      var cached = window.ReleaseCacheService.get(url);
+      if (cached) return Promise.resolve(cached);
+    }
     return fetch(url + '?_=' + Date.now(), { cache: 'no-store' })
       .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(json) {
+        if (json && window.ReleaseCacheService) {
+          window.ReleaseCacheService.set(url, json);
+        }
+        return json;
+      })
       .catch(function() { return null; });
   }
 

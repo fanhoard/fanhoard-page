@@ -26,8 +26,19 @@ export interface BuildConfig {
 
 let _config: BuildConfig | null = null;
 
+/**
+ * Maps page source paths (e.g. 'data/verse/discover/index.html') to the hashed
+ * Vite bundle URL emitted for that page's module scripts, so localized SSG
+ * output references real built assets instead of raw TS sources.
+ */
+let _pageBundleMap: Record<string, string> = {};
+
 export function setConfig(cfg: BuildConfig): void {
   _config = cfg;
+}
+
+export function setPageBundleMap(map: Record<string, string>): void {
+  _pageBundleMap = map;
 }
 
 /**
@@ -84,6 +95,21 @@ export function transformHtml(
       const src = $(el).attr('src') || '';
       if (removePatterns.some((p) => src.includes(p))) {
         $(el).remove();
+      }
+    });
+  }
+
+  // 5.5 Replace module scripts with the page's Vite bundle (mirrors Vite HTML output)
+  const pageBundle = _pageBundleMap[srcFilePath];
+  if (pageBundle) {
+    let first = true;
+    $('script[type="module"][src]').each((_, el) => {
+      const $el = $(el);
+      if (first) {
+        $el.attr('src', pageBundle).attr('crossorigin', '');
+        first = false;
+      } else {
+        $el.remove();
       }
     });
   }

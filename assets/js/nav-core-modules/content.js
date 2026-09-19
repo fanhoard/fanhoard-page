@@ -549,12 +549,14 @@
       const resolvedItems = await this._resolveAll(groups, lang);
       if (!resolvedItems.length) return;
 
+      if (window.DiscoverFeed && typeof window.DiscoverFeed.renderFeedGroups === "function") {
+        window.DiscoverFeed.renderFeedGroups(ctr, resolvedItems, lang, sentinel);
+        return;
+      }
+
       const page     = document.createElement('div');
       page.className = 'feed-page';
 
-      // WHY สร้าง HTML string ก่อนแล้ว set innerHTML ครั้งเดียว:
-      //   ลด DOM mutation ให้น้อยที่สุด — browser parse + build subtree ครั้งเดียว
-      //   ดีกว่า append element ทีละอัน (หลาย reflow)
       let html = '';
       for (const item of resolvedItems) html += this._tpl(item, lang);
       page.innerHTML = html;
