@@ -20,7 +20,7 @@ body {
 
 /* ---------- TYPOGRAPHY ---------- */
 h1, .h1 {
-  font-family: var(--font-heading);
+  font-family: var(--font-sans);
   font-size: var(--step-4);
   font-weight: var(--font-bold);
   color: var(--text-main);
@@ -30,7 +30,7 @@ h1, .h1 {
 }
 
 h2, .h2 {
-  font-family: var(--font-heading);
+  font-family: var(--font-sans);
   font-size: var(--step-2);
   font-weight: var(--font-bold);
   color: var(--color-brand-primary);
@@ -143,7 +143,7 @@ section.mn {
   max-width: 720px;
   width: 100%;
   margin: 0 auto;
-  font-family: var(--font-heading);
+  font-family: var(--font-sans);
   font-size: var(--step-5);
   font-weight: var(--font-bold);
   line-height: 1.2;
@@ -343,7 +343,7 @@ details[open] .faq-answer {
 }
 
 .category-section h2 {
-  font-family: var(--font-heading);
+  font-family: var(--font-sans);
   font-size: var(--step-2);
   color: var(--text-main);
   margin-bottom: var(--space-4);

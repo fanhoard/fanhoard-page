@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Sofia&display=swap");
 
 /* ═══════════════════════════════════════════════════════════════
    FANHOARD FOOTER COMPONENT
@@ -83,7 +82,7 @@
 }
 
 .footer-minimal .logo-text {
-  font-family: 'Sofia', cursive, var(--font-sans);
+  font-family: var(--font-sans);
   font-size: 1.7rem;
   font-weight: 700;
   color: var(--color-brand-primary, #0d9488);

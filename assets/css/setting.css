@@ -106,7 +106,7 @@ section.con p {
 }
 
 section.con .fv-section-label {
-  font-family: var(--font-heading, 'FoglihtenNo07calt', Georgia, serif);
+  font-family: var(--font-sans);
   font-size: var(--step-2);
   font-weight: var(--font-bold);
   color: var(--text-main);
@@ -286,7 +286,7 @@ section.con h1 {
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease-out);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.15));
   overflow: hidden;
 }
 
@@ -451,7 +451,6 @@ section.con h1 {
 }
 
 @media (max-width: 640px) {
-  body { padding-top: 2rem; }
   .settings { padding: var(--space-4); }
 }
 

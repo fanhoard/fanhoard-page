@@ -21,7 +21,7 @@ main { margin-top:30px; margin-bottom:80px; contain: layout style; }
 .hj {
   border-radius:var(--fv-radius-xl);
   background:var(--fv-surface-page);
-  box-shadow: inset 0 0 1px 1px rgba(166, 187, 211, 0.14);
+  border: 1px solid var(--border-subtle, rgba(166, 187, 211, 0.2));
 }
 
 #sub-nav { contain: layout style; }
