@@ -162,6 +162,48 @@
     queryAll: (sel) => document.querySelectorAll(sel),
 
     /**
+     * Get the main landmark element (#fv-main with fallbacks).
+     * @returns {HTMLElement|null}
+     */
+    getMainLandmark() {
+      return document.getElementById("fv-main") ||
+             document.getElementById("searchResults") ||
+             document.getElementById("main") ||
+             document.querySelector("main.fv-main, main");
+    },
+
+    /**
+     * Get nav height consuming --fv-nav-height token.
+     * @returns {number}
+     */
+    getNavHeight() {
+      try {
+        const val = getComputedStyle(document.documentElement).getPropertyValue("--fv-nav-height").trim();
+        if (val) {
+          const parsed = parseFloat(val);
+          if (!isNaN(parsed)) return parsed;
+        }
+      } catch (_) {}
+      const nav = document.querySelector("header nav, nav.fv-nav, .fv-nav");
+      return nav ? nav.offsetHeight : 56;
+    },
+
+    /**
+     * Get standardized scroll offset consuming --fv-scroll-offset token.
+     * @returns {number}
+     */
+    getScrollOffset() {
+      try {
+        const val = getComputedStyle(document.documentElement).getPropertyValue("--fv-scroll-offset").trim();
+        if (val && val.includes("px")) {
+          const parsed = parseFloat(val);
+          if (!isNaN(parsed)) return parsed;
+        }
+      } catch (_) {}
+      return this.getNavHeight() + 12;
+    },
+
+    /**
      * Create a DOM element with optional id, class and inline styles.
      * @param {string} tag
      * @param {string|null} [id]

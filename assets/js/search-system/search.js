@@ -308,8 +308,16 @@
             UIService.setupFilters();
             UIService.setupAutoSearchInput();
 
+            try {
+              const sticky = document.getElementById("search-sticky");
+              if (sticky) {
+                const navH = DOMService.getNavHeight ? DOMService.getNavHeight() : 56;
+                sticky.style.setProperty("--fv-nav-height", navH + "px");
+              }
+            } catch (_) {}
+
             document.body.style.marginBottom = '';
-            const sr = DOMService.get(CONFIG.DOM.searchResultsId);
+            const sr = DOMService.get(CONFIG.DOM.searchResultsId) || (DOMService.getMainLandmark ? DOMService.getMainLandmark() : null);
             if (sr) {
               sr.innerHTML = `<div class="search-result-here">${M.LanguageService.t('search_result_here')}</div>`;
             }

@@ -38,6 +38,25 @@
       lastScrollPosition: 0,
     },
 
+    getNavHeight() {
+      try {
+        const val = getComputedStyle(document.documentElement).getPropertyValue('--fv-nav-height').trim();
+        if (val) {
+          const parsed = parseFloat(val);
+          if (!isNaN(parsed)) return parsed;
+        }
+      } catch (_) {}
+      const nav = document.querySelector('header nav, nav.fv-nav, .fv-nav');
+      return nav ? nav.offsetHeight : 56;
+    },
+
+    getMainElement() {
+      return document.getElementById('fv-main') ||
+             document.getElementById('searchResults') ||
+             document.getElementById('main') ||
+             document.querySelector('main.fv-main, main');
+    },
+
     _initialNavigation: true,
     _safetyTimer: null,
     /** @type {number} Navigation generation — แต่ละครั้งที่ navigateTo เริ่มจะบวก 1
@@ -445,7 +464,7 @@
         }
 
         // Direct style application (more reliable than CSS rules in some browsers)
-        const nav    = document.querySelector('header nav');
+        const nav    = document.querySelector('header nav, nav.fv-nav, .fv-nav');
         const subNav = document.getElementById('sub-nav');
         const opacity = isLoading ? '0' : '';
         const pe      = isLoading ? 'none' : '';

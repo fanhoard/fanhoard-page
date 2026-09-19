@@ -107,7 +107,26 @@
       return;
     }
     M.InitService.start();
-    window._navCore = { _initialized: true };
+    window._navCore = {
+      _initialized: true,
+      getNavHeight: function () {
+        try {
+          const val = getComputedStyle(document.documentElement).getPropertyValue('--fv-nav-height').trim();
+          if (val) {
+            const parsed = parseFloat(val);
+            if (!isNaN(parsed)) return parsed;
+          }
+        } catch (_) {}
+        const nav = document.querySelector('header nav, nav.fv-nav, .fv-nav');
+        return nav ? nav.offsetHeight : 56;
+      },
+      getMainElement: function () {
+        return document.getElementById('fv-main') ||
+               document.getElementById('searchResults') ||
+               document.getElementById('main') ||
+               document.querySelector('main.fv-main, main');
+      }
+    };
     if (typeof module !== 'undefined' && module.exports)
       module.exports = M;
   }
