@@ -186,132 +186,140 @@
 <noscript><style>body { opacity: 1 !important; }</style></noscript>
 </head>
 
-<body>
+<body class="fv-body">
   <!-- Skip to content for keyboard accessibility -->
   <a href="#fv-main" class="skip-link fv-skip-link" data-translate="home-skip-link">Skip to main content</a>
 
-  <div id="fv-app" class="fv-app" data-page="home">
+  <div id="fv-app" class="fv-app fv-page-shell fv-page-shell--has-top-nav" data-page="home">
 
-    <!-- SEO h1 — อ่านได้ทันทีโดย Crawler, ซ่อนจากผู้ใช้ -->
-    <h1 class="fv-sr-only" data-translate="home-seo-title">FanHoard — Emoji &amp; Symbols Hub | Copy with One Tap</h1>
+    <!-- Header Landmark & Top Navigation Layer -->
+    <header class="fv-header" role="banner">
+      <nav class="fv-nav" role="navigation" aria-label="Main Navigation">
+        <div id="fv-nav-layer"></div>
+      </nav>
+    </header>
 
-    <!-- Navigation Layer -->
-    <div id="fv-nav-layer"></div>
+    <!-- Main Landmark -->
+    <main id="fv-main" class="fv-main" role="main" tabindex="-1">
 
-    <!-- Page Shell -->
-    <div class="fv-page-shell">
-      <main id="fv-main" class="fv-main">
+      <!-- SEO h1 — อ่านได้ทันทีโดย Crawler, ซ่อนจากผู้ใช้ -->
+      <h1 class="fv-sr-only" data-translate="home-seo-title">FanHoard — Emoji &amp; Symbols Hub | Copy with One Tap</h1>
 
-        <div class="blur-overlay-top"></div>
+      <div class="blur-overlay-top"></div>
 
-        <div class="hio">
-          <div class="img-d1">
-            <picture>
-              <source srcset="/assets/images/j.avif" type="image/avif" />
-              <source srcset="/assets/images/j.webp" type="image/webp" />
-              <img src="/assets/images/j.png" alt="FanHoard Hub — Emoji and Symbol Collection" loading="lazy" />
-            </picture>
-          </div>
+      <div class="hio">
+        <div class="img-d1">
+          <picture>
+            <source srcset="/assets/images/j.avif" type="image/avif" />
+            <source srcset="/assets/images/j.webp" type="image/webp" />
+            <img src="/assets/images/j.png" alt="FanHoard Hub — Emoji and Symbol Collection" loading="lazy" />
+          </picture>
         </div>
+      </div>
 
-        <!-- HERO -->
-        <section class="hero nob">
-          <div class="fv-hero-display h1"
-               data-translate="home-hero-title"
-               aria-hidden="true"></div>
-          <p class="lead" data-translate="home-hero-desc">
-            <span></span> <strong></strong> <strong></strong>
-          </p>
-          <div class="hero-btns">
-            <a href="/data/verse/discover/?type=emojis__&page=1"
-              class="button button-secondary btn btn-secondary oc"
-              data-translate="home-hero-btn-emoji">
-              <span class="btn-icon" data-translate-slot="1">
-                <img class="im" src="https://twemoji.maxcdn.com/v/latest/svg/2764.svg" alt="heart" width="20" height="20">
-              </span>
-              <span></span>
-            </a>
-            <a href="/data/verse/discover/?type=symbols__&page=1"
-              class="button button-secondary btn btn-secondary oc"
-              data-translate="home-hero-btn-symbol">
-              <span class="btn-icon" data-translate-slot="1">✦</span>
-              <span></span>
-            </a>
-            <a href="/data/verse/discover/?type=fancy"
-              class="button button-secondary btn btn-secondary oc"
-              data-translate="home-hero-btn-fancy">
-              <span class="btn-icon" data-translate-slot="1">Aa</span>
-              <span></span>
-            </a>
-          </div>
-        </section>
+      <!-- HERO -->
+      <section class="hero nob fv-section fv-hero">
+        <div class="fv-hero-display h1"
+             data-translate="home-hero-title"
+             aria-hidden="true"></div>
+        <p class="lead" data-translate="home-hero-desc">
+          <span></span> <strong></strong> <strong></strong>
+        </p>
+        <div class="hero-btns">
+          <a href="/data/verse/discover/?type=emojis__&page=1"
+            class="button button-secondary btn btn-secondary oc"
+            data-translate="home-hero-btn-emoji">
+            <span class="btn-icon" data-translate-slot="1">
+              <img class="im" src="https://twemoji.maxcdn.com/v/latest/svg/2764.svg" alt="heart" width="20" height="20">
+            </span>
+            <span></span>
+          </a>
+          <a href="/data/verse/discover/?type=symbols__&page=1"
+            class="button button-secondary btn btn-secondary oc"
+            data-translate="home-hero-btn-symbol">
+            <span class="btn-icon" data-translate-slot="1">✦</span>
+            <span></span>
+          </a>
+          <a href="/data/verse/discover/?type=fancy"
+            class="button button-secondary btn btn-secondary oc"
+            data-translate="home-hero-btn-fancy">
+            <span class="btn-icon" data-translate-slot="1">Aa</span>
+            <span></span>
+          </a>
+        </div>
+      </section>
 
-        <div class="container">
-          <div id="app"></div>
+      <div class="container-lg stack-lg">
+        <div id="app"></div>
 
-          <!-- FEATURES SECTION -->
+        <!-- FEATURES SECTION -->
+        <section class="fv-section">
           <h2 id="features-heading" data-translate="home-features-title"></h2>
 
-          <div class="features-grid">
-            <section class="feature-card">
+          <div class="features-grid grid-3">
+            <div class="fv-card feature-card">
               <span class="feature-icon" aria-hidden="true">🔍</span>
               <div>
                 <h3 data-translate="home-feature1-title"></h3>
                 <div data-translate="home-feature1-desc"></div>
               </div>
-            </section>
-            <section class="feature-card">
+            </div>
+            <div class="fv-card feature-card">
               <span class="feature-icon" aria-hidden="true">📋</span>
               <div>
                 <h3 data-translate="home-feature2-title"></h3>
                 <div data-translate="home-feature2-desc"></div>
               </div>
-            </section>
-            <section class="feature-card">
+            </div>
+            <div class="fv-card feature-card">
               <span class="feature-icon" aria-hidden="true">✨</span>
               <div>
                 <h3 data-translate="home-feature3-title"></h3>
                 <div data-translate="home-feature3-desc"></div>
               </div>
-            </section>
+            </div>
           </div>
+        </section>
 
-          <!-- FAQ SECTION -->
+        <!-- FAQ SECTION -->
+        <section class="fv-section">
           <h2 id="faq-heading" data-translate="home-faq-title"></h2>
 
-          <div class="faq-grid">
-            <section class="o faq-card">
+          <div class="faq-grid stack-md">
+            <div class="fv-card faq-card">
               <details class="faq-item">
                 <summary class="faq-question" id="faq1-title" data-translate="home-faq-q1" aria-expanded="false" aria-controls="faq1-answer">What is FanHoard?</summary>
                 <div class="faq-answer" id="faq1-answer" role="region" aria-labelledby="faq1-title">
                   <div data-translate="home-faq-a1"></div>
                 </div>
               </details>
-            </section>
-            <section class="o faq-card">
+            </div>
+            <div class="fv-card faq-card">
               <details class="faq-item">
                 <summary class="faq-question" id="faq2-title" data-translate="home-faq-q2" aria-expanded="false" aria-controls="faq2-answer">How do I access symbol data?</summary>
                 <div class="faq-answer" id="faq2-answer" role="region" aria-labelledby="faq2-title">
                   <div data-translate="home-faq-a2"></div>
                 </div>
               </details>
-            </section>
-            <section class="o faq-card">
+            </div>
+            <div class="fv-card faq-card">
               <details class="faq-item">
                 <summary class="faq-question" id="faq3-title" data-translate="home-faq-q3" aria-expanded="false" aria-controls="faq3-answer">Is FanHoard free to use?</summary>
                 <div class="faq-answer" id="faq3-answer" role="region" aria-labelledby="faq3-title">
                   <div data-translate="home-faq-a3"></div>
                 </div>
               </details>
-            </section>
+            </div>
           </div>
-        </div>
+        </section>
+      </div>
 
-      </main>
+    </main>
 
+    <!-- Footer Landmark -->
+    <footer class="fv-footer" role="contentinfo">
       <div id="fv-footer-mount"></div>
-    </div>
-
+    </footer>
   </div>
 
   <script src="/assets/js/lang-core.js?v=1.0.0"></script>
