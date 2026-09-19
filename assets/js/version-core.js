@@ -157,7 +157,23 @@
     });
   }
 
-  function setupToggle(){var b=document.getElementById(CFG.TOGGLE_ID),s=document.getElementById(CFG.SWITCH_ID);if(!b||!s)return;s.checked=!isDisabled();function a(){setDisabled(!s.checked);}s.addEventListener('change',a);b.addEventListener('click',function(e){if(e.target!==s){s.checked=!s.checked;a();}});}
+  function setupToggle(){
+    var b=document.getElementById(CFG.TOGGLE_ID),s=document.getElementById(CFG.SWITCH_ID);
+    if(!b||!s)return;
+    s.checked=!isDisabled();
+    s.setAttribute('aria-checked',s.checked?'true':'false');
+    function a(){
+      setDisabled(!s.checked);
+      s.setAttribute('aria-checked',s.checked?'true':'false');
+    }
+    s.addEventListener('change',a);
+    b.addEventListener('click',function(e){
+      if(e.target!==s && e.target.tagName!=='LABEL' && (!e.target.parentElement || e.target.parentElement.tagName!=='LABEL')){
+        s.checked=!s.checked;
+        a();
+      }
+    });
+  }
   function trySetupToggle(){if(document.getElementById(CFG.TOGGLE_ID))setupToggle();else setTimeout(trySetupToggle,50);}
 
   function initWithRelease(wn) {
