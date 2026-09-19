@@ -44,43 +44,37 @@
   <link rel="modulepreload" href="/assets/js/con-data-service/con-data-service.js?v=1.0.0-20250322" />
 </head>
 
-<body>
-  <a href="#searchResults" class="skip-link fv-skip-link">Skip to main content</a>
+<body class="fv-body">
+  <a href="#fv-main" class="skip-link fv-skip-link">Skip to main content</a>
   <!-- SEO h1 ซ่อน -->
   <h1 class="fv-sr-only">Search Emoji and Symbols — FanHoard</h1>
 
-  <div id="fv-app" class="fv-app" data-page="search">
+  <div id="fv-app" class="fv-app fv-page-shell fv-page-shell--has-top-nav" data-page="search">
 
-    <!--
-      STICKY HEADER (Google-like)
-      ──────────────────────────────────────────────────────────────
-      Only the search box + nav bar background sticks to the screen.
-      Filter pills (type + category) live OUTSIDE #search-sticky so
-      they scroll with the page — matching Google's search UX where
-      the filter row scrolls away under the sticky search bar.
-
-      Category filter is always visible when categories exist; the
-      old show/hide toggle arrow has been removed entirely.
-    -->
-    <div id="search-sticky">
-      <header class="search-header" role="banner">
-        <form id="searchForm" autocomplete="off" role="search" aria-label="FanHoard Search">
-          <div class="search-input-wrapper">
-            <span class="search-input-icon" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--tmd)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-              </svg>
-            </span>
-            <input type="search" id="searchInput" name="q"
-              placeholder="ค้นหาข้อมูล…"
-              inputmode="search" enterkeyhint="search"
-              aria-label="Search emojis and symbols"
-              autocomplete="off" spellcheck="false" />
+    <!-- Header Landmark & Sticky Search Hero -->
+    <header class="fv-header" role="banner">
+      <div id="search-sticky">
+        <div class="search-header fv-hero">
+          <div class="container-lg">
+            <form id="searchForm" autocomplete="off" role="search" aria-label="FanHoard Search">
+              <div class="search-input-wrapper">
+                <span class="search-input-icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--tmd)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                  </svg>
+                </span>
+                <input type="search" id="searchInput" name="q"
+                  placeholder="ค้นหาข้อมูล…"
+                  inputmode="search" enterkeyhint="search"
+                  aria-label="Search emojis and symbols"
+                  autocomplete="off" spellcheck="false" />
+              </div>
+            </form>
           </div>
-        </form>
-      </header>
-    </div>
+        </div>
+      </div>
+    </header>
 
     <!--
       FILTER PILLS (non-sticky — scrolls with the page)
@@ -95,10 +89,14 @@
       <div id="categoryFilter" class="filter-pills-row filter-pills-row--cat" role="group" aria-label="Category filter"></div>
     </nav>
 
-    <div class="search-main-layout">
-      <main id="searchResults" role="main" aria-live="polite" aria-label="Search results" tabindex="0"></main>
+    <!-- Main Landmark -->
+    <main id="fv-main" class="fv-main search-main-layout" role="main" tabindex="-1">
+      <div id="searchResults" role="region" aria-live="polite" aria-label="Search results" tabindex="0"></div>
       <div id="searchLiveAnnouncer" class="fv-sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
-    </div>
+    </main>
+
+    <!-- Footer Landmark Mount -->
+    <footer class="fv-footer" id="fv-footer-mount" role="contentinfo"></footer>
 
   </div><!-- /#fv-app -->
 
