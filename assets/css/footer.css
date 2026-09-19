@@ -1,242 +1,356 @@
 @import url("https://fonts.googleapis.com/css2?family=Sofia&display=swap");
 
+/* ═══════════════════════════════════════════════════════════════
+   FANHOARD FOOTER COMPONENT
+   assets/css/footer.css
+   Token-based, zero-override component stylesheet
+   ═══════════════════════════════════════════════════════════════ */
+
 .footer-minimal,
 .footer-minimal *,
 .footer-minimal *::before,
-.footer-minimal *::after { 
-  box-sizing: border-box!important; 
+.footer-minimal *::after {
+  box-sizing: border-box;
 }
 
 .footer-minimal {
-  display: block!important; 
-  width: 100%!important; 
-  position: relative!important;
-  left: auto!important; right: auto!important; bottom: auto!important; top: auto!important;
-  transform: none!important; z-index: auto!important; float: none!important;
-  background: var(--fv-surface-page)!important;
-  color: var(--fv-text-secondary);
-  font-family: var(--fv-font-stack)!important;
-  font-size: 0.94rem!important; 
-  font-weight: 400!important; 
-  line-height: 1.7!important; 
-  letter-spacing: -0.015em; 
-  
-  /* 🚀 ปรับจุดที่ 1: ตัว Footer หลัก เปลี่ยนจาก border-top เป็นการใช้เงาดันขึ้นด้านบนเบาๆแทน border */
-  box-shadow: 0 -1px 0 0 var(--fv-border-default)!important;
-  border: none!important; 
-  border-radius: 32px 32px 0 0!important; 
-  
-  margin: 0!important; padding: 0!important;
-  -webkit-font-smoothing: antialiased; 
+  display: block;
+  width: 100%;
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  top: auto;
+  transform: none;
+  z-index: auto;
+  float: none;
+  background: var(--surface-base, #f8fafc);
+  color: var(--text-muted, #475569);
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 0.94rem;
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: -0.015em;
+  box-shadow: 0 -1px 0 0 var(--border-subtle, #e2e8f0);
+  border: none;
+  border-radius: 32px 32px 0 0;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: left!important;
-  -webkit-tap-highlight-color: transparent!important; 
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* 🚀 ปรับจุดที่ 2: คอนเทนเนอร์แม่ (.footer-inner) ยกเลิก border แล้วใช้ box-shadow จำลองเส้นขอบ */
-.footer-minimal .footer-inner { 
-  max-width: var(--fv-container-max)!important; 
-  width: calc(100% - 2rem)!important; 
-  margin: 2.5rem auto!important; 
-  
-  background: linear-gradient(135deg, #ffffff 0%, #f7fffb 100%)!important;
-  
-  /* เทคนิคชั้นสูง: ใช้เงาแรเงาซ้อนกัน เลเยอร์แรกทำหน้าที่แทน Border บางๆ เลเยอร์สองทำให้นุ่มนวลมีมิติ */
-  box-shadow: 0 0 0 1px rgba(0, 206, 176, 0.12), 0 10px 30px -10px rgba(6, 20, 24, 0.04)!important;
-  border: none!important; 
-  
-  border-radius: 28px!important; 
-  padding: 4rem 3rem 3rem!important; 
-  contain: content!important;
+.footer-minimal .footer-inner {
+  max-width: var(--fv-container-max, 1110px);
+  width: calc(100% - 2rem);
+  margin: 2.5rem auto;
+  background: var(--surface-card, #ffffff);
+  box-shadow: 0 0 0 1px var(--border-subtle, #e2e8f0), 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+  border: none;
+  border-radius: 28px;
+  padding: 4rem 3rem 3rem;
+  contain: content;
 }
 
 .footer-minimal .footer-grid {
-  display: grid!important;
-  grid-template-columns: 2.2fr 1fr 1fr 1.2fr!important; 
-  gap: 2.5rem 3rem!important; 
-  padding-bottom: 3.5rem!important; 
-  
-  /* 🚀 ปรับจุดที่ 3: เส้นคั่นใน Grid เปลี่ยนมาใช้ shadow จำลองเส้นขอบล่างแทน border-bottom */
-  box-shadow: 0 1px 0 0 var(--fv-border-default)!important;
-  border: none!important;
-  margin: 0!important;
+  display: grid;
+  grid-template-columns: 2.2fr 1fr 1fr 1.2fr;
+  gap: 2.5rem 3rem;
+  padding-bottom: 3.5rem;
+  box-shadow: 0 1px 0 0 var(--border-subtle, #e2e8f0);
+  border: none;
+  margin: 0;
 }
 
-/* ==========================================
-   📱 SUPER MOBILE OPTIMIZATION
-   ========================================== */
+/* Brand Section */
+.footer-minimal .footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  justify-content: flex-start;
+}
+
+.footer-minimal .footer-logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  width: fit-content;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+.footer-minimal .logo-text {
+  font-family: 'Sofia', cursive, var(--font-sans);
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--color-brand-primary, #0d9488);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.footer-minimal .footer-desc {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted, #475569);
+  max-width: 100%;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Navigation & Heading Sections */
+.footer-minimal .footer-heading {
+  margin: 0 0 1.2rem;
+  padding: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted, #475569);
+  background: none;
+  border: none;
+  line-height: 1.5;
+}
+
+.footer-minimal .footer-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.footer-minimal .footer-list li {
+  margin: 0;
+  padding: 0;
+}
+
+/* Navigation Links */
+.footer-minimal .footer-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.8rem 1.2rem;
+  border-radius: var(--radius-pill, 9999px);
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-muted, #475569);
+  text-decoration: none;
+  margin-left: -0.6rem;
+  width: fit-content;
+  box-shadow: 0 0 0 1px var(--border-subtle, #e2e8f0), 0 2px 6px rgba(0, 0, 0, 0.02);
+  border: none;
+  background: var(--surface-base, #f8fafc);
+  transition: background-color var(--duration-fast, 150ms) var(--ease-in-out),
+              box-shadow var(--duration-fast, 150ms) var(--ease-in-out),
+              color var(--duration-fast, 150ms) var(--ease-in-out),
+              transform var(--duration-fast, 150ms) var(--ease-out);
+  line-height: 1;
+}
+
+.footer-minimal .footer-link:hover {
+  background: var(--surface-hover, #f1f5f9);
+  box-shadow: 0 0 0 1px var(--color-brand-primary, #0d9488), 0 4px 12px rgba(13, 148, 136, 0.1);
+  color: var(--color-brand-primary, #0d9488);
+  text-decoration: none;
+  transform: translateX(4px);
+}
+
+.footer-minimal .footer-link:focus-visible {
+  outline: 2px solid var(--color-brand-primary, #0d9488);
+  outline-offset: 2px;
+}
+
+.footer-minimal .footer-license-note {
+  margin: 1.2rem 0 0;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted, #475569);
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Social Links */
+.footer-minimal .footer-socials {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.footer-minimal .footer-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 1.05rem 1.45rem;
+  border-radius: var(--radius-pill, 9999px);
+  box-shadow: 0 0 0 1.5px var(--border-subtle, #e2e8f0);
+  border: none;
+  background: var(--surface-card, #ffffff);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-muted, #475569);
+  text-decoration: none;
+  width: fit-content;
+  transition: background-color var(--duration-fast, 150ms) var(--ease-in-out),
+              box-shadow var(--duration-fast, 150ms) var(--ease-in-out),
+              color var(--duration-fast, 150ms) var(--ease-in-out),
+              transform var(--duration-fast, 150ms) var(--ease-out);
+  line-height: 1;
+}
+
+.footer-minimal .footer-social svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  flex-shrink: 0;
+  stroke-width: 1.8;
+  fill: none;
+  display: block;
+}
+
+.footer-minimal .footer-social:hover {
+  box-shadow: 0 0 0 1.5px var(--color-brand-primary, #0d9488), 0 6px 15px rgba(13, 148, 136, 0.12);
+  color: var(--color-brand-primary, #0d9488);
+  background: var(--surface-hover, #f1f5f9);
+  transform: translateY(-3px);
+}
+
+.footer-minimal .footer-social:focus-visible {
+  outline: 2px solid var(--color-brand-primary, #0d9488);
+  outline-offset: 2px;
+}
+
+/* Bottom Bar */
+.footer-minimal .footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding-top: 2rem;
+  margin: 0;
+}
+
+.footer-minimal .footer-bottom small,
+.footer-minimal .footer-bottom .text-muted {
+  font-size: 0.8rem;
+  color: var(--text-muted, #475569);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.footer-minimal .footer-bottom a {
+  color: var(--text-muted, #475569);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color var(--duration-fast, 150ms) var(--ease-in-out),
+              border-color var(--duration-fast, 150ms) var(--ease-in-out);
+  font-weight: 400;
+}
+
+.footer-minimal .footer-bottom a:hover {
+  color: var(--color-brand-primary, #0d9488);
+  border-bottom-color: var(--color-brand-primary, #0d9488);
+  text-decoration: none;
+}
+
+.footer-minimal .footer-bottom a:focus-visible {
+  outline: 2px solid var(--color-brand-primary, #0d9488);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE ADAPTATIONS
+   ═══════════════════════════════════════════════════════════════ */
+
 @media (max-width: 960px) {
-  .footer-minimal .footer-grid { grid-template-columns: 1.8fr 1fr 1fr 1fr!important; gap: 2rem 1.5rem!important; }
+  .footer-minimal .footer-grid {
+    grid-template-columns: 1.8fr 1fr 1fr 1fr;
+    gap: 2rem 1.5rem;
+  }
 }
 
 @media (max-width: 860px) {
-  .footer-minimal .footer-inner { 
-    width: 100%!important; 
-    margin: 0!important; 
-    border-radius: 32px 32px 0 0!important; 
-    
-    /* บนมือถือ ถอดโครงสร้างเงาเดิมออก แล้วปรับให้กลมกลืนกับขอบบน */
-    box-shadow: 0 -1px 0 0 var(--fv-border-default)!important;
-    border: none!important; 
-    padding: 3.5rem 1.5rem 2.5rem!important; 
+  .footer-minimal .footer-inner {
+    width: 100%;
+    margin: 0;
+    border-radius: 32px 32px 0 0;
+    box-shadow: 0 -1px 0 0 var(--border-subtle, #e2e8f0);
+    border: none;
+    padding: 3.5rem 1.5rem 2.5rem;
   }
-  .footer-minimal .footer-grid { grid-template-columns: 1fr 1fr!important; gap: 3rem 1.5rem!important; }
-  
-  /* 🚀 เส้นคั่นแบรนด์บนมือถือ เปลี่ยนเป็น shadow แทน borderเช่นกัน */
-  .footer-minimal .footer-brand { 
-    grid-column: 1 / -1!important; 
-    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.04)!important; 
-    border: none!important;
-    padding-bottom: 2rem; 
+
+  .footer-minimal .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem 1.5rem;
+  }
+
+  .footer-minimal .footer-brand {
+    grid-column: 1 / -1;
+    box-shadow: 0 1px 0 0 var(--border-subtle, #e2e8f0);
+    border: none;
+    padding-bottom: 2rem;
   }
 }
 
 @media (max-width: 560px) {
-  .footer-minimal .footer-inner { padding: 3rem 1.2rem 2.5rem!important; }
-  .footer-minimal .footer-grid { 
-    grid-template-columns: 1fr!important; 
-    gap: 2.5rem!important; 
-    padding-bottom: 2.5rem!important; 
+  .footer-minimal .footer-inner {
+    padding: 3rem 1.2rem 2.5rem;
   }
-  
-  /* 🚀 หัวข้อเมนูบนมือถือ เปลี่ยนเป็น shadow คั่นด้านล่างแทน border */
+
+  .footer-minimal .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+
   .footer-minimal .footer-heading {
-    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.03)!important;
-    border: none!important;
-    padding-bottom: 0.6rem!important;
-    margin-bottom: 1rem!important;
+    box-shadow: 0 1px 0 0 var(--border-subtle, #e2e8f0);
+    border: none;
+    padding-bottom: 0.6rem;
+    margin-bottom: 1rem;
   }
 
-  .footer-minimal .footer-list { 
-    display: grid!important;
-    grid-template-columns: 1fr 1fr!important;
-    gap: 0.8rem!important;
+  .footer-minimal .footer-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
   }
-  
+
   .footer-minimal .footer-link {
-    width: 100%!important; 
-    justify-content: center!important; 
-    margin-left: 0!important;
-    padding: 0.85rem 0.8rem!important; 
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+    padding: 0.85rem 0.8rem;
   }
 
-  .footer-minimal .footer-socials { 
-    flex-direction: row!important; 
-    width: 100%!important; 
-    gap: 8px!important;
+  .footer-minimal .footer-socials {
+    flex-direction: row;
+    width: 100%;
+    gap: 8px;
     padding-top: 0.5rem;
   }
-  .footer-minimal .footer-social { 
-    flex: 1!important; 
-    justify-content: center!important; 
-    padding: 1rem 0.5rem!important; 
+
+  .footer-minimal .footer-social {
+    flex: 1;
+    justify-content: center;
+    padding: 1rem 0.5rem;
   }
 }
 
-/* ส่วนประกอบย่อยของแบรนด์ */
-.footer-minimal .footer-brand { display: flex!important; flex-direction: column!important; gap: 0.8rem!important; justify-content: flex-start!important; }
-.footer-minimal .footer-logo { display: inline-flex!important; align-items: center!important; text-decoration: none!important; width: fit-content!important; border: none!important; background: none!important; padding: 0!important; }
-.footer-minimal .logo-text { font-family: 'Sofia', cursive!important; font-size: 1.7rem!important; font-weight: 700!important; color: var(--fv-brand-teal-light)!important; letter-spacing: -0.02em!important; line-height: 1!important; background: none!important; -webkit-background-clip: unset!important; -webkit-text-fill-color: unset!important; background-clip: unset!important; }
-.footer-minimal .footer-desc { margin: 0!important; font-size: 0.88rem!important; color: var(--fv-text-muted)!important; max-width: 100%!important; line-height: 1.6!important; font-weight: 400; opacity: 0.85; }
-
-.footer-minimal .footer-heading { 
-  margin: 0 0 1.2rem!important; padding: 0!important; 
-  font-size: 0.75rem!important; 
-  font-weight: 700!important; 
-  letter-spacing: 0.14em!important; 
-  text-transform: uppercase!important; 
-  color: var(--fv-text-faint)!important; 
-  background: none!important; border: none!important; line-height: 1.5!important; 
-}
-
-.footer-minimal .footer-list { list-style: none!important; margin: 0!important; padding: 0!important; display: flex!important; flex-direction: column!important; gap: 0.6rem!important; } 
-.footer-minimal .footer-list li { margin: 0!important; padding: 0!important; }
-
-/* ==========================================
-   ⚡ ปุ่มแคปซูลเมนูลิงก์
-   ========================================== */
-.footer-minimal .footer-link {
-  display: inline-flex!important; 
-  align-items: center!important;
-  padding: 0.8rem 1.2rem!important; 
-  border-radius: var(--fv-radius-pill)!important; 
-  font-size: 0.92rem!important; 
-  font-weight: 500!important;
-  color: var(--fv-text-secondary)!important; 
-  text-decoration: none!important;
-  margin-left: -0.6rem!important; 
-  width: fit-content!important; 
-  
-  /* 🚀 ปรับจุดที่ 4: เปลี่ยนจาก border เป็นการใช้ shadow แรเงาแทนขอบ 1px */
-  box-shadow: 0 0 0 1px rgba(0, 206, 176, 0.06), 0 2px 6px rgba(6, 20, 24, 0.01), inset 0 1px 0 rgba(255, 255, 255, 0.6)!important;
-  border: none!important;
-  background: rgba(0, 206, 176, 0.03)!important; 
-  
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, transform 0.2s cubic-bezier(0.25, 1, 0.5, 1)!important;
-  
-  line-height: 1!important; 
-}
-.footer-minimal .footer-link:hover {
-  background: rgba(0, 206, 176, 0.09)!important; 
-  /* 🚀 ตอน Hover อัปเดตสีขอบเงาให้ชัดขึ้นแทน border-color */
-  box-shadow: 0 0 0 1px rgba(0, 206, 176, 0.25), 0 4px 12px rgba(0, 206, 176, 0.05)!important;
-  color: var(--fv-brand-teal-light)!important;
-  text-decoration: none!important;
-  transform: translateX(4px) scale(1.02)!important; 
-}
-.footer-minimal .footer-license-note { margin: 1.2rem 0 0!important; padding: 0!important; font-size: 0.8rem!important; color: var(--fv-text-faint)!important; line-height: 1.6!important; font-weight: 400!important; }
-
-.footer-minimal .footer-socials { display: flex!important; flex-direction: column!important; gap: 10px!important; align-items: flex-start!important; }
-
-/* ==========================================
-   ⚡ ปุ่มแคปซูลโซเชียล
-   ========================================== */
-.footer-minimal .footer-social {
-  display: inline-flex!important; 
-  align-items: center!important; 
-  gap: 10px!important;
-  padding: 1.05rem 1.45rem!important; 
-  border-radius: var(--fv-radius-pill)!important; 
-  
-  /* 🚀 ปรับจุดที่ 5: ปุ่มโซเชียลเปลี่ยนมาใช้ขอบเงา 1.5px แทน border เดิม */
-  box-shadow: 0 0 0 1.5px var(--fv-border-default)!important;
-  border: none!important;
-  background: var(--fv-surface-page)!important;
-  
-  font-size: 0.88rem!important; 
-  font-weight: 500!important;
-  color: var(--fv-text-secondary)!important; 
-  text-decoration: none!important;
-  width: fit-content!important;
-  
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, transform 0.2s cubic-bezier(0.25, 1, 0.5, 1)!important;
-  
-  line-height: 1!important;
-}
-.footer-minimal .footer-social svg { width: 14px!important; height: 14px!important; stroke: currentColor!important; flex-shrink: 0!important; stroke-width: 1.8!important; fill: none!important; display: block!important; }
-.footer-minimal .footer-social:hover {
-  /* 🚀 ตอน Hover อัปเดตสีขอบเงาโซเชียล */
-  box-shadow: 0 0 0 1.5px rgba(0, 206, 176, 0.35), 0 6px 15px rgba(0, 206, 176, 0.08)!important;
-  color: var(--fv-brand-teal-light)!important;
-  background: rgba(0, 206, 176, 0.03)!important;
-  transform: translateY(-3px) scale(1.03)!important; 
-}
-
-/* ส่วนท้ายสุด */
-.footer-minimal .footer-bottom { 
-  display: flex!important; 
-  align-items: center!important; 
-  justify-content: space-between!important; 
-  flex-wrap: wrap!important; 
-  gap: 1.5rem!important; 
-  padding-top: 2rem!important; 
-  margin: 0!important; 
-}
-.footer-minimal .footer-bottom small,
-.footer-minimal .footer-bottom .text-muted { font-size: 0.8rem!important; color: var(--fv-text-faint)!important; font-weight: 400!important; line-height: 1.5!important; }
-.footer-minimal .footer-bottom a { color: var(--fv-text-faint)!important; text-decoration: none!important; border-bottom: 1px solid transparent!important; transition: color 0.2s ease; font-weight: 400!important; }
-.footer-minimal .footer-bottom a:hover { color: var(--fv-brand-teal)!important; border-bottom-color: rgba(19, 180, 127, 0.25)!important; text-decoration: none!important; }
+/* ═══════════════════════════════════════════════════════════════
+   REDUCED MOTION GUARD (WCAG 2.2 AA)
+   ═══════════════════════════════════════════════════════════════ */
 
 @media (prefers-reduced-motion: reduce) {
-  .footer-minimal *, .footer-minimal *::before { transition: none!important; transform: none!important; }
+  .footer-minimal,
+  .footer-minimal *,
+  .footer-minimal *::before,
+  .footer-minimal *::after {
+    transition: none;
+    transform: none;
+  }
 }
