@@ -24,7 +24,7 @@
   
   /* ── Inject footer HTML ───────────────────────────── */
   function inject(html) {
-    if (document.querySelector('footer.footer-minimal')) return;
+    if (document.querySelector('footer.fv-footer, footer.footer-minimal')) return;
     
     const tmp = document.createElement('div');
     tmp.innerHTML = html.trim();
@@ -41,12 +41,12 @@
   
   /* ── Fallback inline footer ───────────────────────── */
   function fallback() {
-    if (document.querySelector('footer.footer-minimal')) return;
+    if (document.querySelector('footer.fv-footer, footer.footer-minimal')) return;
     const el = document.createElement('footer');
-    el.className = 'footer-minimal';
+    el.className = 'fv-footer footer-minimal';
     el.setAttribute('role', 'contentinfo');
     el.setAttribute('aria-label', 'Site footer');
-    el.innerHTML = '<div class="footer-inner"><p>© FanHoard</p></div>';
+    el.innerHTML = '<div class="container-full footer-inner"><p>© FanHoard</p></div>';
     
     const mount = document.getElementById('fv-footer-mount');
     if (mount) {
@@ -62,7 +62,7 @@
     
     if (
       document.documentElement.dataset.fvBuilt &&
-      document.querySelector('footer.footer-minimal')
+      document.querySelector('footer.fv-footer, footer.footer-minimal')
     ) return;
     
     fetch(FOOTER_TEMPLATE_PATH, { cache: 'force-cache' })
