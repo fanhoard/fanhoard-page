@@ -1,5 +1,5 @@
 # .github/workflows/release.yml — Layer 3: CI validation + build + deploy
-# 4-layer version control system for Fantrove
+# 4-layer version control system for FanHoard
 #
 # Workflow:
 #   1. Validate (validate-release.js --ci)
@@ -70,8 +70,8 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           echo "📝  Layer 3.4: Committing build artifacts..."
-          git config user.name "Fantrove CI"
-          git config user.email "ci@fantrove.local"
+          git config user.name "FanHoard CI"
+          git config user.email "ci@fanhoard.local"
           # v6.2: commit path ให้ตรงกับโครงสร้าง per-language releases/ (แทน path เก่าที่ไม่มีแล้ว)
           git add assets/md/en/releases/ assets/md/th/releases/ assets/json/version.json assets/md/en/current.md assets/md/th/current.md
           if git diff --staged --quiet; then
@@ -110,6 +110,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: fantrove
+          projectName: fanhoard
           directory: .
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
