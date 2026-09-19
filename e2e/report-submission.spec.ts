@@ -5,6 +5,19 @@ test.describe('Community Report Form Journey', () => {
     await page.goto('/en/community/report/');
     await page.waitForLoadState('domcontentloaded');
 
+    // Dismiss the "new update" blocking popup shown to first-time visitors
+    // Dismiss the "new update" blocking popup shown to first-time visitors.
+    // Wait until the popup is fully open (fp-is-open) so its event wiring is settled.
+    const dismissBtn = page.locator('[data-fp-action="dismiss"]');
+    try {
+      await page.waitForSelector('.fp-popup.fp-is-open', { timeout: 5000 });
+      await page.waitForTimeout(400);
+      await dismissBtn.first().click();
+      await page.waitForSelector('.fp-blocking', { state: 'detached', timeout: 5000 });
+    } catch {
+      // popup not shown (already dismissed in a prior run) — proceed
+    }
+
     const categorySelect = page.locator('#report-category');
     await expect(categorySelect).toBeVisible();
     await categorySelect.selectOption('bug');
