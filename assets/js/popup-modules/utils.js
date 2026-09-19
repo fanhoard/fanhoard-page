@@ -1,6 +1,6 @@
 // Path:    assets/js/popup-modules/utils.js
 // Purpose: Shared utility functions for the Popup System.
-//          DOM helpers, option merging, ID generation.
+//          DOM helpers, option merging, HTML sanitization/escaping, ID generation.
 // Used by: engine.js, renderer.js, overlay.js, a11y.js
 
 (function(M) {
@@ -55,6 +55,98 @@
       if (el && el.parentNode) el.parentNode.removeChild(el);
     },
   };
+
+  // ── Sanitization & Escaping ──────────────────────────────────────────────────
+
+  /**
+   * Escape HTML special characters in a string.
+   * @param {string} str
+   * @returns {string}
+   */
+  function escapeHTML(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>"']/g, function(match) {
+      switch (match) {
+        case '&': return '&amp;';
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '"': return '&quot;';
+        case "'": return '&#39;';
+        default: return match;
+      }
+    });
+  }
+
+  /**
+   * Sanitize an HTML string to prevent XSS attacks while allowing safe DOM markup.
+   * Strips script tags, iframes, objects, embeds, style tags, event attributes (on*),
+   * and dangerous URI schemes (javascript:, vbscript:, non-image data:).
+   *
+   * @param {string} html
+   * @returns {string} Sanitized HTML string
+   */
+  function sanitizeHTML(html) {
+    if (typeof html !== 'string') return '';
+    if (!html.trim()) return '';
+
+    if (typeof DOMParser === 'undefined') {
+      return escapeHTML(html);
+    }
+
+    try {
+      var parser = new DOMParser();
+      var doc = parser.parseFromString(html, 'text/html');
+      var body = doc.body;
+
+      var FORBIDDEN_TAGS = [
+        'SCRIPT', 'IFRAME', 'OBJECT', 'EMBED', 'STYLE', 'LINK',
+        'META', 'BASE', 'FRAME', 'FRAMESET', 'APPLET',
+      ];
+      var SAFE_URI_REGEX = /^(?:https?|mailto|tel|blob|data:image\/(?:png|jpe?g|gif|svg\+xml|webp);base64,|\/|#|\.\/|\.\.\/)/i;
+
+      function cleanNode(node) {
+        var children = Array.from(node.childNodes);
+        for (var i = 0; i < children.length; i++) {
+          var child = children[i];
+          if (child.nodeType === 1) { // ELEMENT_NODE
+            var tagName = child.nodeName.toUpperCase();
+            if (FORBIDDEN_TAGS.indexOf(tagName) !== -1) {
+              child.remove();
+              continue;
+            }
+            var attrs = Array.from(child.attributes);
+            for (var j = 0; j < attrs.length; j++) {
+              var attr = attrs[j];
+              var name = attr.name.toLowerCase();
+              var val = attr.value;
+              if (name.startsWith('on')) {
+                child.removeAttribute(attr.name);
+                continue;
+              }
+              if ((name === 'href' || name === 'src' || name === 'action' || name === 'data') && val) {
+                var trimmed = val.trim().toLowerCase();
+                if (
+                  trimmed.startsWith('javascript:') ||
+                  trimmed.startsWith('vbscript:') ||
+                  (trimmed.startsWith('data:') && !SAFE_URI_REGEX.test(trimmed))
+                ) {
+                  child.removeAttribute(attr.name);
+                }
+              }
+            }
+            cleanNode(child);
+          } else if (child.nodeType === 8) { // COMMENT_NODE
+            child.remove();
+          }
+        }
+      }
+
+      cleanNode(body);
+      return body.innerHTML;
+    } catch (_) {
+      return escapeHTML(html);
+    }
+  }
 
   // ── Option merging ──────────────────────────────────────────────────────────
 
@@ -155,7 +247,7 @@
   }
 
   M.Utils = Object.freeze({
-    DOM, mergeOptions, resolveZIndex, getPreset, safe, prefersReducedMotion,
+    DOM, escapeHTML, sanitizeHTML, mergeOptions, resolveZIndex, getPreset, safe, prefersReducedMotion,
   });
 
 })(window.PopupModules = window.PopupModules || {});

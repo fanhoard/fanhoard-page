@@ -146,7 +146,7 @@
         closeBtn = Utils.DOM.create('button', null, 'fp-close-btn', { type: 'button' });
         closeBtn.setAttribute(D.CLOSE_BTN_ATTR, '');
         closeBtn.setAttribute('aria-label', 'Close');
-        closeBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+        closeBtn.innerHTML = Utils.sanitizeHTML('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>');
         headerEl.appendChild(closeBtn);
       }
 
@@ -164,7 +164,7 @@
 
     // Content injection
     if (typeof opts.body === 'string') {
-      bodyEl.innerHTML = opts.body;
+      bodyEl.innerHTML = Utils.sanitizeHTML(opts.body);
     } else if (opts.body instanceof HTMLElement) {
       bodyEl.appendChild(opts.body);
     }
@@ -177,7 +177,7 @@
     if (preset.hasFooter && opts.footer !== null && opts.footer !== undefined) {
       footerEl = Utils.DOM.create('div', null, 'fp-footer');
       footerEl.setAttribute(D.FOOTER_ATTR, '');
-      footerEl.innerHTML = opts.footer;
+      footerEl.innerHTML = Utils.sanitizeHTML(opts.footer);
       inner.appendChild(footerEl);
     }
 

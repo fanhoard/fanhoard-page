@@ -330,7 +330,7 @@
     // Re-render body
     if (newOpts.body !== undefined) {
       if (typeof newOpts.body === 'string') {
-        instance.bodyEl.innerHTML = newOpts.body;
+        instance.bodyEl.innerHTML = Utils.sanitizeHTML(newOpts.body);
       } else if (newOpts.body instanceof HTMLElement) {
         instance.bodyEl.innerHTML = '';
         instance.bodyEl.appendChild(newOpts.body);
@@ -339,7 +339,7 @@
 
     // Re-render footer
     if (instance.footerEl && newOpts.footer !== undefined) {
-      instance.footerEl.innerHTML = newOpts.footer;
+      instance.footerEl.innerHTML = Utils.sanitizeHTML(newOpts.footer);
     }
 
     State._emit('updated', { id, options: newOpts });
@@ -488,13 +488,13 @@
     var okLabel = lang === 'th' ? 'ตกลง' : 'OK';
 
     var footerHtml = '<button class="fp-btn fp-btn-primary" data-fp-action="confirm">' +
-      okLabel + '</button>';
+      Utils.escapeHTML(okLabel) + '</button>';
 
     return new Promise(function(resolve) {
       open(Object.assign({}, opts, {
         type    : 'alert',
         title   : opts.title || '',
-        body    : '<div class="fp-alert-body">' + message + '</div>',
+        body    : '<div class="fp-alert-body">' + Utils.sanitizeHTML(message) + '</div>',
         footer  : footerHtml,
         onClose : function(id, result) { resolve(result); },
         onMount : function(bodyEl, handle) {
@@ -523,14 +523,14 @@
     var cancelLabel = lang === 'th' ? 'ยกเลิก' : 'Cancel';
 
     var footerHtml =
-      '<button class="fp-btn fp-btn-secondary" data-fp-action="cancel">' + cancelLabel + '</button>' +
-      '<button class="fp-btn fp-btn-primary" data-fp-action="confirm">' + okLabel + '</button>';
+      '<button class="fp-btn fp-btn-secondary" data-fp-action="cancel">' + Utils.escapeHTML(cancelLabel) + '</button>' +
+      '<button class="fp-btn fp-btn-primary" data-fp-action="confirm">' + Utils.escapeHTML(okLabel) + '</button>';
 
     return new Promise(function(resolve) {
       open(Object.assign({}, opts, {
         type    : 'confirm',
         title   : opts.title || '',
-        body    : '<div class="fp-confirm-body">' + message + '</div>',
+        body    : '<div class="fp-confirm-body">' + Utils.sanitizeHTML(message) + '</div>',
         footer  : footerHtml,
         onClose : function(id, result) { resolve(result.action === 'confirm'); },
         onMount : function(bodyEl, handle) {
