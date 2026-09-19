@@ -12,9 +12,10 @@
 
   <link rel="icon" type="image/x-icon" href="/assets/images/fanhoard-verse360.ico" />
 
-  <!-- 1. Tokens -->
+  <!-- 1. Tokens & Layout CSS -->
   <link rel="preload" href="/assets/css/tokens.css" as="style">
   <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
 
   <!-- 2. Shell & Page CSS -->
   <link rel="preload" href="/assets/css/bg.css?v=1.0.0-20250322" as="style" onload="this.rel='stylesheet'" />
@@ -24,56 +25,59 @@
 </head>
 
 <body>
-  <a href="#main" class="skip-link fv-skip-link" data-translate="home-skip-link">Skip to main content</a>
-  <div id="fv-app" class="fv-app" data-page="scope">
+  <a href="#fv-main" class="skip-link fv-skip-link" data-translate="home-skip-link">Skip to main content</a>
+  <div id="fv-app" class="fv-app fv-page-shell fv-page-shell--has-top-nav" data-page="scope">
 
     <!-- h1 SEO / Accessibility -->
     <h1 class="fv-sr-only">Scope Detail Viewer</h1>
 
-    <nav aria-label="Page navigation">
-      <button class="back-button" id="back-button" aria-label="Go back">
-        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7" />
-        </svg>
-      </button>
-      <span class="page-title">Scope Viewer</span>
-    </nav>
+    <header class="fv-header" role="banner">
+      <nav class="fv-nav" aria-label="Page navigation">
+        <button class="back-button" id="back-button" aria-label="Go back">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7" />
+          </svg>
+        </button>
+        <span class="page-title">Scope Viewer</span>
+      </nav>
+    </header>
 
-    <div class="fv-page-shell">
-      <main id="main" class="fv-main">
-        <div class="scope-shell">
-          <section class="scope-card">
-            <h2 class="scope-section-heading">Scope Overview</h2>
-            <div class="scope-metadata-grid">
-              <div class="scope-kv-item">
-                <span class="scope-kv-key">Scope ID</span>
-                <span class="scope-kv-value">data/verse/scope</span>
-              </div>
-              <div class="scope-kv-item">
-                <span class="scope-kv-key">Category</span>
-                <span class="scope-kv-value">Symbol &amp; Character Metadata</span>
-              </div>
-              <div class="scope-kv-item">
-                <span class="scope-kv-key">Encoding</span>
-                <span class="scope-kv-value">UTF-8 / Unicode 15.0</span>
-              </div>
+    <main id="fv-main" class="fv-main" role="main" tabindex="-1">
+      <div class="container-md scope-shell stack-md">
+        <section class="scope-card fv-card">
+          <h2 class="scope-section-heading">Scope Overview</h2>
+          <div class="scope-metadata-grid">
+            <div class="scope-kv-item">
+              <span class="scope-kv-key">Scope ID</span>
+              <span class="scope-kv-value">data/verse/scope</span>
             </div>
-          </section>
+            <div class="scope-kv-item">
+              <span class="scope-kv-key">Category</span>
+              <span class="scope-kv-value">Symbol &amp; Character Metadata</span>
+            </div>
+            <div class="scope-kv-item">
+              <span class="scope-kv-key">Encoding</span>
+              <span class="scope-kv-value">UTF-8 / Unicode 15.0</span>
+            </div>
+          </div>
+        </section>
 
-          <section class="scope-card">
-            <h2 class="scope-section-heading">Schema &amp; Properties</h2>
-            <pre class="scope-code-block"><code>{
+        <section class="scope-card fv-card">
+          <h2 class="scope-section-heading">Schema &amp; Properties</h2>
+          <pre class="scope-code-block"><code>{
   "scope": "data/verse/scope",
   "status": "active",
   "version": "2.3.0",
   "format": "json-schema-v1",
   "capabilities": ["reader", "breadcrumb-generator", "metadata-viewer"]
 }</code></pre>
-          </section>
-        </div>
-      </main>
+        </section>
+      </div>
+    </main>
+
+    <footer class="fv-footer" role="contentinfo">
       <div id="fv-footer-mount"></div>
-    </div>
+    </footer>
 
   </div><!-- /#fv-app -->
 

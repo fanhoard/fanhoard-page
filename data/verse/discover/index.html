@@ -15,9 +15,10 @@
   <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
   <link rel="icon" type="image/x-icon" href="/assets/images/fanhoard-verse360.ico" />
 
-  <!-- 1. Tokens ก่อนสุด -->
+  <!-- 1. Tokens & Layout CSS -->
   <link rel="preload" href="/assets/css/tokens.css" as="style">
   <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
 
   <!-- 2. CSS -->
   <link rel="preload" href="/assets/css/loading.css?v=1.0.0-20250322" as="style" onload="this.rel='stylesheet'" />
@@ -133,7 +134,7 @@
   <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="16a70d79-a7a7-4b66-89da-afb49e453c67" data-blockingmode="auto" type="text/javascript" async></script>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8233915433564101" crossorigin="anonymous"></script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-R4DGR81NZ6"></script>
-  <script>function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-R4DGR81NZ6');gtag('consent','default',{ad_personalization:'denied',ad_storage:'denied',ad_user_data:'denied'</script>
+  <script>function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-R4DGR81NZ6');gtag('consent','default',{ad_personalization:'denied',ad_storage:'denied',ad_user_data:'denied'});</script>
 </head>
 
 <body>
@@ -238,11 +239,11 @@
   <!-- SEO h1 ซ่อน (JS อาจ update content ตาม type ที่เลือก) -->
   <h1 id="fv-discover-h1" class="fv-sr-only">Discover Emoji and Symbols — FanHoard</h1>
 
-  <div id="fv-app" class="fv-app" data-page="discover">
+  <div id="fv-app" class="fv-app fv-page-shell fv-page-shell--has-top-nav" data-page="discover">
 
-    <header role="banner">
+    <header class="fv-header" role="banner">
       <div class="logo" data-translate="logo-header"></div>
-      <nav aria-label="Content type navigation">
+      <nav class="fv-nav" aria-label="Content type navigation">
         <ul id="nav-list"></ul>
       </nav>
     </header>
@@ -253,9 +254,15 @@
       </div>
     </div>
 
-    <main id="fv-main" role="main">
-      <div id="content-loading"></div>
+    <main id="fv-main" class="fv-main" role="main" tabindex="-1">
+      <div class="container-lg">
+        <div id="content-loading"></div>
+      </div>
     </main>
+
+    <footer class="fv-footer" role="contentinfo">
+      <div id="fv-footer-mount"></div>
+    </footer>
 
   </div><!-- /#fv-app -->
 
