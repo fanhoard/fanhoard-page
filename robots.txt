@@ -12,8 +12,6 @@ Disallow: /assets/json/current-stage.json
 Disallow: /assets/md/releases/
 
 # Block test/development pages from being indexed
-Disallow: /beta.html
-Disallow: /n.html
 Disallow: /s.css
 Disallow: /data/verse/scope/
 

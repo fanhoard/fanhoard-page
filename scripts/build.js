@@ -115,7 +115,6 @@ const CONFIG = {
     'robots.txt',
     'sitemap.xml',
     '_headers',
-    'fanhoard-console-bridge.js',
     'google6b646fa60e0f9f2f.html',
     'console.css',
     'console.js',

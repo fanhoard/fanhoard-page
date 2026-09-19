@@ -7,6 +7,9 @@
     "build": "node scripts/build.js",
     "build:dry": "node scripts/build.js --dry-run",
     "build:verbose": "node scripts/build.js --verbose",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
     "release": "node scripts/update-version.js",
     "validate": "node scripts/validate-release.js",
     "validate:staged": "node scripts/validate-release.js --staged",
@@ -23,5 +26,13 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@typescript-eslint/eslint-plugin": "^8.70.0",
+    "@typescript-eslint/parser": "^8.70.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.8",
+    "typescript": "^6.0.3"
   }
 }

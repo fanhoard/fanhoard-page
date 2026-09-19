@@ -32,26 +32,6 @@
   </url>
 
   <url>
-    <loc>https://fanhoard.pages.dev/en/beta/</loc>
-    <lastmod>2026-09-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/beta/"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/beta/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/beta/"/>
-  </url>
-
-  <url>
-    <loc>https://fanhoard.pages.dev/en/cn/</loc>
-    <lastmod>2026-09-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/cn/"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/cn/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/cn/"/>
-  </url>
-
-  <url>
     <loc>https://fanhoard.pages.dev/en/community/contact/</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
@@ -112,16 +92,6 @@
   </url>
 
   <url>
-    <loc>https://fanhoard.pages.dev/en/n/</loc>
-    <lastmod>2026-09-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/n/"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/n/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/n/"/>
-  </url>
-
-  <url>
     <loc>https://fanhoard.pages.dev/en/platform/about/</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
@@ -129,6 +99,26 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/platform/about/"/>
     <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/platform/about/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/platform/about/"/>
+  </url>
+
+  <url>
+    <loc>https://fanhoard.pages.dev/en/platform/license/</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/platform/license/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/platform/license/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/platform/license/"/>
+  </url>
+
+  <url>
+    <loc>https://fanhoard.pages.dev/en/platform/privacy/</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/platform/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/platform/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/platform/privacy/"/>
   </url>
 
   <url>

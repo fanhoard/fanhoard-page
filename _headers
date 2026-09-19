@@ -1,57 +1,56 @@
 # whats-new.json: ห้าม cache เด็ดขาด
 /assets/json/whats-new.json
-Cache-Control: no-store, no-cache, max-age=0, must-revalidate
-Pragma: no-cache
-Expires: 0
-Surrogate-Control: no-store
+  Cache-Control: no-store, no-cache, max-age=0, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+  Surrogate-Control: no-store
 
 # release-history.json: ห้าม cache (legacy v4.0)
 /assets/json/release-history.json
-Cache-Control: no-store, no-cache, max-age=0, must-revalidate
-Pragma: no-cache
-Expires: 0
-Surrogate-Control: no-store
+  Cache-Control: no-store, no-cache, max-age=0, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+  Surrogate-Control: no-store
 
 # releases/index.json: ห้าม cache (v4.1+ manifest)
 /assets/md/releases/index.json
-Cache-Control: no-store, no-cache, max-age=0, must-revalidate
-Pragma: no-cache
-Expires: 0
-Surrogate-Control: no-store
+  Cache-Control: no-store, no-cache, max-age=0, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+  Surrogate-Control: no-store
 
 # current-stage.json: ห้าม cache
 /assets/json/current-stage.json
-Cache-Control: no-store, no-cache, max-age=0, must-revalidate
-Pragma: no-cache
-Expires: 0
-Surrogate-Control: no-store
+  Cache-Control: no-store, no-cache, max-age=0, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+  Surrogate-Control: no-store
 
 /th/*
-Content-Language: th
+  Content-Language: th
 
 /en/*
-Content-Language: en
+  Content-Language: en
 
 # assets ทั้งหมด: cache สูงสุด 1 วัน (bust ด้วย ?v= ทุก deploy)
-# (ลดจาก 7 วัน → 1 วัน)
 /assets/*
-Cache-Control: public, max-age=86400, stale-while-revalidate=86400
+  Cache-Control: public, max-age=86400, stale-while-revalidate=86400
 
 # ระบุ /index.html โดยตรงเป็น no-cache (สำคัญสำหรับ SPA ที่ rewrite มาที่ index.html)
 /index.html
-Cache-Control: no-store, no-cache, max-age=0, must-revalidate
-Pragma: no-cache
-Expires: 0
-Surrogate-Control: no-store
+  Cache-Control: no-store, no-cache, max-age=0, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+  Surrogate-Control: no-store
 
-# ทุก path อื่น (HTML ทุกไฟล์ ทุก folder รวมกรณี rewrite): ห้าม cache ทุกกรณี
-# วางหลัง /assets/* เพื่อให้กฎ /assets/* ถูกนำไปใช้กับไฟล์ assets ก่อน
+# ทุก path อื่น: ห้าม cache + OWASP security headers
 /*
-Cache-Control: no-store, no-cache, max-age=0, must-revalidate
-Pragma: no-cache
-Expires: 0
-Surrogate-Control: no-store
-
-/*
-Content-Encoding: gzip
-Vary: Accept-Encoding
+  Cache-Control: no-store, no-cache, max-age=0, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+  Surrogate-Control: no-store
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://consent.cookiebot.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://community-fanhoard.pages.dev https://*.cloudflare.com https://www.google-analytics.com https://region1.google-analytics.com https://pagead2.googlesyndication.com; frame-src https://challenges.cloudflare.com https://consent.cookiebot.com https://googleads.g.doubleclick.net;
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
