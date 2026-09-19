@@ -12,7 +12,7 @@
 
 @font-face {
   font-family: 'MunroSmall';
-  src: url('/assets/fonts/MunroSmall.ttf') format('truetype');
+  src: url('/assets/fonts/MunroSmall.woff2') format('woff2');
   font-display: swap;
 }
 

@@ -1,3 +1,22 @@
+/* ── Font Assets (WOFF2) ── */
+@font-face {
+  font-family: 'FoglihtenNo07calt';
+  src: url('/assets/fonts/FoglihtenNo07calt.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'FoglihtenNo07';
+  src: url('/assets/fonts/FoglihtenNo07.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MunroSmall';
+  src: url('/assets/fonts/MunroSmall.woff2') format('woff2');
+  font-display: swap;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    FANHOARD DESIGN TOKENS v1.0
    assets/css/tokens.css
