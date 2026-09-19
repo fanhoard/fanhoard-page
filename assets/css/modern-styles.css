@@ -81,3 +81,68 @@
 }
 
 } /* end layer */
+
+/* ── Detail Scope Viewer (Read surface mode) ────────────────────────────────── */
+.scope-shell {
+  max-width: 800px;
+  margin: var(--space-6) auto;
+  padding: 0 var(--space-4);
+}
+
+.scope-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: var(--space-6);
+}
+
+.scope-section-heading {
+  font-family: var(--font-heading);
+  font-size: var(--step-2);
+  color: var(--text-main);
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.scope-metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.scope-kv-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.scope-kv-key {
+  font-size: var(--step--1);
+  color: var(--text-muted);
+  font-weight: var(--font-medium);
+}
+
+.scope-kv-value {
+  font-size: var(--step-0);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  word-break: break-all;
+}
+
+.scope-code-block {
+  background: var(--surface-base);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--text-main);
+  overflow-x: auto;
+  line-height: 1.5;
+  margin: 0;
+}
