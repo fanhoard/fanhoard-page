@@ -14,7 +14,7 @@
   position:fixed; inset:auto 0 0 0; z-index:var(--fv-z-nav);
   -webkit-tap-highlight-color:transparent;
   display:flex; justify-content:space-evenly; align-items:center;
-  padding:10px 0 calc(env(safe-area-inset-bottom,0px) + 0px);
+  padding: var(--space-2) 0 calc(env(safe-area-inset-bottom,0px) + 0px);
   background: var(--fv-surface-page);
   border-top: 1px solid var(--border-subtle);
   border-radius:var(--nav-radius) var(--nav-radius) 0 0;
@@ -27,7 +27,7 @@
 
 .nav-item {
   background:none; border:0; padding:0;
-  display:flex; flex-direction:column; align-items:center; gap:2px;
+  display:flex; flex-direction:column; align-items:center; gap: var(--space-1, 4px);
   border-radius:var(--nav-item-radius);
   cursor:pointer; user-select:none; text-decoration:none;
   transition:color var(--fv-transition-fast);
@@ -35,7 +35,7 @@
 
 .svg-wrapper {
   position:relative; width:var(--nav-item-w); height:var(--nav-item-h);
-  border-radius:50px; overflow:hidden;
+  border-radius: var(--radius-full); overflow:hidden;
 }
 .svg-wrapper > svg {
   position:absolute; inset:50% auto auto 50%;
@@ -53,7 +53,7 @@
   will-change: opacity;
 }
 .nav-item .label {
-  font-size:12.5px; letter-spacing:.01em;
+  font-size: var(--step--1, 0.875rem); letter-spacing:.01em;
   white-space:nowrap; color:var(--fv-text-secondary);
   transition:color var(--fv-transition-fast);
 }

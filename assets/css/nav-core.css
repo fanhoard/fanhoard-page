@@ -8,28 +8,28 @@ body { margin:0; padding:0; }
 
 header {
   position:relative; display:flex; flex-direction:column; align-items:flex-start;
-  width:100%; background:var(--fv-surface-page); margin-bottom:30px; 
+  width:100%; background:var(--fv-surface-page); margin-bottom: var(--space-8, 32px); 
   contain: layout style;
 }
 
 .logo {
   font-family:'FoglihtenNo07calt',monospace;
-  font-size:26px; padding:20px 0 0;
+  font-size: var(--step-3, 1.75rem); padding: var(--space-5, 20px) 0 0;
   color:var(--color-brand-primary, #0d9488);
   white-space:nowrap; display:flex; align-items:center;
-  margin-left:10px; pointer-events:none;
+  margin-left: var(--space-3, 12px); pointer-events:none;
 }
 .logo span { pointer-events:auto; user-select:text; }
-.logo img  { height:var(--height); margin-left:5px; }
+.logo img  { height:var(--height); margin-left: var(--space-1, 4px); }
 
-nav { width:100%; margin-top:7px; contain: layout style; }
+nav { width:100%; margin-top: var(--space-2, 8px); contain: layout style; }
 nav ul {
   display:flex; list-style:none; margin:0;
-  padding:7px 7px 0;
+  padding: var(--space-2) var(--space-2) 0;
   overflow-x:auto;
   white-space:nowrap;
   scrollbar-width:none;
-  border-bottom:0.8px solid rgba(13,148,136,0.3);
+  border-bottom: 1px solid var(--border-subtle);
   overscroll-behavior-x:contain; touch-action:pan-x;
   -webkit-overflow-scrolling:touch; 
   contain: layout style; 
@@ -39,19 +39,19 @@ nav ul li { flex:none; }
 
 nav ul li button {
   position:relative; display:flex; align-items:center; justify-content:center;
-  padding:11px 13px; border-radius:var(--fv-radius-pill);
-  font-size:0.9em; background:transparent; border:1px solid transparent;
+  padding: var(--space-3) var(--space-3); min-height: 44px; border-radius:var(--fv-radius-pill);
+  font-size: var(--step--1, 0.875rem); background:transparent; border:1px solid transparent;
   color:var(--fv-text-secondary); cursor:pointer; white-space:nowrap;
   user-select:none; -webkit-tap-highlight-color:transparent; 
   touch-action: manipulation; 
-  transition: background 200ms ease-in-out, border-color 200ms ease-in-out, color 200ms ease-in-out;
+  transition: background var(--transition-fast, 150ms) ease-in-out, border-color var(--transition-fast, 150ms) ease-in-out, color var(--transition-fast, 150ms) ease-in-out;
 }
 nav ul li button:active { background: var(--fv-surface-hover, #f0f0f0); }
 
 nav ul li button.active {
   color:var(--color-brand-primary, #0d9488);
   background:var(--fv-surface-teal-hover);
-  border-color:rgba(13,148,136,0.51);
+  border-color: var(--border-brand, #0d9488);
   transform: scale(0.98);
   transition: transform 150ms ease-out, background 150ms ease-out, border-color 150ms ease-out;
 }
@@ -59,7 +59,7 @@ nav ul li button.active {
 nav ul li button::after {
   content:''; position:absolute; left:50%; bottom:0;
   width:40%; height:3px; background:var(--color-brand-primary, #0d9488);
-  border-radius:10px 10px 0 0; 
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0; 
   transform: translateX(-50%) scaleX(0);
   will-change: transform;
   transition: transform 200ms ease-in;
@@ -73,18 +73,18 @@ nav ul li button.active::after {
 .navbar-toggle {
   display:flex; flex-direction:column; gap:4px; cursor:pointer;
   -webkit-tap-highlight-color:transparent; touch-action:manipulation;
-  position:fixed; left:16px; top:25.3px; padding:5px;
+  position:fixed; left:16px; top: var(--space-6, 24px); padding: var(--space-1, 4px);
   z-index:var(--fv-z-overlay);
 }
 
-.error-message { position:fixed; top:50%; right:20px; background:#dc2626; color:#fff; padding:15px 20px; border-radius:5px; z-index:var(--z-toast, 700); }
+.error-message { position:fixed; top:50%; right:20px; background: var(--color-danger, #dc2626); color: var(--text-inverse, #ffffff); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md, 8px); z-index:var(--z-toast, 700); }
 
 @media (min-width:600px)  { nav { margin-top:5px; } }
 @media (min-width:1024px) { nav { margin-top:5px; } }
 @media (max-width:320px)  {
-  .logo { font-size:20px; padding:15px 0 0; }
-  nav ul li button { padding:8px 10px; font-size:0.85em; }
-  .navbar-toggle { left:12px; top:20px; }
+  .logo { font-size: var(--step-2); padding: var(--space-4) 0 0; }
+  nav ul li button { padding: var(--space-2); font-size: var(--step--1); }
+  .navbar-toggle { left: var(--space-3); top: var(--space-5); }
 }
 
 @media (prefers-reduced-motion: reduce) {
