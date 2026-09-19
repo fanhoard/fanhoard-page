@@ -10,8 +10,10 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "test": "vitest run",
     "release": "node scripts/update-version.js",
-    "validate": "node scripts/validate-release.js",
+    "validate:data": "tsx scripts/validate-data.ts",
+    "validate": "npm run validate:data && node scripts/validate-release.js",
     "validate:staged": "node scripts/validate-release.js --staged",
     "validate:ci": "node scripts/validate-release.js --ci --allow-generated",
     "hooks:install": "bash scripts/hooks/install.sh",
@@ -22,17 +24,22 @@
     "postbuild": "npm run generate-sitemap && node -e \"const fs=require('fs'); const src='sitemap.xml'; const dest='dist/sitemap.xml'; try{ fs.mkdirSync('dist',{ recursive:true }); fs.copyFileSync(src, dest); console.log('sitemap copied to', dest); } catch(e) { console.warn('sitemap copy failed:', e && e.message ? e.message : e); }\""
   },
   "dependencies": {
-    "cheerio": "^1.0.0"
+    "cheerio": "^1.0.0",
+    "zod": "^4.6.5"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.2",
     "@typescript-eslint/eslint-plugin": "^8.70.0",
     "@typescript-eslint/parser": "^8.70.0",
     "eslint": "^10.11.0",
+    "happy-dom": "^20.14.5",
     "prettier": "^3.9.8",
-    "typescript": "^6.0.3"
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
   }
 }

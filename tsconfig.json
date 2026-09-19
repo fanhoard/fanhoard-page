@@ -11,6 +11,6 @@
     "checkJs": false,
     "noEmit": true
   },
-  "include": ["scripts/**/*"],
+  "include": ["src/**/*", "scripts/**/*", "tests/**/*"],
   "exclude": ["node_modules", "dist"]
 }
