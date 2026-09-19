@@ -3,88 +3,100 @@
    assets/css/report.css
    ═══════════════════════════════════════════════════ */
 
+/* ── Description & Section Labels ── */
+.report-desc {
+  font-size: var(--step-0, 1rem);
+  line-height: 1.5;
+  color: var(--text-muted, #475569);
+  margin-top: var(--space-2, 0.5rem);
+}
+
 /* ── Textarea ── */
 .report-textarea {
   width: 100%;
-  padding: calc(var(--fv-space-2) + 8px) var(--fv-space-4);
-  font-size: 0.9em;
-  font-family: var(--fv-font-stack);
-  border: 1px solid var(--fv-border-subtle);
-  border-radius: var(--fv-radius-xl);
-  background-color: var(--fv-surface-page);
-  color: var(--fv-text-primary);
-  transition: border-color var(--fv-transition-fast),
-    box-shadow var(--fv-transition-fast);
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  font-size: var(--step-0, 0.95rem);
+  font-family: var(--font-sans, inherit);
+  border: 1px solid var(--border-subtle, #cbd5e1);
+  border-radius: var(--radius-lg, 0.75rem);
+  background-color: var(--surface-card, #ffffff);
+  color: var(--text-main, #0f172a);
+  transition: border-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
+              box-shadow var(--duration-fast, 150ms) var(--ease-out, ease-out);
   resize: vertical;
-  min-height: 80px;
-  line-height: var(--fv-leading-normal);
+  min-height: 90px;
+  line-height: 1.5;
   -webkit-appearance: none;
+  box-sizing: border-box;
 }
 
 .report-textarea:focus {
-  border-color: var(--fv-brand-teal);
-  box-shadow: var(--fv-shadow-focus);
+  border-color: var(--color-brand-primary, #0d9488);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+  outline: none;
 }
 
 .report-textarea::placeholder {
-  color: var(--fv-text-faint);
+  color: var(--text-muted, #94a3b8);
 }
 
 /* ── Text Input ── */
 .report-textinput {
   width: 100%;
-  padding: calc(var(--fv-space-2) + 8px) var(--fv-space-4);
-  font-size: 0.9em;
-  font-family: var(--fv-font-stack);
-  border: 1px solid var(--fv-border-subtle);
-  border-radius: var(--fv-radius-xl);
-  background-color: var(--fv-surface-page);
-  color: var(--fv-text-primary);
-  transition: border-color var(--fv-transition-fast),
-    box-shadow var(--fv-transition-fast);
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  font-size: var(--step-0, 0.95rem);
+  font-family: var(--font-sans, inherit);
+  border: 1px solid var(--border-subtle, #cbd5e1);
+  border-radius: var(--radius-lg, 0.75rem);
+  background-color: var(--surface-card, #ffffff);
+  color: var(--text-main, #0f172a);
+  transition: border-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
+              box-shadow var(--duration-fast, 150ms) var(--ease-out, ease-out);
   -webkit-appearance: none;
+  box-sizing: border-box;
 }
 
 .report-textinput:focus {
-  border-color: var(--fv-brand-teal);
-  box-shadow: var(--fv-shadow-focus);
+  border-color: var(--color-brand-primary, #0d9488);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+  outline: none;
 }
 
 .report-textinput::placeholder {
-  color: var(--fv-text-faint);
+  color: var(--text-muted, #94a3b8);
 }
 
-/* ── Optional label badge ── */
+/* ── Optional Label Badge ── */
 .report-optional {
-  font-weight: var(--fv-font-normal);
-  color: var(--fv-text-faint);
+  font-weight: var(--font-normal, 400);
+  color: var(--text-muted, #64748b);
   font-size: 0.85em;
-  margin-left: var(--fv-space-1);
+  margin-left: var(--space-1, 0.25rem);
 }
 
 /* ── Submit Button ── */
 .report-submit {
   width: 100%;
-  padding: calc(var(--fv-space-3) + 4px) var(--fv-space-6);
-  font-size: 1em;
-  font-family: var(--fv-font-stack);
-  font-weight: var(--fv-font-bold);
-  color: var(--fv-text-inverse);
-  background: var(--fv-gradient-btn);
+  padding: var(--space-3, 0.75rem) var(--space-6, 1.5rem);
+  font-size: var(--step-0, 1rem);
+  font-family: var(--font-sans, inherit);
+  font-weight: var(--font-bold, 700);
+  color: #ffffff;
+  background-color: var(--color-brand-primary, #0d9488);
   border: none;
-  border-radius: var(--fv-radius-xl);
+  border-radius: var(--radius-lg, 0.75rem);
   cursor: pointer;
-  transition: opacity var(--fv-transition-fast),
-    transform var(--fv-transition-fast),
-    box-shadow var(--fv-transition-normal);
-  margin-top: var(--fv-space-6);
+  transition: background-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
+              transform var(--duration-fast, 150ms) var(--ease-out, ease-out),
+              box-shadow var(--duration-normal, 250ms) var(--ease-out, ease-out);
+  margin-top: var(--space-6, 1.5rem);
   -webkit-tap-highlight-color: transparent;
 }
 
 .report-submit:hover {
-  opacity: 0.92;
+  background-color: var(--color-brand-primary-hover, #0f766e);
   transform: translateY(-1px);
-  box-shadow: var(--fv-shadow-teal);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
 }
 
 .report-submit:active {
@@ -94,21 +106,24 @@
 .report-submit:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-  transform: none !important;
-  box-shadow: none !important;
+  transform: none;
+  box-shadow: none;
 }
 
-/* ── Field validation error ── */
-.report-field-error {
-  border-color: #ef4444 !important;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+/* ── Field Validation Error ── */
+.report-field-error,
+select.report-field-error,
+textarea.report-field-error,
+input.report-field-error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
 }
 
 .report-error-text {
-  color: #ef4444;
-  font-size: 0.8em;
-  margin-top: var(--fv-space-1);
-  padding-left: var(--fv-space-4);
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin-top: var(--space-1, 0.25rem);
+  padding-left: var(--space-1, 0.25rem);
   display: none;
 }
 
@@ -116,19 +131,31 @@
   display: block;
 }
 
-/* ── Custom page input (shown when "Other" selected) ── */
+/* ── Custom Page Input ── */
 .report-page-custom {
-  margin-top: var(--fv-space-2);
+  margin-top: var(--space-2, 0.5rem);
   display: none;
 }
 
 .report-page-custom.visible {
   display: block;
 }
+
+/* ── Focus Visible Accessibility ── */
 .report-textarea:focus-visible,
 .report-textinput:focus-visible,
 .report-submit:focus-visible {
-  border-color: var(--fv-brand-teal);
-  outline: 3px solid var(--fv-focus-ring, #0a9273);
+  border-color: var(--color-brand-primary, #0d9488);
+  outline: 2px solid var(--color-brand-primary, #0d9488);
   outline-offset: 2px;
+}
+
+/* ── Reduced Motion Accessibility ── */
+@media (prefers-reduced-motion: reduce) {
+  .report-submit,
+  .report-textarea,
+  .report-textinput {
+    transition: none;
+    transform: none;
+  }
 }

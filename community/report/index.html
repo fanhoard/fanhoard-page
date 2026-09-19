@@ -5,9 +5,9 @@
   <script src="assets/js/lang-proxy.js?v=1.0.0-20250322"></script>
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title data-translate="page-report"></title>
+  <title data-translate="page-report">Report an Issue</title>
   <meta name="description" content="Report a bug, issue, or suggestion to help improve FanHoard.">
-  <meta name="theme-color" content="#13b47f" />
+  <meta name="theme-color" content="#0d9488" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <link rel="icon" type="image/x-icon" href="/assets/images/fanhoard-verse360.ico" />
 
@@ -22,10 +22,11 @@
   <noscript><link rel="stylesheet" href="/assets/css/bg.css?v=1.0.0-20250322" /></noscript>
   <link rel="stylesheet" href="/assets/css/top-navigation-bar.css?v=1.0.0-20250322" media="all" />
   <link rel="stylesheet" href="/assets/css/report.css?v=1.6.2_2" media="all" />
-<noscript><style>body { opacity: 1 !important; }</style></noscript>
 </head>
 
 <body>
+
+  <a href="#fv-main" class="skip-link fv-skip-link">Skip to main content</a>
 
   <div id="fv-app" class="fv-app" data-page="report">
 
@@ -36,18 +37,18 @@
           <path d="m15 19-7-7 7-7" />
         </svg>
       </button>
-      <span class="page-title" data-translate="page-report"></span>
+      <span class="page-title" data-translate="page-report">Report an Issue</span>
     </nav>
 
-    <h1 class="fv-sr-only" data-translate="page-report"></h1>
+    <h1 class="fv-sr-only" data-translate="page-report">Report an Issue</h1>
 
     <div class="fv-page-shell">
       <main id="fv-main">
 
       <section>
             <div class="m5"><div class="w">
-                <p class="fv-section-label" data-translate="report-new-title"></p>
-                <p class="report-desc" data-translate="report-new-desc"></p>
+                <p class="fv-section-label" data-translate="report-new-title">Report an Issue</p>
+                <p class="report-desc" data-translate="report-new-desc">Found a bug or have a suggestion? Let us know so we can improve FanHoard.</p>
             </div></div>
 
         <section>
@@ -56,9 +57,9 @@
             <!-- Issue Type -->
             <div class="m5"><div class="w">
               <div class="setting-item">
-                <label for="report-category" data-translate="report-category-label"></label>
+                <label for="report-category" data-translate="report-category-label">Issue Category</label>
                 <select id="report-category" class="setting-item select" required>
-                  <option value="" disabled selected data-translate="report-select-placeholder"></option>
+                  <option value="" disabled selected data-translate="report-select-placeholder">Select a category…</option>
                 </select>
                 <p class="report-error-text" id="error-category"></p>
               </div>
@@ -67,7 +68,7 @@
             <!-- Problem Details -->
             <div class="m5"><div class="w">
               <div class="setting-item">
-                <label for="report-details" data-translate="report-details-label"></label>
+                <label for="report-details" data-translate="report-details-label">Problem Details</label>
                 <textarea id="report-details" class="report-textarea" rows="4" required></textarea>
                 <p class="report-error-text" id="error-details"></p>
               </div>
@@ -77,8 +78,8 @@
             <div class="m5"><div class="w">
               <div class="setting-item">
                 <label for="report-expected">
-                  <span data-translate="report-expected-label"></span>
-                  <span class="report-optional" data-translate="report-optional"></span>
+                  <span data-translate="report-expected-label">Expected Behavior</span>
+                  <span class="report-optional" data-translate="report-optional">(Optional)</span>
                 </label>
                 <textarea id="report-expected" class="report-textarea" rows="3"></textarea>
               </div>
@@ -87,10 +88,11 @@
             <!-- Page where issue occurred -->
             <div class="m5"><div class="w">
               <div class="setting-item">
-                <label for="report-page" data-translate="report-page-label"></label>
+                <label for="report-page" data-translate="report-page-label">Page Where Issue Occurred</label>
                 <select id="report-page" class="setting-item select" required>
-                  <option value="" disabled selected data-translate="report-select-placeholder"></option>
+                  <option value="" disabled selected data-translate="report-select-placeholder">Select a page…</option>
                 </select>
+                <label for="report-page-custom" id="label-report-page-custom" class="fv-sr-only" data-translate="report-page-custom-label">Specific Page or URL</label>
                 <input type="text" id="report-page-custom" class="report-textinput report-page-custom" autocomplete="off" />
                 <p class="report-error-text" id="error-page"></p>
               </div>
@@ -99,9 +101,9 @@
             <!-- Browser -->
             <div class="m5"><div class="w">
               <div class="setting-item">
-                <label for="report-browser" data-translate="report-browser-label"></label>
+                <label for="report-browser" data-translate="report-browser-label">Browser / Device</label>
                 <select id="report-browser" class="setting-item select">
-                  <option value="" disabled selected data-translate="report-select-placeholder"></option>
+                  <option value="" disabled selected data-translate="report-select-placeholder">Select a browser…</option>
                 </select>
               </div>
             </div></div>
@@ -110,8 +112,8 @@
             <div class="m5"><div class="w">
               <div class="setting-item">
                 <label for="report-email">
-                  <span data-translate="report-email-label"></span>
-                  <span class="report-optional" data-translate="report-optional"></span>
+                  <span data-translate="report-email-label">Your Email</span>
+                  <span class="report-optional" data-translate="report-optional">(Optional)</span>
                 </label>
                 <input type="email" id="report-email" class="report-textinput" autocomplete="email" />
               </div>
@@ -119,7 +121,7 @@
 
             <!-- Submit -->
             <div class="m5"><div class="w">
-              <button type="submit" class="report-submit" id="report-submit" data-translate="report-submit-btn"></button>
+              <button type="submit" class="report-submit" id="report-submit" data-translate="report-submit-btn">Submit Report</button>
             </div></div>
 
           </form>
@@ -184,235 +186,247 @@
       { value: 'Safari',           label: { en: 'Safari',           th: 'Safari' } },
       { value: 'Edge',             label: { en: 'Edge',             th: 'Edge' } },
       { value: 'Opera',            label: { en: 'Opera',            th: 'Opera' } },
+      { value: 'Brave',            label: { en: 'Brave',            th: 'Brave' } },
       { value: 'Samsung Internet', label: { en: 'Samsung Internet', th: 'Samsung Internet' } },
       { value: 'Other',            label: { en: 'Other',            th: '\u0E2D\u0E37\u0E48\u0E19\u0E46' } }
     ];
 
-    /* ── Placeholders ── */
-    var PLACEHOLDERS = {
+    /* ── UI Translations ── */
+    var UI_STRINGS = {
       en: {
-        details: 'Describe the issue you encountered...',
-        expected: 'What did you expect to happen?',
-        email: 'your@email.com',
-        pageCustom: '/path/to/page'
+        selectPlaceholder: '-- Select --',
+        customPagePlaceholder: 'Specify page name or URL...',
+        detailsPlaceholder: 'Describe the issue you encountered…',
+        expectedPlaceholder: 'What did you expect to happen?',
+        emailPlaceholder: 'you@example.com',
+        errCategory: 'Please select an issue category',
+        errDetails: 'Please describe the issue in detail',
+        errPage: 'Please select or specify the page',
+        submitBtn: 'Submit Report',
+        submitting: 'Submitting…',
+        successTitle: 'Report Sent',
+        successBody: 'Thank you! Your report has been submitted successfully.',
+        errorTitle: 'Submission Failed',
+        errorBody: 'Could not send report. Please check your connection and try again.'
       },
       th: {
-        details: '\u0E2D\u0E18\u0E34\u0E1A\u0E32\u0E22\u0E1B\u0E31\u0E0D\u0E2B\u0E32\u0E17\u0E35\u0E48\u0E1E\u0E1A...',
-        expected: '\u0E04\u0E38\u0E13\u0E04\u0E32\u0E14\u0E2B\u0E27\u0E31\u0E07\u0E43\u0E2B\u0E49\u0E40\u0E01\u0E34\u0E14\u0E2D\u0E30\u0E44\u0E23\u0E02\u0E36\u0E49\u0E19?',
-        email: 'your@email.com',
-        pageCustom: '/path/to/page'
+        selectPlaceholder: '-- \u0E40\u0E25\u0E37\u0E2D\u0E01 --',
+        customPagePlaceholder: '\u0E23\u0E30\u0E1A\u0E38\u0E0A\u0E37\u0E48\u0E2D\u0E2B\u0E19\u0E49\u0E32\u0E2B\u0E23\u0E37\u0E2D URL...',
+        detailsPlaceholder: '\u0E2D\u0E18\u0E34\u0E1A\u0E32\u0E22\u0E1B\u0E31\u0E0D\u0E2B\u0E32\u0E17\u0E35\u0E48\u0E1E\u0E1A…',
+        expectedPlaceholder: '\u0E2A\u0E34\u0E48\u0E07\u0E17\u0E35\u0E48\u0E04\u0E22\u0E04\u0E32\u0E14\u0E2B\u0E27\u0E31\u0E07\u0E43\u0E2B\u0E49\u0E40\u0E01\u0E34\u0E14\u0E02\u0E36\u0E49\u0E19?',
+        emailPlaceholder: 'you@example.com',
+        errCategory: '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E1B\u0E23\u0E30\u0E40\u0E20\u0E17\u0E1B\u0E31\u0E0D\u0E2B\u0E32',
+        errDetails: '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E2D\u0E18\u0E34\u0E1A\u0E32\u0E22\u0E1B\u0E31\u0E0D\u0E2B\u0E32',
+        errPage: '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E2B\u0E23\u0E37\u0E2D\u0E23\u0E30\u0E1A\u0E38\u0E2B\u0E19\u0E49\u0E32',
+        submitBtn: '\u0E2A\u0E48\u0E07\u0E23\u0E32\u0E22\u0E07\u0E32\u0E19',
+        submitting: '\u0E01\u0E33\u0E25\u0E31\u0E07\u0E2A\u0E48\u0E07…',
+        successTitle: '\u0E2A\u0E48\u0E07\u0E23\u0E32\u0E22\u0E07\u0E32\u0E19\u0E41\u0E25\u0E49\u0E27',
+        successBody: '\u0E02\u0E2D\u0E1A\u0E04\u0E38\u0E13! \u0E23\u0E32\u0E22\u0E07\u0E32\u0E19\u0E02\u0E2D\u0E07\u0E04\u0E38\u0E13\u0E16\u0E39\u0E01\u0E2A\u0E48\u0E07\u0E40\u0E23\u0E35\u0E22\u0E1A\u0E23\u0E49\u0E2D\u0E22\u0E41\u0E25\u0E49\u0E27',
+        errorTitle: '\u0E2A\u0E48\u0E07\u0E44\u0E21\u0E48\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08',
+        errorBody: '\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E2A\u0E48\u0E07\u0E23\u0E32\u0E22\u0E07\u0E32\u0E19\u0E44\u0E14\u0E49 \u0E01\u0E23\u0E38\u0E13\u0E32\u0E15\u0E23\u0E27\u0E08\u0E2A\u0E2D\u0E1A\u0E01\u0E32\u0E23\u0E40\u0E00\u0E37\u0E48\u0E2D\u0E21\u0E15\u0E48\u0E2D\u0E41\u0E25\u0E49\u0E27\u0E25\u0E2D\u0E07\u0E43\u0E2B\u0E21\u0E48'
       }
     };
 
     /* ══════════════════════════════════════════════
-       STATE
+       STATE & HELPERS
        ══════════════════════════════════════════════ */
     var currentLang = 'en';
     var currentVersion = VERSION_FALLBACK;
 
-    /* ══════════════════════════════════════════════
-       DETECTION
-       ══════════════════════════════════════════════ */
-
-    function detectBrowser() {
-      var ua = navigator.userAgent;
-      if (/Edg\//i.test(ua)) return 'Edge';
-      if (/OPR\/|Opera/i.test(ua)) return 'Opera';
-      if (/SamsungBrowser/i.test(ua)) return 'Samsung Internet';
-      if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) return 'Chrome';
-      if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) return 'Safari';
-      if (/Firefox/i.test(ua)) return 'Firefox';
-      return 'Other';
-    }
-
-    function detectDevice() {
-      var ua = navigator.userAgent;
-      if (/Android/i.test(ua) && /Mobile/i.test(ua)) return 'Android';
-      if (/iPhone/i.test(ua)) return 'iPhone';
-      if (/iPad/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1)) return 'iPad';
-      if (/Android/i.test(ua)) return 'Android';
-      if (/Windows/i.test(ua)) return 'Windows';
-      if (/Macintosh/i.test(ua)) return 'macOS';
-      if (/Linux/i.test(ua)) return 'Linux';
-      return 'Other';
+    function getTranslations() {
+      return UI_STRINGS[currentLang] || UI_STRINGS.en;
     }
 
     function getLangLabel() {
-      return (currentLang === 'th') ? '\u0E44\u0E17\u0E22' : 'English';
+      return currentLang === 'th' ? 'th' : 'en';
+    }
+
+    /* Detect device type */
+    function detectDevice() {
+      var ua = navigator.userAgent;
+      if (/eReader|Kindle|Kobo|Book/i.test(ua)) return 'E-Reader';
+      if (/Mobile|Android|iP(hone|od)/i.test(ua)) return 'Mobile';
+      if (/Tablet|iPad/i.test(ua)) return 'Tablet';
+      return 'Desktop';
+    }
+
+    /* Fetch current app version */
+    async function fetchVersion() {
+      try {
+        var res = await fetch('/assets/json/version.json');
+        if (res.ok) {
+          var data = await res.json();
+          if (data.version) currentVersion = data.version;
+        }
+      } catch (_) { /* use fallback */ }
     }
 
     /* ══════════════════════════════════════════════
-       VERSION FETCH
+       POPULATE DROPDOWNS
        ══════════════════════════════════════════════ */
 
-    function fetchVersion() {
-      var lang = window.FvLang ? window.FvLang.lang : 'en';
-      return fetch('/assets/md/' + lang + '/current.md')
-        .then(function(r) { return r.ok ? r.text() : ''; })
-        .then(function(text) {
-          var m = text.match(/version:\s*(.+)/);
-          if (m) currentVersion = m[1].trim();
-        })
-        .catch(function() {});
-    }
+    function populateSelect(selectId, items, placeholderText) {
+      var sel = document.getElementById(selectId);
+      if (!sel) return;
+      var curVal = sel.value;
 
-    /* ══════════════════════════════════════════════
-       DROPDOWN POPULATION
-       ══════════════════════════════════════════════ */
+      sel.innerHTML = '';
 
-    function populateSelect(selectEl, items, selectedValue) {
-      // Remove all options except the first (placeholder)
-      while (selectEl.options.length > 1) {
-        selectEl.remove(1);
-      }
+      /* Placeholder option */
+      var opt0 = document.createElement('option');
+      opt0.value = '';
+      opt0.disabled = true;
+      opt0.selected = !curVal;
+      opt0.textContent = placeholderText;
+      sel.appendChild(opt0);
+
       items.forEach(function(item) {
         var opt = document.createElement('option');
         opt.value = item.value;
-        opt.textContent = item.label[currentLang] || item.label.en || item.value;
-        selectEl.appendChild(opt);
+        opt.textContent = typeof item.label === 'object'
+          ? (item.label[currentLang] || item.label.en)
+          : item.label;
+        if (item.value === curVal) opt.selected = true;
+        sel.appendChild(opt);
       });
-      if (selectedValue && selectEl.querySelector('option[value="' + selectedValue + '"]')) {
-        selectEl.value = selectedValue;
-      } else {
-        selectEl.selectedIndex = 0;
-      }
     }
 
     function updateDropdowns() {
-      var detectedBrowser = detectBrowser();
-      populateSelect(document.getElementById('report-category'), CATEGORIES);
-      populateSelect(document.getElementById('report-page'), PAGES);
-      populateSelect(document.getElementById('report-browser'), BROWSERS, detectedBrowser);
-      updatePlaceholders();
-      handlePageSelect();
-    }
+      var t = getTranslations();
 
-    function updatePlaceholders() {
-      var ph = PLACEHOLDERS[currentLang] || PLACEHOLDERS.en;
-      document.getElementById('report-details').placeholder = ph.details;
-      document.getElementById('report-expected').placeholder = ph.expected;
-      document.getElementById('report-email').placeholder = ph.email;
-      document.getElementById('report-page-custom').placeholder = ph.pageCustom;
+      populateSelect('report-category', CATEGORIES, t.selectPlaceholder);
+      populateSelect('report-page', PAGES, t.selectPlaceholder);
+      populateSelect('report-browser', BROWSERS, t.selectPlaceholder);
+
+      /* Placeholders */
+      document.getElementById('report-details').placeholder = t.detailsPlaceholder;
+      document.getElementById('report-expected').placeholder = t.expectedPlaceholder;
+      document.getElementById('report-email').placeholder = t.emailPlaceholder;
+      document.getElementById('report-page-custom').placeholder = t.customPagePlaceholder;
+
+      /* Submit button label */
+      var btn = document.getElementById('report-submit');
+      if (!btn.disabled) {
+        btn.textContent = t.submitBtn;
+      }
     }
 
     /* ══════════════════════════════════════════════
-       PAGE SELECT (Other -> show text input)
+       PAGE CUSTOM FIELD TOGGLE
        ══════════════════════════════════════════════ */
 
     function handlePageSelect() {
       var sel = document.getElementById('report-page');
-      var custom = document.getElementById('report-page-custom');
+      var customInput = document.getElementById('report-page-custom');
       if (sel.value === '__other__') {
-        custom.classList.add('visible');
-        custom.required = true;
-        custom.focus();
+        customInput.classList.add('visible');
+        customInput.required = true;
+        customInput.focus();
       } else {
-        custom.classList.remove('visible');
-        custom.required = false;
-        custom.value = '';
+        customInput.classList.remove('visible');
+        customInput.required = false;
+        customInput.value = '';
       }
+      clearError('page');
     }
 
     /* ══════════════════════════════════════════════
        VALIDATION
        ══════════════════════════════════════════════ */
 
-    function clearErrors() {
-      document.querySelectorAll('.report-field-error').forEach(function(el) {
-        el.classList.remove('report-field-error');
-      });
-      document.querySelectorAll('.report-error-text').forEach(function(el) {
-        el.classList.remove('visible');
-        el.textContent = '';
-      });
+    function showError(fieldKey, message) {
+      var errEl = document.getElementById('error-' + fieldKey);
+      if (errEl) {
+        errEl.textContent = message;
+        errEl.classList.add('visible');
+      }
+
+      var fieldEl;
+      if (fieldKey === 'category') fieldEl = document.getElementById('report-category');
+      else if (fieldKey === 'details') fieldEl = document.getElementById('report-details');
+      else if (fieldKey === 'page') {
+        var pageSel = document.getElementById('report-page');
+        fieldEl = pageSel.value === '__other__'
+          ? document.getElementById('report-page-custom')
+          : pageSel;
+      }
+
+      if (fieldEl) fieldEl.classList.add('report-field-error');
     }
 
-    function showFieldError(fieldId, errorId, msg) {
-      var field = document.getElementById(fieldId);
-      var error = document.getElementById(errorId);
-      if (field) field.classList.add('report-field-error');
-      if (error) {
-        error.textContent = msg;
-        error.classList.add('visible');
+    function clearError(fieldKey) {
+      var errEl = document.getElementById('error-' + fieldKey);
+      if (errEl) {
+        errEl.textContent = '';
+        errEl.classList.remove('visible');
       }
+
+      var fieldEl;
+      if (fieldKey === 'category') fieldEl = document.getElementById('report-category');
+      else if (fieldKey === 'details') fieldEl = document.getElementById('report-details');
+      else if (fieldKey === 'page') {
+        document.getElementById('report-page').classList.remove('report-field-error');
+        document.getElementById('report-page-custom').classList.remove('report-field-error');
+        return;
+      }
+
+      if (fieldEl) fieldEl.classList.remove('report-field-error');
+    }
+
+    function clearAllErrors() {
+      ['category', 'details', 'page'].forEach(clearError);
     }
 
     function validateForm() {
-      clearErrors();
-      var valid = true;
+      clearAllErrors();
       var t = getTranslations();
+      var valid = true;
 
-      if (!document.getElementById('report-category').value) {
-        showFieldError('report-category', 'error-category', t.errorCategory);
+      var category = document.getElementById('report-category').value;
+      if (!category) {
+        showError('category', t.errCategory);
         valid = false;
       }
 
-      if (!document.getElementById('report-details').value.trim()) {
-        showFieldError('report-details', 'error-details', t.errorDetails);
+      var details = document.getElementById('report-details').value.trim();
+      if (!details) {
+        showError('details', t.errDetails);
         valid = false;
       }
 
-      var page = document.getElementById('report-page').value;
-      var pageCustom = document.getElementById('report-page-custom').value.trim();
-      if (!page) {
-        showFieldError('report-page', 'error-page', t.errorPage);
+      var pageSel = document.getElementById('report-page').value;
+      if (!pageSel) {
+        showError('page', t.errPage);
         valid = false;
-      } else if (page === '__other__' && !pageCustom) {
-        document.getElementById('report-page-custom').classList.add('report-field-error');
-        showFieldError('report-page-custom', 'error-page', t.errorPage);
-        valid = false;
+      } else if (pageSel === '__other__') {
+        var customVal = document.getElementById('report-page-custom').value.trim();
+        if (!customVal) {
+          showError('page', t.errPage);
+          valid = false;
+        }
+      }
+
+      if (!valid) {
+        var firstErr = document.querySelector('.report-field-error');
+        if (firstErr) firstErr.focus();
       }
 
       return valid;
     }
 
     /* ══════════════════════════════════════════════
-       TRANSLATIONS (inline for popup messages)
-       ══════════════════════════════════════════════ */
-
-    function getTranslations() {
-      var map = {
-        en: {
-          errorCategory: 'Please select an issue type.',
-          errorDetails: 'Please describe the problem.',
-          errorPage: 'Please select or specify the page.',
-          submitBtn: 'Submit Report',
-          submitting: 'Submitting...',
-          successTitle: '\u2705 Report Submitted',
-          successBody: 'Thank you for helping improve FanHoard.',
-          errorTitle: '\u26A0\uFE0F Submission Failed',
-          errorBody: 'Please try again later.'
-        },
-        th: {
-          errorCategory: '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E1B\u0E23\u0E30\u0E40\u0E20\u0E17\u0E1B\u0E31\u0E0D\u0E2B\u0E32',
-          errorDetails: '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E2D\u0E18\u0E34\u0E1A\u0E32\u0E22\u0E1B\u0E31\u0E0D\u0E2B\u0E32',
-          errorPage: '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E2B\u0E23\u0E37\u0E2D\u0E23\u0E30\u0E1A\u0E38\u0E2B\u0E19\u0E49\u0E32',
-          submitBtn: '\u0E2A\u0E48\u0E07\u0E23\u0E32\u0E22\u0E07\u0E32\u0E19',
-          submitting: '\u0E01\u0E33\u0E25\u0E31\u0E07\u0E2A\u0E48\u0E07...',
-          successTitle: '\u2705 \u0E2A\u0E48\u0E07\u0E23\u0E32\u0E22\u0E07\u0E32\u0E19\u0E41\u0E25\u0E49\u0E27',
-          successBody: '\u0E02\u0E2D\u0E1A\u0E04\u0E38\u0E13\u0E17\u0E35\u0E48\u0E0A\u0E48\u0E27\u0E22\u0E1E\u0E31\u0E12\u0E19\u0E32 FanHoard \u0E43\u0E2B\u0E49\u0E14\u0E35\u0E02\u0E36\u0E49\u0E19',
-          errorTitle: '\u26A0\uFE0F \u0E2A\u0E48\u0E07\u0E44\u0E21\u0E48\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08',
-          errorBody: '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E25\u0E2D\u0E07\u0E2D\u0E35\u0E01\u0E04\u0E23\u0E31\u0E49\u0E07\u0E20\u0E32\u0E22\u0E2B\u0E25\u0E31\u0E07'
-        }
-      };
-      return map[currentLang] || map.en;
-    }
-
-    /* ══════════════════════════════════════════════
-       FORM SUBMISSION
+       SUBMIT HANDLER
        ══════════════════════════════════════════════ */
 
     function getFormData() {
-      var pageSelect = document.getElementById('report-page').value;
-      var pageCustom = document.getElementById('report-page-custom').value.trim();
-      var page = (pageSelect === '__other__') ? pageCustom : pageSelect;
+      var pageSel = document.getElementById('report-page').value;
+      var page = pageSel === '__other__'
+        ? document.getElementById('report-page-custom').value.trim()
+        : pageSel;
 
       var categoryVal = document.getElementById('report-category').value;
-      var categoryOption = CATEGORIES.find(function(c) { return c.value === categoryVal; });
-      var categoryLabel = categoryOption ? (categoryOption.label[currentLang] || categoryOption.label.en) : categoryVal;
 
       return {
-        category: categoryLabel,
         categoryKey: categoryVal,
         page: page,
         language: getLangLabel(),
@@ -453,7 +467,7 @@
       var t = getTranslations();
       setSubmitLoading(true);
       if (window.announceToScreenReader) {
-        window.announceToScreenReader(currentLang === "th" ? "กำลังส่งรายงาน..." : "Submitting report...", "polite");
+        window.announceToScreenReader(currentLang === "th" ? "กำลังส่งรายงาน…" : "Submitting report…", "polite");
       }
 
       var data = getFormData();
@@ -519,8 +533,6 @@
       }
 
       fetchVersion();
-
-      document.body.style.opacity = '1';
     }
 
     if (document.readyState === 'loading') {
