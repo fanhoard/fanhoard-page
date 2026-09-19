@@ -1,7 +1,7 @@
 /* ==========================================================================
-   FANHOARD LAYOUT STYLES
+   FANHOARD LAYOUT STYLES v2.1 (Phase 1 Native Foundation)
    assets/css/layout.css
-   Layer 3: Containers, grid utilities, landmarks, and navigation/shell wrappers.
+   Layer 3: Containers, grid utilities, landmarks, and shell wrappers.
    ========================================================================== */
 
 /* ── Global Scroll Alignment Rules ── */
@@ -111,40 +111,46 @@ main {
   }
 }
 
-/* ── Grid Utilities ── */
+/* ── Row-Based Grid Primitives ── */
 .grid {
   display: grid;
   gap: var(--space-6, 24px);
+  align-items: stretch;
 }
 
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-4, 16px);
+  align-items: stretch;
 }
 
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-4, 16px);
+  align-items: stretch;
 }
 
 .grid-4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--space-4, 16px);
+  align-items: stretch;
 }
 
 .grid-auto-fit {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: var(--space-4, 16px);
+  align-items: stretch;
 }
 
 .grid-aside {
   display: grid;
   grid-template-columns: 1fr 300px;
   gap: var(--space-6, 24px);
+  align-items: stretch;
 }
 
 @media (min-width: 768px) {
@@ -153,24 +159,20 @@ main {
   }
 }
 
-@media (max-width: 1024px) {
-  .grid-4 {
+@media (max-width: 1023px) {
+  .grid-4,
+  .grid-3 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 768px) {
-  .grid-2,
-  .grid-3 {
+@media (max-width: 767px) {
+  .grid-4,
+  .grid-3,
+  .grid-2 {
     grid-template-columns: 1fr;
   }
   .grid-aside {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .grid-4 {
     grid-template-columns: 1fr;
   }
 }
@@ -194,19 +196,22 @@ main {
   gap: var(--space-3, 12px);
 }
 
-/* ── Material Component Primitives ── */
-/* 1. Material Card (.fv-card) */
+/* ── Native Component Primitives ── */
+
+/* 1. Single-Layer Card Surface (.fv-card) */
 .fv-card {
   background-color: var(--surface-card, #ffffff);
   border: 1px solid var(--border-subtle, #e2e8f0);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--radius-xl, 16px);
   padding: var(--space-6, 24px);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--duration-fast, 150ms) var(--ease-out),
-              border-color var(--duration-fast, 150ms) var(--ease-out);
+  box-shadow: none; /* Zero default shadow on rest surface */
+  transition: transform var(--duration-fast, 150ms) var(--ease-out, ease-out),
+              box-shadow var(--duration-fast, 150ms) var(--ease-out, ease-out),
+              border-color var(--duration-fast, 150ms) var(--ease-out, ease-out);
 }
 
 .fv-card:hover {
+  border-color: transparent;
   box-shadow: var(--shadow-md);
 }
 
@@ -239,8 +244,15 @@ main {
 
 /* 2. Section Scaffold (.fv-section) */
 .fv-section {
-  padding-top: var(--space-8, 32px);
-  padding-bottom: var(--space-8, 32px);
+  padding-top: var(--space-10, 40px);
+  padding-bottom: var(--space-10, 40px);
+}
+
+@media (max-width: 767px) {
+  .fv-section {
+    padding-top: var(--space-6, 24px);
+    padding-bottom: var(--space-6, 24px);
+  }
 }
 
 .fv-section__header {
@@ -315,6 +327,35 @@ main {
   margin-left: auto;
   margin-right: auto;
   margin-bottom: var(--space-6, 24px);
+}
+
+/* ── Ergonomic Touch Targets & Focus Floor ── */
+.btn,
+.nav-item,
+.search-clear-btn,
+.carousel-arrow,
+.fv-touch-target,
+.button-content,
+.ca-icon-wrap,
+.view-all-icon {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-primary, #0d9488);
+  outline-offset: 2px;
+}
+
+/* ── Policy Rules & Chrome Ban Enforcement ── */
+h1, h2, h3, h4, h5, h6, .page-title, .fv-section__title, .fv-hero__title {
+  -webkit-text-fill-color: initial;
+  background: none;
+  color: var(--text-main);
+}
+
+.side-stripe, [class*="stripe-"] {
+  border-left: none !important;
 }
 
 /* ── Skip Link Utility (WCAG 2.4.1) ── */
