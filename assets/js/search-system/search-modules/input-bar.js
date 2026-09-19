@@ -104,9 +104,10 @@
           display               : 'none',   // shown via sync()
           alignItems            : 'center',
           justifyContent        : 'center',
-          width                 : '20px',
-          height                : '20px',
-          minWidth              : '20px',
+          width                 : '44px',
+          height                : '44px',
+          minWidth              : '44px',
+          minHeight             : '44px',
           borderRadius          : '50%',
           background            : 'rgba(0,0,0,.10)',
           border                : 'none',

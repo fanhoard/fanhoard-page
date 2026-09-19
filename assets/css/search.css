@@ -43,7 +43,10 @@ body {
 }
 
 .search-header {
-  padding: 14px 0 12px;
+  padding: var(--space-2, 8px) 0;
+  min-height: 56px;
+  max-height: 64px;
+  box-sizing: border-box;
   background: var(--surface-card, rgba(255, 255, 255, 0.98));
   border-bottom: 1px solid var(--border-subtle, rgba(14, 95, 153, 0.07));
   box-shadow: 0 1px 0 rgba(14, 95, 153, 0.05), 0 4px 16px rgba(6, 20, 24, 0.05);
@@ -149,17 +152,24 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
-  border-radius: 50%;
-  background: rgba(14, 95, 153, 0.10);
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-full, 999px);
+  background: transparent;
   border: none;
   cursor: pointer;
   touch-action: manipulation;
   color: var(--text-muted, #6d8590);
   padding: 0;
   transition: background-color var(--duration-fast, 150ms) ease, opacity var(--duration-fast, 150ms) ease;
+}
+
+#search-clear-btn:hover,
+#search-clear-btn:focus-visible {
+  background: var(--surface-hover, rgba(13, 148, 136, 0.08));
+  color: var(--color-brand-primary, #0d9488);
 }
 
 #search-clear-btn:active {
@@ -210,10 +220,11 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding-block: 1.0em;
-  padding-inline: 0.9em;
+  min-height: 44px;
+  padding-block: var(--space-2, 8px);
+  padding-inline: var(--space-3, 12px);
   border-radius: var(--radius-full, 999px);
-  font-size: 0.9rem;
+  font-size: var(--step--1, 0.88rem);
   line-height: 1;
   font-family: inherit;
   background: transparent;
@@ -241,9 +252,10 @@ body {
 }
 
 .filter-pill--cat {
-  padding-block: 0.70em;
-  padding-inline: 0.90em;
-  font-size: 0.88rem;
+  min-height: 44px;
+  padding-block: var(--space-2, 8px);
+  padding-inline: var(--space-3, 12px);
+  font-size: var(--step--1, 0.88rem);
   font-weight: 500;
   background: transparent;
   border: 1px solid var(--border-subtle, rgba(14, 95, 153, 0.09));
@@ -285,18 +297,23 @@ body {
 /* ── Search Cards ── */
 .sc {
   display: flex;
-  gap: 16px;
+  gap: var(--space-4, 16px);
   align-items: flex-start;
-  padding: 18px 20px;
-  border-radius: var(--radius-lg, 20px);
-  background: var(--surface-card, rgba(255, 255, 255, 0.97));
+  padding: var(--space-4, 16px);
+  border-radius: var(--radius-xl, 16px);
+  background: var(--surface-card, #ffffff);
   border: 1px solid var(--border-subtle, rgba(14, 95, 153, 0.07));
-  box-shadow: 0 1px 3px rgba(6, 20, 24, 0.04), 0 4px 16px rgba(6, 20, 24, 0.025);
+  box-shadow: none;
   position: relative;
-  margin-bottom: 10px;
+  margin-bottom: var(--space-3, 12px);
   touch-action: manipulation;
   transition: background-color var(--duration-fast, 150ms) ease, border-color var(--duration-fast, 150ms) ease, box-shadow var(--duration-fast, 150ms) ease;
   cursor: pointer;
+}
+
+.sc:hover {
+  border-color: transparent;
+  box-shadow: var(--shadow-md);
 }
 
 .sc:active {
@@ -734,7 +751,7 @@ body {
     margin: 10px auto 0;
   }
   .search-header {
-    padding: 10px 0 9px;
+    padding: var(--space-2, 8px) 0;
   }
   #searchForm {
     padding: 0 12px;
@@ -795,7 +812,7 @@ body {
     margin: 8px auto 0;
   }
   .search-header {
-    padding: 8px 0 7px;
+    padding: var(--space-2, 8px) 0;
   }
   #searchForm {
     padding: 0 10px;
