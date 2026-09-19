@@ -4,9 +4,9 @@
   "private": true,
   "description": "FanHoard Emoji & Symbols Hub — static build system",
   "scripts": {
-    "build": "node scripts/build.js",
-    "build:dry": "node scripts/build.js --dry-run",
-    "build:verbose": "node scripts/build.js --verbose",
+    "build": "vite build && tsx src/build/ssg.ts",
+    "build:dry": "tsx src/build/ssg.ts --dry-run",
+    "build:verbose": "tsx src/build/ssg.ts --verbose",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -18,9 +18,9 @@
     "validate:ci": "node scripts/validate-release.js --ci --allow-generated",
     "hooks:install": "bash scripts/hooks/install.sh",
     "prepare": "bash scripts/hooks/install.sh || true",
-    "dev": "echo 'Development mode: open index.html / home/index.html directly in browser (no build required)'",
+    "dev": "vite",
     "clean": "node -e \"const fs=require('fs'); if(fs.existsSync('dist')) fs.rmSync('dist',{recursive:true,force:true}); console.log('dist/ cleaned');\"",
-    "generate-sitemap": "node scripts/generate-sitemap.js",
+    "generate-sitemap": "tsx src/build/sitemap.ts",
     "postbuild": "npm run generate-sitemap && node -e \"const fs=require('fs'); const src='sitemap.xml'; const dest='dist/sitemap.xml'; try{ fs.mkdirSync('dist',{ recursive:true }); fs.copyFileSync(src, dest); console.log('sitemap copied to', dest); } catch(e) { console.warn('sitemap copy failed:', e && e.message ? e.message : e); }\""
   },
   "dependencies": {
@@ -38,8 +38,10 @@
     "eslint": "^10.11.0",
     "happy-dom": "^20.14.5",
     "prettier": "^3.9.8",
+    "terser": "^5.51.2",
     "tsx": "^4.23.13",
     "typescript": "^6.0.3",
+    "vite": "^8.3.0",
     "vitest": "^4.1.11"
   }
 }
