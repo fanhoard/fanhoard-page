@@ -21,7 +21,9 @@
     "dev": "vite",
     "clean": "node -e \"const fs=require('fs'); if(fs.existsSync('dist')) fs.rmSync('dist',{recursive:true,force:true}); console.log('dist/ cleaned');\"",
     "generate-sitemap": "tsx src/build/sitemap.ts",
-    "postbuild": "npm run generate-sitemap && node -e \"const fs=require('fs'); const src='sitemap.xml'; const dest='dist/sitemap.xml'; try{ fs.mkdirSync('dist',{ recursive:true }); fs.copyFileSync(src, dest); console.log('sitemap copied to', dest); } catch(e) { console.warn('sitemap copy failed:', e && e.message ? e.message : e); }\""
+    "postbuild": "npm run generate-sitemap && node -e \"const fs=require('fs'); const src='sitemap.xml'; const dest='dist/sitemap.xml'; try{ fs.mkdirSync('dist',{ recursive:true }); fs.copyFileSync(src, dest); console.log('sitemap copied to', dest); } catch(e) { console.warn('sitemap copy failed:', e && e.message ? e.message : e); }\"",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "cheerio": "^1.0.0",
@@ -32,9 +34,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^26.6.2",
     "@typescript-eslint/eslint-plugin": "^8.70.0",
     "@typescript-eslint/parser": "^8.70.0",
+    "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^10.11.0",
     "happy-dom": "^20.14.5",
     "prettier": "^3.9.8",
