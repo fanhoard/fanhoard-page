@@ -100,8 +100,25 @@ section.con {
 
 section.con p {
   font-size: var(--step-0);
-  line-height: 1.5;
+  line-height: 1.6;
   color: var(--text-main);
+  margin-bottom: var(--space-3);
+}
+
+section.con .fv-section-label {
+  font-family: var(--font-heading, 'FoglihtenNo07calt', Georgia, serif);
+  font-size: var(--step-2);
+  font-weight: var(--font-bold);
+  color: var(--text-main);
+  margin-bottom: var(--space-3);
+  display: block;
+}
+
+section.con .fv-section-desc {
+  font-size: var(--step-0);
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: 0;
 }
 
 section.con span {
