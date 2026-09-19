@@ -46,57 +46,156 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8233915433564101" crossorigin="anonymous"></script>
 
   <style>
-    /* 404 page styles — token-based Persuade mode */
-    * { box-sizing:border-box; }
-    body { margin:0; font-family:var(--font-sans, system-ui, sans-serif); background:var(--surface-base, #ffffff); color:var(--text-main, #0f172a); }
+    /* 404 landing shell styles — token-based native elevation & 4/8px spacing */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+      background: var(--surface-base, #ffffff);
+      color: var(--text-main, #0f172a);
+    }
 
-    .fv-app { min-height:100svh; display:flex; align-items:center; justify-content:center; text-align:center; padding:var(--space-7, 28px); }
-    .wrap { max-width:640px; width:100%; }
+    .fv-app {
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--space-8, 32px) var(--space-4, 16px);
+    }
+
+    .wrap {
+      max-width: 640px;
+      width: 100%;
+    }
 
     .brand-name {
-      font-family:'FoglihtenNo07calt', Georgia, serif;
+      font-family: 'FoglihtenNo07calt', Georgia, serif;
     }
 
     .badge {
-      display:inline-flex; align-items:center; justify-content:center; gap:0.35em;
-      padding:var(--space-1, 4px) var(--space-3, 12px); border-radius:var(--radius-full, 9999px);
-      background:var(--surface-hover, #f1f5f9); color:var(--color-brand-primary, #0d9488);
-      border:1px solid rgba(13, 148, 136, 0.25);
-      font-size:var(--step--1, 13px); font-weight:var(--font-semibold, 600); letter-spacing:0.04em; margin-bottom:var(--space-4, 18px);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-1, 4px);
+      padding: var(--space-1, 4px) var(--space-3, 12px);
+      border-radius: var(--radius-full, 9999px);
+      background: var(--surface-hover, #f1f5f9);
+      color: var(--color-brand-primary, #0d9488);
+      border: 1px solid var(--border-subtle, #cbd5e1);
+      font-size: var(--step--1, 13px);
+      font-weight: var(--font-semibold, 600);
+      letter-spacing: 0.04em;
+      margin-bottom: var(--space-4, 16px);
+      min-height: 32px;
     }
 
-    /* h1 visual 404 heading */
+    /* Visual 404 heading */
     h1 {
-      font-family:var(--font-sans, system-ui, sans-serif);
-      font-size:clamp(3.5rem, 2.5rem + 5vw, 4.25rem); margin:0 0 var(--space-2, 10px); line-height:1;
-      color:var(--color-brand-primary, #0d9488);
-      letter-spacing:-0.04em;
+      font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+      font-size: clamp(3.5rem, 2.5rem + 5vw, 4.25rem);
+      margin: 0 0 var(--space-2, 8px);
+      line-height: 1;
+      color: var(--color-brand-primary, #0d9488);
+      letter-spacing: -0.04em;
     }
 
-    h2 { font-family:var(--font-sans, system-ui, sans-serif); margin:0 0 var(--space-3, 14px); font-size:var(--step-2, 24px); font-weight:var(--font-bold, 700); letter-spacing:-0.02em; color:var(--text-main, #0f172a); }
-    p  { margin:0 auto var(--space-6, 26px); color:var(--text-muted, #64748b); font-size:var(--step-0, 16px); line-height:var(--lh-normal, 1.65); max-width:520px; }
+    h2 {
+      font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+      margin: 0 0 var(--space-3, 12px);
+      font-size: var(--step-2, 24px);
+      font-weight: var(--font-bold, 700);
+      letter-spacing: -0.02em;
+      color: var(--text-main, #0f172a);
+    }
 
-    .actions { display:flex; gap:var(--space-3, 14px); justify-content:center; flex-wrap:wrap; }
+    p {
+      margin: 0 auto var(--space-6, 24px);
+      color: var(--text-muted, #64748b);
+      font-size: var(--step-0, 16px);
+      line-height: var(--lh-normal, 1.65);
+      max-width: 520px;
+    }
+
+    .actions {
+      display: flex;
+      gap: var(--space-4, 16px);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
 
     .btn-primary, .btn-secondary {
-      display:inline-flex; align-items:center; justify-content:center; gap:0.45em;
-      -webkit-tap-highlight-color:transparent; font-family:var(--font-sans, system-ui, sans-serif);
-      font-weight:var(--font-semibold, 600); font-size:var(--step-0, 0.95rem); letter-spacing:0.015em;
-      padding:var(--space-3, 12px) var(--space-6, 24px); border-radius:var(--radius-full, 9999px);
-      text-decoration:none; line-height:1.5; vertical-align:middle;
-      cursor:pointer; user-select:none;
-      transition:background-color var(--duration-fast, 150ms) var(--ease-out, ease-out), color var(--duration-fast, 150ms) var(--ease-out, ease-out), border-color var(--duration-fast, 150ms) var(--ease-out, ease-out);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2, 8px);
+      -webkit-tap-highlight-color: transparent;
+      font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+      font-weight: var(--font-semibold, 600);
+      font-size: var(--step-0, 16px);
+      letter-spacing: 0.015em;
+      padding: var(--space-3, 12px) var(--space-6, 24px);
+      border-radius: var(--radius-full, 9999px);
+      text-decoration: none;
+      line-height: 1.5;
+      vertical-align: middle;
+      cursor: pointer;
+      user-select: none;
+      min-height: 44px;
+      min-width: 44px;
+      box-shadow: none;
+      transition: background-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
+                  color var(--duration-fast, 150ms) var(--ease-out, ease-out),
+                  border-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
+                  box-shadow var(--duration-fast, 150ms) var(--ease-out, ease-out);
     }
-    .btn-primary  { background:var(--color-brand-primary, #0d9488); color:#ffffff; border:1px solid transparent; }
-    .btn-primary:hover  { background:var(--color-brand-hover, #0f766e); color:#ffffff; }
-    .btn-secondary { background:var(--surface-card, #ffffff); color:var(--text-main, #0f172a); border:1px solid var(--border-subtle, #cbd5e1); }
-    .btn-secondary:hover { background:var(--surface-hover, #f1f5f9); border-color:var(--border-strong, #94a3b8); }
 
-    .note { margin-top:var(--space-5, 22px); font-size:var(--step--1, 13px); color:var(--text-muted, #64748b); }
+    .btn-primary {
+      background: var(--color-brand-primary, #0d9488);
+      color: #ffffff;
+      border: 1px solid transparent;
+    }
 
-    @media (max-width:480px) {
-      h1{font-size:3.25rem;} h2{font-size:1.3rem;} p{font-size:0.95rem;}
-      .btn-primary, .btn-secondary{font-size:0.92rem;padding:var(--space-3, 10px) var(--space-5, 20px);}
+    .btn-primary:hover {
+      background: var(--color-brand-hover, #0f766e);
+      color: #ffffff;
+      box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.08));
+    }
+
+    .btn-secondary {
+      background: var(--surface-card, #ffffff);
+      color: var(--text-main, #0f172a);
+      border: 1px solid var(--border-subtle, #cbd5e1);
+      border-radius: var(--radius-xl, 16px);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-hover, #f1f5f9);
+      border-color: var(--border-strong, #94a3b8);
+      box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.08));
+    }
+
+    .fv-hero {
+      padding: var(--space-12, 48px) var(--space-4, 16px);
+    }
+
+    .note {
+      margin-top: var(--space-5, 20px);
+      font-size: var(--step--1, 13px);
+      color: var(--text-muted, #64748b);
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 3.25rem; }
+      h2 { font-size: 1.3rem; }
+      p { font-size: 0.95rem; }
+      .fv-hero { padding: var(--space-8, 32px) var(--space-3, 12px); }
+      .btn-primary, .btn-secondary {
+        font-size: var(--step-0, 16px);
+        padding: var(--space-3, 12px) var(--space-5, 20px);
+        min-height: 44px;
+        width: 100%;
+      }
     }
   </style>
 </head>
