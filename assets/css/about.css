@@ -95,7 +95,7 @@ p.content a {
   will-change: color, transform;
 }
 p.content a:hover { color:var(--fv-brand-teal); transform:translateY(-2px); border-color:rgba(19,180,127,0.14); }
-p.content a:focus { outline:none; box-shadow:var(--fv-shadow-focus); border-radius:10px; }
+p.content a:focus-visible { outline: 3px solid var(--fv-focus-ring, #0a9273); outline-offset: 2px; box-shadow:var(--fv-shadow-focus); border-radius:4px; }
 
 strong { color:var(--fv-brand-teal); font-weight:var(--fv-font-extrabold); }
 

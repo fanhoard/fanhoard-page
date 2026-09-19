@@ -113,7 +113,6 @@
           cursor                : 'pointer',
           color                 : 'var(--tx-lo,#637a6e)',
           padding               : '0',
-          outline               : 'none',
           WebkitTapHighlightColor: 'transparent',
         });
 

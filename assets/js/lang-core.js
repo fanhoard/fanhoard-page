@@ -209,6 +209,10 @@
           bubbles: false,
           cancelable: false
         }));
+        if (typeof window.announceToScreenReader === "function") {
+          var msg = newLang === "th" ? "เปลี่ยนภาษาเป็นภาษาไทยแล้ว" : "Language changed to English";
+          window.announceToScreenReader(msg, "polite");
+        }
       } catch (e) {}
     },
     
@@ -462,6 +466,10 @@
           bubbles: false,
           cancelable: false
         }));
+        if (typeof window.announceToScreenReader === "function") {
+          var msg = newLang === "th" ? "เปลี่ยนภาษาเป็นภาษาไทยแล้ว" : "Language changed to English";
+          window.announceToScreenReader(msg, "polite");
+        }
       } catch (e) {}
     },
     

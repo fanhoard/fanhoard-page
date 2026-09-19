@@ -348,6 +348,10 @@
         if (form) {
           Handlers.formSubmit = e => {
             e.preventDefault();
+            const lang = M.LanguageService ? M.LanguageService.getLang() : "en";
+            if (typeof window.announceToScreenReader === "function") {
+              window.announceToScreenReader(lang === "th" ? "กำลังค้นหา..." : "Searching...", "polite");
+            }
             SearchService.doSearch();
             UIService.closeKB();
           };

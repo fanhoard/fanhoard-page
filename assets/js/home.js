@@ -141,7 +141,7 @@ function injectStyles() {
       cursor: pointer; user-select: none; -webkit-user-select: none;
       touch-action: manipulation;
       opacity: 0; pointer-events: none;
-      transition: opacity 0.22s ease; outline: none;
+      transition: opacity 0.22s ease;
     }
     .carousel-arrow.visible { opacity: 1; pointer-events: auto; }
     .carousel-arrow--left {

@@ -25,13 +25,15 @@
   border: 1px solid var(--fp-border, var(--fv-border-default));
   border-radius: var(--fp-radius, var(--fv-radius-md));
   box-shadow: var(--fp-shadow, var(--fv-shadow-lg));
-  outline: none;
   -webkit-tap-highlight-color: transparent;
 }
 
-.fp-popup:focus-visible {
-  box-shadow: var(--fp-shadow, var(--fv-shadow-lg)),
-    var(--fv-shadow-focus);
+.fp-popup:focus-visible,
+.fp-close-btn:focus-visible,
+.fp-btn:focus-visible {
+  outline: 3px solid var(--fv-focus-ring, #0a9273);
+  outline-offset: 2px;
+  box-shadow: var(--fp-shadow, var(--fv-shadow-lg)), var(--fv-shadow-focus);
 }
 
 /* ── Inner container ────────────────────────────────────────────────────── */

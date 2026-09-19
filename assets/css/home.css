@@ -130,7 +130,6 @@ section.mn { margin-bottom: 3rem; margin-top: 2rem; }
   font-family: inherit;
   font-weight: var(--fv-font-bold);
   border: none;
-  outline: none;
   gap: 1em;
   font-size: 1em;
   padding: 1.9em 1.7em;
@@ -441,7 +440,7 @@ section.o:has(details[open]) { padding-bottom:2.1rem!important; }
   border: 1.4px solid #e6ecf7;
   box-shadow: inset 0 0 11px 2px #F7FAFF;
   position: relative; text-align:center; font-size:1.05em; gap:0.38rem;
-  outline: none; flex-shrink: 0; box-sizing: border-box;
+  flex-shrink: 0; box-sizing: border-box;
   word-break: break-word; overflow: visible;
   contain: paint;
 
@@ -547,4 +546,8 @@ section.o:has(details[open]) { padding-bottom:2.1rem!important; }
   text-transform: uppercase;
   color: var(--fv-brand-teal);
   margin: var(--fv-space-8) 0 var(--fv-space-3) var(--fv-space-3);
+}
+.button:focus-visible, .btn:focus-visible, .item-card:focus-visible {
+  outline: 3px solid var(--fv-focus-ring, #0a9273);
+  outline-offset: 2px;
 }

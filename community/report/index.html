@@ -451,6 +451,9 @@
 
       var t = getTranslations();
       setSubmitLoading(true);
+      if (window.announceToScreenReader) {
+        window.announceToScreenReader(currentLang === "th" ? "กำลังส่งรายงาน..." : "Submitting report...", "polite");
+      }
 
       var data = getFormData();
 
@@ -469,9 +472,15 @@
 
         document.getElementById('report-form').reset();
         updateDropdowns();
+        if (window.announceToScreenReader) {
+          window.announceToScreenReader(currentLang === "th" ? "ส่งรายงานสำเร็จเรียบร้อยแล้ว" : "Report submitted successfully.", "polite");
+        }
         showPopup(t.successTitle, t.successBody);
       } catch (err) {
         console.error('[report] Submit failed:', err);
+        if (window.announceToScreenReader) {
+          window.announceToScreenReader(currentLang === "th" ? "เกิดข้อผิดพลาดในการส่งรายงาน" : "Failed to submit report.", "assertive");
+        }
         showPopup(t.errorTitle, t.errorBody);
       } finally {
         setSubmitLoading(false);

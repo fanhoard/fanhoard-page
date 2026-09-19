@@ -62,7 +62,7 @@ section.con h1 { font-size:1.5em; }
   background-color: var(--fv-surface-page);
   color: var(--fv-text-primary);
   transition:all var(--fv-transition-fast);
-  outline:none; cursor:pointer; appearance:none;
+  cursor:pointer; appearance:none;
   -webkit-tap-highlight-color:transparent;
   display:flex; align-items:center; gap:0.5rem;
   background-position:right 0.75rem center;
@@ -152,3 +152,9 @@ section.con h1 { font-size:1.5em; }
 @media (min-width:1280px) { .settings{max-width:32rem;} #language-dropdown{width:60%;} }
 @media (min-width:1536px) { .settings{max-width:36rem;} #language-dropdown{width:50%;} }
 @media print { body{background:none;padding:0;} .settings{box-shadow:none;border:1px solid #000;} }
+.setting-item select:focus-visible,
+#language-button:focus-visible,
+.buttons:focus-visible {
+  outline: 3px solid var(--fv-focus-ring, #0a9273);
+  outline-offset: 2px;
+}

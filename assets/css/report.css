@@ -15,7 +15,6 @@
   color: var(--fv-text-primary);
   transition: border-color var(--fv-transition-fast),
     box-shadow var(--fv-transition-fast);
-  outline: none;
   resize: vertical;
   min-height: 80px;
   line-height: var(--fv-leading-normal);
@@ -43,7 +42,6 @@
   color: var(--fv-text-primary);
   transition: border-color var(--fv-transition-fast),
     box-shadow var(--fv-transition-fast);
-  outline: none;
   -webkit-appearance: none;
 }
 
@@ -126,4 +124,11 @@
 
 .report-page-custom.visible {
   display: block;
+}
+.report-textarea:focus-visible,
+.report-textinput:focus-visible,
+.report-submit:focus-visible {
+  border-color: var(--fv-brand-teal);
+  outline: 3px solid var(--fv-focus-ring, #0a9273);
+  outline-offset: 2px;
 }

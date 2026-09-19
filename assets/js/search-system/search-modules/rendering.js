@@ -179,6 +179,16 @@
           : results;
 
         State.currentFilteredResults = filtered;
+        const _count = filtered.length;
+        const _announceMsg = _count === 0
+          ? (lang === "th" ? "ไม่พบผลการค้นหา" : "No search results found")
+          : (lang === "th" ? "พบ " + _count + " รายการ" : "Found " + _count + " " + (_count === 1 ? "result" : "results"));
+        if (typeof window.announceToScreenReader === "function") {
+          window.announceToScreenReader(_announceMsg, "polite");
+        } else {
+          const _annEl = document.getElementById("searchLiveAnnouncer");
+          if (_annEl) _annEl.textContent = _announceMsg;
+        }
 
         if (!filtered.length) {
           // Tear down URE — empty state needs plain HTML, not a VS container

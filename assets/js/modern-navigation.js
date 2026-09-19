@@ -645,6 +645,10 @@
       if (lang !== stored) { try { this._writeStoredLang(lang); } catch (e) {} }
       this.syncAllToStoredLang();
       this._updateActiveState();
+      if (typeof window.announceToScreenReader === "function") {
+        const msg = lang === "th" ? "เปลี่ยนภาษาเป็นภาษาไทยแล้ว" : "Language changed to English";
+        window.announceToScreenReader(msg, "polite");
+      }
     }
 
     _onScrollForActiveState() {
@@ -880,6 +884,38 @@
   });
 
   queueMicrotask(() => { controller.init().catch(e => { try { console.error('ModernNavigation init failed:', e); } catch (e2) {} }); });
+
+
+  function announceToScreenReader(message, priority) {
+    if (!message) return;
+    priority = priority || 'polite';
+    try {
+      var announcer = document.getElementById('fv-live-announcer');
+      if (!announcer) {
+        announcer = document.createElement('div');
+        announcer.id = 'fv-live-announcer';
+        announcer.className = 'fv-sr-only';
+        announcer.setAttribute('role', 'status');
+        announcer.setAttribute('aria-live', priority);
+        announcer.setAttribute('aria-atomic', 'true');
+        if (document.body) {
+          document.body.appendChild(announcer);
+        } else {
+          document.addEventListener('DOMContentLoaded', function() {
+            if (document.body && !document.getElementById('fv-live-announcer')) {
+              document.body.appendChild(announcer);
+            }
+          });
+        }
+      }
+      announcer.setAttribute('aria-live', priority);
+      announcer.textContent = '';
+      setTimeout(function() {
+        announcer.textContent = message;
+      }, 50);
+    } catch (e) {}
+  }
+  window.announceToScreenReader = announceToScreenReader;
 
   window.modernNav = {
     forceResync: () => controller.forceResync(),

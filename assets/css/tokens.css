@@ -58,6 +58,7 @@
   --fv-border-teal: rgba(0, 206, 176, 0.25);
   --fv-border-teal-strong: rgba(0, 206, 176, 0.80);
   --fv-border-focus-ring: rgba(19, 180, 127, 0.16);
+  --fv-focus-ring: #0a9273;
   
   /* Gradients */
   --fv-gradient-brand:
@@ -229,4 +230,10 @@
   --content-gap: 1.05rem;
   --h2-size: clamp(1.02rem, 1.06rem + 0.4vw, 1.16rem);
   --lead-size: clamp(1.02rem, 1.05rem + 0.35vw, 1.12rem);
+}
+
+/* ── Accessibility Focus Ring Standard (WCAG 2.1 AA) ── */
+:focus-visible {
+  outline: 3px solid var(--fv-focus-ring, #0a9273) !important;
+  outline-offset: 2px !important;
 }

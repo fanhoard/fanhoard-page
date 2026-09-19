@@ -207,7 +207,6 @@
     line-height: 1;
     border: 0;
     background: transparent;
-    outline: none;
     /* Blue-tinted text color */
     color: var(--thi);
     font-family: inherit;
@@ -231,7 +230,7 @@
     cursor: pointer;
     touch-action: manipulation;
     color: var(--tlo);
-    padding: 0; outline: none;
+    padding: 0;
     -webkit-tap-highlight-color: transparent;
     transition: background-color var(--tf), opacity var(--tf);
 
@@ -615,7 +614,7 @@
     letter-spacing: .01em;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-    outline: none; user-select: none; font-synthesis: none;
+    user-select: none; font-synthesis: none;
     transition: opacity 140ms ease, background-color 140ms ease;
 
     &:active { opacity: .55; }
@@ -815,4 +814,10 @@
     }
   }
 
+}
+#searchInput:focus-visible,
+#search-clear-btn:focus-visible,
+.filter-pills-row button:focus-visible {
+  outline: 3px solid var(--fv-focus-ring, #0a9273);
+  outline-offset: 2px;
 }
