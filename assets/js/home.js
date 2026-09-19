@@ -282,7 +282,7 @@ function attachCarouselArrows(wrapper, track) {
 function buildItemCard(item, typeId, lang) {
   const itemName = pickLang(item.name, lang);
   const card = document.createElement('div');
-  card.className = 'item-card';
+  card.className = 'item-card fv-card';
   card.title = itemName;
   card.setAttribute('role', 'button');
   card.setAttribute('tabindex', '0');
@@ -317,7 +317,7 @@ function buildItemCard(item, typeId, lang) {
 function buildViewAllCard(typeId) {
   const label = getViewAllLabel(typeId);
   const card  = document.createElement('a');
-  card.className = 'item-card item-card--view-all';
+  card.className = 'item-card fv-card item-card--view-all';
   card.href  = getViewAllUrl(typeId);
   card.title = label;
   card.setAttribute('aria-label', label);
