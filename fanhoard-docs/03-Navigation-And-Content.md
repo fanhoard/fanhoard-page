@@ -33,7 +33,6 @@
     - [`modern-navigation.js`](#201-modern-navigationjs)
     - [`copyNotification.js`](#202-copynotificationjs)
     - [`footer-template.js`](#203-footer-templatejs)
-    - [`banner-engine.js`](#204-banner-enginejs)
     - [`home.js`](#205-homejs)
     - [`new.js`](#206-newjs)
     - [`roadmap.js`](#207-roadmapjs)
@@ -1126,39 +1125,6 @@ window.showCopyNotification({ text, name, typeId, lang })
 **Guard**:
 ```javascript
 if (window.__fanhoardFooterInjected) return;
-```
-
----
-
-### 20.4 `banner-engine.js`
-
-**บทบาท**: แสดง promotional banner จาก API ภายใน Shadow DOM
-
-**2 Rendering Modes**:
-- **builder** — สร้าง HTML จาก JSON config (slider, image, text, countdown, buttons)
-- **html** — ใช้ customHtml + customCss โดยตรง
-
-**ทำไมใช้ Shadow DOM**:
-- Banner ต้องดูเหมือนกันทุกหน้า โดยไม่ถูกรบกวนจาก CSS ของหน้านั้น
-- Shadow DOM สร้าง style boundary สมบูรณ์
-
-**JS Triggers**: `confetti`, `shake`, `pulse`, `scroll_reveal`, `bounce`, `glow`
-
-**Cache**: 60 วินาที พร้อม stale-while-revalidate
-
-**Mounting**:
-```html
-<div data-banner="my-banner-slug"></div>
-```
-
-**Global API**:
-```javascript
-window.BannerEngine = {
-  version: '5.0.0',
-  mount: (selector, slug) => {},
-  refresh: () => {},
-  destroy: () => {},
-};
 ```
 
 ---

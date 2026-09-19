@@ -201,7 +201,6 @@ fanhoard-page/
 │   │   ├── modern-navigation.js        # Bottom nav bar
 │   │   ├── copyNotification.js         # Copy feedback UI
 │   │   ├── footer-template.js          # Footer injection
-│   │   ├── banner-engine.js            # Banner system
 │   │   ├── home.js                     # Home page logic
 │   │   ├── new.js                      # What's New renderer
 │   │   ├── roadmap.js                  # Roadmap renderer
@@ -468,7 +467,6 @@ assets/db/con-data/
 | Cheerio | npm dependency (build only) | Build System |
 | Ko-fi | nontakorn_nonsurat | Settings page |
 | Patreon | rowingsco | Settings page |
-| Banner API | fanhoard-banner.vercel.app | Home page |
 
 ---
 
