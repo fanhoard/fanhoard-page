@@ -44,7 +44,7 @@ body.is-loaded {
 
 /* ── Typography Defaults ── */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading, 'FoglihtenNo07calt', Georgia, serif);
+  font-family: var(--font-heading, var(--font-sans, system-ui, sans-serif));
   font-weight: var(--font-bold, 700);
   line-height: var(--lh-tight, 1.25);
   color: var(--text-main, #0f172a);
@@ -67,10 +67,11 @@ a:hover {
   color: var(--color-brand-hover, #0f766e);
 }
 
-/* ── Universal Accessibility Focus Rings (WCAG 2.4.7) ── */
+/* ── Universal Accessibility Focus Rings (WCAG 2.4.7 & 2.2 AA) ── */
 :focus-visible {
   outline: 2px solid var(--color-brand-primary, #0d9488);
   outline-offset: 2px;
+  box-shadow: var(--shadow-focus, 0 0 0 3px rgba(13, 148, 136, 0.45));
 }
 
 /* ── Shell Controls: Buttons (WCAG 2.2 AA Contrast ≥ 4.5:1) ── */

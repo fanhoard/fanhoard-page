@@ -4,6 +4,49 @@
    Layer 3: Containers, grid utilities, landmarks, and navigation/shell wrappers.
    ========================================================================== */
 
+/* ── Global Scroll Alignment Rules ── */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--fv-scroll-offset, calc(var(--fv-nav-height, 56px) + var(--space-4, 16px)));
+}
+
+[id],
+section,
+article,
+.fv-section,
+main {
+  scroll-margin-top: var(--fv-scroll-offset, calc(var(--fv-nav-height, 56px) + var(--space-4, 16px)));
+}
+
+/* ── Canonical Page Shell Contract ── */
+.fv-page-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.fv-page-shell--has-top-nav {
+  padding-top: var(--fv-nav-height, 56px);
+}
+
+.fv-header {
+  width: 100%;
+  position: relative;
+  z-index: var(--z-sticky, 100);
+}
+
+.fv-main {
+  flex: 1 0 auto;
+  width: 100%;
+  outline: none;
+}
+
+.fv-footer {
+  margin-top: auto;
+  width: 100%;
+}
+
 /* ── Page Containers ── */
 .container,
 .page-container {
@@ -17,9 +60,33 @@
 
 .container-narrow {
   width: 100%;
-  max-width: 800px;
+  max-width: 720px;
   margin-left: auto;
   margin-right: auto;
+  padding-left: var(--space-4, 16px);
+  padding-right: var(--space-4, 16px);
+}
+
+.container-md {
+  width: 100%;
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-4, 16px);
+  padding-right: var(--space-4, 16px);
+}
+
+.container-lg {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-4, 16px);
+  padding-right: var(--space-4, 16px);
+}
+
+.container-full {
+  width: 100%;
   padding-left: var(--space-4, 16px);
   padding-right: var(--space-4, 16px);
 }
@@ -33,6 +100,17 @@
   padding-right: var(--space-4, 16px);
 }
 
+@media (min-width: 768px) {
+  .container-narrow,
+  .container-md,
+  .container-lg,
+  .container-full,
+  .container-wide {
+    padding-left: var(--space-6, 24px);
+    padding-right: var(--space-6, 24px);
+  }
+}
+
 /* ── Grid Utilities ── */
 .grid {
   display: grid;
@@ -42,33 +120,201 @@
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-6, 24px);
+  gap: var(--space-4, 16px);
 }
 
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-6, 24px);
+  gap: var(--space-4, 16px);
 }
 
 .grid-4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-6, 24px);
+  gap: var(--space-4, 16px);
 }
 
 .grid-auto-fit {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: var(--space-4, 16px);
+}
+
+.grid-aside {
+  display: grid;
+  grid-template-columns: 1fr 300px;
   gap: var(--space-6, 24px);
+}
+
+@media (min-width: 768px) {
+  .grid-2, .grid-3, .grid-4, .grid-auto-fit {
+    gap: var(--space-6, 24px);
+  }
+}
+
+@media (max-width: 1024px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
   .grid-2,
-  .grid-3,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .grid-aside {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
   .grid-4 {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── Stack & Cluster Primitives ── */
+.stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.stack-xs { display: flex; flex-direction: column; gap: var(--space-1, 4px); }
+.stack-sm { display: flex; flex-direction: column; gap: var(--space-2, 8px); }
+.stack-md { display: flex; flex-direction: column; gap: var(--space-4, 16px); }
+.stack-lg { display: flex; flex-direction: column; gap: var(--space-6, 24px); }
+.stack-xl { display: flex; flex-direction: column; gap: var(--space-8, 32px); }
+
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3, 12px);
+}
+
+/* ── Material Component Primitives ── */
+/* 1. Material Card (.fv-card) */
+.fv-card {
+  background-color: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-lg, 12px);
+  padding: var(--space-6, 24px);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--duration-fast, 150ms) var(--ease-out),
+              border-color var(--duration-fast, 150ms) var(--ease-out);
+}
+
+.fv-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.fv-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3, 12px);
+  margin-bottom: var(--space-4, 16px);
+}
+
+.fv-card__title {
+  font-family: var(--font-sans);
+  font-size: var(--step-1);
+  font-weight: var(--font-semibold, 600);
+  color: var(--text-main);
+  margin: 0;
+}
+
+.fv-card__body {
+  color: var(--text-muted);
+}
+
+.fv-card__footer {
+  margin-top: var(--space-6, 24px);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 12px);
+}
+
+/* 2. Section Scaffold (.fv-section) */
+.fv-section {
+  padding-top: var(--space-8, 32px);
+  padding-bottom: var(--space-8, 32px);
+}
+
+.fv-section__header {
+  margin-bottom: var(--space-6, 24px);
+}
+
+.fv-section__title {
+  font-family: var(--font-sans);
+  font-size: var(--step-3);
+  font-weight: var(--font-bold, 700);
+  color: var(--text-main);
+  margin-bottom: var(--space-2, 8px);
+}
+
+.fv-section__desc {
+  font-size: var(--step-0);
+  color: var(--text-muted);
+  margin-bottom: 0;
+}
+
+/* 3. Setting / Form Row (.fv-setting-row) */
+.fv-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4, 16px);
+  padding: var(--space-4, 16px) 0;
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.fv-setting-row:last-child {
+  border-bottom: none;
+}
+
+.fv-setting-row__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1, 4px);
+}
+
+.fv-setting-row__label {
+  font-family: var(--font-sans);
+  font-weight: var(--font-semibold, 600);
+  color: var(--text-main);
+  font-size: var(--step-0);
+}
+
+.fv-setting-row__help {
+  font-size: var(--step--1);
+  color: var(--text-muted);
+}
+
+/* 4. Hero Header Scaffold (.fv-hero) */
+.fv-hero {
+  padding-top: var(--space-10, 40px);
+  padding-bottom: var(--space-10, 40px);
+  text-align: center;
+}
+
+.fv-hero__title {
+  font-family: var(--font-sans);
+  font-size: var(--step-4);
+  font-weight: var(--font-bold, 700);
+  color: var(--text-main);
+  margin-bottom: var(--space-4, 16px);
+}
+
+.fv-hero__subtitle {
+  font-size: var(--step-1);
+  color: var(--text-muted);
+  max-width: 60ch;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: var(--space-6, 24px);
 }
 
 /* ── Skip Link Utility (WCAG 2.4.1) ── */
@@ -99,7 +345,8 @@
 
 /* ── Landmark & Shell Structures ── */
 main,
-#main {
+#main,
+#fv-main {
   display: block;
   min-height: 60vh;
 }
