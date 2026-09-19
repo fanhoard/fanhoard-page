@@ -46,53 +46,53 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8233915433564101" crossorigin="anonymous"></script>
 
   <style>
-    /* 404 page styles — ใช้ tokens สีหลัก */
+    /* 404 page styles — token-based Persuade mode */
     * { box-sizing:border-box; }
-    body { margin:0; font-family:var(--fv-font-stack); background:var(--fv-surface-page); color:var(--fv-text-primary); }
+    body { margin:0; font-family:var(--font-sans, system-ui, sans-serif); background:var(--surface-base, #ffffff); color:var(--text-main, #0f172a); }
 
-    .fv-app { min-height:100svh; display:flex; align-items:center; justify-content:center; text-align:center; padding:28px; }
+    .fv-app { min-height:100svh; display:flex; align-items:center; justify-content:center; text-align:center; padding:var(--space-7, 28px); }
     .wrap { max-width:640px; width:100%; }
 
     .badge {
       display:inline-flex; align-items:center; justify-content:center; gap:0.35em;
-      padding:0.45em 1em; border-radius:var(--fv-radius-pill);
-      background:rgba(0,255,184,0.1); color:var(--fv-brand-teal-light);
-      font-size:13px; font-weight:var(--fv-font-extrabold); letter-spacing:0.04em; margin-bottom:18px;
+      padding:var(--space-1, 4px) var(--space-3, 12px); border-radius:var(--radius-full, 9999px);
+      background:var(--surface-hover, #f1f5f9); color:var(--color-brand-primary, #0d9488);
+      border:1px solid rgba(13, 148, 136, 0.25);
+      font-size:var(--step--1, 13px); font-weight:var(--font-semibold, 600); letter-spacing:0.04em; margin-bottom:var(--space-4, 18px);
     }
 
-    /* h1 จริงสำหรับ 404 — เป็น visual heading */
+    /* h1 visual 404 heading */
     h1 {
-      font-size:68px; margin:0 0 10px; line-height:1;
-      background:var(--fv-gradient-brand);
-      filter:brightness(0.95) contrast(1.35) saturate(1.15);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-      letter-spacing:-0.05em;
+      font-family:var(--font-heading, 'FoglihtenNo07calt', Georgia, serif);
+      font-size:clamp(3.5rem, 2.5rem + 5vw, 4.25rem); margin:0 0 var(--space-2, 10px); line-height:1;
+      color:var(--color-brand-primary, #0d9488);
+      letter-spacing:-0.04em;
     }
 
-    h2 { margin:0 0 14px; font-size:24px; font-weight:var(--fv-font-extrabold); letter-spacing:-0.02em; color:#111827; }
-    p  { margin:0 auto 26px; color:var(--fv-text-muted); font-size:16px; line-height:1.65; max-width:520px; }
+    h2 { font-family:var(--font-heading, 'FoglihtenNo07calt', Georgia, serif); margin:0 0 var(--space-3, 14px); font-size:var(--step-2, 24px); font-weight:var(--font-bold, 700); letter-spacing:-0.02em; color:var(--text-main, #0f172a); }
+    p  { margin:0 auto var(--space-6, 26px); color:var(--text-muted, #64748b); font-size:var(--step-0, 16px); line-height:var(--lh-normal, 1.65); max-width:520px; }
 
-    .actions { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+    .actions { display:flex; gap:var(--space-3, 14px); justify-content:center; flex-wrap:wrap; }
 
     .btn-primary, .btn-secondary {
       display:inline-flex; align-items:center; justify-content:center; gap:0.45em;
-      -webkit-tap-highlight-color:transparent; font-family:inherit;
-      font-weight:var(--fv-font-bold); font-size:0.95em; letter-spacing:0.015em;
-      padding:1.15em 2em; border-radius:var(--fv-radius-pill);
-      text-decoration:none; line-height:1; vertical-align:middle;
+      -webkit-tap-highlight-color:transparent; font-family:var(--font-sans, system-ui, sans-serif);
+      font-weight:var(--font-semibold, 600); font-size:var(--step-0, 0.95rem); letter-spacing:0.015em;
+      padding:var(--space-3, 12px) var(--space-6, 24px); border-radius:var(--radius-full, 9999px);
+      text-decoration:none; line-height:1.5; vertical-align:middle;
       cursor:pointer; user-select:none;
-      transition:background var(--fv-transition-normal), color var(--fv-transition-fast), border-color var(--fv-transition-normal);
+      transition:background-color var(--duration-fast, 150ms) var(--ease-out, ease-out), color var(--duration-fast, 150ms) var(--ease-out, ease-out), border-color var(--duration-fast, 150ms) var(--ease-out, ease-out);
     }
-    .btn-primary  { background:rgba(255,255,255,1); color:#2CEBC2; border:1.5px solid rgba(0,255,184,0.45); }
-    .btn-primary:hover  { background:rgba(234,255,249,1); }
-    .btn-secondary { background:transparent; color:var(--fv-text-muted); border:1.5px solid rgba(203,213,225,0.8); }
-    .btn-secondary:hover { background:rgba(241,245,249,0.9); }
+    .btn-primary  { background:var(--color-brand-primary, #0d9488); color:#ffffff; border:1px solid transparent; }
+    .btn-primary:hover  { background:var(--color-brand-hover, #0f766e); color:#ffffff; }
+    .btn-secondary { background:var(--surface-card, #ffffff); color:var(--text-main, #0f172a); border:1px solid var(--border-subtle, #cbd5e1); }
+    .btn-secondary:hover { background:var(--surface-hover, #f1f5f9); border-color:var(--border-strong, #94a3b8); }
 
-    .note { margin-top:22px; font-size:13px; color:#9ca3af; }
+    .note { margin-top:var(--space-5, 22px); font-size:var(--step--1, 13px); color:var(--text-muted, #64748b); }
 
     @media (max-width:480px) {
-      h1{font-size:58px;} h2{font-size:21px;} p{font-size:15px;}
-      .btn-primary, .btn-secondary{font-size:0.92em;padding:1.05em 1.85em;}
+      h1{font-size:3.25rem;} h2{font-size:1.3rem;} p{font-size:0.95rem;}
+      .btn-primary, .btn-secondary{font-size:0.92rem;padding:var(--space-3, 10px) var(--space-5, 20px);}
     }
   </style>
 </head>
@@ -100,7 +100,9 @@
 <body>
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PJ397CLS" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
-  <div id="fv-app" class="fv-app" data-page="404">
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <main id="main" class="fv-app" data-page="404">
     <div class="wrap">
       <div class="badge">FanHoard</div>
       <!-- h1 เป็น visual "404" — เหมาะสมสำหรับ error page -->
@@ -113,7 +115,7 @@
       </div>
       <div class="note">Something wrong? Try again later.</div>
     </div>
-  </div>
+  </main>
 
   <script src="/assets/js/lang-core.js?v=1.0.0"></script>
   <script src="/assets/js/language.js?v=1.0.0-20250322"></script>
