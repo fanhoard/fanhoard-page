@@ -38,7 +38,6 @@
   <noscript><link rel="stylesheet" href="/assets/css/search.css?v=1.0.0-20250322" /></noscript>
   <link rel="preload" href="/assets/css/bg.css?v=1.0.0-20250322" as="style" onload="this.rel='stylesheet'" />
   <noscript><link rel="stylesheet" href="/assets/css/bg.css?v=1.0.0-20250322" /></noscript>
-  <link rel="stylesheet" href="/assets/css/search-compact-overrides.css?v=1.0.0-20250322" />
   <link rel="stylesheet" href="/assets/css/back-to-top.css?v=1.0.0-20250322">
 
   <link rel="modulepreload" href="/assets/js/con-data-service/con-data-registry.js?v=1.0.0-20250322" />
@@ -46,9 +45,9 @@
 </head>
 
 <body>
+  <a href="#searchResults" class="skip-link fv-skip-link">Skip to main content</a>
   <!-- SEO h1 ซ่อน -->
   <h1 class="fv-sr-only">Search Emoji and Symbols — FanHoard</h1>
-  <style>.fv-sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}</style>
 
   <div id="fv-app" class="fv-app" data-page="search">
 
@@ -89,7 +88,7 @@
       Sits directly under the sticky header. Both rows are horizontally
       scrollable on narrow viewports. The category row auto-collapses
       (display:none) when empty via the `.filter-pills-row--cat:empty`
-      CSS rule in search-compact-overrides.css.
+      CSS rule in search.css.
     -->
     <nav class="search-filters-panel" aria-label="Search filters">
       <div id="typeFilter" class="filter-pills-row" role="group" aria-label="Type filter"></div>
