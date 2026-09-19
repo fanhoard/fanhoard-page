@@ -24,69 +24,84 @@
 </head>
 <body>
 
-    <a href="#main" class="skip-link fv-skip-link">Skip to main content</a>
+    <a href="#fv-main" class="skip-link fv-skip-link">Skip to main content</a>
 
-    <!-- Navigation Bar -->
-    <nav aria-label="Page navigation">
-        <button class="back-button" id="back-button" aria-label="Go back">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m15 19-7-7 7-7" />
-            </svg>
-        </button>
-        <span class="page-title" data-translate="page-contact">Contact</span>
-    </nav>
+    <div id="fv-app" class="fv-app fv-page-shell fv-page-shell--has-top-nav" data-page="contact">
 
-    <main id="main" class="fv-main">
-        <section class="con">
-            <h1 class="fv-section-label" data-translate="contact-other-title">Contact Us</h1>
-            <p class="fv-section-desc" data-translate="contact-other-desc">If you have any questions or feedback, please reach out using one of the contact options below.</p>
-        </section>
+        <!-- Navigation Bar Header -->
+        <header class="fv-header" role="banner">
+            <nav class="fv-nav" role="navigation" aria-label="Page navigation">
+                <button class="back-button" id="back-button" aria-label="Go back">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="m15 19-7-7 7-7" />
+                    </svg>
+                </button>
+                <span class="page-title" data-translate="page-contact">Contact</span>
+            </nav>
+        </header>
 
-        <div class="pad">
-            <div class="setting-item">
-                <label for="contact-method" data-translate="contact-method-label">Contact Method</label>
-                <section>
-                    <select id="contact-method" class="setting-item select">
-                        <option value="gmail" data-translate="contact-method-gmail">Gmail</option>
-                        <option value="form" data-translate="contact-method-form">Google Form</option>
-                    </select>
+        <!-- Main Landmark -->
+        <main id="fv-main" class="fv-main" role="main" tabindex="-1">
+            <div class="container-md stack-md">
+                <section class="fv-section fv-card con">
+                    <h1 class="fv-section-label" data-translate="contact-other-title">Contact Us</h1>
+                    <p class="fv-section-desc" data-translate="contact-other-desc">If you have any questions or feedback, please reach out using one of the contact options below.</p>
                 </section>
-            </div>
 
-            <div class="setting-item" id="contact-form-section" style="display:none;">
-                <label for="contact-form-lang" data-translate="contact-form-lang-label">Select Form Language</label>
-                <section>
-                    <select id="contact-form-lang" class="setting-item select m5">
-                        <!-- Dynamic options populated by JS -->
-                    </select>
-                    <button class="buttons tap" id="goto-form-btn">Go to Contact Form</button>
-                </section>
-            </div>
+                <div class="fv-card pad stack-md">
+                    <div class="setting-item fv-setting-row">
+                        <label for="contact-method" data-translate="contact-method-label">Contact Method</label>
+                        <section>
+                            <select id="contact-method" class="setting-item select">
+                                <option value="gmail" data-translate="contact-method-gmail">Gmail</option>
+                                <option value="form" data-translate="contact-method-form">Google Form</option>
+                            </select>
+                        </section>
+                    </div>
 
-            <div class="setting-item" id="gmail-section">
-                <label for="goto-gmail-btn" data-translate="contact-gmail-text">Email Support</label>
-                <section>
-                    <button id="goto-gmail-btn" onclick="window.location.href='mailto:fanhoard.official@gmail.com'" class="buttons tap" data-translate="contact-gmail-btn">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.25"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          aria-hidden="true"
-                        >
-                          <path d="M10 14l11 -11" />
-                          <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
-                        </svg>
-                    </button>
-                </section>
+                    <div class="setting-item fv-setting-row" id="contact-form-section" style="display:none;">
+                        <label for="contact-form-lang" data-translate="contact-form-lang-label">Select Form Language</label>
+                        <section>
+                            <select id="contact-form-lang" class="setting-item select m5">
+                                <!-- Dynamic options populated by JS -->
+                            </select>
+                            <button class="buttons tap" id="goto-form-btn">Go to Contact Form</button>
+                        </section>
+                    </div>
+
+                    <div class="setting-item fv-setting-row" id="gmail-section">
+                        <label for="goto-gmail-btn" data-translate="contact-gmail-text">Email Support</label>
+                        <section>
+                            <button id="goto-gmail-btn" onclick="window.location.href='mailto:fanhoard.official@gmail.com'" class="buttons tap" data-translate="contact-gmail-btn">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="1.25"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  aria-hidden="true"
+                                  focusable="false"
+                                >
+                                  <path d="M10 14l11 -11" />
+                                  <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
+                                </svg>
+                            </button>
+                        </section>
+                    </div>
+                </div>
             </div>
-        </div>
-    </main>
+        </main>
+
+        <!-- Footer Landmark -->
+        <footer class="fv-footer" role="contentinfo">
+            <div id="fv-footer-mount"></div>
+        </footer>
+
+    </div><!-- /#fv-app -->
 
     <!-- JS: Language loader -->
     <script src="/assets/js/lang-core.js?v=1.0.0"></script>
