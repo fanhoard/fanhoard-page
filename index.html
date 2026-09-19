@@ -53,6 +53,10 @@
     .fv-app { min-height:100svh; display:flex; align-items:center; justify-content:center; text-align:center; padding:var(--space-7, 28px); }
     .wrap { max-width:640px; width:100%; }
 
+    .brand-name {
+      font-family:'FoglihtenNo07calt', Georgia, serif;
+    }
+
     .badge {
       display:inline-flex; align-items:center; justify-content:center; gap:0.35em;
       padding:var(--space-1, 4px) var(--space-3, 12px); border-radius:var(--radius-full, 9999px);
@@ -63,13 +67,13 @@
 
     /* h1 visual 404 heading */
     h1 {
-      font-family:var(--font-heading, 'FoglihtenNo07calt', Georgia, serif);
+      font-family:var(--font-sans, system-ui, sans-serif);
       font-size:clamp(3.5rem, 2.5rem + 5vw, 4.25rem); margin:0 0 var(--space-2, 10px); line-height:1;
       color:var(--color-brand-primary, #0d9488);
       letter-spacing:-0.04em;
     }
 
-    h2 { font-family:var(--font-heading, 'FoglihtenNo07calt', Georgia, serif); margin:0 0 var(--space-3, 14px); font-size:var(--step-2, 24px); font-weight:var(--font-bold, 700); letter-spacing:-0.02em; color:var(--text-main, #0f172a); }
+    h2 { font-family:var(--font-sans, system-ui, sans-serif); margin:0 0 var(--space-3, 14px); font-size:var(--step-2, 24px); font-weight:var(--font-bold, 700); letter-spacing:-0.02em; color:var(--text-main, #0f172a); }
     p  { margin:0 auto var(--space-6, 26px); color:var(--text-muted, #64748b); font-size:var(--step-0, 16px); line-height:var(--lh-normal, 1.65); max-width:520px; }
 
     .actions { display:flex; gap:var(--space-3, 14px); justify-content:center; flex-wrap:wrap; }
@@ -104,7 +108,7 @@
 
   <main id="main" class="fv-app" data-page="404">
     <div class="wrap">
-      <div class="badge">FanHoard</div>
+      <div class="badge brand-name">FanHoard</div>
       <!-- h1 เป็น visual "404" — เหมาะสมสำหรับ error page -->
       <h1>404</h1>
       <h2>Oops! Lost your way?</h2>
