@@ -1,4 +1,4 @@
-# Fantrove — Fix Auto-Redirect ภาษา (Patch v3.1)
+# FanHoard — Fix Auto-Redirect ภาษา (Patch v3.1)
 
 แก้ปัญหา Google Search Console "Page with redirect" ที่เกิดจากระบบบังคับเพิ่ม
 language prefix ให้ URL โดยอัตโนมัติ
@@ -16,8 +16,8 @@ assets/js/lang-proxy.js   ← ทับไฟล์เดิม
 ### วิธีที่ 1: แตกไฟล์ทับลงบน repo
 
 ```bash
-# จาก root ของ repo fantrove-page
-unzip -o fantrove-fix.zip -d .
+# จาก root ของ repo fanhoard-page
+unzip -o fanhoard-fix.zip -d .
 ```
 
 ไฟล์ `assets/js/lang-proxy.js` จะถูกแทนที่โดยตรง (โครงสร้าง folder ตรงกับของเว็บ)
@@ -25,7 +25,7 @@ unzip -o fantrove-fix.zip -d .
 ### วิธีที่ 2: คัดลอกด้วยมือ
 
 คัดลอกไฟล์ `assets/js/lang-proxy.js` จาก zip ไปทับไฟล์เดิมใน repo ที่ path
-`fantrove-page/assets/js/lang-proxy.js`
+`fanhoard-page/assets/js/lang-proxy.js`
 
 ### หลังติดตั้ง
 

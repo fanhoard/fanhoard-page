@@ -1,6 +1,6 @@
 # AI_COMMIT_GUIDE — มาตรฐาน Commit Message, PR, และ Changelog
 
-> เอกสารนี้กำหนดมาตรฐานการเขียน commit message, PR description, และ changelog สำหรับ AI agents ที่ทำงานกับ repo Fantrove
+> เอกสารนี้กำหนดมาตรฐานการเขียน commit message, PR description, และ changelog สำหรับ AI agents ที่ทำงานกับ repo FanHoard
 >
 > **สำหรับ:** AI agents ที่จะ commit หรือเปิด PR
 >
@@ -194,7 +194,7 @@ fix(home): prevent banner carousel from breaking on slow networks
 - Show static banner image as fallback
 - Log timeout errors to console for debugging
 
-The banner API (fantrove-banner.vercel.app) occasionally times out
+The banner API (fanhoard-banner.vercel.app) occasionally times out
 during peak hours, leaving the carousel in a loading state indefinitely.
 This commit adds graceful degradation.
 ```
@@ -268,7 +268,7 @@ to avoid impacting initial page load performance.
 - `assets/js/search-modules/state.js` — add isFuzzy flag
 - `assets/js/search-modules/rendering.js` — highlight matched text
 - `assets/css/search.css` — style for highlight
-- `fantrove-docs/02-Search-System.md` — document new behavior
+- `fanhoard-docs/02-Search-System.md` — document new behavior
 
 ## Testing
 
@@ -290,7 +290,7 @@ Closes #142
 
 ### 5.1 ไม่มี CHANGELOG.md แยก
 
-Fantrove ไม่ใช้ `CHANGELOG.md` แยก — ใช้ release notes ใน `assets/md/{en,th}/current.md` แทน (ดู [`RELEASE_NOTES_GUIDE.md`](./RELEASE_NOTES_GUIDE.md))
+FanHoard ไม่ใช้ `CHANGELOG.md` แยก — ใช้ release notes ใน `assets/md/{en,th}/current.md` แทน (ดู [`RELEASE_NOTES_GUIDE.md`](./RELEASE_NOTES_GUIDE.md))
 
 ### 5.2 การ generate changelog อัตโนมัติ
 

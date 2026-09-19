@@ -246,7 +246,7 @@
 ### D2.2 อัปเดตเอกสารตามมาตรฐาน
 
 - [ ] ใช้ H1 + header blockquote + สารบัญ + cross-references
-- [ ] ใช้ "Fantrove" ไม่ใช่ "FanTrove" หรือ "Fantrove Page"
+- [ ] ใช้ "FanHoard" ไม่ใช่ "FanHoard" หรือ "FanHoard Page"
 - [ ] ใช้ relative path ใน cross-references
 - [ ] ใช้ชื่อไฟล์จริง (หลัง rename)
 - [ ] ใช้ language tag ใน code blocks
@@ -256,7 +256,7 @@
 
 ### D2.3 Verify เอกสารอื่นที่อ้างถึง
 
-- [ ] ใช้ `grep -rn "keyword" fantrove-docs/` หาเอกสารอื่นที่อ้างถึงสิ่งที่เปลี่ยน
+- [ ] ใช้ `grep -rn "keyword" fanhoard-docs/` หาเอกสารอื่นที่อ้างถึงสิ่งที่เปลี่ยน
 - [ ] ตรวจทุกไฟล์ที่พบว่ายังตรงไหม
 - [ ] อัปเดตถ้าจำเป็น
 

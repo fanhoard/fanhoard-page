@@ -104,7 +104,7 @@ const CONFIG = {
    * URL หน้าเว็บจริง สำหรับ canonical + hreflang tags
    * [PATCH v2] เพิ่มใหม่ — html-transformer.js v2 ต้องการ
    */
-  baseUrl: 'https://fantrove.pages.dev',
+  baseUrl: 'https://fanhoard.pages.dev',
 
   /**
    * Static files (in srcDir) to copy directly to dist/ root.
@@ -115,7 +115,7 @@ const CONFIG = {
     'robots.txt',
     'sitemap.xml',
     '_headers',
-    'fantrove-console-bridge.js',
+    'fanhoard-console-bridge.js',
     'google6b646fa60e0f9f2f.html',
     'console.css',
     'console.js',
@@ -159,7 +159,7 @@ async function build() {
   const startTime = Date.now();
   console.log('');
   console.log('╔══════════════════════════════════════╗');
-  console.log('║   Fantrove Static Build System v1.0  ║');
+  console.log('║   FanHoard Static Build System v1.0  ║');
   if (DRY_RUN) console.log('║   ⚠  DRY RUN — no files written       ║');
   console.log('╚══════════════════════════════════════╝');
   console.log('');
@@ -404,7 +404,7 @@ function _generateRedirects(langs, defaultLang) {
     '/assets/*    /assets/:splat    200',
     '/robots.txt  /robots.txt       200',
     '/sitemap.xml /sitemap.xml      200',
-    '/favicon.ico /assets/images/fantrove-hub360.ico 200',
+    '/favicon.ico /assets/images/fanhoard-hub360.ico 200',
     '',
     '# ── Language root → home (REWRITE 200, URL คงเดิม) ───────────────────',
     '# /en, /en/, /th, /th/ เป็น valid path ที่ตอบ 200 + ส่ง content ของ home',

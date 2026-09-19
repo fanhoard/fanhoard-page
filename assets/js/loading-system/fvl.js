@@ -1,5 +1,5 @@
 // Path:    assets/js/loading-system/fvl.js
-// Purpose: FVL (FantroveVerse Loader) v1.0.0 — flexible loading framework.
+// Purpose: FVL (FanHoardVerse Loader) v1.0.0 — flexible loading framework.
 //          Supports 4 display modes: fullscreen / scoped / inline / topbar.
 //          Single-file hybrid architecture (entry + internal modules in one file)
 //          for maximum lightweight — 1 HTTP request only.

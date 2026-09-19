@@ -2,7 +2,7 @@
 
 > เอกสารนี้กำหนดลำดับขั้นการทำงานที่ AI agent ทุกตัวต้องยึดเมื่อรับ task จากผู้ใช้
 >
-> **สำหรับ:** AI agents ที่รับ task พัฒนา/แก้/เพิ่ม feature ใน Fantrove
+> **สำหรับ:** AI agents ที่รับ task พัฒนา/แก้/เพิ่ม feature ใน FanHoard
 >
 > **เป้าหมาย:** ทำให้งานที่ AI ส่งมอบ "ไม่มั่ว รอบคอบ และตรงตามที่ผู้ใช้ต้องการ"
 
@@ -264,7 +264,7 @@ npm run build
 
 ## Phase 4.5: Documentation Sync (priority #1 สูงสุด)
 
-> 🥇 เอกสารเป็น priority สูงสุดของ Fantrove — สูงกว่า SEO และ Performance ทุกการเปลี่ยนแปลงระบบต้อง sync กับเอกสาร ดู [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) สำหรับมาตรฐานเต็ม
+> 🥇 เอกสารเป็น priority สูงสุดของ FanHoard — สูงกว่า SEO และ Performance ทุกการเปลี่ยนแปลงระบบต้อง sync กับเอกสาร ดู [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) สำหรับมาตรฐานเต็ม
 
 ### Step 4.5.1: ระบุเอกสารที่ต้องอัปเดต
 
@@ -289,7 +289,7 @@ npm run build
 ปฏิบัติตาม [`13-Documentation-Standard.md`](./13-Documentation-Standard.md):
 
 - ใช้ H1 + header blockquote + สารบัญ + cross-references
-- ใช้ "Fantrove" ไม่ใช่ "FanTrove" หรือ "Fantrove Page"
+- ใช้ "FanHoard" ไม่ใช่ "FanHoard" หรือ "FanHoard Page"
 - ใช้ relative path ใน cross-references
 - ใช้ language tag ใน code blocks
 - ใช้ ✅/❌ markers สำหรับตัวอย่างดี/ไม่ดี
@@ -301,7 +301,7 @@ npm run build
 
 ```bash
 # ตัวอย่าง: ถ้าเปลี่ยน API ของ URE.mount()
-grep -rn "URE.mount" fantrove-docs/
+grep -rn "URE.mount" fanhoard-docs/
 # ตรวจทุกไฟล์ที่พบว่ายังอ้างถึง API เดิมไหม
 ```
 
@@ -331,7 +331,7 @@ git commit -m "feat(ure): add new module"
 git commit -m "docs(ure): update for new module"
 
 # ✅ ถูก — รวมใน commit เดียว
-git add assets/js/ure/ure-modules/new-module.js fantrove-docs/01-Virtual-Scroll-Rendering.md
+git add assets/js/ure/ure-modules/new-module.js fanhoard-docs/01-Virtual-Scroll-Rendering.md
 git commit -m "feat(ure): add new module + update docs"
 ```
 

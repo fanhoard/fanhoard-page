@@ -1,6 +1,6 @@
 # 05 — ระบบ ConData Service (ConData Service)
 
-> เอกสารนี้อธิบายระบบ **ConData Service** ของ Fantrove — ระบบศูนย์กลางข้อมูล (Neutral Data Service) ที่เป็น Single Source of Truth สำหรับข้อมูลทุกประเภท (อีโมจิ, สัญลักษณ์, ข้อความแฟนซี, คอลเลกชัน)
+> เอกสารนี้อธิบายระบบ **ConData Service** ของ FanHoard — ระบบศูนย์กลางข้อมูล (Neutral Data Service) ที่เป็น Single Source of Truth สำหรับข้อมูลทุกประเภท (อีโมจิ, สัญลักษณ์, ข้อความแฟนซี, คอลเลกชัน)
 >
 > **สำหรับ:** AI และนักพัฒนาที่จะแก้/ขยาย ConData Service หรือเพิ่ม type/subcategory ใหม่
 >
@@ -37,7 +37,7 @@
 
 ## 1. ภาพรวมสถาปัตยกรรม
 
-ConData Service คือ **ระบบศูนย์กลางข้อมูล (Neutral Data Service)** ที่ทำหน้าที่เป็น Single Source of Truth สำหรับข้อมูลทุกประเภทใน Fantrove — รวมถึงอีโมจิ, สัญลักษณ์, ข้อความแฟนซี และคอลเลกชัน
+ConData Service คือ **ระบบศูนย์กลางข้อมูล (Neutral Data Service)** ที่ทำหน้าที่เป็น Single Source of Truth สำหรับข้อมูลทุกประเภทใน FanHoard — รวมถึงอีโมจิ, สัญลักษณ์, ข้อความแฟนซี และคอลเลกชัน
 
 ### แผนภาพสถาปัตยกรรม
 
@@ -1225,7 +1225,7 @@ import { ConDataRegistry } from './con-data-service.js';
 
 ## 13. การรับส่งข้อมูลกับระบบอื่น
 
-ConData Service ถูกออกแบบมาให้เป็น **neutral** — ระบบอื่นใน Fantrove สามารถดึงข้อมูลไปใช้ได้ทันที
+ConData Service ถูกออกแบบมาให้เป็น **neutral** — ระบบอื่นใน FanHoard สามารถดึงข้อมูลไปใช้ได้ทันที
 
 ### 13.1 ระบบที่ใช้ ConData Service
 

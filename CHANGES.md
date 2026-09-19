@@ -1,4 +1,4 @@
-# Fantrove Feed System v2.1 — Per-User Persistent Discovery Feed
+# FanHoard Feed System v2.1 — Per-User Persistent Discovery Feed
 
 ## What changed
 
@@ -25,7 +25,7 @@ the tab and coming back within the TTL window.
 
 ### Option A — apply the patch
 
-From the root of your local `fantrove-page` clone:
+From the root of your local `fanhoard-page` clone:
 
 ```bash
 git apply feed-system-v2.1.patch

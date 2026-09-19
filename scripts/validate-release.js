@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/validate-release.js — Fantrove Release Validator
+// scripts/validate-release.js — FanHoard Release Validator
 // v1.5: FIX — Layer 3 (CI) เช็ค version bump ผิดพลาดเสมอ (HEAD timing bug)
 //
 // v1.5 changes จาก v1.4:
@@ -212,7 +212,7 @@ function readVersionFromCurrentMd(lang) {
 // พอ CI checkout commit ที่ push มา, HEAD *คือ* commit ที่ bump เวอร์ชั่นไปแล้ว
 // (เหมือนกับไฟล์บน disk เป๊ะ) ทำให้ current === lastCommitted เสมอ ไม่ว่าจะ
 // bump จริงหรือไม่ก็ตาม → checkVersionBump() เห็นว่า "ไม่เคย bump" ทุกครั้งใน
-// CI (ยืนยันจาก git log: ตลอด 1,100+ commits ไม่มี commit จาก "Fantrove CI"
+// CI (ยืนยันจาก git log: ตลอด 1,100+ commits ไม่มี commit จาก "FanHoard CI"
 // เลยสักครั้ง — แปลว่า Layer 3 fail มาตลอดโดยไม่มีใครรู้)
 // วิธีแก้: ตรวจก่อนว่า HEAD ตรงกับเวอร์ชั่นบน disk หรือไม่
 //   - ไม่ตรง (ปกติ: pre-commit/pre-push ที่รันก่อน commit จริง) → ใช้ HEAD ได้เลย
@@ -362,7 +362,7 @@ function main() {
   }
 
   const modeLabel = ciMode ? 'CI' : prePushMode ? 'pre-push' : mode === 'staged' ? 'pre-commit' : mode;
-  console.log('🔍  Fantrove Release Validator v1.5 (fixed CI version-bump check)');
+  console.log('🔍  FanHoard Release Validator v1.5 (fixed CI version-bump check)');
   console.log('    Mode: ' + modeLabel + (commitHash ? ' (' + commitHash + ')' : '') + (allowGenerated || ciMode ? ' (allow-generated)' : ''));
   console.log('');
 

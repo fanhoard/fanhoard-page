@@ -1,8 +1,8 @@
-# Code of Conduct for Fantrove
+# Code of Conduct for FanHoard
 
 ## Introduction
 
-**Fantrove** (หรือชื่อเต็ม **Fantrove Verse`) เป็นเว็บไซต์แบบ static ที่รวบรวมอีโมจิ สัญลักษณ์ ข้อความแฟนซี และคอลเลกชันอื่น ๆ ไว้ให้ผู้ใช้คัดลอกและใช้งานได้ฟรี ผู้ใช้ทั่วไปไม่ต้องสมัครสมาชิก ไม่ต้อง login ไม่สามารถโพสต์หรือแก้ไขเนื้อหาบนเว็บได้ — ใช้งานได้ทันทีเพียงแค่เปิดเว็บ
+**FanHoard** (หรือชื่อเต็ม **FanHoard Verse`) เป็นเว็บไซต์แบบ static ที่รวบรวมอีโมจิ สัญลักษณ์ ข้อความแฟนซี และคอลเลกชันอื่น ๆ ไว้ให้ผู้ใช้คัดลอกและใช้งานได้ฟรี ผู้ใช้ทั่วไปไม่ต้องสมัครสมาชิก ไม่ต้อง login ไม่สามารถโพสต์หรือแก้ไขเนื้อหาบนเว็บได้ — ใช้งานได้ทันทีเพียงแค่เปิดเว็บ
 
 เอกสารฉบับนี้กำหนดมาตรฐานพฤติกรรมสำหรับทุกคนที่มีส่วนร่วมในโปรเจกต์ — ไม่ว่าจะเป็นผู้มีเยี่ยมชมเว็บ สมาชิก Discord ผู้รายงานปัญหาผ่าน GitHub Issues หรือผู้ร่วมพัฒนาโค้ด เราต้องการให้ทุกคนรู้สึกปลอดภัยและได้รับการเคารพเสมอ
 
@@ -17,7 +17,7 @@
 
 ## Expected Behavior
 
-พฤติกรรมที่คาดหวังจากทุกคนในชุมชน Fantrove:
+พฤติกรรมที่คาดหวังจากทุกคนในชุมชน FanHoard:
 
 - สื่อสารอย่างสุภาพและเป็นมิตร
 - ให้ความช่วยเหลือผู้อื่นเมื่อทำได้
@@ -42,7 +42,7 @@
 
 ## About the Website
 
-เพื่อให้เข้าใจขอบเขตของ Code of Conduct นี้ ควรทราบลักษณะของเว็บ Fantrove:
+เพื่อให้เข้าใจขอบเขตของ Code of Conduct นี้ ควรทราบลักษณะของเว็บ FanHoard:
 
 ### 3.1 ลักษณะการใช้งาน
 
@@ -73,14 +73,14 @@
 
 ### 4.1 รายงาน bug หรือเสนอ feature
 
-- **GitHub Issues**: [github.com/fantrove/fantrove-page/issues](https://github.com/fantrove/fantrove-page/issues)
+- **GitHub Issues**: [github.com/fanhoard/fanhoard-page/issues](https://github.com/fanhoard/fanhoard-page/issues)
 - อธิบายปัญหาหรือคำขอให้ชัดเจน พร้อมขั้นตอนที่ทำให้เกิดปัญหา (ถ้ามี)
 
 ### 4.2 รายงานพฤติกรรมไม่เหมาะสม
 
 ถ้าพบพฤติกรรมที่ละเมิด Code of Conduct นี้ สามารถรายงานได้ที่:
 
-- **Email**: [fantrove.official@gmail.com](mailto:fantrove.official@gmail.com)
+- **Email**: [fanhoard.official@gmail.com](mailto:fanhoard.official@gmail.com)
 - **Discord**: ส่งข้อความส่วนตัวให้ moderator
 
 เราจะตรวจสอบทุกรายงานอย่างเป็นส่วนตัวและเร็วที่สุดเท่าที่ทำได้
@@ -93,7 +93,7 @@
 
 ## Enforcement
 
-ทีมพัฒนาของ Fantrove รับผิดชอบการบังคับใช้ Code of Conduct นี้ ผู้ที่ละเมิดอาจได้รับ:
+ทีมพัฒนาของ FanHoard รับผิดชอบการบังคับใช้ Code of Conduct นี้ ผู้ที่ละเมิดอาจได้รับ:
 
 - การเตือนเป็นลายลักษณ์อักษร
 - การระงับสิทธิ์ในช่องทางสื่อสาร (Discord, GitHub)
@@ -105,8 +105,8 @@
 
 ## Attribution
 
-Code of Conduct นี้ปรับปรุงให้เหมาะสมกับบริบทของ Fantrove (static website ที่ผู้ใช้ใช้งานแบบ read-only) โดยอ้างอิงหลักการจาก [Contributor Covenant](https://www.contributor-covenant.org/) และ [GitHub Community Guidelines](https://docs.github.com/en/site-policy/github-terms/github-community-guidelines)
+Code of Conduct นี้ปรับปรุงให้เหมาะสมกับบริบทของ FanHoard (static website ที่ผู้ใช้ใช้งานแบบ read-only) โดยอ้างอิงหลักการจาก [Contributor Covenant](https://www.contributor-covenant.org/) และ [GitHub Community Guidelines](https://docs.github.com/en/site-policy/github-terms/github-community-guidelines)
 
 ---
 
-ขอบคุณที่ช่วยกันรักษาชุมชน Fantrove ให้เป็นมิตรและปลอดภัยสำหรับทุกคน 🙏
+ขอบคุณที่ช่วยกันรักษาชุมชน FanHoard ให้เป็นมิตรและปลอดภัยสำหรับทุกคน 🙏

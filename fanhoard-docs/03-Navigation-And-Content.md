@@ -1,6 +1,6 @@
 # 03 — ระบบ Nav-Core และไฟล์ JavaScript อิสระ
 
-> เอกสารนี้อธิบายระบบ Nav-Core ของ **Fantrove** ซึ่งเป็นหัวใจสำคัญของการนำทางแบบ SPA (Single Page Application) และการจัดการเนื้อหาบนหน้า Discover รวมถึงไฟล์ JavaScript อิสระที่ทำงานร่วมกับ Nav-Core
+> เอกสารนี้อธิบายระบบ Nav-Core ของ **FanHoard** ซึ่งเป็นหัวใจสำคัญของการนำทางแบบ SPA (Single Page Application) และการจัดการเนื้อหาบนหน้า Discover รวมถึงไฟล์ JavaScript อิสระที่ทำงานร่วมกับ Nav-Core
 >
 > **สำหรับ:** AI และนักพัฒนาที่จะแก้/ขยาย Nav-Core หรือไฟล์อิสระที่เกี่ยวข้อง
 >
@@ -48,7 +48,7 @@
 
 ### 1.1 Nav-Core คืออะไร
 
-Nav-Core เป็นระบบ **Navigation & Content Management System** ที่ทำหน้าที่เป็น "สมองกลาง" ของทุกหน้าในเว็บ Fantrove Verse โดยจัดการ:
+Nav-Core เป็นระบบ **Navigation & Content Management System** ที่ทำหน้าที่เป็น "สมองกลาง" ของทุกหน้าในเว็บ FanHoard Verse โดยจัดการ:
 
 - **SPA Routing** — การนำทางแบบ Single Page Application โดยใช้ query string `?type=...&page=...`
 - **Content Rendering** — การแสดงผลเนื้อหา (ปุ่มคัดลอก, การ์ด) ผ่านระบบ URE (Universal Render Engine)
@@ -1121,11 +1121,11 @@ window.showCopyNotification({ text, name, typeId, lang })
 1. โหลด CSS `/assets/css/footer.css`
 2. Fetch `/assets/template-html/footer-template.html` (force-cache)
 3. Parse + inject ต่อท้าย `<body>`
-4. Fallback: สร้าง `<footer class="footer-minimal">© Fantrove</footer>` ถ้า fetch ล้มเหลว
+4. Fallback: สร้าง `<footer class="footer-minimal">© FanHoard</footer>` ถ้า fetch ล้มเหลว
 
 **Guard**:
 ```javascript
-if (window.__fantroveFooterInjected) return;
+if (window.__fanhoardFooterInjected) return;
 ```
 
 ---
@@ -1408,7 +1408,7 @@ button-content click
 
 ---
 
-> เอกสารนี้ครอบคลุมทุกระบบ JavaScript ของ Fantrove Verse ทั้ง Nav-Core system และไฟล์อิสระ AI สามารถอ่านเอกสารนี้อย่างเดียวแล้วเข้าใจ architecture, data flow, และการทำงานของทุกส่วนได้
+> เอกสารนี้ครอบคลุมทุกระบบ JavaScript ของ FanHoard Verse ทั้ง Nav-Core system และไฟล์อิสระ AI สามารถอ่านเอกสารนี้อย่างเดียวแล้วเข้าใจ architecture, data flow, และการทำงานของทุกส่วนได้
 tService._onClick(e)
         │
         └── unifiedCopyToClipboard({ text, api, type })

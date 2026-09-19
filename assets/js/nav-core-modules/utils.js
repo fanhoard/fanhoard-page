@@ -61,7 +61,7 @@
     const ua  = navigator.userAgent || '';
     const url = location.href || '';
     const lines = [
-      '=== Fantrove Error Report ===',
+      '=== FanHoard Error Report ===',
       'Time    : ' + now,
       'URL     : ' + url,
       'UA      : ' + ua,

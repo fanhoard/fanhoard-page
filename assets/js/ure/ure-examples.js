@@ -1,7 +1,7 @@
 /**
  * ════════════════════════════════════════════════════════════════════════════
  * URE — Universal Render Engine  v1.0.0
- * Integration Guide & Examples for Fantrove
+ * Integration Guide & Examples for FanHoard
  * ════════════════════════════════════════════════════════════════════════════
  *
  * File: assets/js/ure/ure-examples.js

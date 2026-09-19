@@ -1,6 +1,6 @@
-# 07 — Loading System (FVL — FantroveVerse Loader)
+# 07 — Loading System (FVL — FanHoardVerse Loader)
 
-> เอกสารนี้อธิบายระบบ **FVL (FantroveVerse Loader)** ของ Fantrove — ระบบ loading ส่วนกลางที่แยกออกมาจาก Nav-Core เดิม ออกแบบมาเพื่อให้ทุก loading indicator ทั่วทั้งเว็บมีคุณภาพระดับเดียวกันและยืดหยุ่นพอที่จะแสดงได้ในทุกบริบท — ตั้งแต่ overlay เต็มหน้าจอ ไปจนถึง spinner เล็ก ๆ ในปุ่ม
+> เอกสารนี้อธิบายระบบ **FVL (FanHoardVerse Loader)** ของ FanHoard — ระบบ loading ส่วนกลางที่แยกออกมาจาก Nav-Core เดิม ออกแบบมาเพื่อให้ทุก loading indicator ทั่วทั้งเว็บมีคุณภาพระดับเดียวกันและยืดหยุ่นพอที่จะแสดงได้ในทุกบริบท — ตั้งแต่ overlay เต็มหน้าจอ ไปจนถึง spinner เล็ก ๆ ในปุ่ม
 >
 > **สำหรับ:** AI และนักพัฒนาที่จะแก้ FVL หรือเรียกใช้ loading indicator ในโค้ดใหม่
 >
@@ -30,7 +30,7 @@
 
 ## 1. Overview
 
-FVL (FantroveVerse Loader) คือระบบ loading ส่วนกลางของ Fantrove ที่แยกออกมาจาก Nav-Core เดิม ออกแบบมาเพื่อให้ **ทุก loading indicator ทั่วทั้งเว็บมีคุณภาพระดับเดียวกัน** และยืดหยุ่นพอที่จะแสดงได้ในทุกบริบท — ตั้งแต่ overlay เต็มหน้าจอ ไปจนถึง spinner เล็กๆ ในปุ่ม
+FVL (FanHoardVerse Loader) คือระบบ loading ส่วนกลางของ FanHoard ที่แยกออกมาจาก Nav-Core เดิม ออกแบบมาเพื่อให้ **ทุก loading indicator ทั่วทั้งเว็บมีคุณภาพระดับเดียวกัน** และยืดหยุ่นพอที่จะแสดงได้ในทุกบริบท — ตั้งแต่ overlay เต็มหน้าจอ ไปจนถึง spinner เล็กๆ ในปุ่ม
 
 ### หลักการออกแบบ
 
@@ -38,7 +38,7 @@ FVL (FantroveVerse Loader) คือระบบ loading ส่วนกลา�
 - **4 display modes**: `fullscreen` / `scoped` / `inline` / `topbar` — ใช้ API เดียว (`FVL.show()`)
 - **Zero coupling กับระบบอื่น**: ทำงานได้เลยโดยไม่ต้องมี URE, NavCore, Search หรือ Language System
 - **Full backward-compat**: API เดิมของ Nav-Core (`LoadingService.show/hide`, `window.showInstantLoadingOverlay`, `window._navCore_contentLoadingManager` ฯลฯ) ทำงานเหมือนเดิมผ่าน proxy อัตโนมัติ
-- **ใช้ Fantrove Design Tokens**: สี/เงา/รัศมี ดึงจาก `tokens.css` ทั้งหมด
+- **ใช้ FanHoard Design Tokens**: สี/เงา/รัศมี ดึงจาก `tokens.css` ทั้งหมด
 - **รองรับ i18n**: รับ `lang` option หรืออ่านจาก `localStorage.selectedLang` อัตโนมัติ
 - **Accessibility first**: `role="status"`, `aria-live="polite"`, `prefers-reduced-motion`
 - **Performance-focused**: CSS animations (ไม่ใช้ JS-driven), `contain: strict`, composite-only properties (transform/opacity), lazy DOM creation
@@ -61,7 +61,7 @@ loading-demo/
 assets/js/nav-core-modules/
 └── loading.js                              ← Thin proxy (delegates to FVL)
 
-fantrove-docs/
+fanhoard-docs/
 └── 07-Loading-System.md                ← This document
 ```
 

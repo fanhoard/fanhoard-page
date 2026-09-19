@@ -2,7 +2,7 @@
 // Purpose: Theme application for popup instances.
 //          Applies CSS custom properties to popup elements based on the
 //          selected theme ('light', 'dark', 'brand').
-//          Uses Fantrove design tokens from tokens.css.
+//          Uses FanHoard design tokens from tokens.css.
 // Used by: engine.js
 
 (function(M) {
@@ -11,7 +11,7 @@
   /**
    * Theme token maps. Each key is a CSS variable, each value is the
    * token value from tokens.css. This keeps popup styling 100% aligned
-   * with the rest of the Fantrove design system.
+   * with the rest of the FanHoard design system.
    */
   var THEMES = Object.freeze({
 

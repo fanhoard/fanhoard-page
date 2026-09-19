@@ -1,6 +1,6 @@
 # AI_FORBIDDEN — กฎเหล็กสำหรับ AI Agents
 
-> เอกสารนี้คือ **กฎเหล็ก** ที่ AI agent ทุกตัวต้องปฏิบัติตามเมื่อทำงานกับโค้ดเบส Fantrove
+> เอกสารนี้คือ **กฎเหล็ก** ที่ AI agent ทุกตัวต้องปฏิบัติตามเมื่อทำงานกับโค้ดเบส FanHoard
 >
 > ⚠️ **การละเว้นกฎข้อใดข้อหนึ่งในนี้อาจทำให้เว็บพังได้** — อ่านให้จบก่อนแตะโค้ด
 >
@@ -40,7 +40,7 @@
 |---|---|
 | `assets/lang/en.json`, `assets/lang/th.json` | ต้องเพิ่ม key ทั้งสองไฟล์พร้อมกัน |
 | `assets/md/{en,th}/current.md` | ต้องเขียนทั้งสองภาษาพร้อมกัน ตาม [`RELEASE_NOTES_GUIDE.md`](./RELEASE_NOTES_GUIDE.md) |
-| `package.json` | อย่าเพิ่ม dependency โดยไม่จำเป็น — Fantrove ใช้ dependency น้อยมาก |
+| `package.json` | อย่าเพิ่ม dependency โดยไม่จำเป็น — FanHoard ใช้ dependency น้อยมาก |
 | `00-System-Architecture.md` | อัปเดตได้แต่ต้องคงโครงสร้างหลักไว้ |
 
 ---
@@ -49,7 +49,7 @@
 
 ### 2.1 ห้ามใช้ ES Modules
 
-Fantrove ใช้ **IIFE pattern** ทั้งระบบ ไม่ใช่ ES modules
+FanHoard ใช้ **IIFE pattern** ทั้งระบบ ไม่ใช่ ES modules
 
 ```javascript
 // ❌ ห้าม
@@ -68,7 +68,7 @@ export function bar() { ... }
 
 ### 2.2 ห้ามใช้ Framework (React, Vue, etc.)
 
-Fantrove เป็น vanilla JavaScript ทั้งหมด ห้ามเพิ่ม React, Vue, Svelte, หรือ framework อื่นใด
+FanHoard เป็น vanilla JavaScript ทั้งหมด ห้ามเพิ่ม React, Vue, Svelte, หรือ framework อื่นใด
 
 ### 2.3 ห้ามใช้ jQuery
 
@@ -93,8 +93,8 @@ document.querySelector('.button').addEventListener('click', ...)
 window.myRandomVar = '...';
 
 // ✅ ถูก — ใช้ namespace ที่มีอยู่แล้ว หรือสร้าง namespace ใหม่อย่างชัดเจน
-window.FantroveUtils = window.FantroveUtils || {};
-window.FantroveUtils.myFeature = '...';
+window.FanHoardUtils = window.FanHoardUtils || {};
+window.FanHoardUtils.myFeature = '...';
 ```
 
 ### 2.6 ห้ามใช้ `alert()`, `confirm()`, `prompt()`
@@ -136,9 +136,9 @@ el.textContent = userInput;
 
 ## 3. Assumption ที่ผิดบ่อย
 
-### 3.1 "Fantrove = Fantrove Page"
+### 3.1 "FanHoard = FanHoard Page"
 
-❌ ผิด — ชื่อโปรเจกต์คือ **Fantrove** (หรือเต็ม: **Fantrove Verse**) ไม่ใช่ "Fantrove Page"
+❌ ผิด — ชื่อโปรเจกต์คือ **FanHoard** (หรือเต็ม: **FanHoard Verse**) ไม่ใช่ "FanHoard Page"
 
 ### 3.2 "มี build step ก็เลยใช้ React/Next.js ได้"
 
@@ -321,7 +321,7 @@ elements.forEach((el, i) => {
 
 ## 8. กฎเกี่ยวกับ SEO (priority สูงสุด)
 
-> ⚠️ SEO เป็น priority ระดับพิเศษที่สูงสุดของ Fantrove — กฎในส่วนนี้ผิดนิดเดียวอาจทำให้ ranking ตก ดู [`12-SEO-Guide.md`](./12-SEO-Guide.md) สำหรับรายละเอียดเต็ม
+> ⚠️ SEO เป็น priority ระดับพิเศษที่สูงสุดของ FanHoard — กฎในส่วนนี้ผิดนิดเดียวอาจทำให้ ranking ตก ดู [`12-SEO-Guide.md`](./12-SEO-Guide.md) สำหรับรายละเอียดเต็ม
 
 ### 8.1 ห้ามลบ meta tags และ SEO elements
 
@@ -410,7 +410,7 @@ document.getElementById('title').textContent = 'Page Title';
 <img src="banner.jpg">
 
 <!-- ✅ ถูก -->
-<img src="banner.jpg" alt="Fantrove banner with emojis and symbols" width="1200" height="630">
+<img src="banner.jpg" alt="FanHoard banner with emojis and symbols" width="1200" height="630">
 ```
 
 ### 8.9 ห้ามใช้ `loading="lazy"` บน hero image
@@ -441,7 +441,7 @@ document.getElementById('title').textContent = 'Page Title';
 <meta name="description" content="Emoji site with emoji for emoji lovers who want emoji">
 
 <!-- ✅ ถูก — ใส่ keyword ตามธรรมชาติ -->
-<title>Emojis, Symbols & Fancy Text — Fantrove</title>
+<title>Emojis, Symbols & Fancy Text — FanHoard</title>
 <meta name="description" content="Find, copy, and use thousands of emojis, symbols, and fancy text instantly. No installation required.">
 ```
 
@@ -607,7 +607,7 @@ echo "0" > .release-bypass  # reset เป็น 0 ได้ (ปิด bypass)
 
 ## 10. กฎเกี่ยวกับเอกสาร (Documentation — priority #1 สูงสุด)
 
-> 🥇 เอกสารเป็น priority สูงสุดของ Fantrove — สูงกว่า SEO และ Performance เพราะเป็นตัวอธิบายระบบ ดู [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) สำหรับมาตรฐานเต็ม
+> 🥇 เอกสารเป็น priority สูงสุดของ FanHoard — สูงกว่า SEO และ Performance เพราะเป็นตัวอธิบายระบบ ดู [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) สำหรับมาตรฐานเต็ม
 
 ### 10.1 ห้ามแก้ระบบโดยไม่อัปเดตเอกสาร
 
@@ -619,8 +619,8 @@ echo "0" > .release-bypass  # reset เป็น 0 ได้ (ปิด bypass)
 
 // ✅ ถูก — อัปเดตทั้งโค้ดและเอกสารใน commit เดียวกัน
 // - เพิ่ม assets/js/ure/ure-modules/new-module.js
-// - อัปเดต fantrove-docs/01-Virtual-Scroll-Rendering.md (เพิ่ม section)
-// - อัปเดต fantrove-docs/00-System-Architecture.md (ถ้ากระทบภาพรวม)
+// - อัปเดต fanhoard-docs/01-Virtual-Scroll-Rendering.md (เพิ่ม section)
+// - อัปเดต fanhoard-docs/00-System-Architecture.md (ถ้ากระทบภาพรวม)
 // - อัปเดต INDEX.md (ถ้าจำเป็น)
 ```
 
@@ -634,7 +634,7 @@ git commit -m "feat(ure): add new module"
 git commit -m "docs(ure): update for new module"
 
 # ✅ ถูก — รวมใน commit เดียว
-git add assets/js/ure/ure-modules/new-module.js fantrove-docs/01-Virtual-Scroll-Rendering.md
+git add assets/js/ure/ure-modules/new-module.js fanhoard-docs/01-Virtual-Scroll-Rendering.md
 git commit -m "feat(ure): add new module + update docs"
 ```
 
@@ -658,15 +658,15 @@ git commit -m "feat(ure): add new module + update docs"
 // (เดี๋ยวคนอื่นจะแก้เอง)
 
 // ✅ ถูก — บันทึกใน PR description หรือเปิด issue แยก
-// "พบเอกสารไม่ตรงจริงที่ fantrove-docs/XX.md:LINE — อธิบาย..."
+// "พบเอกสารไม่ตรงจริงที่ fanhoard-docs/XX.md:LINE — อธิบาย..."
 ```
 
 ### 10.5 ห้ามละเว้นมาตรฐานเอกสาร
 
-ทุกไฟล์ markdown ใน `fantrove-docs/` ต้องปฏิบัติตามมาตรฐานใน [`13-Documentation-Standard.md`](./13-Documentation-Standard.md):
+ทุกไฟล์ markdown ใน `fanhoard-docs/` ต้องปฏิบัติตามมาตรฐานใน [`13-Documentation-Standard.md`](./13-Documentation-Standard.md):
 
 - มี H1 + header blockquote + สารบัญ + cross-references
-- ใช้ "Fantrove" ไม่ใช่ "FanTrove" หรือ "Fantrove Page"
+- ใช้ "FanHoard" ไม่ใช่ "FanHoard" หรือ "FanHoard Page"
 - ใช้ relative path ใน cross-references
 - ใช้ชื่อไฟล์จริง (หลัง rename)
 - ใช้ language tag ใน code blocks
@@ -675,11 +675,11 @@ git commit -m "feat(ure): add new module + update docs"
 
 ```bash
 # ❌ ห้าม — rename แล้วไม่อัปเดต links
-mv fantrove-docs/01-old-name.md fantrove-docs/01-new-name.md
+mv fanhoard-docs/01-old-name.md fanhoard-docs/01-new-name.md
 git commit -m "rename"
 
 # ✅ ถูก — rename + อัปเดต cross-references ทุกที่
-mv fantrove-docs/01-old-name.md fantrove-docs/01-new-name.md
+mv fanhoard-docs/01-old-name.md fanhoard-docs/01-new-name.md
 python3 scripts/fix_cross_refs.py  # หรืออัปเดต manual
 # อัปเดต INDEX.md ด้วย
 git commit -m "docs: rename 01-old → 01-new + update cross-refs"

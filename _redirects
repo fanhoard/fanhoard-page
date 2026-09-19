@@ -21,7 +21,7 @@
 /assets/* /assets/:splat 200
 /robots.txt /robots.txt 200
 /sitemap.xml /sitemap.xml 200
-/favicon.ico /assets/images/fantrove-verse360.ico 200
+/favicon.ico /assets/images/fanhoard-verse360.ico 200
 /sw.js /sw.js 200
 
 # ── Home page (served at /home/ path) ──────────────────────────────────────

@@ -8,7 +8,7 @@
 
   // ── Z-Index Layers ─────────────────────────────────────────────────────────
   // Stackable popups increment within their layer. The base is always
-  // higher than the highest Fantrove z-index (--fv-z-toast: 19000).
+  // higher than the highest FanHoard z-index (--fv-z-toast: 19000).
 
   const Z_INDEX = Object.freeze({
     TOOLTIP       : 20000,
@@ -309,7 +309,7 @@
     }),
   });
 
-  // ── Shadow presets (map user-facing name to Fantrove tokens) ───────────────
+  // ── Shadow presets (map user-facing name to FanHoard tokens) ───────────────
 
   const SHADOWS = Object.freeze({
     none : 'none',

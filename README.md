@@ -1,4 +1,4 @@
-# Fantrove — Redirect Fix Patch (v3 — Final)
+# FanHoard — Redirect Fix Patch (v3 — Final)
 
 แก้ปัญหา "Page with redirect" ใน Google Search Console ที่ทำให้ Google ไม่สามารถ index หน้า `/` ได้ พร้อมทั้งทำให้ `index.html` ใน root เป็น custom 404 page ของระบบที่แสดงผลได้ทุกที่ที่ไม่พบหน้าจริง
 
@@ -73,7 +73,7 @@ Regenerate แล้ว:
 วางไฟล์เหล่านี้ทับไฟล์เดิมใน repo ตามโครงสร้าง folder เดิม:
 
 ```
-fantrove-page/
+fanhoard-page/
 ├── _redirects                                    ← ทับไฟล์เดิม
 ├── index.html                                    ← ทับไฟล์เดิม
 ├── sitemap.xml                                   ← ทับไฟล์เดิม
@@ -96,15 +96,15 @@ npm run build
 ## หลังจาก Deploy
 
 **พฤติกรรมใหม่:**
-- ผู้ใช้เข้า `https://fantrove.pages.dev/` → เห็น custom 404 page ของเรา (มีปุ่ม "Take Me Home" ไป `/home/`)
-- ผู้ใช้เข้า `https://fantrove.pages.dev/anything-not-exist` → เห็น custom 404 page เดียวกัน
-- ผู้ใช้เข้า `https://fantrove.pages.dev/home/` หรือ `https://fantrove.pages.dev/en/home/` → เห็น home page ปกติ
-- ผู้ใช้เข้า `https://fantrove.pages.dev/en/` หรือ `https://fantrove.pages.dev/th/` → เห็น home page ของภาษานั้น (URL คงเดิม)
+- ผู้ใช้เข้า `https://fanhoard.pages.dev/` → เห็น custom 404 page ของเรา (มีปุ่ม "Take Me Home" ไป `/home/`)
+- ผู้ใช้เข้า `https://fanhoard.pages.dev/anything-not-exist` → เห็น custom 404 page เดียวกัน
+- ผู้ใช้เข้า `https://fanhoard.pages.dev/home/` หรือ `https://fanhoard.pages.dev/en/home/` → เห็น home page ปกติ
+- ผู้ใช้เข้า `https://fanhoard.pages.dev/en/` หรือ `https://fanhoard.pages.dev/th/` → เห็น home page ของภาษานั้น (URL คงเดิม)
 
 **ใน Google Search Console:**
-1. ไปที่ **URL Inspection** สำหรับ `https://fantrove.pages.dev/`
+1. ไปที่ **URL Inspection** สำหรับ `https://fanhoard.pages.dev/`
 2. Google จะเห็นว่าเป็น 404 → ไม่ index แต่ไม่ใช่ "Page with redirect" อีกต่อไป
-3. ไปที่ **URL Inspection** สำหรับ `https://fantrove.pages.dev/en/home/`
+3. ไปที่ **URL Inspection** สำหรับ `https://fanhoard.pages.dev/en/home/`
 4. กด **Request Indexing** → Google จะ index canonical URL นี้เป็นหน้าแรกของเว็บ
 5. รอ 1-3 วัน → สถานะ "Page with redirect" จะหายไปจาก GSC
 

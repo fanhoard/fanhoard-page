@@ -1,6 +1,6 @@
 # 12 — SEO Guide (Search Engine Optimization Strategy)
 
-> เอกสารนี้คือ **กลยุทธ์ SEO ระดับ platform** ของ Fantrove — ปฏิบัติดังทีมงานของแพลตฟอร์มใหญ่ที่ดำเนินมาหลายปี ไม่ใช่ checklist เล็ก ๆ ของเว็บเริ่มต้น
+> เอกสารนี้คือ **กลยุทธ์ SEO ระดับ platform** ของ FanHoard — ปฏิบัติดังทีมงานของแพลตฟอร์มใหญ่ที่ดำเนินมาหลายปี ไม่ใช่ checklist เล็ก ๆ ของเว็บเริ่มต้น
 >
 > **สำหรับ:** AI และนักพัฒนาทุกคน — ทุกการตัดสินใจทางเทคนิคต้องคำนึงถึง SEO
 >
@@ -36,9 +36,9 @@
 
 ## 1. ภาพรวมกลยุทธ์ SEO
 
-Fantrove เป็น static website บน Cloudflare Pages ที่แสดงอีโมจิ สัญลักษณ์ ข้อความแฟนซี และคอลเลกชัน — ทุกอย่างที่ทำให้ search engine เข้าใจเราดีขึ้นคือ SEO ที่ดี กลยุทธ์ SEO ของเราออกแบบมาเพื่อแข่งกับเว็บใหญ่ ๆ ในสายเดียวกัน (เช่น Emojipedia, SymbolKeyboard, Fancy Text Generator) โดยใช้จุดแข็งหลัก 3 อย่าง:
+FanHoard เป็น static website บน Cloudflare Pages ที่แสดงอีโมจิ สัญลักษณ์ ข้อความแฟนซี และคอลเลกชัน — ทุกอย่างที่ทำให้ search engine เข้าใจเราดีขึ้นคือ SEO ที่ดี กลยุทธ์ SEO ของเราออกแบบมาเพื่อแข่งกับเว็บใหญ่ ๆ ในสายเดียวกัน (เช่น Emojipedia, SymbolKeyboard, Fancy Text Generator) โดยใช้จุดแข็งหลัก 3 อย่าง:
 
-### 1.1 จุดแข็งทาง SEO ของ Fantrove
+### 1.1 จุดแข็งทาง SEO ของ FanHoard
 
 1. **Static HTML pre-built** — เนื้อหาทุกหน้าแปลแล้วล่วงหน้าใน HTML ตอน build time search engine crawl ได้ทันที ไม่ต้องรอ JavaScript
 2. **Multi-language native** — แต่ละภาษามี URL เฉพาะ (`/en/`, `/th/`) พร้อม hreflang ที่ถูกต้อง Google เข้าใจเนื้อหาแต่ละภาษาแยกกัน
@@ -64,7 +64,7 @@ Fantrove เป็น static website บน Cloudflare Pages ที่แสด�
 
 > ⚠️ **กฎเหล็ก:** เราดัน SEO **ทุกภาษาที่รองรับเท่ากัน** ไม่เลือกภาษาใดภาษาหนึ่ง — ปัจจุบันคือ `en` (English) และ `th` (Thai) เมื่อเพิ่มภาษาใหม่ ภาษานั้นต้องได้รับการปฏิบัติเหมือนภาษาเดิมทุกประการ
 
-Fantrove เป็นเว็บ multi-language โดย design — ทุกภาษาคือ "พลเมืองชั้นหนึ่ง" ที่ต้องได้รับ SEO treatment เต็มรูปแบบเหมือนกันหมด ห้าม bias ภาษาใดภาษาหนึ่ง
+FanHoard เป็นเว็บ multi-language โดย design — ทุกภาษาคือ "พลเมืองชั้นหนึ่ง" ที่ต้องได้รับ SEO treatment เต็มรูปแบบเหมือนกันหมด ห้าม bias ภาษาใดภาษาหนึ่ง
 
 #### 1.4.1 กฎ multi-language parity
 
@@ -100,7 +100,7 @@ Technical SEO คือพื้นฐานที่ทำให้ search engi
 
 ### 2.1 Static HTML pre-build
 
-Fantrove ใช้ build system (`scripts/build.js`) ที่แปล translation markers (`[data-translate]`) เป็น text จริงใน HTML ก่อน deploy ทำให้:
+FanHoard ใช้ build system (`scripts/build.js`) ที่แปล translation markers (`[data-translate]`) เป็น text จริงใน HTML ก่อน deploy ทำให้:
 
 - ✅ Search engine เห็นเนื้อหาเป็นภาษาที่แปลแล้ว ไม่ใช่แค่ tag เปล่า ๆ
 - ✅ First Contentful Paint (FCP) เร็วขึ้นเพราะ browser ไม่ต้องรอ JS แปล
@@ -141,29 +141,29 @@ Meta tags บอก search engine และ social media ว่าหน้า�
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 
   <!-- Canonical -->
-  <link rel="canonical" href="https://fantrove.pages.dev/{lang}/{page}/">
+  <link rel="canonical" href="https://fanhoard.pages.dev/{lang}/{page}/">
 
   <!-- hreflang (ดู section 4) -->
-  <link rel="alternate" hreflang="en" href="https://fantrove.pages.dev/en/{page}/">
-  <link rel="alternate" hreflang="th" href="https://fantrove.pages.dev/th/{page}/">
-  <link rel="alternate" hreflang="x-default" href="https://fantrove.pages.dev/en/{page}/">
+  <link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/{page}/">
+  <link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/{page}/">
+  <link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/{page}/">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://fantrove.pages.dev/{lang}/{page}/">
+  <meta property="og:url" content="https://fanhoard.pages.dev/{lang}/{page}/">
   <meta property="og:title" content="{title}">
   <meta property="og:description" content="{description}">
-  <meta property="og:image" content="https://fantrove.pages.dev/assets/images/OG/{page-og}.png">
+  <meta property="og:image" content="https://fanhoard.pages.dev/assets/images/OG/{page-og}.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="{lang}_TH or {lang}_US">
-  <meta property="og:site_name" content="Fantrove">
+  <meta property="og:site_name" content="FanHoard">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{title}">
   <meta name="twitter:description" content="{description}">
-  <meta name="twitter:image" content="https://fantrove.pages.dev/assets/images/OG/{page-og}.png">
+  <meta name="twitter:image" content="https://fanhoard.pages.dev/assets/images/OG/{page-og}.png">
 
   <!-- Theme color -->
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
@@ -175,15 +175,15 @@ Meta tags บอก search engine และ social media ว่าหน้า�
 
 - ความยาว **50-60 ตัวอักษร** (Google ตัดที่ประมาณ 60)
 - ใส่ keyword หลักที่ต้นประโยค
-- ใส่ชื่อแบรนด์ท้ายประโยค ("— Fantrove" หรือ "| Fantrove")
+- ใส่ชื่อแบรนด์ท้ายประโยค ("— FanHoard" หรือ "| FanHoard")
 - แต่ละหน้าต้อง unique ไม่ซ้ำกัน
 - ภาษาของ title ต้องตรงกับ `lang` attribute ของหน้า
 
 **ตัวอย่าง:**
-- หน้า Home (en): `Emojis, Symbols & Fancy Text — Fantrove`
-- หน้า Home (th): `อีโมจิ สัญลักษณ์ ข้อความแฟนซี — Fantrove`
-- หน้า Search (en): `Search Emojis & Symbols — Fantrove`
-- หน้า Search (th): `ค้นหาอีโมจิและสัญลักษณ์ — Fantrove`
+- หน้า Home (en): `Emojis, Symbols & Fancy Text — FanHoard`
+- หน้า Home (th): `อีโมจิ สัญลักษณ์ ข้อความแฟนซี — FanHoard`
+- หน้า Search (en): `Search Emojis & Symbols — FanHoard`
+- หน้า Search (th): `ค้นหาอีโมจิและสัญลักษณ์ — FanHoard`
 
 ### 3.3 กฎการเขียน description
 
@@ -210,15 +210,15 @@ Meta tags บอก search engine และ social media ว่าหน้า�
 
 ## 4. hreflang & International SEO
 
-Fantrove รองรับหลายภาษา — hreflang เป็นวิธีบอก Google ว่าหน้าไหนเป็นภาษาอะไร และเป็น alternate version ของกันและกัน
+FanHoard รองรับหลายภาษา — hreflang เป็นวิธีบอก Google ว่าหน้าไหนเป็นภาษาอะไร และเป็น alternate version ของกันและกัน
 
 ### 4.1 hreflang tags ที่ต้องมีในทุกหน้า
 
 ```html
 <!-- สำหรับหน้า home เป็นตัวอย่าง -->
-<link rel="alternate" hreflang="en" href="https://fantrove.pages.dev/en/home/">
-<link rel="alternate" hreflang="th" href="https://fantrove.pages.dev/th/home/">
-<link rel="alternate" hreflang="x-default" href="https://fantrove.pages.dev/en/home/">
+<link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/home/">
+<link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/home/">
+<link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/home/">
 ```
 
 ### 4.2 กฎ hreflang
@@ -232,13 +232,13 @@ Fantrove รองรับหลายภาษา — hreflang เป็นว
 ### 4.3 URL structure สำหรับแต่ละภาษา
 
 ```
-https://fantrove.pages.dev/en/home/    ← English home
-https://fantrove.pages.dev/th/home/    ← Thai home
-https://fantrove.pages.dev/en/search/  ← English search
-https://fantrove.pages.dev/th/search/  ← Thai search
+https://fanhoard.pages.dev/en/home/    ← English home
+https://fanhoard.pages.dev/th/home/    ← Thai home
+https://fanhoard.pages.dev/en/search/  ← English search
+https://fanhoard.pages.dev/th/search/  ← Thai search
 ```
 
-ใช้รูปแบบ **subdirectory** (`/lang/`) ไม่ใช่ subdomain (`en.fantrove...`) เพราะ:
+ใช้รูปแบบ **subdirectory** (`/lang/`) ไม่ใช่ subdomain (`en.fanhoard...`) เพราะ:
 - รวม link equity ใน domain เดียว
 - ง่ายต่อการ manage ใน Cloudflare Pages
 - Google เข้าใจดีกว่า
@@ -258,10 +258,10 @@ https://fantrove.pages.dev/th/search/  ← Thai search
 
 ```xml
 <url>
-  <loc>https://fantrove.pages.dev/en/home/</loc>
-  <xhtml:link rel="alternate" hreflang="en" href="https://fantrove.pages.dev/en/home/"/>
-  <xhtml:link rel="alternate" hreflang="th" href="https://fantrove.pages.dev/th/home/"/>
-  <xhtml:link rel="alternate" hreflang="x-default" href="https://fantrove.pages.dev/en/home/"/>
+  <loc>https://fanhoard.pages.dev/en/home/</loc>
+  <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/home/"/>
+  <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/home/"/>
+  <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/home/"/>
 </url>
 ```
 
@@ -274,7 +274,7 @@ Canonical URL บอก Google ว่า "นี่คือ URL หลักข
 ### 5.1 กฎ canonical
 
 - ทุกหน้าต้องมี `<link rel="canonical">` ที่ถูกต้อง
-- Canonical URL ต้องเป็น **absolute URL** (`https://fantrove.pages.dev/...`)
+- Canonical URL ต้องเป็น **absolute URL** (`https://fanhoard.pages.dev/...`)
 - Canonical ต้องชี้ไปหน้าที่ index ได้จริง (ไม่ใช่ redirect หรือ 404)
 - ถ้ามี query parameters ที่ไม่เปลี่ยนเนื้อหา (เช่น `?utm_source`) ให้ canonical ชี้ไป version ไม่มี query
 - ถ้ามีหลายภาษา แต่ละภาษามี canonical ของตัวเอง (ไม่ใช่ canonical ไปภาษาเดียว)
@@ -312,13 +312,13 @@ Sitemap.xml บอก search engine ว่ามีหน้าอะไรบ�
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://fantrove.pages.dev/en/home/</loc>
+    <loc>https://fanhoard.pages.dev/en/home/</loc>
     <lastmod>2026-06-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://fantrove.pages.dev/en/home/"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://fantrove.pages.dev/th/home/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://fantrove.pages.dev/en/home/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/home/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/home/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/home/"/>
   </url>
   <!-- ... ทุกหน้า × ทุกภาษา -->
 </urlset>
@@ -335,7 +335,7 @@ Sitemap.xml บอก search engine ว่ามีหน้าอะไรบ�
 
 - **Google Search Console:** Properties → Sitemaps → submit `sitemap.xml`
 - **Bing Webmaster Tools:** Submit sitemap
-- `robots.txt` ต้องชี้ไป sitemap: `Sitemap: https://fantrove.pages.dev/sitemap.xml`
+- `robots.txt` ต้องชี้ไป sitemap: `Sitemap: https://fanhoard.pages.dev/sitemap.xml`
 
 ### 6.4 เมื่อเพิ่ม/ลบหน้า
 
@@ -359,7 +359,7 @@ Allow: /
 Disallow: /assets/js/ure/ure-examples.js
 
 # Sitemap location
-Sitemap: https://fantrove.pages.dev/sitemap.xml
+Sitemap: https://fanhoard.pages.dev/sitemap.xml
 ```
 
 ### 7.2 กฎการใช้ robots.txt
@@ -391,14 +391,14 @@ Structured data บอก Google ว่าเนื้อหาหน้าน�
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "Fantrove",
-  "alternateName": "Fantrove Verse",
-  "url": "https://fantrove.pages.dev/",
+  "name": "FanHoard",
+  "alternateName": "FanHoard Verse",
+  "url": "https://fanhoard.pages.dev/",
   "potentialAction": {
     "@type": "SearchAction",
     "target": {
       "@type": "EntryPoint",
-      "urlTemplate": "https://fantrove.pages.dev/en/search/?q={search_term_string}"
+      "urlTemplate": "https://fanhoard.pages.dev/en/search/?q={search_term_string}"
     },
     "query-input": "required name=search_term_string"
   }
@@ -418,13 +418,13 @@ Structured data บอก Google ว่าเนื้อหาหน้าน�
       "@type": "ListItem",
       "position": 1,
       "name": "Home",
-      "item": "https://fantrove.pages.dev/en/home/"
+      "item": "https://fanhoard.pages.dev/en/home/"
     },
     {
       "@type": "ListItem",
       "position": 2,
       "name": "Discover",
-      "item": "https://fantrove.pages.dev/en/data/verse/discover/"
+      "item": "https://fanhoard.pages.dev/en/data/verse/discover/"
     }
   ]
 }
@@ -438,9 +438,9 @@ Structured data บอก Google ว่าเนื้อหาหน้าน�
 {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "Fantrove",
-  "url": "https://fantrove.pages.dev/",
-  "logo": "https://fantrove.pages.dev/assets/images/fantrove-logo-1280.png",
+  "name": "FanHoard",
+  "url": "https://fanhoard.pages.dev/",
+  "logo": "https://fanhoard.pages.dev/assets/images/fanhoard-logo-1280.png",
   "sameAs": [
     "https://discord.gg/MMxQSZB3y3",
     "https://www.patreon.com/rowingsco"
@@ -457,7 +457,7 @@ Structured data บอก Google ว่าเนื้อหาหน้าน�
 - อย่าใส่ structured data ที่ไม่ตรงกับเนื้อหาหน้า (เช่น อย่าใส่ `Recipe` ในหน้าที่ไม่ใช่สูตรอาหาร)
 - อัปเดตเมื่อเนื้อหาเปลี่ยน (เช่น เพิ่มภาษาใหม่ → อัปเดต `potentialAction.target`)
 
-### 8.5 Schema types ที่ Fantrove ใช้
+### 8.5 Schema types ที่ FanHoard ใช้
 
 | Schema type | ใช้ที่ไหน | วัตถุประสงค์ |
 |---|---|---|
@@ -537,7 +537,7 @@ Google ใช้ mobile version ของหน้าเว็บเป็น pr
 - ตรวจสอบว่าไม่มี horizontal scroll บนมือถือ
 - ปุ่ม/ลิงก์ต้องกดได้ง่ายด้วยนิ้วโป้ง
 
-### 10.3 Mobile-specific considerations ของ Fantrove
+### 10.3 Mobile-specific considerations ของ FanHoard
 
 - URE ปรับ buffer size ตาม device tier (ดู `08-Performance-Architecture.md` ส่วน device tier)
 - Search มีระบบ keyboard handling สำหรับมือถี่ (ดู `02-Search-System.md` ส่วน keyboard)
@@ -615,10 +615,10 @@ Semantic HTML ช่วย search engine เข้าใจโครงสร้
 
 ```xml
 <url>
-  <loc>https://fantrove.pages.dev/en/home/</loc>
+  <loc>https://fanhoard.pages.dev/en/home/</loc>
   <image:image>
-    <image:loc>https://fantrove.pages.dev/assets/images/banner-fantrove-hub.jpg</image:loc>
-    <image:caption>Fantrove home banner</image:caption>
+    <image:loc>https://fanhoard.pages.dev/assets/images/banner-fanhoard-hub.jpg</image:loc>
+    <image:caption>FanHoard home banner</image:caption>
   </image:image>
 </url>
 ```
@@ -675,7 +675,7 @@ E-E-A-T = Experience, Expertise, Authoritativeness, Trustworthiness — หล�
 
 - เนื้อหาต้องถูกต้อง — emoji names ต้องตรงตาม Unicode standard
 - ใช้ terminology ที่ถูกต้อง (เช่น "Unicode code point" ไม่ใช่ "letter number")
-- เอกสาร technical (`fantrove-docs/`) แสดงความเชี่ยวชาญของทีม
+- เอกสาร technical (`fanhoard-docs/`) แสดงความเชี่ยวชาญของทีม
 
 ### 14.3 Authoritativeness
 
@@ -694,7 +694,7 @@ E-E-A-T = Experience, Expertise, Authoritativeness, Trustworthiness — หล�
 
 ### 14.5 YMYL (Your Money Your Life)
 
-Fantrove ไม่ใช่ YMYL site (ไม่เกี่ยวกับสุขภาพ, การเงิน, ความปลอดภัย) แต่ก็ต้องรักษา E-E-A-T ระดับหนึ่ง
+FanHoard ไม่ใช่ YMYL site (ไม่เกี่ยวกับสุขภาพ, การเงิน, ความปลอดภัย) แต่ก็ต้องรักษา E-E-A-T ระดับหนึ่ง
 
 ---
 
@@ -733,7 +733,7 @@ Fantrove ไม่ใช่ YMYL site (ไม่เกี่ยวกับส�
 
 ### 16.1 Google Search Console
 
-- **Property type:** URL prefix (`https://fantrove.pages.dev`)
+- **Property type:** URL prefix (`https://fanhoard.pages.dev`)
 - **Verify:** ผ่าน HTML file (`google6b646fa60e0f9f2f.html`) ที่ root
 - **Sitemap:** ส่ง `sitemap.xml`
 - **Performance:** ดู queries, pages, countries, devices

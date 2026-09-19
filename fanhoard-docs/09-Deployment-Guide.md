@@ -1,6 +1,6 @@
 # 09 — คู่มือ Deployment (Deployment Guide)
 
-> เอกสารนี้อธิบายวิธี deploy โปรเจกต์ **Fantrove** (หรือ Fantrove Verse) บน Cloudflare Pages — ตั้งแต่การตั้งค่าครั้งแรก, build process, environment variables, ไปจนถึงการตรวจสอบหลัง deploy
+> เอกสารนี้อธิบายวิธี deploy โปรเจกต์ **FanHoard** (หรือ FanHoard Verse) บน Cloudflare Pages — ตั้งแต่การตั้งค่าครั้งแรก, build process, environment variables, ไปจนถึงการตรวจสอบหลัง deploy
 >
 > **สำหรับ:** นักพัฒนา/AI ที่รับผิดชอบการ deploy หรือตั้งค่า environment ใหม่
 >
@@ -28,7 +28,7 @@
 
 ## 1. ภาพรวม Deployment
 
-Fantrove เป็น static website ที่ deploy บน **Cloudflare Pages** ที่ URL `fantrove.pages.dev` (และ custom domain ถ้ามี) การ deploy ไม่ใช้แค่ "push ไฟล์ขึ้น server" แต่มี **build step** ที่สำคัญ — เพื่อสร้าง static HTML สำหรับแต่ละภาษาจาก source HTML + translation JSON
+FanHoard เป็น static website ที่ deploy บน **Cloudflare Pages** ที่ URL `fanhoard.pages.dev` (และ custom domain ถ้ามี) การ deploy ไม่ใช้แค่ "push ไฟล์ขึ้น server" แต่มี **build step** ที่สำคัญ — เพื่อสร้าง static HTML สำหรับแต่ละภาษาจาก source HTML + translation JSON
 
 ### 1.1 ขั้นตอนระดับสูง
 
@@ -60,7 +60,7 @@ Build script (scripts/build.js):
 Deploy dist/ ขึ้น Cloudflare Pages CDN
         │
         ▼
-เว็บ live ที่ fantrove.pages.dev
+เว็บ live ที่ fanhoard.pages.dev
 ```
 
 ### 1.2 ทำไมต้องมี build step?
@@ -97,8 +97,8 @@ Build step แก้ปัญหาทั้งหมดโดยสร้าง
 
 ```bash
 # Clone repo
-git clone https://github.com/fantrove/fantrove-page.git
-cd fantrove-page
+git clone https://github.com/fanhoard/fanhoard-page.git
+cd fanhoard-page
 
 # ติดตั้ง dependencies
 npm install
@@ -227,7 +227,7 @@ Build script หลักอยู่ที่ `scripts/build.js` ทำงา�
 
 | Setting | Value |
 |---|---|
-| Project name | `fantrove` |
+| Project name | `fanhoard` |
 | Production branch | `main` |
 | Framework preset | None |
 | Build command | `npm run build` |
@@ -273,7 +273,7 @@ const CONFIG = {
   dbJsonPath: 'assets/lang/options/db.json',
   translationPath: (lang) => `assets/lang/${lang}.json`,
   defaultLang: 'en',
-  baseUrl: 'https://fantrove.pages.dev',
+  baseUrl: 'https://fanhoard.pages.dev',
   // ...
 };
 ```
@@ -282,7 +282,7 @@ const CONFIG = {
 
 ### 5.3 Secrets / API keys
 
-ปัจจุบัน Fantrove ไม่มี server-side code จึงไม่มี secrets ที่ต้องเก็บ แต่ third-party services ที่ใช้บนเว็บ (GTM, GA4, AdSense) มี ID ฝังอยู่ใน HTML โดยตรง — ดูรายละเอียดใน `00-System-Architecture.md` ส่วน Third-Party Integrations
+ปัจจุบัน FanHoard ไม่มี server-side code จึงไม่มี secrets ที่ต้องเก็บ แต่ third-party services ที่ใช้บนเว็บ (GTM, GA4, AdSense) มี ID ฝังอยู่ใน HTML โดยตรง — ดูรายละเอียดใน `00-System-Architecture.md` ส่วน Third-Party Integrations
 
 ---
 
@@ -333,7 +333,7 @@ Build script ใช้ **Cheerio** (npm dependency) สำหรับ parse HTM
 | `defaultLang` | `en` | ภาษา default (สำหรับ x-default hreflang) |
 | `excludeDirs` | `[dist, node_modules, .git, scripts, ...]` | โฟลเดอร์ที่ไม่ build |
 | `removeScriptPatterns` | `[lang-proxy.js, lang-sync.js, lang-coordinator.js]` | Scripts ที่ลบออกจาก built pages |
-| `baseUrl` | `https://fantrove.pages.dev` | URL หลักสำหรับ canonical/hreflang |
+| `baseUrl` | `https://fanhoard.pages.dev` | URL หลักสำหรับ canonical/hreflang |
 | `staticFiles` | `[robots.txt, sitemap.xml, _headers, ...]` | ไฟล์ที่ copy ตรงไป dist/ |
 | `passThroughHiddenDirs` | `[.well-known]` | Hidden dirs ที่ copy ตรง |
 | `footerTemplatePath` | `assets/template-html/footer-template.html` | Footer template สำหรับ inject |
@@ -358,13 +358,13 @@ Cloudflare Pages ใช้ไฟล์ `_redirects` สำหรับ routing �
 /assets/* /assets/:splat 200
 /robots.txt /robots.txt 200
 /sitemap.xml /sitemap.xml 200
-/favicon.ico /assets/images/fantrove-verse360.ico 200
+/favicon.ico /assets/images/fanhoard-verse360.ico 200
 ```
 
 ### 7.2 URL Structure หลัง build
 
 ```
-https://fantrove.pages.dev/
+https://fanhoard.pages.dev/
     │
     ├── /en/home/                    # Home (English)
     ├── /en/search/                  # Search (English)
@@ -512,12 +512,12 @@ Script สร้าง `sitemap.xml` จากรายการหน้าท�
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://fantrove.pages.dev/en/home/</loc>
+    <loc>https://fanhoard.pages.dev/en/home/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://fantrove.pages.dev/th/home/</loc>
+    <loc>https://fanhoard.pages.dev/th/home/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -543,7 +543,7 @@ Script สร้าง `sitemap.xml` จากรายการหน้าท�
 
 ### 11.1 ตรวจสอบด้วย browser
 
-- [ ] เปิด `https://fantrove.pages.dev/` — ควร redirect ไป `/en/home/` หรือ `/th/home/` ตาม browser language
+- [ ] เปิด `https://fanhoard.pages.dev/` — ควร redirect ไป `/en/home/` หรือ `/th/home/` ตาม browser language
 - [ ] เปิด `/en/home/` ตรง ๆ — ควรเห็นเนื้อหาเป็นภาษาอังกฤษทันที (ไม่ต้องรอ JS)
 - [ ] เปิด `/th/home/` ตรง ๆ — ควรเห็นเนื้อหาเป็นภาษาไทยทันที
 - [ ] สลับภาษา — ควรเปลี่ยน URL และเนื้อหา
@@ -567,7 +567,7 @@ Script สร้าง `sitemap.xml` จากรายการหน้าท�
 ### 11.4 ตรวจสอบ version.json
 
 ```bash
-curl https://fantrove.pages.dev/assets/json/version.json
+curl https://fanhoard.pages.dev/assets/json/version.json
 ```
 
 ควรได้:

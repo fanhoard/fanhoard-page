@@ -1,7 +1,7 @@
 /**
- * @file home.js — Fantrove Verse Home Page
+ * @file home.js — FanHoard Verse Home Page
  * @version 4.3
- * @description Home page renderer สำหรับ Fantrove — โหลดข้อมูลจาก ConDataService,
+ * @description Home page renderer สำหรับ FanHoard — โหลดข้อมูลจาก ConDataService,
  * สร้าง carousel แสดง emoji/symbol/fancy พร้อมปุ่ม copy, View All, และ carousel arrows
  *
  * @requires ConDataService (dynamic import) — สำหรับโหลดข้อมูล content

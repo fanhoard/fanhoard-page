@@ -55,7 +55,7 @@
 }
 
 .suggestion-badge--type {
-  /* Teal tint — matches the Fantrove brand accent */
+  /* Teal tint — matches the FanHoard brand accent */
   background: rgba(19, 180, 127, 0.12);
   color: #0f7a55;
 }
@@ -66,7 +66,7 @@
   color: #1a5276;
 }
 
-/* Dark-mode adjustments — Fantrove uses light theme by default but the
+/* Dark-mode adjustments — FanHoard uses light theme by default but the
  * tokens flip on prefers-color-scheme. Make sure badges stay readable. */
 @media (prefers-color-scheme: dark) {
   .suggestion-badge {

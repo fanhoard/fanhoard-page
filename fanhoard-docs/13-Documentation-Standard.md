@@ -1,6 +1,6 @@
 # 13 — มาตรฐานการเขียนเอกสาร (Documentation Standard)
 
-> เอกสารนี้เป็น **มาตรฐานสูงสุด** สำหรับการเขียนและอัปเดตเอกสารทุกชนิดในโปรเจกต์ Fantrove — ทั้งเอกสารระบบ (00-12), เอกสาร AI (`AI_*.md`), `RELEASE_NOTES_GUIDE.md`, และ `README.md`
+> เอกสารนี้เป็น **มาตรฐานสูงสุด** สำหรับการเขียนและอัปเดตเอกสารทุกชนิดในโปรเจกต์ FanHoard — ทั้งเอกสารระบบ (00-12), เอกสาร AI (`AI_*.md`), `RELEASE_NOTES_GUIDE.md`, และ `README.md`
 >
 > **สำหรับ:** AI และนักพัฒนาทุกคนที่เขียน/แก้เอกสาร — ต้องยึดมาตรฐานนี้เสมอเพื่อให้เอกสารทุกไฟล์มีคุณภาพสม่ำเสมอ
 >
@@ -28,9 +28,9 @@
 
 ## 1. ทำไมเอกสารสำคัญที่สุด
 
-เอกสารคือตัวกลางระหว่างระบบกับผู้พัฒนา (รวมถึง AI agent) ทุกคน — ถ้าเอกสารไม่ตรงจริง การพัฒนาจะสับสน ตัดสินใจผิด และสร้าง bug ใหม่ ๆ ดังนั้นเอกสารมี priority สูงสุดใน Fantrove
+เอกสารคือตัวกลางระหว่างระบบกับผู้พัฒนา (รวมถึง AI agent) ทุกคน — ถ้าเอกสารไม่ตรงจริง การพัฒนาจะสับสน ตัดสินใจผิด และสร้าง bug ใหม่ ๆ ดังนั้นเอกสารมี priority สูงสุดใน FanHoard
 
-### 1.1 Priority Hierarchy ของ Fantrove
+### 1.1 Priority Hierarchy ของ FanHoard
 
 | Priority | ระดับ | เหตุผล |
 |---|---|---|
@@ -52,7 +52,7 @@
 
 ## 2. มาตรฐานโครงสร้างไฟล์
 
-ทุกไฟล์ markdown ใน `fantrove-docs/` ต้องมีโครงสร้างนี้ตามลำดับ:
+ทุกไฟล์ markdown ใน `fanhoard-docs/` ต้องมีโครงสร้างนี้ตามลำดับ:
 
 ```
 1. H1 heading (# XX — Title)
@@ -70,7 +70,7 @@
 ```markdown
 # 13 — มาตรฐานการเขียนเอกสาร (Documentation Standard)
 
-> เอกสารนี้เป็น **มาตรฐานสูงสุด** สำหรับการเขียนและอัปเดตเอกสารทุกชนิดในโปรเจกต์ Fantrove
+> เอกสารนี้เป็น **มาตรฐานสูงสุด** สำหรับการเขียนและอัปเดตเอกสารทุกชนิดในโปรเจกต์ FanHoard
 >
 > **สำหรับ:** AI และนักพัฒนาทุกคนที่เขียน/แก้เอกสาร
 >
@@ -115,7 +115,7 @@
 ```markdown
 # 02 — ระบบ Search (Search System)
 
-> เอกสารนี้อธิบายระบบ Search ของ **Fantrove** — ระบบค้นหา client-side แบบ two-tier (substring + Fuse.js fuzzy) ที่ทำงานร่วมกับ URE สำหรับ virtual scroll rendering
+> เอกสารนี้อธิบายระบบ Search ของ **FanHoard** — ระบบค้นหา client-side แบบ two-tier (substring + Fuse.js fuzzy) ที่ทำงานร่วมกับ URE สำหรับ virtual scroll rendering
 >
 > **สำหรับ:** AI และนักพัฒนาที่จะแก้/ขยายระบบ Search
 >
@@ -130,7 +130,7 @@
 - เว้นบรรทัดว่างระหว่าง field
 - **สำหรับ** ต้องระบุชัดว่าใครควรอ่าน
 - **ไฟล์หลัก** ต้องระบุ path จริง (ไม่ใช่ path สั้น)
-- ใช้ **Fantrove** ไม่ใช่ "Fantrove Page" หรือ "FanTrove"
+- ใช้ **FanHoard** ไม่ใช่ "FanHoard Page" หรือ "FanHoard"
 
 ---
 
@@ -219,7 +219,7 @@ N. [อ้างอิงข้ามเอกสาร](#n-อ้างอิ�
 | ❌ ห้ามใช้ | ✅ ใช้แทน |
 |---|---|
 | ปฏิวัติ, พลิกโฉม, สุดยอด | ปรับปรุง, เพิ่ม, แก้ไข |
-| FanTrove, Fantrove Page | Fantrove |
+| FanHoard, FanHoard Page | FanHoard |
 | น่าจะ, อาจจะ (ใน spec) | ต้อง, จะ (ชัดเจน) |
 | ฯลฯ ใน checklist | ระบุให้ครบ |
 
@@ -368,7 +368,7 @@ docs(seo): add multi-language parity section
 ```markdown
 # XX — ชื่อระบบ (English Name)
 
-> เอกสารนี้อธิบายระบบ **[ชื่อระบบ]** ของ Fantrove — [1 ประโยคอธิบายหน้าที่]
+> เอกสารนี้อธิบายระบบ **[ชื่อระบบ]** ของ FanHoard — [1 ประโยคอธิบายหน้าที่]
 >
 > **สำหรับ:** AI และนักพัฒนาที่จะแก้/ขยาย [ชื่อระบบ]
 >
@@ -409,7 +409,7 @@ docs(seo): add multi-language parity section
 ```markdown
 # AI_XXX — ชื่อมาตรฐาน
 
-> เอกสารนี้กำหนด [อะไร] สำหรับ AI agent ทุกตัวที่ทำงานกับโค้ดเบส Fantrove
+> เอกสารนี้กำหนด [อะไร] สำหรับ AI agent ทุกตัวที่ทำงานกับโค้ดเบส FanHoard
 >
 > **สำหรับ:** AI agents ที่ [ทำอะไร]
 >
@@ -453,7 +453,7 @@ docs(seo): add multi-language parity section
 ### 11.2 เนื้อหา
 
 - [ ] ใช้ภาษาไทย (ยกเว้น code blocks และ technical terms)
-- [ ] ใช้ "Fantrove" ไม่ใช่ "FanTrove" หรือ "Fantrove Page"
+- [ ] ใช้ "FanHoard" ไม่ใช่ "FanHoard" หรือ "FanHoard Page"
 - [ ] น้ำเสียงเป็นมิตร ตรงไปตรงมา ไม่ทางการเกินไป
 - [ ] ไม่มีคำต้องห้าม (ปฏิวัติ, พลิกโฉม, สุดยอด)
 - [ ] ทุก code block มี language tag
@@ -480,7 +480,7 @@ docs(seo): add multi-language parity section
 
 ### 12.1 ห้ามในเอกสาร
 
-- ❌ ห้ามใช้ "FanTrove" หรือ "Fantrove Page" — ใช้ "Fantrove"
+- ❌ ห้ามใช้ "FanHoard" หรือ "FanHoard Page" — ใช้ "FanHoard"
 - ❌ ห้ามเขียนเอกสารโดยไม่มี สารบัญ (ถ้าไฟล์ > 100 บรรทัด)
 - ❌ ห้ามเขียนเอกสารโดยไม่มี section "อ้างอิงข้ามเอกสาร"
 - ❌ ห้ามใช้ absolute path ใน cross-references — ใช้ relative path

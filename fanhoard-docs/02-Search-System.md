@@ -1,6 +1,6 @@
 # 02 — ระบบ Search (Search System)
 
-> เอกสารนี้อธิบายระบบ Search ของ **Fantrove** — ระบบค้นหา client-side แบบ two-tier (substring + Fuse.js fuzzy) ที่ทำงานร่วมกับ URE สำหรับ virtual scroll rendering
+> เอกสารนี้อธิบายระบบ Search ของ **FanHoard** — ระบบค้นหา client-side แบบ two-tier (substring + Fuse.js fuzzy) ที่ทำงานร่วมกับ URE สำหรับ virtual scroll rendering
 >
 > **สำหรับ:** AI และนักพัฒนาที่จะแก้/ขยายระบบ Search
 >
@@ -40,7 +40,7 @@
 
 > **v3.0 การปรับปรุงครั้งใหญ่:** ระบบ Search ถูกรวมไฟล์หลัก 2 ไฟล์ (`search-engine.js` + `search-ui.js`) เข้าเป็นไฟล์เดียว (`search.js`) และย้าย modules เข้าไปอยู่ในโฟลเดอร์ `search-system/` เพื่อให้เป็นระบบ modular เช่นเดียวกับ URE ดู [`assets/js/search-system/MIGRATION.md`](../assets/js/search-system/MIGRATION.md) สำหรับรายละเอียดเต็ม
 
-ระบบ Search ของ Fantrove ถูกออกแบบแบบ **modular architecture** ประกอบด้วย:
+ระบบ Search ของ FanHoard ถูกออกแบบแบบ **modular architecture** ประกอบด้วย:
 
 - **`search-system/search.js`** — Entry point หลัก (IIFE, ไม่มี dependency) ที่โหลด modules ทั้งหมดแบบ 5-phase parallel, จัดการ data prefetch, และบูตระบบ — เหมือน `ure.js` ของระบบ URE
 - **`search-system/search-modules/engine.js`** — เอนจินค้นหา (IIFE module) ใช้ **substring search** แบบเบาสำหรับผลลัพธ์ทันที และ **Fuse.js** สำหรับ fuzzy search ที่แม่นยำกว่า — แทนที่ `search-engine.js` แบบ standalone เดิม
@@ -461,7 +461,7 @@ function scheduleBuildFuse() {
 
 ## 5. Two-Tier Search — ระบบค้นหาสองชั้น
 
-ระบบค้นหาของ Fantrove ใช้ **สองชั้น** เพื่อสร้างสมดุลระหว่างความเร็วและความแม่นยำ:
+ระบบค้นหาของ FanHoard ใช้ **สองชั้น** เพื่อสร้างสมดุลระหว่างความเร็วและความแม่นยำ:
 
 ### Tier 1: Immediate Substring Search
 
@@ -1883,7 +1883,7 @@ NotificationService.copyText(text, name)
 
 ### 19.1 Discovery System — แนวคิด
 
-ระบบ Search ของ Fantrove ก่อน v4.0 แสดงผลลัพธ์ค้นหาเท่านั้น — เมื่อผลลัพธ์หมด หน้าจอก็ว่างเปล่า (หรือแสดง 5 random suggestions กรณี empty state) ผู้ใช้ไม่สามารถ "ค้นพบ" สิ่งใหม่ๆ ได้หลังจากผลลัพธ์หลักหมด
+ระบบ Search ของ FanHoard ก่อน v4.0 แสดงผลลัพธ์ค้นหาเท่านั้น — เมื่อผลลัพธ์หมด หน้าจอก็ว่างเปล่า (หรือแสดง 5 random suggestions กรณี empty state) ผู้ใช้ไม่สามารถ "ค้นพบ" สิ่งใหม่ๆ ได้หลังจากผลลัพธ์หลักหมด
 
 v4.0 เพิ่ม **Discovery Section** — section ใหม่ที่ปรากฏใต้ผลลัพธ์หลัก แสดง related content ที่คาดว่าน่าจะเกี่ยวข้องกับสิ่งที่ผู้ใช้ค้นหา โดยอ้างอิงจากแพลตฟอร์มใหญ่ๆ เช่น YouTube ที่ผู้ใช้เห็นสิ่งที่ค้นหาก่อน แล้วเมื่อหมดก็ยังมีอันอื่นเพิ่มเติมเข้ามาให้สำรวจต่อ
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 # scripts/hooks/pre-push — Layer 2: Pre-push validation
-# 4-layer version control system for Fantrove
+# 4-layer version control system for FanHoard
 #
 # ตรวจสอบก่อน push:
 #   1. ไฟล์สำคัญครบ (current.md ทั้ง en + th)

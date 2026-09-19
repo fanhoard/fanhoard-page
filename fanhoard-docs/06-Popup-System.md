@@ -1,6 +1,6 @@
-# 06 — Popup System (Fantrove Popup System)
+# 06 — Popup System (FanHoard Popup System)
 
-> เอกสารนี้อธิบายระบบ **Popup System** ของ Fantrove — ระบบ popup ส่วนกลางที่ทุก popup ทั่วทั้งเว็บใช้ร่วมกัน (9 presets, fullscreen, zero coupling กับระบบอื่น)
+> เอกสารนี้อธิบายระบบ **Popup System** ของ FanHoard — ระบบ popup ส่วนกลางที่ทุก popup ทั่วทั้งเว็บใช้ร่วมกัน (9 presets, fullscreen, zero coupling กับระบบอื่น)
 >
 > **สำหรับ:** AI และนักพัฒนาที่จะแก้ Popup System หรือเรียกใช้ popup ในโค้ดใหม่
 >
@@ -30,14 +30,14 @@
 
 ## 1. Overview
 
-Popup System คือระบบ popup ส่วนกลางของ Fantrove ที่ออกแบบมาเพื่อให้ **ทุก popup ทั่วทั้งเว็บมีคุณภาพระดับเดียวกัน** สามารถใช้งานได้ง่าย และยืดหยุ่นเหมือนระบบ URE (Universal Render Engine)
+Popup System คือระบบ popup ส่วนกลางของ FanHoard ที่ออกแบบมาเพื่อให้ **ทุก popup ทั่วทั้งเว็บมีคุณภาพระดับเดียวกัน** สามารถใช้งานได้ง่าย และยืดหยุ่นเหมือนระบบ URE (Universal Render Engine)
 
 ### หลักการออกแบบ
 
 - **Unified API**: ทุก popup ทั้ง dialog, alert, confirm, sheet, toast, drawer, tooltip, popover, fullscreen ใช้ API เดียวกัน (`PopupSystem.open()`)
 - **Preset System**: แต่ละประเภทมี preset ค่า default ที่ต่างกัน แต่ทุกอย่าง override ได้ per-instance
 - **Zero coupling กับระบบอื่น**: ทำงานได้เลยโดยไม่ต้องมี URE, NavCore, Search หรือ Language System
-- **ใช้ Fantrove Design Tokens**: สี เงา ขอบ รัศมี ฟอนต์ ทั้งหมดดึงจาก `tokens.css`
+- **ใช้ FanHoard Design Tokens**: สี เงา ขอบ รัศมี ฟอนต์ ทั้งหมดดึงจาก `tokens.css`
 - **รองรับ i18n**: รับ `lang` option หรืออ่านจาก `localStorage.selectedLang` อัตโนมัติ
 - **Accessibility first**: focus trap, return focus, inert siblings, ARIA roles
 
@@ -302,7 +302,7 @@ await PopupSystem.open({ theme: 'light', ... });
 // Dark
 await PopupSystem.open({ theme: 'dark', ... });
 
-// Brand (uses Fantrove teal accents)
+// Brand (uses FanHoard teal accents)
 await PopupSystem.open({ theme: 'brand', ... });
 ```
 
@@ -536,7 +536,7 @@ const handle = await PopupSystem.fullscreen({
 handle.close();
 ```
 
-### 13.6 ใช้ในระบบอื่นของ Fantrove
+### 13.6 ใช้ในระบบอื่นของ FanHoard
 
 PopupSystem ถูกใช้งานในหลายส่วนของระบบ:
 

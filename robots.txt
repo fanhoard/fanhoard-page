@@ -1,4 +1,4 @@
-# robots.txt for Fantrove
+# robots.txt for FanHoard
 # Allow all crawlers, point to sitemap
 User-agent: *
 Allow: /
@@ -17,4 +17,4 @@ Disallow: /n.html
 Disallow: /s.css
 Disallow: /data/verse/scope/
 
-Sitemap: https://fantrove.pages.dev/sitemap.xml
+Sitemap: https://fanhoard.pages.dev/sitemap.xml

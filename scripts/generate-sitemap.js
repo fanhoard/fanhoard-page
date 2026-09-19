@@ -40,7 +40,7 @@ const ROOT_PAGE_PATH = '/home/';
 const CONFIG = {
   srcDir: ROOT,
   dbJsonPath: path.join('assets', 'lang', 'options', 'db.json'),
-  baseUrl: 'https://fantrove.pages.dev'
+  baseUrl: 'https://fanhoard.pages.dev'
 };
 
 function loadDb() {

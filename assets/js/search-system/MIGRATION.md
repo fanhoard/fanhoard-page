@@ -321,11 +321,11 @@ single-character queries ทุกตัวได้อย่างน้อย 
 
 ## 10. อ้างอิงข้ามเอกสาร
 
-- [`02-Search-System.md`](../fantrove-docs/02-Search-System.md) — เอกสารระบบ Search (section 19 ครอบคลุม v4.0)
-- [`00-System-Architecture.md`](../fantrove-docs/00-System-Architecture.md) — ภาพรวมสถาปัตยกรรม
-- [`01-Virtual-Scroll-Rendering.md`](../fantrove-docs/01-Virtual-Scroll-Rendering.md) — URE ที่ใช้ render ผลลัพธ์
-- [`AI_CODING_GUIDE.md`](../fantrove-docs/AI_CODING_GUIDE.md) — มาตรฐานโค้ดที่ยึด
-- [`AI_FORBIDDEN.md`](../fantrove-docs/AI_FORBIDDEN.md) — กฎเหล็กก่อนแตะ Search
+- [`02-Search-System.md`](../fanhoard-docs/02-Search-System.md) — เอกสารระบบ Search (section 19 ครอบคลุม v4.0)
+- [`00-System-Architecture.md`](../fanhoard-docs/00-System-Architecture.md) — ภาพรวมสถาปัตยกรรม
+- [`01-Virtual-Scroll-Rendering.md`](../fanhoard-docs/01-Virtual-Scroll-Rendering.md) — URE ที่ใช้ render ผลลัพธ์
+- [`AI_CODING_GUIDE.md`](../fanhoard-docs/AI_CODING_GUIDE.md) — มาตรฐานโค้ดที่ยึด
+- [`AI_FORBIDDEN.md`](../fanhoard-docs/AI_FORBIDDEN.md) — กฎเหล็กก่อนแตะ Search
 
 ---
 
@@ -446,6 +446,6 @@ Test cases ครอบคลุม:
 
 ### 11.9 อ้างอิงเพิ่มเติม
 
-- [`02-Search-System.md` section 19](../fantrove-docs/02-Search-System.md#19-v40--discovery-system--smart-language-detection) — เอกสาร v4.0 ฉบับเต็ม
-- [`AI_CODING_GUIDE.md`](../fantrove-docs/AI_CODING_GUIDE.md) — มาตรฐานโค้ดที่ยึด
-- [`AI_FORBIDDEN.md`](../fantrove-docs/AI_FORBIDDEN.md) — กฎเหล็กที่ปฏิบัติตาม
+- [`02-Search-System.md` section 19](../fanhoard-docs/02-Search-System.md#19-v40--discovery-system--smart-language-detection) — เอกสาร v4.0 ฉบับเต็ม
+- [`AI_CODING_GUIDE.md`](../fanhoard-docs/AI_CODING_GUIDE.md) — มาตรฐานโค้ดที่ยึด
+- [`AI_FORBIDDEN.md`](../fanhoard-docs/AI_FORBIDDEN.md) — กฎเหล็กที่ปฏิบัติตาม

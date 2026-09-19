@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/update-version.js — Fantrove Verse Release Tool
+// scripts/update-version.js — FanHoard Verse Release Tool
 // v6.2: FIX — ประวัติไม่ถูกบันทึก (AUTO-SNAPSHOT อ้างอิง HEAD ผิดจังหวะ)
 //
 // v6.2 bug fix (จาก v6.1):
@@ -586,7 +586,7 @@ var dateStr = NOW.toISOString().slice(0,10).replace(/-/g,'');
 var timeStr = pad2(NOW.getUTCHours()) + pad2(NOW.getUTCMinutes());
 var buildId = newVersion + '-' + dateStr + timeStr;
 
-console.log('\n📦  Fantrove Release Tool v6.1 (PER-LANG releases/ FOLDER)');
+console.log('\n📦  FanHoard Release Tool v6.1 (PER-LANG releases/ FOLDER)');
 console.log('    Version:  ' + newVersion + (isNewVersion ? ' (NEW)' : ' (same)'));
 console.log('    Prev:     ' + (prevVersion || '(none)'));
 console.log('    Build ID: ' + buildId);

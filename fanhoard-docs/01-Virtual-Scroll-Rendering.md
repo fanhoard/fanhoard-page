@@ -1,6 +1,6 @@
 # 01 — URE (Universal Render Engine)
 
-> เอกสารนี้อธิบายระบบ **URE (Universal Render Engine)** ของ Fantrove — virtual scrolling engine หลักสำหรับแสดงข้อมูลจำนวนมหาศาล (หลายหมื่นถึงหลายแสนรายการ) บนหน้าเว็บโดยไม่ทำให้หน้าเว็บช้า
+> เอกสารนี้อธิบายระบบ **URE (Universal Render Engine)** ของ FanHoard — virtual scrolling engine หลักสำหรับแสดงข้อมูลจำนวนมหาศาล (หลายหมื่นถึงหลายแสนรายการ) บนหน้าเว็บโดยไม่ทำให้หน้าเว็บช้า
 >
 > **สำหรับ:** AI และนักพัฒนาที่จะแก้/ขยาย URE หรือใช้ URE mount list ในหน้าใหม่
 >

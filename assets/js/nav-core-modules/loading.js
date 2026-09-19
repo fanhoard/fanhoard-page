@@ -1,7 +1,7 @@
 // @ts-check
 /**
  * @file loading.js
- * LoadingService — thin proxy that delegates to FVL (FantroveVerse Loader).
+ * LoadingService — thin proxy that delegates to FVL (FanHoardVerse Loader).
  *
  * v2.1 — "Always-show, render-behind-overlay, single-message"
  *

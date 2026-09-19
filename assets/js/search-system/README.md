@@ -1,6 +1,6 @@
 # Search System v3.0
 
-> Unified, aerospace-grade search system for Fantrove.
+> Unified, aerospace-grade search system for FanHoard.
 > Consolidates legacy `search-engine.js` + `search-ui.js` into a single
 > self-loading entry point — same pattern as the URE system.
 
@@ -72,6 +72,6 @@ window.SearchEngine._internals.isFuseReady();
 ## มาตรฐานการพัฒนา
 
 ปฏิบัติตาม:
-- [`AI_CODING_GUIDE.md`](../../fantrove-docs/AI_CODING_GUIDE.md) — IIFE pattern, 2-space indent, single quotes
-- [`AI_FORBIDDEN.md`](../../fantrove-docs/AI_FORBIDDEN.md) — ห้าม ES modules, ห้าม React/jQuery
-- [`02-Search-System.md`](../../fantrove-docs/02-Search-System.md) — เอกสารระบบ Search
+- [`AI_CODING_GUIDE.md`](../../fanhoard-docs/AI_CODING_GUIDE.md) — IIFE pattern, 2-space indent, single quotes
+- [`AI_FORBIDDEN.md`](../../fanhoard-docs/AI_FORBIDDEN.md) — ห้าม ES modules, ห้าม React/jQuery
+- [`02-Search-System.md`](../../fanhoard-docs/02-Search-System.md) — เอกสารระบบ Search

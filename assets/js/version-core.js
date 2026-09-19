@@ -1,5 +1,5 @@
 /**
- * @file version-core.js — Fantrove Verse
+ * @file version-core.js — FanHoard Verse
  * @version 5.1
  * @description ระบบแจ้งเตือนอัพเดทเวอร์ชันใหม่
  *

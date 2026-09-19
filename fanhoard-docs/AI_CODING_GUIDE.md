@@ -1,6 +1,6 @@
 # AI_CODING_GUIDE — มาตรฐานการเขียนโค้ดสำหรับ AI Agents
 
-> เอกสารนี้กำหนดมาตรฐานการเขียนโค้ดที่ AI agent ทุกตัวต้องยึดเมื่อทำงานกับโค้ดเบส Fantrove
+> เอกสารนี้กำหนดมาตรฐานการเขียนโค้ดที่ AI agent ทุกตัวต้องยึดเมื่อทำงานกับโค้ดเบส FanHoard
 >
 > **สำหรับ:** AI agents (Claude, GPT, Gemini, etc.) ที่รับ task เขียน/แก้โค้ด
 >
@@ -231,7 +231,7 @@ function scrollEnd() { ... }
 - ใช้ backticks ` ` ` ` สำหรับ template literals
 
 ```javascript
-const name = 'fantrove';
+const name = 'fanhoard';
 const html = "<div class='button'>";
 const greeting = `Hello, ${name}!`;
 ```
@@ -606,7 +606,7 @@ async function initSearch() {
 
 ## 11. SEO-friendly Code Patterns
 
-> ⚠️ SEO เป็น priority สูงสุดของ Fantrove — ดู [`12-SEO-Guide.md`](./12-SEO-Guide.md) สำหรับรายละเอียดเต็ม และ [`AI_FORBIDDEN.md`](./AI_FORBIDDEN.md) ส่วน SEO violations สำหรับสิ่งที่ห้ามทำ
+> ⚠️ SEO เป็น priority สูงสุดของ FanHoard — ดู [`12-SEO-Guide.md`](./12-SEO-Guide.md) สำหรับรายละเอียดเต็ม และ [`AI_FORBIDDEN.md`](./AI_FORBIDDEN.md) ส่วน SEO violations สำหรับสิ่งที่ห้ามทำ
 
 ### 11.1 Semantic HTML เสมอ
 
@@ -654,7 +654,7 @@ async function initSearch() {
 ```html
 <!-- ✅ ดี — ป้องกัน CLS + accessibility + SEO -->
 <img src="banner.jpg"
-     alt="Fantrove banner with emojis and symbols"
+     alt="FanHoard banner with emojis and symbols"
      width="1200"
      height="630">
 
@@ -749,7 +749,7 @@ document.getElementById('main').innerHTML = '<h1>Main Content</h1>';
 
 ## 12. Documentation Maintenance Patterns
 
-> 🥇 เอกสารเป็น priority #1 สูงสุดของ Fantrove — สูงกว่า SEO และ Performance ดู [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) สำหรับมาตรฐานเต็ม และ [`AI_FORBIDDEN.md`](./AI_FORBIDDEN.md) section 10 สำหรับกฎเหล็ก
+> 🥇 เอกสารเป็น priority #1 สูงสุดของ FanHoard — สูงกว่า SEO และ Performance ดู [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) สำหรับมาตรฐานเต็ม และ [`AI_FORBIDDEN.md`](./AI_FORBIDDEN.md) section 10 สำหรับกฎเหล็ก
 
 ### 12.1 Code และ Docs ต้อง sync เสมอ
 
@@ -759,8 +759,8 @@ document.getElementById('main').innerHTML = '<h1>Main Content</h1>';
 
 // ✅ ถูก — อัปเดตทั้งโค้ดและเอกสารใน commit เดียวกัน
 // - เพิ่ม assets/js/ure/ure-modules/new-module.js
-// - อัปเดต fantrove-docs/01-Virtual-Scroll-Rendering.md
-// - อัปเดต fantrove-docs/00-System-Architecture.md (ถ้ากระทบภาพรวม)
+// - อัปเดต fanhoard-docs/01-Virtual-Scroll-Rendering.md
+// - อัปเดต fanhoard-docs/00-System-Architecture.md (ถ้ากระทบภาพรวม)
 ```
 
 ### 12.2 Comments ใน code ต้องตรงกับเอกสาร
@@ -773,7 +773,7 @@ document.getElementById('main').innerHTML = '<h1>Main Content</h1>';
 
 // ✅ ถูก — comment และเอกสารตรงกัน
 /**
- * @version 1.7.0  ← ตรงกับ fantrove-docs/01-Virtual-Scroll-Rendering.md
+ * @version 1.7.0  ← ตรงกับ fanhoard-docs/01-Virtual-Scroll-Rendering.md
  */
 ```
 
@@ -810,8 +810,8 @@ function processItems(items, options = {}) {
 //   ใหม่: URE.mount({ container, data, template })
 
 // ต้องอัปเดต:
-// 1. fantrove-docs/01-Virtual-Scroll-Rendering.md (section API)
-// 2. fantrove-docs/00-System-Architecture.md (ถ้ามีตัวอย่าง)
+// 1. fanhoard-docs/01-Virtual-Scroll-Rendering.md (section API)
+// 2. fanhoard-docs/00-System-Architecture.md (ถ้ามีตัวอย่าง)
 // 3. assets/js/ure/Readme.md (API reference สั้น)
 // 4. JSDoc ใน source code
 ```
@@ -821,15 +821,15 @@ function processItems(items, options = {}) {
 ก่อน commit เอกสาร ให้ใช้คำสั่งนี้เพื่อ verify:
 
 ```bash
-# ตรวจว่าไม่มี "Fantrove Page" หลงเหลือ
-grep -rn "Fantrove Page" fantrove-docs/
+# ตรวจว่าไม่มี "FanHoard Page" หลงเหลือ
+grep -rn "FanHoard Page" fanhoard-docs/
 
-# ตรวจว่าไม่มี "FanTrove" (case-sensitive)
-grep -rn "FanTrove" fantrove-docs/
+# ตรวจว่าไม่มี "FanHoard" (case-sensitive)
+grep -rn "FanHoard" fanhoard-docs/
 
 # ตรวจว่า cross-references ไม่ broken (ชื่อไฟล์ตรงกับจริง)
-ls fantrove-docs/*.md | sort > /tmp/existing.txt
-grep -ohE '\./[A-Za-z0-9_-]+\.md' fantrove-docs/*.md | sort -u | sed 's|^\./||' > /tmp/refs.txt
+ls fanhoard-docs/*.md | sort > /tmp/existing.txt
+grep -ohE '\./[A-Za-z0-9_-]+\.md' fanhoard-docs/*.md | sort -u | sed 's|^\./||' > /tmp/refs.txt
 comm -23 /tmp/refs.txt /tmp/existing.txt  # ควรว่าง (ไม่มี refs ไปไฟล์ที่ไม่มี)
 ```
 
@@ -842,7 +842,7 @@ comm -23 /tmp/refs.txt /tmp/existing.txt  # ควรว่าง (ไม่ม�
 // (เดี๋ยวคนอื่นจะแก้เอง)
 
 // ✅ ถูก — บันทึกใน PR description
-// "พบเอกสารไม่ตรงจริงที่ fantrove-docs/XX.md:LINE — อธิบาย..."
+// "พบเอกสารไม่ตรงจริงที่ fanhoard-docs/XX.md:LINE — อธิบาย..."
 // แล้วทำ task A ต่อ
 ```
 

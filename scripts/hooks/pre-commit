@@ -1,6 +1,6 @@
 #!/bin/bash
 # scripts/hooks/pre-commit — Layer 1: Pre-commit validation
-# 4-layer version control system for Fantrove
+# 4-layer version control system for FanHoard
 #
 # ตรวจสอบก่อน commit:
 #   1. validate-release.js (closed system check)

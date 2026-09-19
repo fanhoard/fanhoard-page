@@ -16,7 +16,7 @@
 (function (global) {
   'use strict';
 
-  var BANNER_ENGINE_URL = global.__BANNER_ENGINE_URL || 'https://fantrove-banner.vercel.app';
+  var BANNER_ENGINE_URL = global.__BANNER_ENGINE_URL || 'https://fanhoard-banner.vercel.app';
   var API_BASE   = BANNER_ENGINE_URL + '/api/public/banners';
   var CACHE_TTL  = 60 * 1000;
   var MOUNT_ATTR = 'data-banner';

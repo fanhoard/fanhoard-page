@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   FVL (FantroveVerse Loader) v1.0.7 — loading-system.css
+   FVL (FanHoardVerse Loader) v1.0.7 — loading-system.css
    assets/css/loading-system.css
 
    Designed for maximum lightweight:
@@ -10,7 +10,7 @@
      (we avoid `transform: translateZ(0)` on the arc because it would
      override the animation's `transform: rotate()`)
    • prefers-reduced-motion: reduce → animations disabled
-   • All colors via Fantrove design tokens (--fv-*)
+   • All colors via FanHoard design tokens (--fv-*)
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Keyframes (OUTSIDE @layer for maximum browser compatibility) ────────

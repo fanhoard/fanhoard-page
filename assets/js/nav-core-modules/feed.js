@@ -56,7 +56,7 @@
     CHUNK_CARD:       30,    // items per card segment (cards richer per slot)
 
     // ── Scoring weights ──────────────────────────────────────────────────────
-    // WHY these values: hand-tuned so that on a typical Fantrove DB
+    // WHY these values: hand-tuned so that on a typical FanHoard DB
     //   (3-4 button types × 20-50 categories, 2-3 card types × 5-20 categories)
     //   cards appear roughly every 3-4 segments on average.
 

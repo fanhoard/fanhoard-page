@@ -1,6 +1,6 @@
 # 08 — สถาปัตยกรรมประสิทธิภาพ (Performance Architecture)
 
-> เอกสารนี้อธิบายกลยุทธ์และเทคนิคประสิทธิภาพที่ใช้ทั่วทั้งระบบ Fantrove — เป็น cross-cutting concern ที่กระทบหลายระบบ (URE, Search, Nav-Core, Language, ConData)
+> เอกสารนี้อธิบายกลยุทธ์และเทคนิคประสิทธิภาพที่ใช้ทั่วทั้งระบบ FanHoard — เป็น cross-cutting concern ที่กระทบหลายระบบ (URE, Search, Nav-Core, Language, ConData)
 >
 > **สำหรับ:** นักพัฒนา/AI ที่ทำงานด้าน performance optimization
 >
@@ -32,7 +32,7 @@
 
 ### 1.1 ปัญหาที่ต้องแก้
 
-Fantrove แสดงข้อมูลคงที่จำนวนมหาศาล — อีโมจินับพันตัว, สัญลักษณ์ 27 หมวด, ข้อความแฟนซี 10 สไตล์, รวมเป็น **หลายหมื่นถึงหลายแสนรายการ** ในหน้า Discover และ Search เดียว หากแสดง DOM ทุกตัวจะเกิด:
+FanHoard แสดงข้อมูลคงที่จำนวนมหาศาล — อีโมจินับพันตัว, สัญลักษณ์ 27 หมวด, ข้อความแฟนซี 10 สไตล์, รวมเป็น **หลายหมื่นถึงหลายแสนรายการ** ในหน้า Discover และ Search เดียว หากแสดง DOM ทุกตัวจะเกิด:
 
 - **Jank ตอน scroll** — การ layout/paint หลายหมื่น element ทำให้ frame ตก 60fps ทำไม่ได้
 - **OOM บน mobile** — อุปกรณ์ low-end (1–2 GB RAM) จะ crash ตอน dataset ใหญ่
@@ -2262,7 +2262,7 @@ URE ใช้ `will-change: transform` แทน — `will-change` ให้ bro
 
 ## 15. อ้างอิงข้ามเอกสาร
 
-เอกสารที่เกี่ยวข้องใน `fantrove-docs/`:
+เอกสารที่เกี่ยวข้องใน `fanhoard-docs/`:
 
 | เอกสาร | ความเชื่อมโยง |
 |--------|----------------|
@@ -2298,7 +2298,7 @@ URE ใช้ `will-change: transform` แทน — `will-change` ให้ bro
 
 ---
 
-> **สรุป**: ประสิทธิภาพของ Fantrove ไม่ใช่เทคนิคเดียว แต่เป็นการซ้อนทับกัน 6 ชั้น (Layer 1–6) ที่ออกแบบมาทำงานร่วมกัน — Virtual Scrolling ลด DOM size, Pooling ลด GC, Adaptive Memory ปรับตามอุปกรณ์, Worker ย้ายงานออกจาก main thread, Scheduler รวมเป็น paint เดียว, CSS Containment จำกัด layout scope เมื่อแก้ปัญหา performance ใหม่ ให้เริ่มจากการวัดก่อน (§12) แล้วค่อยเลือกเลเยอร์ที่จะ optimize
+> **สรุป**: ประสิทธิภาพของ FanHoard ไม่ใช่เทคนิคเดียว แต่เป็นการซ้อนทับกัน 6 ชั้น (Layer 1–6) ที่ออกแบบมาทำงานร่วมกัน — Virtual Scrolling ลด DOM size, Pooling ลด GC, Adaptive Memory ปรับตามอุปกรณ์, Worker ย้ายงานออกจาก main thread, Scheduler รวมเป็น paint เดียว, CSS Containment จำกัด layout scope เมื่อแก้ปัญหา performance ใหม่ ให้เริ่มจากการวัดก่อน (§12) แล้วค่อยเลือกเลเยอร์ที่จะ optimize
 
 ---
 

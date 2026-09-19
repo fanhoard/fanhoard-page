@@ -6,8 +6,8 @@
   const FOOTER_CSS_PATH = '/assets/css/footer.css';
   const FOOTER_TEMPLATE_PATH = '/assets/template-html/footer-template.html';
   
-  if (window.__fantroveFooterInjected) return;
-  window.__fantroveFooterInjected = true;
+  if (window.__fanhoardFooterInjected) return;
+  window.__fanhoardFooterInjected = true;
   
   /* ── Load CSS ─────────────────────────────────────── */
   function loadCSS() {
@@ -39,7 +39,7 @@
     const el = document.createElement('footer');
     el.className = 'footer-minimal';
     el.setAttribute('role', 'contentinfo');
-    el.innerHTML = '<div class="footer-inner"><p>© Fantrove</p></div>';
+    el.innerHTML = '<div class="footer-inner"><p>© FanHoard</p></div>';
     document.body.appendChild(el);
   }
   

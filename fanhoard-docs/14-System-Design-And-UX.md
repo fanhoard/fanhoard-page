@@ -1,10 +1,10 @@
 # 14 — System Design และ UX (System Design & User Experience)
 
-> เอกสารนี้อธิบาย **หลักการออกแบบระบบและประสบการณ์ผู้ใช้** ของ Fantrove อย่างละเอียด — ตั้งแต่ design tokens, สไตล์การออกแบบ, mobile-first strategy, responsive design, UX patterns, component design, animation, accessibility, ไปจนถึง performance-driven design
+> เอกสารนี้อธิบาย **หลักการออกแบบระบบและประสบการณ์ผู้ใช้** ของ FanHoard อย่างละเอียด — ตั้งแต่ design tokens, สไตล์การออกแบบ, mobile-first strategy, responsive design, UX patterns, component design, animation, accessibility, ไปจนถึง performance-driven design
 >
-> **สำหรับ:** AI agents และนักพัฒนาที่จะสร้างหน้าเว็บใหม่ใน Fantrove หรือ **นำหลักการไปใช้กับเว็บอื่น** — เอกสารนี้ออกแบบมาเป็น training data ที่ทำให้ AI เข้าใจหลักการออกแบบได้อย่างถ่องแท้
+> **สำหรับ:** AI agents และนักพัฒนาที่จะสร้างหน้าเว็บใหม่ใน FanHoard หรือ **นำหลักการไปใช้กับเว็บอื่น** — เอกสารนี้ออกแบบมาเป็น training data ที่ทำให้ AI เข้าใจหลักการออกแบบได้อย่างถ่องแท้
 >
-> **เป้าหมาย:** หลังอ่านเอกสารนี้ AI ควรสามารถสร้างหน้าเว็บใหม่หรือเว็บใหม่ที่มีคุณภาพการออกแบบเทียบเท่า Fantrove ได้โดยไม่ต้องดูตัวอย่างเพิ่มเติม
+> **เป้าหมาย:** หลังอ่านเอกสารนี้ AI ควรสามารถสร้างหน้าเว็บใหม่หรือเว็บใหม่ที่มีคุณภาพการออกแบบเทียบเท่า FanHoard ได้โดยไม่ต้องดูตัวอย่างเพิ่มเติม
 
 ---
 
@@ -34,29 +34,29 @@
 
 ## 1. ภาพรวมและปรัชญาการออกแบบ
 
-Fantrove เป็นเว็บไซต์แบบ static ที่รวบรวมอีโมจิ สัญลักษณ์ ข้อความแฟนซี และคอลเลกชันอื่น ๆ ให้ผู้ใช้คัดลอกและใช้งานได้ทันทีโดยไม่ต้องสมัครสมาชิก การออกแบบของ Fantrove ผสมผสานระหว่างความสวยงามที่ทันสมัย ประสบการณ์ผู้ใช้ที่ราบรื่น และประสิทธิภาพระดับ platform ที่ทำให้แสดงข้อมูลจำนวนมหาศาลได้โดยไม่ช้าลง เอกสารฉบับนี้ไม่ใช่แค่คู่มือของ Fantrove เท่านั้น แต่เป็นข้อมูลฝึกอบรม (training data) ที่ออกแบบมาเพื่อให้ AI agents เข้าใจหลักการออกแบบเหล่านี้อย่างถ่องแท้ และสามารถนำไปประยุกต์ใช้กับการสร้างหน้าเว็บใหม่ใน Fantrove เอง หรือแม้กระทั่งเว็บอื่นที่จะพัฒนาในอนาคตก็ตาม
+FanHoard เป็นเว็บไซต์แบบ static ที่รวบรวมอีโมจิ สัญลักษณ์ ข้อความแฟนซี และคอลเลกชันอื่น ๆ ให้ผู้ใช้คัดลอกและใช้งานได้ทันทีโดยไม่ต้องสมัครสมาชิก การออกแบบของ FanHoard ผสมผสานระหว่างความสวยงามที่ทันสมัย ประสบการณ์ผู้ใช้ที่ราบรื่น และประสิทธิภาพระดับ platform ที่ทำให้แสดงข้อมูลจำนวนมหาศาลได้โดยไม่ช้าลง เอกสารฉบับนี้ไม่ใช่แค่คู่มือของ FanHoard เท่านั้น แต่เป็นข้อมูลฝึกอบรม (training data) ที่ออกแบบมาเพื่อให้ AI agents เข้าใจหลักการออกแบบเหล่านี้อย่างถ่องแท้ และสามารถนำไปประยุกต์ใช้กับการสร้างหน้าเว็บใหม่ใน FanHoard เอง หรือแม้กระทั่งเว็บอื่นที่จะพัฒนาในอนาคตก็ตาม
 
 ### 1.1 ปรัชญาหลัก
 
-การออกแบบของ Fantrove ยึดถือปรัชญา "function follows form, but form serves everyone" กล่าวคือ ทุกการตัดสินใจออกแบบต้องผ่านคำถาม 3 ข้อเสมอ — สิ่งนี้ทำให้ผู้ใช้ทำสิ่งที่ต้องการได้ง่ายขึ้นไหม สิ่งนี้ทำงานได้ดีบนอุปกรณ์ทุกประเภทไหม และสิ่งนี้ยังคงความสวยงามและสอดคล้องกับแบรนด์ไหม ถ้าคำตอบของข้อใดข้อหนึ่งเป็น "ไม่" ก็ต้องกลับไปทำการบ้านต่อ ปรัชญานี้สะท้อนให้เห็นในทุกรายละเอียดของเว็บ ตั้งแต่การเลือกสีหลักที่เป็น teal ซึ่งดูสดใสแต่ไม่ล้าตา ไปจนถึงการใช้ border radius ที่ไม่ใช่ค่ามาตรฐาน (12/17/27/37/47px) เพื่อสร้างความนุ่มนวลที่เป็นเอกลักษณ์
+การออกแบบของ FanHoard ยึดถือปรัชญา "function follows form, but form serves everyone" กล่าวคือ ทุกการตัดสินใจออกแบบต้องผ่านคำถาม 3 ข้อเสมอ — สิ่งนี้ทำให้ผู้ใช้ทำสิ่งที่ต้องการได้ง่ายขึ้นไหม สิ่งนี้ทำงานได้ดีบนอุปกรณ์ทุกประเภทไหม และสิ่งนี้ยังคงความสวยงามและสอดคล้องกับแบรนด์ไหม ถ้าคำตอบของข้อใดข้อหนึ่งเป็น "ไม่" ก็ต้องกลับไปทำการบ้านต่อ ปรัชญานี้สะท้อนให้เห็นในทุกรายละเอียดของเว็บ ตั้งแต่การเลือกสีหลักที่เป็น teal ซึ่งดูสดใสแต่ไม่ล้าตา ไปจนถึงการใช้ border radius ที่ไม่ใช่ค่ามาตรฐาน (12/17/27/37/47px) เพื่อสร้างความนุ่มนวลที่เป็นเอกลักษณ์
 
 ### 1.2 ผู้ใช้เป้าหมาย
 
-ผู้ใช้ของ Fantrove คือทุกคนที่ต้องการอีโมจิหรือสัญลักษณ์อย่างรวดเร็ว — นักเรียนที่แชตคุยกับเพื่อน, คนทำงานที่เขียน social media, นักเล่นเกมที่ตั้งชื่อ in-game, คนทั่วไปที่ต้องการข้อความแฟนซีสำหรับโพสต์ ผู้ใช้เหล่านี้มีลักษณะร่วมคือต้องการสิ่งของที่จะใช้ "ทันที" ไม่ต้องสมัคร ไม่ต้อง login ไม่ต้องรอโหลดนาน ๆ และไม่ต้องการ popup หรือโฆษณาที่รบกวน การออกแบบทุกส่วนต้องตอบสนองความต้องการนี้ — เปิดเว็บแล้วใช้ได้ทันที ค้นหาเจอเร็ว คัดลอกง่าย และปิดไปเมื่อไหร่ก็ได้โดยไม่ต้องกังวล
+ผู้ใช้ของ FanHoard คือทุกคนที่ต้องการอีโมจิหรือสัญลักษณ์อย่างรวดเร็ว — นักเรียนที่แชตคุยกับเพื่อน, คนทำงานที่เขียน social media, นักเล่นเกมที่ตั้งชื่อ in-game, คนทั่วไปที่ต้องการข้อความแฟนซีสำหรับโพสต์ ผู้ใช้เหล่านี้มีลักษณะร่วมคือต้องการสิ่งของที่จะใช้ "ทันที" ไม่ต้องสมัคร ไม่ต้อง login ไม่ต้องรอโหลดนาน ๆ และไม่ต้องการ popup หรือโฆษณาที่รบกวน การออกแบบทุกส่วนต้องตอบสนองความต้องการนี้ — เปิดเว็บแล้วใช้ได้ทันที ค้นหาเจอเร็ว คัดลอกง่าย และปิดไปเมื่อไหร่ก็ได้โดยไม่ต้องกังวล
 
 ### 1.3 บริบทเทคนิค
 
-Fantrove เป็น static website ที่ทำงานฝั่ง client ทั้งหมด ไม่มี backend server หรือ database ของผู้ใช้ ทำงานบน Cloudflare Pages CDN ทั่วโลก รองรับ 2 ภาษา (อังกฤษและไทย) แบบ pre-built static HTML สำหรับแต่ละภาษา การออกแบบต้องคำนึงถึงข้อจำกัดและจุดแข็งของ static site เสมอ — ไม่มี server-side rendering ดังนั้นทุกอย่างต้องอยู่ใน static HTML ตอน build แล้ว แต่ขณะเดียวกันก็ต้องมี interactivity ที่ราบรื่นผ่าน JavaScript ที่ deferred load ทั้งหมด
+FanHoard เป็น static website ที่ทำงานฝั่ง client ทั้งหมด ไม่มี backend server หรือ database ของผู้ใช้ ทำงานบน Cloudflare Pages CDN ทั่วโลก รองรับ 2 ภาษา (อังกฤษและไทย) แบบ pre-built static HTML สำหรับแต่ละภาษา การออกแบบต้องคำนึงถึงข้อจำกัดและจุดแข็งของ static site เสมอ — ไม่มี server-side rendering ดังนั้นทุกอย่างต้องอยู่ใน static HTML ตอน build แล้ว แต่ขณะเดียวกันก็ต้องมี interactivity ที่ราบรื่นผ่าน JavaScript ที่ deferred load ทั้งหมด
 
 ---
 
 ## 2. หลักการออกแบบหลัก (Core Design Principles)
 
-การออกแบบของ Fantrove ยึดตาม 10 หลักการหลัก ที่ทุกการตัดสินใจด้านดีไซน์ต้องผ่านการพิจารณาเสมอ:
+การออกแบบของ FanHoard ยึดตาม 10 หลักการหลัก ที่ทุกการตัดสินใจด้านดีไซน์ต้องผ่านการพิจารณาเสมอ:
 
 ### 2.1 Mobile-First
 
-Fantrove ออกแบบสำหรับมือถือก่อนเป็นอันดับแรก เพราะผู้ใช้ส่วนใหญ่เข้าถึงเว็บจากมือถือ การออกแบบเริ่มจากหน้าจอเล็ก (320px-600px) แล้วค่อยขยายไป tablet (768px) และ desktop (1024px+) สิ่งที่ต้องคำนึงถึงบนมือถือคือ — ปุ่มต้องใหญ่พอที่จะกดด้วยนิ้วโป้งได้สบาย (44x44px ขั้นต่ำ), ข้อความต้องอ่านได้โดยไม่ต้องซูม (16px ขั้นต่ำ), และ layout ต้องไม่บังคับให้ horizontal scroll เกิดขึ้น
+FanHoard ออกแบบสำหรับมือถือก่อนเป็นอันดับแรก เพราะผู้ใช้ส่วนใหญ่เข้าถึงเว็บจากมือถือ การออกแบบเริ่มจากหน้าจอเล็ก (320px-600px) แล้วค่อยขยายไป tablet (768px) และ desktop (1024px+) สิ่งที่ต้องคำนึงถึงบนมือถือคือ — ปุ่มต้องใหญ่พอที่จะกดด้วยนิ้วโป้งได้สบาย (44x44px ขั้นต่ำ), ข้อความต้องอ่านได้โดยไม่ต้องซูม (16px ขั้นต่ำ), และ layout ต้องไม่บังคับให้ horizontal scroll เกิดขึ้น
 
 ### 2.2 Performance-First
 
@@ -102,7 +102,7 @@ Design tokens คือรากฐานของระบบดีไซน์
 
 ### 3.1 โครงสร้าง Token
 
-Token ทั้งหมดใช้ prefix `--fv-*` (Fantrove) เพื่อหลีกเลี่ยงการชนกับ third-party libraries มี token ประมาณ 100+ ตัว แบ่งเป็น 11 หมวด นอกจากนี้ยังมี alias แบบ legacy (`--brand-*`, `--wn-*`, `--ui-*`) เก็บไว้เพื่อ backward compatibility — แต่ code ใหม่ต้องใช้ `--fv-*` เท่านั้น
+Token ทั้งหมดใช้ prefix `--fv-*` (FanHoard) เพื่อหลีกเลี่ยงการชนกับ third-party libraries มี token ประมาณ 100+ ตัว แบ่งเป็น 11 หมวด นอกจากนี้ยังมี alias แบบ legacy (`--brand-*`, `--wn-*`, `--ui-*`) เก็บไว้เพื่อ backward compatibility — แต่ code ใหม่ต้องใช้ `--fv-*` เท่านั้น
 
 ### 3.2 Brand Colors
 
@@ -188,7 +188,7 @@ Spacing scale เป็นแบบ 4px base unit (เหมือน Tailwind, 
 --fv-radius-pill: 999px;
 ```
 
-**หมายเหตุสำคัญ:** Border radius ของ Fantrove ใช้ค่าที่ไม่ใช่ multiples ของ 4 หรือ 8 (ซึ่งเป็นมาตรฐานอุตสาหกรรม) แต่เป็น 12/17/27/37/47 ซึ่งเป็นสูตรเฉพาะของ Fantrove ที่ให้ความรู้สึก "นุ่มนวลแต่ไม่ generic" — ดู soft แต่ยังคงความเป็นเอกลักษณ์ การเลือกค่าเหล่านี้มาจากการทดลองว่าค่าไหนทำให้ components ดู "friendly" โดยไม่ดูเด็กเกินไป ห้ามเปลี่ยนเป็นค่ามาตรฐาน 4/8/12/16/24 เพราะจะทำลายเอกลักษณ์ของแบรนด์
+**หมายเหตุสำคัญ:** Border radius ของ FanHoard ใช้ค่าที่ไม่ใช่ multiples ของ 4 หรือ 8 (ซึ่งเป็นมาตรฐานอุตสาหกรรม) แต่เป็น 12/17/27/37/47 ซึ่งเป็นสูตรเฉพาะของ FanHoard ที่ให้ความรู้สึก "นุ่มนวลแต่ไม่ generic" — ดู soft แต่ยังคงความเป็นเอกลักษณ์ การเลือกค่าเหล่านี้มาจากการทดลองว่าค่าไหนทำให้ components ดู "friendly" โดยไม่ดูเด็กเกินไป ห้ามเปลี่ยนเป็นค่ามาตรฐาน 4/8/12/16/24 เพราะจะทำลายเอกลักษณ์ของแบรนด์
 
 ### 3.8 Typography
 
@@ -233,14 +233,14 @@ Font stack เริ่มด้วย Noto Sans (รองรับ Thai ผ่
 --fv-shadow-focus:  0 0 0 4px rgba(19, 180, 127, 0.16)     /* Focus ring */
 ```
 
-Shadows ของ Fantrove มีลักษณะเฉพาะคือ — soft และ subtle แม้ระดับ lg ก็ยังไม่ "หนัก" เกินไป เงาระดับ lg และ teal มี teal tint อยู่ในเงาเอง ทำให้เงาดูเป็นสีเดียวกับแบรนด์ ไม่ใช่สีดำทึบ
+Shadows ของ FanHoard มีลักษณะเฉพาะคือ — soft และ subtle แม้ระดับ lg ก็ยังไม่ "หนัก" เกินไป เงาระดับ lg และ teal มี teal tint อยู่ในเงาเอง ทำให้เงาดูเป็นสีเดียวกับแบรนด์ ไม่ใช่สีดำทึบ
 
 ### 3.10 Transitions
 
 ```css
 /* Easing functions */
 --fv-ease-standard:  cubic-bezier(0.4, 0, 0.2, 1)     /* Material standard */
---fv-ease-spring:    cubic-bezier(0.2, 0.9, 0.2, 1)   /* Fantrove spring */
+--fv-ease-spring:    cubic-bezier(0.2, 0.9, 0.2, 1)   /* FanHoard spring */
 
 /* Durations */
 --fv-transition-fast:    150ms cubic-bezier(0.4, 0, 0.2, 1)
@@ -248,7 +248,7 @@ Shadows ของ Fantrove มีลักษณะเฉพาะคือ — 
 --fv-transition-slow:    400ms cubic-bezier(0.2, 0.9, 0.2, 1)
 ```
 
-Fantrove มี easing ที่เป็นเอกลักษณ์คือ `cubic-bezier(0.2, 0.9, 0.2, 1)` ซึ่งเป็น "spring" curve ที่ทำให้ animations ดูมีชีวิตชีวากว่า linear หรือ ease-in-out มาตรฐาน นอกจากนี้ยังมี Back-out easing `cubic-bezier(0.34, 1.56, 0.64, 1)` สำหรับ overshoot effects เช่น nav underline indicator
+FanHoard มี easing ที่เป็นเอกลักษณ์คือ `cubic-bezier(0.2, 0.9, 0.2, 1)` ซึ่งเป็น "spring" curve ที่ทำให้ animations ดูมีชีวิตชีวากว่า linear หรือ ease-in-out มาตรฐาน นอกจากนี้ยังมี Back-out easing `cubic-bezier(0.34, 1.56, 0.64, 1)` สำหรับ overshoot effects เช่น nav underline indicator
 
 ### 3.11 Layout Tokens
 
@@ -277,7 +277,7 @@ Z-index ใช้ scale 4 ระดับ (sticky, nav, overlay, modal, toast) �
 
 ## 4. สไตล์การออกแบบ (Design Style)
 
-สไตล์การออกแบบของ Fantrove ผสมผสานระหว่าง modern minimal, soft organic, และ playful motion ที่สร้างความรู้สึก friendly โดยไม่ดูเด็กเกินไป
+สไตล์การออกแบบของ FanHoard ผสมผสานระหว่าง modern minimal, soft organic, และ playful motion ที่สร้างความรู้สึก friendly โดยไม่ดูเด็กเกินไป
 
 ### 4.1 Modern Minimal
 
@@ -293,11 +293,11 @@ Teal (`#13b47f`) เป็นสีหลักของแบรนด์ — �
 
 ### 4.4 Light-Mode Primary
 
-ปัจจุบัน Fantrove เป็น light-mode only — พื้นหลังขาว, text เข้ม, accent สด มีเพียงหน้า What's New (`new.css`) ที่รองรับ `prefers-color-scheme: dark` และ loading system ที่มี opt-in dark theme การเลือก light-mode เป็น default มาจาก — ผู้ใช้ส่วนใหร้อยใช้ light mode (StatCounter: ~80%), content ที่เป็น emojis/symbols มองเห็นได้ชัดกว่าบนพื้นขาว, และ color contrast ทำได้ง่ายกว่า อย่างไรก็ตาม หากจะเพิ่ม dark mode ในอนาคต ต้องเพิ่มเป็น system-wide ผ่าน tokens.css ไม่ใช่ per-page แบบที่เป็นอยู่
+ปัจจุบัน FanHoard เป็น light-mode only — พื้นหลังขาว, text เข้ม, accent สด มีเพียงหน้า What's New (`new.css`) ที่รองรับ `prefers-color-scheme: dark` และ loading system ที่มี opt-in dark theme การเลือก light-mode เป็น default มาจาก — ผู้ใช้ส่วนใหร้อยใช้ light mode (StatCounter: ~80%), content ที่เป็น emojis/symbols มองเห็นได้ชัดกว่าบนพื้นขาว, และ color contrast ทำได้ง่ายกว่า อย่างไรก็ตาม หากจะเพิ่ม dark mode ในอนาคต ต้องเพิ่มเป็น system-wide ผ่าน tokens.css ไม่ใช่ per-page แบบที่เป็นอยู่
 
 ### 4.5 Shadow-as-Border Technique
 
-Fantrove ใช้เทคนิค "shadow as border" — แทนที่จะใช้ `border: 1px solid` ใช้ `box-shadow: 0 0 0 1px color` แทน เทคนิคนี้มีข้อดีคือ — ไม่กระทบ box model (border เพิ่มขนาด element, shadow ไม่), ทำ layered borders ได้ (shadow หลายชั้น), และทำให้ใช้ gradient backgrounds ได้โดยไม่มีปัญหา border ตัดเส้น gradient เทคนิคนี้ใช้ใน footer, nav buttons, และ links
+FanHoard ใช้เทคนิค "shadow as border" — แทนที่จะใช้ `border: 1px solid` ใช้ `box-shadow: 0 0 0 1px color` แทน เทคนิคนี้มีข้อดีคือ — ไม่กระทบ box model (border เพิ่มขนาด element, shadow ไม่), ทำ layered borders ได้ (shadow หลายชั้น), และทำให้ใช้ gradient backgrounds ได้โดยไม่มีปัญหา border ตัดเส้น gradient เทคนิคนี้ใช้ใน footer, nav buttons, และ links
 
 ### 4.6 Gradient Accents
 
@@ -311,13 +311,13 @@ Gradient text เป็นเทคนิคที่ใช้บ่อย — �
 
 ### 4.7 Playful Motion
 
-Animations ของ Fantrove มีลักษณะ "playful" โดยใช้ spring easing (`cubic-bezier(0.2, 0.9, 0.2, 1)`) และ Back-out easing (`cubic-bezier(0.34, 1.56, 0.64, 1)`) ที่ทำให้ animations "overshoot" เล็กน้อยก่อนจะหยุด — ทำให้ดูมีชีวิตชีวากว่า ease-out มาตรฐาน ตัวอย่างเช่น nav underline indicator ที่ขยายจาก center พร้อม overshoot, back-to-top button ที่ spring up เมื่อ appear, และ popup ที่ scale up พร้อม slight bounce
+Animations ของ FanHoard มีลักษณะ "playful" โดยใช้ spring easing (`cubic-bezier(0.2, 0.9, 0.2, 1)`) และ Back-out easing (`cubic-bezier(0.34, 1.56, 0.64, 1)`) ที่ทำให้ animations "overshoot" เล็กน้อยก่อนจะหยุด — ทำให้ดูมีชีวิตชีวากว่า ease-out มาตรฐาน ตัวอย่างเช่น nav underline indicator ที่ขยายจาก center พร้อม overshoot, back-to-top button ที่ spring up เมื่อ appear, และ popup ที่ scale up พร้อม slight bounce
 
 ---
 
 ## 5. Mobile-First Design Strategy
 
-Fantrove ออกแบบสำหรับมือถือเป็นอันดับแรกเสมอ เพราะผู้ใช้ส่วนใหญ่เข้าถึงเว็บจากมือถือ (โดยเฉพาะในเอเชียตะวันออกเฉียงใต้ที่ mobile penetration สูงมาก) การออกแบบ mobile-first ไม่ใช่แค่ "ทำให้ใช้ได้บนมือถือ" แต่คือ "เริ่มจากมือถือแล้วค่อยขยายไป desktop"
+FanHoard ออกแบบสำหรับมือถือเป็นอันดับแรกเสมอ เพราะผู้ใช้ส่วนใหญ่เข้าถึงเว็บจากมือถือ (โดยเฉพาะในเอเชียตะวันออกเฉียงใต้ที่ mobile penetration สูงมาก) การออกแบบ mobile-first ไม่ใช่แค่ "ทำให้ใช้ได้บนมือถือ" แต่คือ "เริ่มจากมือถือแล้วค่อยขยายไป desktop"
 
 ### 5.1 ทำไมต้อง Mobile-First
 
@@ -325,7 +325,7 @@ Fantrove ออกแบบสำหรับมือถือเป็นอ�
 
 ### 5.2 Touch-Friendly Targets
 
-ทุก interactive element ต้องกดได้สบายด้วยนิ้วโป้ง — ขนาดขั้นต่ำ 44×44px (ตาม Apple HIG) หรือ 48×48dp (ตาม Material Design) ในทางปฏิบัติ Fantrove ใช้:
+ทุก interactive element ต้องกดได้สบายด้วยนิ้วโป้ง — ขนาดขั้นต่ำ 44×44px (ตาม Apple HIG) หรือ 48×48dp (ตาม Material Design) ในทางปฏิบัติ FanHoard ใช้:
 
 ```css
 /* ปุ่ม nav items */
@@ -388,7 +388,7 @@ iOS devices ที่มี notch หรือ dynamic island ต้องได
 
 ### 5.5 Bottom Navigation Pattern
 
-Fantrove ใช้ bottom navigation bar บนมือถือ (ไม่ใช่ top nav หรือ hamburger menu) เพราะ — นิ้วโป้งเข้าถึงได้ง่ายที่สุด, เป็น pattern ที่ผู้ใช้คุ้นเคยจาก native apps, และทำให้ top area ว่างสำหรับ content
+FanHoard ใช้ bottom navigation bar บนมือถือ (ไม่ใช่ top nav หรือ hamburger menu) เพราะ — นิ้วโป้งเข้าถึงได้ง่ายที่สุด, เป็น pattern ที่ผู้ใช้คุ้นเคยจาก native apps, และทำให้ top area ว่างสำหรับ content
 
 Bottom nav มีลักษณะเฉพาะ:
 - `position: fixed; inset: auto 0 0 0` — ติดอยู่ด้านล่างเสมอ
@@ -490,7 +490,7 @@ Carousels บนมือถือใช้ CSS scroll-snap แทน JavaScript
 
 ### 5.9 Tap Highlight Removal
 
-Fantrove ลบ tap highlight ของ Android ออกเพื่อความสะอาด:
+FanHoard ลบ tap highlight ของ Android ออกเพื่อความสะอาด:
 
 ```css
 body {
@@ -532,11 +532,11 @@ CSS เขียนสำหรับมือถือก่อน แล้ว
 
 ## 6. Responsive Design Strategy
 
-Fantrove ใช้ responsive strategy แบบ "mixed approach" — บางส่วนเป็น mobile-first (`min-width` queries), บางส่วนเป็น desktop-first (`max-width` queries) ขึ้นกับว่า component นั้นออกแบบมาจากฝั่งไหนก่อน
+FanHoard ใช้ responsive strategy แบบ "mixed approach" — บางส่วนเป็น mobile-first (`min-width` queries), บางส่วนเป็น desktop-first (`max-width` queries) ขึ้นกับว่า component นั้นออกแบบมาจากฝั่งไหนก่อน
 
 ### 6.1 Breakpoint Inventory
 
-Fantrove ใช้ breakpoints หลายระดับที่ calibrated ตามอุปกรณ์จริง:
+FanHoard ใช้ breakpoints หลายระดับที่ calibrated ตามอุปกรณ์จริง:
 
 | Breakpoint | Type | อุปกรณ์เป้าหมาย | การใช้งานหลัก |
 |---|---|---|---|
@@ -595,7 +595,7 @@ p.content {
 
 ### 6.5 Container Queries (Future)
 
-ในอนาคต Fantrove อาจใช้ CSS Container Queries แทน Media Queries สำหรับ component-level responsiveness — ทำให้ component ปรับ layout ตามขนาด container แทนที่จะตาม viewport แต่ปัจจุบันยังไม่ใช้เพราะ browser support ยังไม่ครบ
+ในอนาคต FanHoard อาจใช้ CSS Container Queries แทน Media Queries สำหรับ component-level responsiveness — ทำให้ component ปรับ layout ตามขนาด container แทนที่จะตาม viewport แต่ปัจจุบันยังไม่ใช้เพราะ browser support ยังไม่ครบ
 
 ### 6.6 Print Styles
 
@@ -621,11 +621,11 @@ p.content {
 
 ## 7. UX Patterns (ประสบการณ์ผู้ใช้)
 
-UX patterns ของ Fantrove ออกแบบมาให้ผู้ใช้ทำสิ่งที่ต้องการได้โดยไม่ต้องคิดมาก — เปิดเว็บ ค้นหา คัดลอก ใช้งาน ปิดไป ทั้งหมดในไม่กี่วินาที
+UX patterns ของ FanHoard ออกแบบมาให้ผู้ใช้ทำสิ่งที่ต้องการได้โดยไม่ต้องคิดมาก — เปิดเว็บ ค้นหา คัดลอก ใช้งาน ปิดไป ทั้งหมดในไม่กี่วินาที
 
 ### 7.1 Loading States
 
-Fantrove มีระบบ loading ที่ครอบคลุม 4 modes ตาม context การใช้งาน:
+FanHoard มีระบบ loading ที่ครอบคลุม 4 modes ตาม context การใช้งาน:
 
 1. **Fullscreen** — ใช้เมื่อเปลี่ยนหน้าหรือโหลดข้อมูลใหม่ทั้งหน้า ครอบเต็มจอ (ยกเว้น bottom nav) เพื่อป้องกันผู้ใช้เห็นเนื้อหากระตุกขณะโหลด
 2. **Scoped** — ใช้เมื่อโหลดข้อมูลในบริเวณเฉพาะ (เช่น card content) ครอบเฉพาะ container นั้น
@@ -659,7 +659,7 @@ Popup system มี 9 presets ตาม use case:
 
 ### 7.3 Search Experience
 
-Search ของ Fantrove ออกแบบให้ "instant" — ผู้ใช้พิมพ์แล้วเห็นผลทันที ไม่ต้องกด Enter:
+Search ของ FanHoard ออกแบบให้ "instant" — ผู้ใช้พิมพ์แล้วเห็นผลทันที ไม่ต้องกด Enter:
 
 1. **Sticky search header** — อยู่ด้านบนเสมอ ซ่อนเมื่อ scroll down โผล่เมื่อ scroll up
 2. **Two-tier search** — substring search ทันที, fuzzy search (Fuse.js) โหลด lazy ใน idle time
@@ -709,7 +709,7 @@ Search ของ Fantrove ออกแบบให้ "instant" — ผู้ใ
 
 ## 8. Component Design Patterns
 
-Components ของ Fantrove ออกแบบให้ reusable, consistent, และ accessible ทุกตัว ต่อไปนี้คือ patterns หลัก:
+Components ของ FanHoard ออกแบบให้ reusable, consistent, และ accessible ทุกตัว ต่อไปนี้คือ patterns หลัก:
 
 ### 8.1 Buttons
 
@@ -905,11 +905,11 @@ Spinner ใช้ SVG แทน CSS (เพื่อ control ที่ดีก�
 
 ## 9. Animation & Motion Design
 
-Motion design ของ Fantrove มีหลักการว่า "motion ต้องมีหน้าที่ ไม่ใช่แค่สวย" — ทุก animation ต้องตอบคำถามว่า "motion นี้ช่วยให้ผู้ใช้เข้าใจอะไรดีขึ้นไหม" ถ้าไม่ ก็ตัดทิ้ง
+Motion design ของ FanHoard มีหลักการว่า "motion ต้องมีหน้าที่ ไม่ใช่แค่สวย" — ทุก animation ต้องตอบคำถามว่า "motion นี้ช่วยให้ผู้ใช้เข้าใจอะไรดีขึ้นไหม" ถ้าไม่ ก็ตัดทิ้ง
 
 ### 9.1 Transition Durations
 
-Fantrove มี transition durations 3 ระดับหลัก:
+FanHoard มี transition durations 3 ระดับหลัก:
 
 ```css
 --fv-transition-fast:    150ms;   /* Hover states, button presses */
@@ -934,7 +934,7 @@ Fantrove มี transition durations 3 ระดับหลัก:
 /* Material standard — ใช้สำหรับ general transitions */
 --fv-ease-standard:  cubic-bezier(0.4, 0, 0.2, 1);
 
-/* Fantrove spring — ใช้สำหรับ playful animations */
+/* FanHoard spring — ใช้สำหรับ playful animations */
 --fv-ease-spring:    cubic-bezier(0.2, 0.9, 0.2, 1);
 
 /* Back-out (overshoot) — ใช้สำหรับ indicators, appear animations */
@@ -1028,7 +1028,7 @@ cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
 ### 9.7 Keyframe Animations
 
-Fantrove มี keyframes หลัก:
+FanHoard มี keyframes หลัก:
 
 ```css
 /* Spinner rotation */
@@ -1067,7 +1067,7 @@ Fantrove มี keyframes หลัก:
 
 ## 10. Accessibility Design
 
-Accessibility (a11y) เป็น priority ของ Fantrove — ทุกคนต้องใช้เว็บได้ ไม่ว่าจะใช้ screen reader, keyboard only, หรือมี visual impairment
+Accessibility (a11y) เป็น priority ของ FanHoard — ทุกคนต้องใช้เว็บได้ ไม่ว่าจะใช้ screen reader, keyboard only, หรือมี visual impairment
 
 ### 10.1 Visually Hidden Class
 
@@ -1113,7 +1113,7 @@ Skip link ช่วยให้ keyboard users ข้าม navigation ไปย
 
 ### 10.3 ARIA Attributes
 
-Fantrove ใช้ ARIA อย่างครอบคลุม:
+FanHoard ใช้ ARIA อย่างครอบคลุม:
 
 ```html
 <!-- Navigation -->
@@ -1203,7 +1203,7 @@ Text ต้องมี contrast ratio ขั้นต่ำ:
 
 ## 11. Performance-Driven Design
 
-Performance เป็น priority #3 ของ Fantrove (รองจาก Documentation และ SEO) เพราะส่งผลต่อทั้ง UX และ SEO (Core Web Vitals)
+Performance เป็น priority #3 ของ FanHoard (รองจาก Documentation และ SEO) เพราะส่งผลต่อทั้ง UX และ SEO (Core Web Vitals)
 
 ### 11.1 CSS Containment
 
@@ -1310,14 +1310,14 @@ URE.mount({
 
 ## 12. Internationalization (i18n) Design
 
-Fantrove รองรับหลายภาษา (ปัจจุบัน en + th) และออกแบบมาให้เพิ่มภาษาใหม่ได้ง่าย
+FanHoard รองรับหลายภาษา (ปัจจุบัน en + th) และออกแบบมาให้เพิ่มภาษาใหม่ได้ง่าย
 
 ### 12.1 data-translate Markers
 
 ทุกข้อความใน UI ใช้ `data-translate` attribute:
 
 ```html
-<h1 data-translate="home-title">Welcome to Fantrove</h1>
+<h1 data-translate="home-title">Welcome to FanHoard</h1>
 <button data-translate="action.save">Save</button>
 ```
 
@@ -1471,7 +1471,7 @@ h1.page-title {
 
 ## 14. Color System
 
-ระบบสีของ Fantrove ออกแบบมาให้สื่อสารได้ทั้ง brand identity และ semantic meaning
+ระบบสีของ FanHoard ออกแบบมาให้สื่อสารได้ทั้ง brand identity และ semantic meaning
 
 ### 14.1 Brand Palette
 
@@ -1840,9 +1840,9 @@ const ok = await PopupSystem.confirm('Delete?');
 - i18n-first
 - SEO-first
 
-### 18.2 Fantrove-Specific (ต้อง adapt)
+### 18.2 FanHoard-Specific (ต้อง adapt)
 
-สิ่งที่เป็นเอกลักษณ์ของ Fantrove ต้อง adapt ก่อนใช้กับเว็บอื่น:
+สิ่งที่เป็นเอกลักษณ์ของ FanHoard ต้อง adapt ก่อนใช้กับเว็บอื่น:
 - Brand colors (teal/cyan/purple) — เปลี่ยนเป็นสีของแบรนด์ใหม่
 - Border radius scale (12/17/27/37/47) — อาจใช้ค่ามาตรฐาน 4/8/12/16/24 แทน
 - Easing functions (spring, back-out) — อาจปรับตาม personality ของแบรนด์

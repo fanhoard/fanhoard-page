@@ -1,6 +1,6 @@
 /**
  * lang-core.js — v1.0.0
- * Central Language API for Fantrove
+ * Central Language API for FanHoard
  *
  * โหลดก่อนทุกอย่าง (script แรกใน <head> ก่อน language.js)
  * อ่านภาษาทันทีจาก:
@@ -253,7 +253,7 @@
   
 })();/**
  * lang-core.js — v1.0.0
- * Central Language API for Fantrove
+ * Central Language API for FanHoard
  *
  * โหลดก่อนทุกอย่าง (script แรกใน <head> ก่อน language.js)
  * อ่านภาษาทันทีจาก:

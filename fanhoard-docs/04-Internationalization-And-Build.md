@@ -1,6 +1,6 @@
 # 04 — ระบบภาษา (i18n) และ Build System
 
-> เอกสารนี้อธิบายระบบ internationalization (i18n) และระบบ Build ของ **Fantrove** อย่างละเอียดครบถ้วน ครอบคลุม FvLang Central API (v5.0), Runtime Mode (แปลภาษาด้วย JS บนเบราว์เซอร์) และ Pre-built Static Mode (แปลภาษาด้วย Build Script ก่อน deploy) รวมถึง Build System ที่สร้าง static HTML สำหรับทุกภาษา
+> เอกสารนี้อธิบายระบบ internationalization (i18n) และระบบ Build ของ **FanHoard** อย่างละเอียดครบถ้วน ครอบคลุม FvLang Central API (v5.0), Runtime Mode (แปลภาษาด้วย JS บนเบราว์เซอร์) และ Pre-built Static Mode (แปลภาษาด้วย Build Script ก่อน deploy) รวมถึง Build System ที่สร้าง static HTML สำหรับทุกภาษา
 >
 > **สำหรับ:** AI และนักพัฒนาที่จะแก้ระบบภาษา เพิ่มภาษาใหม่ หรือแก้ Build System
 >
@@ -57,11 +57,11 @@
 
 ## 1. ภาพรวมสถาปัตยกรรม
 
-ระบบภาษาของ Fantrove รองรับ **2 โหมด** ที่ทำงานแยกกันแต่แชร์ codebase ร่วมกัน:
+ระบบภาษาของ FanHoard รองรับ **2 โหมด** ที่ทำงานแยกกันแต่แชร์ codebase ร่วมกัน:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      Fantrove i18n System (v5.0)                    │
+│                      FanHoard i18n System (v5.0)                    │
 ├─────────────────────────────────────────────────────────────────────┤
 │                    FvLang Layer (lang-core.js)                       │
 │  • Synchronous language detection (data-fv-built → URL → LS → nav)  │
@@ -188,7 +188,7 @@ scripts/
 ```json
 {
   "seo": {
-    "home-seo-title": "Fantrove — Emoji & Symbols Hub | Copy with One Tap"
+    "home-seo-title": "FanHoard — Emoji & Symbols Hub | Copy with One Tap"
   },
   "general": {
     "description": "Explore emojis and special characters from virtually every platform"
@@ -245,7 +245,7 @@ Element ที่ต้องการแปลจะมี attribute `data-tran
 {
   "home-hero-btn-emoji": "@slot:1@ เรียกดูอิโมจิทั้งหมด",
   "home-hero-desc": "ศูนย์กลางสำหรับค้นหา คัดลอก และใช้ @strongอิโมจิ@ และ @strongอักขระพิเศษ@ ในทุกการใช้งานของคุณ!",
-  "about-1content": "...เปิดให้ใช้งานได้ฟรี...@br@brเราเชื่อว่า...@br • Gmail: fantrove.official@gmail.com"
+  "about-1content": "...เปิดให้ใช้งานได้ฟรี...@br@brเราเชื่อว่า...@br • Gmail: fanhoard.official@gmail.com"
 }
 ```
 
@@ -1720,14 +1720,14 @@ const CONFIG = {
   dbJsonPath: 'assets/lang/options/db.json',
   translationPath: (lang) => `assets/lang/${lang}.json`,
   defaultLang: 'en',
-  baseUrl: 'https://fantrove.pages.dev',
+  baseUrl: 'https://fanhoard.pages.dev',
   excludeDirs: ['dist', 'node_modules', '.git', 'scripts', '.cloudflare', 'google6b646fa60e0f9f2f.html'],
 
   // Scripts ที่ลบออกจาก built pages
   removeScriptPatterns: ['lang-proxy.js', 'lang-sync.js', 'lang-coordinator.js'],
 
   // Static files คัดลอกตรงไป dist/
-  staticFiles: ['robots.txt', 'sitemap.xml', '_headers', 'fantrove-console-bridge.js', 'google6b646fa60e0f9f2f.html'],
+  staticFiles: ['robots.txt', 'sitemap.xml', '_headers', 'fanhoard-console-bridge.js', 'google6b646fa60e0f9f2f.html'],
 
   // Footer template
   footerTemplatePath: 'assets/template-html/footer-template.html',
@@ -1764,7 +1764,7 @@ const isDefaultWithHtmlSource =
 
 # Static assets
 /assets/*    /assets/:splat    200
-/favicon.ico /assets/images/fantrove-verse360.ico 200
+/favicon.ico /assets/images/fanhoard-verse360.ico 200
 
 # Fallback
 /* /en/home/ 404
@@ -2037,13 +2037,13 @@ function buildUrlEntries(htmlFiles, langs) {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://fantrove.pages.dev/en/home/</loc>
+    <loc>https://fanhoard.pages.dev/en/home/</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://fantrove.pages.dev/en/home/"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://fantrove.pages.dev/th/home/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://fantrove.pages.dev/en/home/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/home/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/home/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/home/"/>
   </url>
   <!-- ... -->
 </urlset>
@@ -2242,7 +2242,7 @@ window.LangModules = {
 
 ---
 
-> **สรุป:** ระบบภาษาของ Fantrove ออกแบบมาเป็น modular architecture ที่รองรับทั้ง runtime translation (เหมาะกับ development) และ pre-built static HTML (เหมาะกับ production SEO) โดยมี **FvLang (lang-core.js)** เป็นชั้น API กลางที่ resolve ภาษาแบบ synchronous และเป็น single source of truth สำหรับทุกระบบ JS ผ่าน `FvLang.lang`, `FvLang.onChange()`, และ event `fv:langchange`
+> **สรุป:** ระบบภาษาของ FanHoard ออกแบบมาเป็น modular architecture ที่รองรับทั้ง runtime translation (เหมาะกับ development) และ pre-built static HTML (เหมาะกับ production SEO) โดยมี **FvLang (lang-core.js)** เป็นชั้น API กลางที่ resolve ภาษาแบบ synchronous และเป็น single source of truth สำหรับทุกระบบ JS ผ่าน `FvLang.lang`, `FvLang.onChange()`, และ event `fv:langchange`
 ---
 
 ## 11. อ้างอิงข้ามเอกสาร

@@ -1,4 +1,4 @@
-# Fantrove Search — v6.1 Patch (Google-like non-sticky filters)
+# FanHoard Search — v6.1 Patch (Google-like non-sticky filters)
 
 วางไฟล์ทั้งหมดใน patch นี้ทับลงบน repo ตามโครงสร้างเดิม — แตก ZIP แล้ว copy ทับได้เลย
 
@@ -9,8 +9,8 @@
 | `search/index.html` | โครงสร้างใหม่ — ย้าย filter pills ออกจาก `#search-sticky` ไปเป็น sibling `.search-filters-panel`, ลบ `#filterCatToggle` (ลูกศร), ลบ `.filter-cat-wrap`, ลบ `#cat-spacer`, เขียน inline sticky script ใหม่แบบกระชับ |
 | `assets/css/search-compact-overrides.css` | ลบ style blocks ของ `.filter-cat-toggle`, `.filter-cat-wrap`, `.filter-row-end`, `.filter-row-wrapper` ออกทั้งหมด — เพิ่ม `:empty` auto-collapse สำหรับ category row — ปรับ `.search-header` padding ให้สมดุล (มี bottom padding บ้างเพราะ filter pills ไม่อยู่ใน header แล้ว) |
 | `assets/js/search-system/search-modules/rendering.js` | `setupCategoryFilter()` แบบใหม่ — ไม่อ้างถึง `filterCatToggle` / `filterCatWrap` / `_closeCatBar` / `_updateCatBarHeight` อีกต่อไป เมื่อไม่มี categories ก็แค่ clear innerHTML แล้ว CSS `:empty` จะ collapse row ให้เอง |
-| `fantrove-docs/14-System-Design-And-UX.md` | เพิ่ม section 5.8.1 "Search Page Sticky Layout (Google-like, v6.1+)" อธิบายกฎการวาง structure ใหม่ + อัปเดต ARIA ตัวอย่างให้เป็น filter pills แทน toggle button |
-| `fantrove-docs/02-Search-System.md` | อัปเดต section 12.4 setupCategoryFilter ให้สะท้อน behavior ใหม่ พร้อม callout box อธิบายการเปลี่ยนแปลง |
+| `fanhoard-docs/14-System-Design-And-UX.md` | เพิ่ม section 5.8.1 "Search Page Sticky Layout (Google-like, v6.1+)" อธิบายกฎการวาง structure ใหม่ + อัปเดต ARIA ตัวอย่างให้เป็น filter pills แทน toggle button |
+| `fanhoard-docs/02-Search-System.md` | อัปเดต section 12.4 setupCategoryFilter ให้สะท้อน behavior ใหม่ พร้อม callout box อธิบายการเปลี่ยนแปลง |
 
 ## พฤติกรรมใหม่
 
