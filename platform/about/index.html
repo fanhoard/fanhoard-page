@@ -42,44 +42,51 @@
 </head>
 
 <body>
-  <a href="#main" class="skip-link fv-skip-link" data-translate="home-skip-link">Skip to main content</a>
+  <a href="#fv-main" class="skip-link fv-skip-link" data-translate="home-skip-link">Skip to main content</a>
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PJ397CLS" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
-  <div id="fv-app" class="fv-app" data-page="about">
+  <div id="fv-app" class="fv-app fv-page-shell fv-page-shell--has-top-nav" data-page="about">
 
-    <!-- Top Navigation -->
-    <nav aria-label="Page navigation">
-      <button class="back-button" id="back-button" aria-label="Go back">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m15 19-7-7 7-7" />
-        </svg>
-      </button>
-      <span class="page-title" data-translate="page-about"></span>
-    </nav>
+    <!-- Header Landmark & Top Navigation -->
+    <header class="fv-header" role="banner">
+      <nav class="fv-nav" role="navigation" aria-label="Page navigation">
+        <button class="back-button" id="back-button" aria-label="Go back">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7" />
+          </svg>
+        </button>
+        <span class="page-title" data-translate="page-about"></span>
+      </nav>
+    </header>
 
-    <div class="fv-page-shell">
-      <main id="main">
+    <!-- Main Landmark -->
+    <main id="fv-main" class="fv-main" role="main" tabindex="-1">
+      <div class="container-narrow stack-md">
 
         <!-- SEO h1 -->
         <h1 class="page-title-about">About FanHoard</h1>
 
         <!-- Website Concept -->
-        <section class="section" aria-labelledby="about-concept">
+        <section class="fv-section section" aria-labelledby="about-concept">
           <h2 class="title" id="about-concept" data-translate="1title"></h2>
           <p class="content" data-translate="1content"></p>
         </section>
 
         <!-- Content License -->
-        <section class="section" aria-labelledby="about-license">
+        <section class="fv-section section" aria-labelledby="about-license">
           <h2 class="title" id="about-license" data-translate="6title"></h2>
           <p class="content" data-translate="5content">
             <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener" data-translate="cc0-link">CC0 1.0 Universal Public Domain Dedication</a>
           </p>
         </section>
 
-      </main>
+      </div>
+    </main>
+
+    <!-- Footer Landmark -->
+    <footer class="fv-footer" role="contentinfo">
       <div id="fv-footer-mount"></div>
-    </div>
+    </footer>
 
   </div><!-- /#fv-app -->
 
