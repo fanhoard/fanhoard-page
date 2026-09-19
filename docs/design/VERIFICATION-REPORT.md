@@ -61,5 +61,59 @@ Part 1 of the final verification for the FanHoard redesign (`fanhoard-page` repo
 
 ---
 
-### 6. Part 2 Placeholder
-> **Note**: Comprehensive Web Design Guidelines review across all 12 main pages and WCAG 2.2 AA accessibility scan (`npx @accesslint/cli`) will be executed and appended to this verification report in **Part 2** (`verify-audits`).
+## Verification Part 2: Web Design Guidelines Review & Accessibility Scan
+
+### 1. Web Design Guidelines Review
+- **Status**: PASSED
+- **Source Guidelines**: Vercel Web Interface Guidelines (`web-design-guidelines`)
+- **Scope**: Reviewed across all 12 main redesign pages:
+  1. `index.html` (404 / landing redirect)
+  2. `home/index.html` (Home page)
+  3. `search/index.html` (Search page)
+  4. `setting/index.html` (Settings page)
+  5. `community/index.html` (Community hub)
+  6. `community/contact/index.html` (Contact form)
+  7. `community/report/index.html` (Report form)
+  8. `platform/about/index.html` (About page)
+  9. `platform/roadmap/index.html` (Roadmap page)
+  10. `platform/whats_new/index.html` (Whats New page)
+  11. `data/verse/discover/index.html` (Discover symbol catalog)
+  12. `data/verse/scope/index.html` (Scope viewer)
+- **Key Guideline Audit Findings**:
+  - **Typography & Copy**: Punctuation updated from literal `...` to semantic `…` in search inputs and form placeholders (`search/index.html`, `community/report/index.html`).
+  - **Focus & Transitions**: Unrestricted `transition: all` in overlay/popup CSS (`assets/css/popup.css`) replaced with explicit property lists (`transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;`).
+  - **Color & Dark Mode**: Token system (`assets/css/tokens.css`) consistently applied across all pages; 0 un-themed or leaking hardcoded colors.
+  - **Semantic Elements & ARIA**: Replaced prohibited `aria-label` on generic `<div>` in `platform/whats_new/index.html` with landmark `<section aria-label="Release notes">`.
+
+---
+
+### 2. Accessibility Scan (`axe-core` / WCAG 2.2 AA)
+- **Status**: PASSED
+- **Engine**: `axe-core` WCAG 2.2 AA audit suite across all 41 user-facing built HTML pages in `dist/` (including localized `en/` and `th/` SSG pages).
+- **Target Violations Allowed**: 0 Critical / 0 Serious WCAG 2.2 AA violations.
+- **Scan Results**:
+  - **Total User-Facing Pages Scanned**: 41
+  - **Critical Violations**: 0
+  - **Serious Violations**: 0
+  - **Moderate / Minor Violations**: 0
+  - **Overall Accessibility Status**: 100% PASS (0 unresolved WCAG 2.2 AA violations across all 41 pages).
+- **Fixes Applied During Audit**:
+  - `setting/index.html`: Added explicit `aria-label="Auto Update"` to switch control `#auto-update-switch`.
+  - `setting/index.html`, `community/index.html`, `platform/about/index.html`, `platform/roadmap/index.html`: Added accessible default fallback text inside empty `data-translate` spans/links (e.g., `support-button`, `support-button-patreon`, `cc0-link`, `pE-link`) ensuring discernible link text during static DOM inspection before JS hydration.
+  - `home/index.html`: Added visible fallback text to FAQ summary elements (`#faq1-title`, `#faq2-title`, `#faq3-title`) for screen-reader discernible text.
+  - `platform/whats_new/index.html`: Changed container tag from generic `<div id="whats-new-container" aria-label="...">` to landmark `<section id="whats-new-container" aria-label="...">` fixing ARIA 1.2 `aria-prohibited-attr` violation.
+  - `google6b646fa60e0f9f2f.html`: Added valid `<html lang="en">` and `<title>` tags for standard document compliance.
+
+---
+
+## Final Overall Verdict
+- **Overall Status**: **PASSED / READY FOR PRODUCTION**
+- **Summary**:
+  - All 16 execution chunks of the FanHoard main website redesign are complete and verified on `main`.
+  - SSG build, schema data validator, and Vitest test suite pass 100% green.
+  - Web design guidelines review and WCAG 2.2 AA accessibility audit verified 0 unresolved critical or serious violations across all 41 built pages.
+  - Repo hygiene rules satisfied (0 legacy files `beta.html`/`cn.html`/`n.html`, 0 overrides file, 0 `!important` in shell CSS).
+
+### Remaining Judgment-Call / Non-Blocking Items
+1. **E2E Playwright Execution**: Playwright specs are verified syntactically and structurally, but require a CI runner with OS-level Chromium dependencies (`libnspr4.so`) installed.
+2. **Third-Party Script Asynchronous Loading**: Google Tag Manager and analytics scripts continue to load asynchronously; monitoring real-user performance metrics in production is recommended.

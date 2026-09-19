@@ -164,7 +164,7 @@
   font-weight: var(--fv-font-medium);
   line-height: 1.4;
   cursor: pointer;
-  transition: all var(--fv-transition-fast);
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease var(--fv-transition-fast);
   white-space: nowrap;
   user-select: none;
   -webkit-user-select: none;
