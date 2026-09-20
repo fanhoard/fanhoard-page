@@ -7,13 +7,13 @@
   'use strict';
 
   // ── Z-Index Layers ─────────────────────────────────────────────────────────
-  // Stackable popups increment within their layer. The base is always
-  // higher than the highest FanHoard z-index (--z-toast: 700).
+  // Stackable popups increment within their layer. Correctly ordered hierarchy:
+  // Tooltips (900) > Toasts (800) > Popovers (700) > Dialogs/Alerts (600) > Drawers/Sheets (500).
 
   const Z_INDEX = Object.freeze({
-    TOOLTIP       : 400,
-    POPOVER       : 300,
-    TOAST         : 700,
+    TOOLTIP       : 900,
+    POPOVER       : 700,
+    TOAST         : 800,
     DRAWER        : 500,
     SHEET         : 500,
     DIALOG        : 600,
@@ -293,7 +293,7 @@
       defaultPosition         : 'center',
       hasOverlay              : true,
       hasHeader               : true,
-      hasFooter               : false,
+      hasFooter               : true,
       hasCloseButton          : true,
       defaultClosable         : true,
       defaultBlocking         : true,
@@ -302,38 +302,35 @@
       defaultStackable        : false,
       defaultDismissOnOverlay : false,
       defaultDismissOnEscape  : true,
-      enterAnimation          : 'fp-enter-fullscreen',
-      exitAnimation           : 'fp-exit-fullscreen',
+      enterAnimation          : 'fp-enter-center',
+      exitAnimation           : 'fp-exit-center',
       defaultRole             : 'dialog',
       zIndexLayer             : Z_INDEX.FULLSCREEN,
     }),
   });
 
-  // ── Shadow presets (map user-facing name to FanHoard tokens) ───────────────
-
+  // ── Default shadow styles per elevation level ──────────────────────────────
   const SHADOWS = Object.freeze({
-    none : 'none',
-    sm   : 'var(--fv-shadow-sm)',
-    md   : 'var(--fv-shadow-md)',
-    lg   : 'var(--fv-shadow-lg)',
-    xl   : '0 30px 60px -12px rgba(6, 20, 24, 0.12), 0 18px 36px -18px rgba(6, 20, 24, 0.08)',
+    none   : 'none',
+    sm     : 'none',
+    md     : 'none',
+    lg     : 'none',
+    xl     : 'none',
   });
 
-  // ── Queue ──────────────────────────────────────────────────────────────────
-
+  // ── Queue settings ─────────────────────────────────────────────────────────
   const QUEUE = Object.freeze({
-    MAX_CONCURRENT     : 5,     // max popups open simultaneously
-    QUEUE_ENABLED      : true,  // enable queuing when at capacity
-    TIMEOUT_CLOSEST_MS : 150,   // don't auto-close within 150ms of open
+    MAX_CONCURRENT_TOASTS : 3,
+    TOAST_GAP_PX          : 12,
   });
 
-  // ── Accessibility ──────────────────────────────────────────────────────────
-
+  // ── Accessibility defaults ────────────────────────────────────────────────
   const A11Y = Object.freeze({
-    AUTO_FOCUS_SELECTOR : 'input:not([type="hidden"]), textarea, select, button, [href], [tabindex]:not([tabindex="-1"])',
-    FOCUS_DELAY_MS      : 80,   // delay before auto-focusing first element
+    FOCUS_RING_COLOR : '#009688',
+    FOCUS_RING_WIDTH : '2px',
   });
 
+  // Export
   M.CONFIG = Object.freeze({
     Z_INDEX, TIMING, EASING, SIZES, DOM, PRESETS, SHADOWS, QUEUE, A11Y,
   });

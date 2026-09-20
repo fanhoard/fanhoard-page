@@ -39,13 +39,11 @@
       overlayEl.setAttribute(D.OVERLAY_ATTR, '');
       overlayEl.setAttribute('aria-hidden', 'true');
 
-      // Overlay styling depends on blocking vs non-blocking
+      // Overlay styling depends on blocking vs non-blocking (clean white-canvas overlay, no backdrop blur)
       if (opts.blocking) {
-        overlayEl.style.backgroundColor = 'rgba(0, 0, 0, 0.45)';
-        overlayEl.style.backdropFilter = 'blur(4px)';
-        overlayEl.style.webkitBackdropFilter = 'blur(4px)';
+        overlayEl.style.backgroundColor = 'rgba(0, 0, 0, 0.35)';
       } else {
-        overlayEl.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+        overlayEl.style.backgroundColor = 'rgba(0, 0, 0, 0.15)';
       }
     }
 
