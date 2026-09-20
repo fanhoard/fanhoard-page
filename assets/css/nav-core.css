@@ -4,18 +4,18 @@
   font-display: swap;
 }
 
-body { margin:0; padding:0; }
+body { margin:0; padding:0; background: var(--fv-surface-page, #ffffff); }
 
 header {
   position:relative; display:flex; flex-direction:column; align-items:flex-start;
-  width:100%; background:var(--fv-surface-page); margin-bottom: var(--space-8, 32px); 
+  width:100%; background:var(--fv-surface-page, #ffffff); margin-bottom: var(--space-6, 24px); 
   contain: layout style;
 }
 
 .logo {
   font-family:'FoglihtenNo07calt',monospace;
   font-size: var(--step-3, 1.75rem); padding: var(--space-5, 20px) 0 0;
-  color:var(--color-brand-primary, #0d9488);
+  color:var(--color-brand-primary, #009688);
   white-space:nowrap; display:flex; align-items:center;
   margin-left: var(--space-3, 12px); pointer-events:none;
 }
@@ -25,11 +25,11 @@ header {
 nav { width:100%; margin-top: var(--space-2, 8px); contain: layout style; }
 nav ul {
   display:flex; list-style:none; margin:0;
-  padding: var(--space-2) var(--space-2) 0;
+  padding: var(--space-2, 8px) var(--space-2, 8px) 0;
   overflow-x:auto;
   white-space:nowrap;
   scrollbar-width:none;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle, rgba(0,0,0,0.06));
   overscroll-behavior-x:contain; touch-action:pan-x;
   -webkit-overflow-scrolling:touch; 
   contain: layout style; 
@@ -39,27 +39,27 @@ nav ul li { flex:none; }
 
 nav ul li button {
   position:relative; display:flex; align-items:center; justify-content:center;
-  padding: var(--space-3) var(--space-3); min-height: 44px; border-radius:var(--fv-radius-pill);
-  font-size: var(--step--1, 0.875rem); background:transparent; border:1px solid transparent;
-  color:var(--fv-text-secondary); cursor:pointer; white-space:nowrap;
+  padding: var(--space-3, 12px) var(--space-4, 16px); min-height: 44px; border-radius:var(--fv-radius-pill, 9999px);
+  font-size: var(--step--1, 0.875rem); font-weight: 500; background:transparent; border:1px solid transparent;
+  color:var(--text-muted, #757575); cursor:pointer; white-space:nowrap;
   user-select:none; -webkit-tap-highlight-color:transparent; 
   touch-action: manipulation; 
   transition: background var(--transition-fast, 150ms) ease-in-out, border-color var(--transition-fast, 150ms) ease-in-out, color var(--transition-fast, 150ms) ease-in-out;
 }
+nav ul li button:hover { color: var(--text-main, #0f172a); }
 nav ul li button:active { background: var(--fv-surface-hover, #f0f0f0); }
 
 nav ul li button.active {
-  color:var(--color-brand-primary, #0d9488);
-  background:var(--fv-surface-teal-hover);
-  border-color: var(--border-brand, #0d9488);
-  transform: scale(0.98);
-  transition: transform 150ms ease-out, background 150ms ease-out, border-color 150ms ease-out;
+  color:var(--color-brand-primary, #009688);
+  background:var(--fv-surface-teal-hover, rgba(0, 150, 136, 0.08));
+  border-color: var(--border-brand, #009688);
+  transform: none;
 }
 
 nav ul li button::after {
   content:''; position:absolute; left:50%; bottom:0;
-  width:40%; height:3px; background:var(--color-brand-primary, #0d9488);
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0; 
+  width:40%; height:3px; background:var(--color-brand-primary, #009688);
+  border-radius: var(--radius-sm, 6px) var(--radius-sm, 6px) 0 0; 
   transform: translateX(-50%) scaleX(0);
   will-change: transform;
   transition: transform 200ms ease-in;
@@ -74,7 +74,7 @@ nav ul li button.active::after {
   display:flex; flex-direction:column; gap:4px; cursor:pointer;
   -webkit-tap-highlight-color:transparent; touch-action:manipulation;
   position:fixed; left:16px; top: var(--space-6, 24px); padding: var(--space-1, 4px);
-  z-index:var(--fv-z-overlay);
+  z-index:var(--fv-z-overlay, 500);
 }
 
 .error-message { position:fixed; top:50%; right:20px; background: var(--color-danger, #dc2626); color: var(--text-inverse, #ffffff); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md, 8px); z-index:var(--z-toast, 700); }
@@ -92,3 +92,6 @@ nav ul li button.active::after {
 }
 
 @media print { header, nav, .navbar-toggle { display:none; } }
+main { margin-top: var(--space-6, 24px); margin-bottom: var(--space-12, 48px); contain: layout style; }
+
+#content-loading { contain: layout style; }

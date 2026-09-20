@@ -211,8 +211,8 @@ main {
 }
 
 .fv-card:hover {
-  border-color: transparent;
-  box-shadow: var(--shadow-md);
+  border-color: var(--color-brand-primary, #009688);
+  box-shadow: none;
 }
 
 .fv-card__header {

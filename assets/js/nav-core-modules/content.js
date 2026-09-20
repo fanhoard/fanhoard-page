@@ -64,19 +64,19 @@
     const s = document.createElement('style');
     s.id = _CSS_ID;
     s.textContent = `
-.cm-group{contain:layout style;isolation:isolate;}
+.cm-group{contain:layout style;isolation:isolate;margin-bottom:var(--space-8, 32px);}
 
 .ure-btn-row{
   display:flex!important;flex-wrap:wrap!important;
-  background:var(--fv-surface-page);
-  justify-content:center!important;align-items:center!important;
-  gap:5px!important;
+  background:transparent!important;
+  justify-content:flex-start!important;align-items:center!important;
+  gap:var(--space-2, 8px)!important;
   contain:layout style;
 }
-.ure-btn-row--only {border-radius:25px!important;padding:1rem 5px!important;margin:0 0 40px!important;}
-.ure-btn-row--first{border-radius:25px 25px 0 0!important;padding:1rem 5px 0!important;}
-.ure-btn-row--mid  {border-radius:0!important;padding:2px 5px!important;}
-.ure-btn-row--last {border-radius:0 0 25px 25px!important;padding:0 5px 1rem!important;margin:0 0 40px!important;}
+.ure-btn-row--only,
+.ure-btn-row--first,
+.ure-btn-row--mid,
+.ure-btn-row--last {border-radius:0!important;padding:0!important;margin:0 0 var(--space-8, 32px)!important;}
 
 .card-content-container--h{
   flex-wrap:nowrap!important;

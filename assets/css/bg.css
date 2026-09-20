@@ -10,32 +10,13 @@
 
 body {
   font-family: var(--fv-font-stack);
+  background: var(--fv-surface-page, #ffffff);
 }
 
-body {
-  background: var(--fv-surface-page);
-}
-
+/* Canvas: pure white, calm precise native-app feel.
+   BANNED: hero gradients, background gradients */
 body::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-image: linear-gradient(
-    45deg,
-    transparent 48%,
-    rgba(255,255,255,0.03) 50%,
-    transparent 52%
-  );
-  background-size: 30px 30px;
-  pointer-events: none;
-  z-index: -1;
-}
-
-@keyframes gradientShift {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  display: none;
 }
 
 @keyframes fadeIn-1 {
@@ -52,13 +33,9 @@ body::before {
 .fadeOut      { animation: fadeOut-1 var(--fade-out-duration) var(--transition-timing) forwards; }
 .reduce-motion { animation:none!important; transition:none!important; }
 
-@media (max-width:768px) {
-  body::before { background-size:20px 20px; }
-}
-
 @media (prefers-reduced-motion:reduce) {
   :root { --fade-in-duration:0ms; --fade-out-duration:0ms; }
-  body  { background-image:none; background-color:var(--fv-surface-page); }
+  body  { background-image:none; background-color:var(--fv-surface-page, #ffffff); }
   body::before { display:none; }
 }
 
