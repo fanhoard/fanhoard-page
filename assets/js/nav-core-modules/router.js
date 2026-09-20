@@ -404,7 +404,9 @@
           detail: { main, sub: chosenSub?.url || chosenSub?.jsonFile || sub },
         }));
 
-        if (!options.maintainScroll) {
+        const routeKey = chosenSub?.url || chosenSub?.jsonFile || sub || main;
+        const hasCachedScroll = M.RouteCache && M.RouteCache.has(routeKey) && M.RouteCache.get(routeKey)?.scrollPosition > 0;
+        if (!options.maintainScroll && !hasCachedScroll) {
           try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (_) {}
         }
 
@@ -496,12 +498,16 @@
     // ── Initialization ─────────────────────────────────────────────────────────
 
     init() {
+      if (typeof history !== 'undefined' && 'scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
       window.addEventListener('popstate', async () => {
         try {
           try { this.updateActiveFromLocation(); } catch (_) {}
           await this.navigateTo(window.location.search || '', {
             isPopState:    true,
             skipUrlUpdate: true,
+            maintainScroll: true,
           });
         } catch (e) { console.error('[NavCore/Router] popstate error:', e); }
       }, { passive: true });

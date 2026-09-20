@@ -174,10 +174,10 @@
 
     // ── clearContent ────────────────────────────────────────────────────────────
 
-    async clearContent() {
+    async clearContent(options = {}) {
       _sess++;
 
-      if (typeof window !== 'undefined' && (window.pageYOffset || window.scrollY)) {
+      if (!options?.skipScroll && typeof window !== 'undefined' && (window.pageYOffset || window.scrollY)) {
         window.scrollTo(0, 0);
       }
 
@@ -288,7 +288,58 @@
       _activeRouteKey  = routeKey;
       _activeRouteKind = 'feed';
 
-      // On return/re-entry, reset render state to show only initial chunk
+      const cached = M.RouteCache ? M.RouteCache.get(routeKey) : null;
+
+      if (cached && cached.scrollPosition > 0) {
+        await this.clearContent({ skipScroll: true });
+        const sess = _sess;
+
+        try {
+          await M.DataService.loadApiDatabase().catch(err => {
+            console.warn('[Content] renderFeed restore: loadApiDatabase failed:', err);
+          });
+          if (sess !== _sess) return;
+
+          this._ensureFeedClickDelegate(ctr);
+
+          if (cached.feedState && M.FeedService) {
+            M.FeedService.restore(cached.feedState);
+          }
+
+          let hasMore = true;
+          if (cached.domSnapshot) {
+            M.RouteCache.restoreDom(ctr, cached.domSnapshot);
+          } else {
+            const targetChunks = cached.chunkCount || 1;
+            for (let i = 0; i < targetChunks; i++) {
+              const size = i === 0 ? FEED_FIRST_PAGE_SIZE : FEED_PAGE_SIZE;
+              const res = await M.FeedService.loadNextPage(lang, size);
+              if (sess !== _sess) return;
+              if (res.groups.length) {
+                await this._appendFeedGroups(ctr, res.groups, lang, null);
+              }
+              hasMore = res.hasMore;
+              if (!hasMore) break;
+            }
+          }
+
+          try { M.LoadingService?.hideInstant(); } catch (_) {}
+          if (sess !== _sess) return;
+
+          if (hasMore !== false) {
+            this._attachFeedSentinel(ctr, lang, sess);
+          }
+
+          await this._restoreScrollPosition(ctr, cached.scrollPosition, cached.chunkCount || 1, async () => {
+            return await M.FeedService.loadNextPage(lang, FEED_PAGE_SIZE);
+          }, lang, sess);
+
+          return;
+        } catch (e) {
+          console.error('[NavCore/Content] renderFeed restore error:', e);
+        }
+      }
+
       if (M.RouteCache) M.RouteCache.invalidate(routeKey);
       if (M.FeedCache) M.FeedCache.clearFeedState();
       M.FeedService.reset();
@@ -302,10 +353,8 @@
         });
         if (sess !== _sess) return;
 
-        // Delegated click — attach ครั้งเดียว ตลอดอายุ ctr element
         this._ensureFeedClickDelegate(ctr);
 
-        // ── First page ─────────────────────────────────────────────────────────
         const { groups: firstGroups, hasMore } =
           await M.FeedService.loadNextPage(lang, FEED_FIRST_PAGE_SIZE);
         if (sess !== _sess) return;
@@ -314,16 +363,7 @@
           await this._appendFeedGroups(ctr, firstGroups, lang, null);
         }
 
-        // v2.1: บันทึก state ลง FeedCache หลัง first page render เสร็จ
-        //   → ครั้งถัดไป (ภายใน TTL) resume ได้จากจุดนี้
         try { M.FeedService?.saveToCache?.(); } catch (_) {}
-
-        // v3: ซ่อน loading หลัง content แสดงผลแล้วเท่านั้น
-        // WHY: ถ้าซ่อนก่อน render → ผู้ใช้เห็นหน้าว่าง 180ms+ (blank flash)
-        //   ตอนนี้ content render เสร็จแล้ว → ซ่อน loading ทันที
-        //   ใช้ hideInstant() — ลบ DOM ทันที เหมือน Google/Microsoft
-        //   v4: hideInstant จะรอ 1 rAF ให้ browser paint content ก่อน remove overlay
-        //     → render-behind-overlay pattern (Netflix/Spotify)
         try { M.LoadingService?.hideInstant(); } catch (_) {}
 
         if (sess !== _sess) return;
@@ -362,10 +402,66 @@
       _activeRouteKey  = routeKey;
       _activeRouteKind = 'lazy';
 
-      // On return/re-entry, reset render state to show only initial chunk
+      const cached = M.RouteCache ? M.RouteCache.get(routeKey) : null;
+
+      if (cached && cached.scrollPosition > 0) {
+        await this.clearContent({ skipScroll: true });
+        const sess = _sess;
+
+        try {
+          await M.DataService.loadApiDatabase().catch(err => {
+            console.warn('[Content] renderContentLazy restore: loadApiDatabase failed:', err);
+          });
+          if (sess !== _sess) return;
+
+          this._ensureFeedClickDelegate(ctr);
+
+          if (cached.paginatorState && M.SourcePaginator) {
+            M.SourcePaginator.restore(cached.paginatorState);
+          }
+
+          let hasMore = true;
+          if (cached.domSnapshot) {
+            M.RouteCache.restoreDom(ctr, cached.domSnapshot);
+          } else {
+            const sourceDesc = data.find(d => d && d.source);
+            if (sourceDesc && M.SourcePaginator) {
+              const layout = sourceDesc.as === 'cards' || sourceDesc.as === 'card' ? 'card' : 'button';
+              const filter = Array.isArray(sourceDesc.only) ? sourceDesc.only : null;
+              await M.SourcePaginator.init(sourceDesc.source, layout, filter);
+              const targetChunks = cached.chunkCount || 1;
+              for (let i = 0; i < targetChunks; i++) {
+                const size = i === 0 ? M.SourcePaginator.FIRST_PAGE_SIZE : M.SourcePaginator.PAGE_SIZE;
+                const res = await M.SourcePaginator.loadNextPage(lang, size);
+                if (sess !== _sess) return;
+                if (res.groups.length) {
+                  await this._appendFeedGroups(ctr, res.groups, lang, null);
+                }
+                hasMore = res.hasMore;
+                if (!hasMore) break;
+              }
+            }
+          }
+
+          try { M.LoadingService?.hideInstant(); } catch (_) {}
+          if (sess !== _sess) return;
+
+          if (hasMore !== false) {
+            this._attachLazySentinel(ctr, lang, sess);
+          }
+
+          await this._restoreScrollPosition(ctr, cached.scrollPosition, cached.chunkCount || 1, async () => {
+            return await M.SourcePaginator.loadNextPage(lang, M.SourcePaginator.PAGE_SIZE);
+          }, lang, sess);
+
+          return;
+        } catch (e) {
+          console.error('[NavCore/Content] renderContentLazy restore error:', e);
+        }
+      }
+
       if (M.RouteCache) M.RouteCache.invalidate(routeKey);
 
-      // ── ไม่มี cache → render ใหม่ ───────────────────────────────────────────
       await this.clearContent();
       const sess = _sess;
 
@@ -375,16 +471,10 @@
         });
         if (sess !== _sess) return;
 
-        // Delegated click — attach ครั้งเดียว
         this._ensureFeedClickDelegate(ctr);
 
-        // ── Initialize paginator สำหรับ source descriptor ตัวแรกที่เจอ ──────
-        // WHY ใช้แค่ตัวแรก: ปัจจุบัน source descriptors มักมีแค่ตัวเดียว
-        //   เช่น symbols.json = [{ source: 'symbol' }]
-        //   ถ้ามีหลาย source ในอนาคต ต้องปรับให้ paginator รองรับหลาย source
         const sourceDesc = data.find(d => d && d.source);
         if (!sourceDesc) {
-          // ไม่ใช่ source-based → fallback ไป renderContent แบบเดิม
           await this.renderContent(data);
           return;
         }
@@ -393,12 +483,10 @@
           ? 'card' : 'button';
         const filter = Array.isArray(sourceDesc.only) ? sourceDesc.only : null;
 
-        // reset paginator ก่อน init (clear state เดิม)
         M.SourcePaginator?.reset?.();
         await M.SourcePaginator.init(sourceDesc.source, layout, filter);
         if (sess !== _sess) return;
 
-        // ── First page ─────────────────────────────────────────────────────────
         const { groups: firstGroups, hasMore } =
           await M.SourcePaginator.loadNextPage(lang, M.SourcePaginator.FIRST_PAGE_SIZE);
         if (sess !== _sess) return;
@@ -852,22 +940,19 @@
       const domSnapshot = M.RouteCache.snapshotDom(ctr);
       if (!domSnapshot) return false;
 
-      const scrollPosition = window.pageYOffset || 0;
+      const scrollPosition = window.pageYOffset || document.documentElement.scrollTop || 0;
+      const chunkCount = ctr.querySelectorAll('.feed-page').length || 1;
 
       /** @type {any} */
       const partial = {
         domSnapshot,
         scrollPosition,
+        chunkCount,
         routeKind: _activeRouteKind || 'ure',
-        hasMore:   false,
+        feedState: _activeRouteKind === 'feed' && M.FeedService ? M.FeedService.snapshot() : null,
+        paginatorState: _activeRouteKind === 'lazy' && M.SourcePaginator ? M.SourcePaginator.snapshot() : null,
+        hasMore: true,
       };
-
-      if (_activeRouteKind === 'feed' || _activeRouteKind === 'lazy') {
-        // Reset render state memory on route exit: clear cached multi-chunk DOM snapshots
-        M.RouteCache.invalidate(_activeRouteKey);
-        if (M.FeedCache) M.FeedCache.clearFeedState();
-        return true;
-      }
 
       M.RouteCache.save(_activeRouteKey, partial);
       return true;
@@ -876,6 +961,31 @@
     /**
      * Clear active route tracking — เรียกเมื่อต้องการ reset (เช่น language change)
      */
+
+    async _restoreScrollPosition(ctr, targetY, targetChunks, loadNextPageFn, lang, sess) {
+      if (!targetY || targetY <= 0) return;
+
+      let chunks = ctr.querySelectorAll('.feed-page').length;
+      while (
+        (document.documentElement.scrollHeight < targetY + window.innerHeight || chunks < targetChunks)
+      ) {
+        if (sess !== _sess) return;
+        const res = await loadNextPageFn();
+        if (sess !== _sess) return;
+        if (!res || !res.groups || res.groups.length === 0) break;
+
+        const sentinel = ctr.querySelector('#' + FEED_SENTINEL_ID);
+        await this._appendFeedGroups(ctr, res.groups, lang, sentinel);
+        chunks = ctr.querySelectorAll('.feed-page').length;
+        if (res.hasMore === false) break;
+      }
+
+      window.scrollTo(0, targetY);
+      requestAnimationFrame(() => {
+        window.scrollTo(0, targetY);
+      });
+    },
+
     clearActiveRoute() {
       _activeRouteKey  = null;
       _activeRouteKind = null;

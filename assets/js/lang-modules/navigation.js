@@ -74,11 +74,7 @@
         if (!event.persisted) return;
         
         try {
-          // On BFCache restoration (return navigation), clear caches and reset render state
-          if (M.RouteCache) M.RouteCache.invalidate();
-          if (M.FeedCache) M.FeedCache.clearFeedState();
-          if (M.FeedService) M.FeedService.reset();
-          if (M.SourcePaginator) M.SourcePaginator.reset();
+          // On BFCache restoration (return navigation), state is preserved via RouteCache
 
           if (M.ContentService) {
             const lang = localStorage.getItem('selectedLang') || 'en';

@@ -99,6 +99,7 @@
      * @returns {RouteCacheEntry|null}
      */
     get(routeKey) {
+      const res = this._cache.get(routeKey);
       if (!routeKey) return null;
       const entry = this._cache.get(routeKey);
       if (!entry) return null;
