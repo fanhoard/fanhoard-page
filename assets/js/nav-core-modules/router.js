@@ -336,6 +336,16 @@
         //      เพราะ renderFeed() จัดการ clearContent + FeedService.reset() ภายในตัวเอง
         //      route อื่นทุก route ยังคง clearContent ปกติ
 
+        const targetRouteKey = main === CONFIG.ALL_BUTTON.URL
+          ? CONFIG.ALL_BUTTON.URL
+          : (chosenSub?.url || chosenSub?.jsonFile || main);
+
+        const hasCachedScroll = Boolean(
+          M.RouteCache &&
+          M.RouteCache.has(targetRouteKey) &&
+          (M.RouteCache.get(targetRouteKey)?.scrollPosition > 0)
+        );
+
         if (main === CONFIG.ALL_BUTTON.URL) {
           // ── Smart infinite feed ───────────────────────────────────────────
           // v5: state preservation — save current route ก่อน navigate ออก
@@ -353,7 +363,7 @@
           //   ถ้าข้อมูลเป็น source-based → ใช้ renderContentLazy (lazy paginate)
           //   ถ้าไม่ใช่ → ใช้ renderContent แบบเดิม (URE virtual scroll)
           try { M.ContentService.saveActiveRoute(); } catch (_) {}
-          try { await M.ContentService.clearContent(); } catch (_) {}
+          try { await M.ContentService.clearContent({ skipScroll: hasCachedScroll }); } catch (_) {}
 
           const jobs = [];
           if (mainButton.jsonFile)
@@ -404,8 +414,6 @@
           detail: { main, sub: chosenSub?.url || chosenSub?.jsonFile || sub },
         }));
 
-        const routeKey = chosenSub?.url || chosenSub?.jsonFile || sub || main;
-        const hasCachedScroll = M.RouteCache && M.RouteCache.has(routeKey) && M.RouteCache.get(routeKey)?.scrollPosition > 0;
         if (!options.maintainScroll && !hasCachedScroll) {
           try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (_) {}
         }

@@ -967,7 +967,8 @@
 
       let chunks = ctr.querySelectorAll('.feed-page').length;
       while (
-        (document.documentElement.scrollHeight < targetY + window.innerHeight || chunks < targetChunks)
+        document.documentElement.scrollHeight < targetY + window.innerHeight &&
+        chunks < targetChunks
       ) {
         if (sess !== _sess) return;
         const res = await loadNextPageFn();
