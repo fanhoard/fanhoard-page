@@ -13,9 +13,9 @@
   // ── Active listeners registry (per-instance cleanup) ──────────────────────
 
   /**
-   * Set of { element, event, handler } tuples currently attached by the overlay system.
+   * Set of { element, event, handler, options, _instanceId } tuples currently attached by the overlay system.
    * Used for guaranteed cleanup on popup close/destroy.
-   * @type {Set<{el: Element, event: string, handler: Function}>}
+   * @type {Set<{el: Element, event: string, handler: Function, options?: Object, _instanceId?: string}>}
    */
   const _attached = new Set();
 
@@ -27,14 +27,22 @@
    * @param {Object} [options]
    */
   function on(el, event, handler, options) {
+    if (!el || !handler) return;
     el.addEventListener(event, handler, options);
-    _attached.add({ el: el, event: event, handler: handler, options: options });
+    _attached.add({
+      el: el,
+      event: event,
+      handler: handler,
+      options: options,
+      _instanceId: handler._instanceId || undefined
+    });
   }
 
   /**
    * Remove a specific tracked listener.
    */
   function off(el, event, handler) {
+    if (!el || !handler) return;
     el.removeEventListener(event, handler);
     for (const entry of _attached) {
       if (entry.el === el && entry.event === event && entry.handler === handler) {
@@ -50,9 +58,9 @@
    * @param {string} instanceId
    */
   function detachAll(instanceId) {
-    // We tag each handler with the instanceId it belongs to
-    for (const entry of _attached) {
-      if (entry._instanceId === instanceId) {
+    if (!instanceId) return;
+    for (const entry of Array.from(_attached)) {
+      if (entry._instanceId === instanceId || (entry.handler && entry.handler._instanceId === instanceId)) {
         entry.el.removeEventListener(entry.event, entry.handler, entry.options);
         _attached.delete(entry);
       }
@@ -93,7 +101,7 @@
     var handler = function(e) {
       if (e.key !== 'Escape') return;
 
-      // Only respond if this instance is the topmost popup
+      // Only respond if this instance is the topmost active popup
       var top = State.getTopInstance();
       if (!top || top.id !== instanceId) return;
 

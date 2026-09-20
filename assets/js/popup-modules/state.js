@@ -74,16 +74,17 @@
 
   function addInstance(instance) {
     _instances.set(instance.id, instance);
-    _stack.push(instance.id);
+    if (_stack.indexOf(instance.id) === -1) {
+      _stack.push(instance.id);
+    }
 
     // Register group
     if (instance.options.group) {
       const existingId = _groups.get(instance.options.group);
       if (existingId && existingId !== instance.id) {
         const existing = _instances.get(existingId);
-        if (existing && existing.state === 'open') {
+        if (existing && (existing.state === 'open' || existing.state === 'opening')) {
           // Close the existing popup in this group
-          // The engine handles the actual close logic
           _emit('group:replace', { oldId: existingId, newId: instance.id, group: instance.options.group });
         }
       }
@@ -91,17 +92,21 @@
     }
   }
 
-  function removeInstance(id) {
-    const instance = _instances.get(id);
-    if (instance && instance.options.group) {
+  function removeInstance(id, instance) {
+    const existing = _instances.get(id);
+    if (!instance || existing === instance) {
+      _instances.delete(id);
+    }
+    const idx = _stack.lastIndexOf(id);
+    if (idx !== -1 && (!instance || existing === instance)) {
+      _stack.splice(idx, 1);
+    }
+    if (instance && instance.options && instance.options.group) {
       const groupId = instance.options.group;
       if (_groups.get(groupId) === id) {
         _groups.delete(groupId);
       }
     }
-    _instances.delete(id);
-    const idx = _stack.indexOf(id);
-    if (idx !== -1) _stack.splice(idx, 1);
   }
 
   function getInstance(id) {
@@ -110,7 +115,13 @@
 
   function getTopInstance() {
     if (_stack.length === 0) return null;
-    return _instances.get(_stack[_stack.length - 1]) || null;
+    for (let i = _stack.length - 1; i >= 0; i--) {
+      const inst = _instances.get(_stack[i]);
+      if (inst && (inst.state === 'open' || inst.state === 'opening')) {
+        return inst;
+      }
+    }
+    return null;
   }
 
   function getInstancesByGroup(group) {
@@ -123,7 +134,13 @@
   }
 
   function getActiveCount() {
-    return _instances.size;
+    let count = 0;
+    for (const [, inst] of _instances) {
+      if (inst.state === 'open' || inst.state === 'opening') {
+        count++;
+      }
+    }
+    return count;
   }
 
   // ── Stacking ────────────────────────────────────────────────────────────────
@@ -134,7 +151,7 @@
 
   function getStackTopZIndex() {
     if (_stack.length === 0) return CONFIG.Z_INDEX.BASE_OFFSET;
-    const top = _instances.get(_stack[_stack.length - 1]);
+    const top = getTopInstance();
     return top ? top.zIndex : CONFIG.Z_INDEX.BASE_OFFSET;
   }
 

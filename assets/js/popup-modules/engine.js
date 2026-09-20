@@ -71,6 +71,17 @@
     const id = opts.id || State.generateId();
     opts.id = id;
 
+    // Guard: check if an instance with this ID already exists
+    const existing = State.getInstance(id);
+    if (existing) {
+      if (existing.state === 'open' || existing.state === 'opening') {
+        return _createHandle(existing);
+      }
+      if (existing.state === 'closing') {
+        destroy(id);
+      }
+    }
+
     // 3. Resolve z-index
     const stackPos = State.getStackHeight();
     const baseZ = opts.zIndex || preset.zIndexLayer;
@@ -152,14 +163,25 @@
       await Animator.staggerDelay(stackPos);
     }
 
+    if (instance.state !== 'opening' || State.getInstance(id) !== instance) {
+      return _createHandle(instance);
+    }
+
     // 14. Play enter animation
-    instance.state = 'opening';
     await Animator.enter(dom.rootEl, dom.overlayEl, opts);
+
+    // Guard: check if close() or destroy() was called mid-animation
+    if (instance.state !== 'opening' || State.getInstance(id) !== instance) {
+      return _createHandle(instance);
+    }
+
     instance.state = 'open';
-    dom.rootEl.classList.add(CONFIG.DOM.OPEN_CLASS);
+    if (dom.rootEl) {
+      dom.rootEl.classList.add(CONFIG.DOM.OPEN_CLASS);
+    }
 
     // 15. Auto-focus
-    if (opts.focusTrap !== false) {
+    if (opts.focusTrap !== false && dom.rootEl) {
       A11yService.autoFocus(dom.rootEl, dom.bodyEl);
     }
 
@@ -206,17 +228,24 @@
 
     const opts = instance.options;
 
+    // Set state 'closing' immediately to guard against double-close or re-entrant open
+    instance.state = 'closing';
+
     // onBeforeClose guard
     if (typeof opts.onBeforeClose === 'function') {
       try {
         const allowed = await opts.onBeforeClose(id);
-        if (allowed === false) return; // prevent close
+        if (allowed === false) {
+          instance.state = 'open';
+          return; // prevent close
+        }
       } catch (e) {
         console.error('[PopupSystem] onBeforeClose error:', e);
       }
     }
 
-    instance.state = 'closing';
+    if (instance.state === 'closed' || instance.state === 'destroyed') return;
+
     State._emit('closing', { id, result });
 
     // Clear auto-close timer
@@ -226,7 +255,9 @@
     }
 
     // Exit animation
-    await Animator.exit(instance.rootEl, instance.overlayEl, opts);
+    if (instance.rootEl) {
+      await Animator.exit(instance.rootEl, instance.overlayEl, opts);
+    }
 
     // Return focus
     if (opts.returnFocus !== false) {
@@ -240,12 +271,12 @@
     OverlayService.detachAll(id);
 
     // Remove DOM
-    Utils.DOM.remove(instance.overlayEl);
-    Utils.DOM.remove(instance.rootEl);
+    if (instance.overlayEl) Utils.DOM.remove(instance.overlayEl);
+    if (instance.rootEl) Utils.DOM.remove(instance.rootEl);
 
     // Update state
     instance.state = 'closed';
-    State.removeInstance(id);
+    State.removeInstance(id, instance);
 
     // Fire onClose callback
     var closeResult = Object.assign({ action: result.action || 'close', data: result.data }, result);
@@ -278,14 +309,18 @@
       instance.autoCloseTimer = null;
     }
 
+    if (instance.rootEl) {
+      Animator.cancel(instance.rootEl);
+    }
+
     _runCleanups(id);
     OverlayService.detachAll(id);
 
-    Utils.DOM.remove(instance.overlayEl);
-    Utils.DOM.remove(instance.rootEl);
+    if (instance.overlayEl) Utils.DOM.remove(instance.overlayEl);
+    if (instance.rootEl) Utils.DOM.remove(instance.rootEl);
 
     instance.state = 'destroyed';
-    State.removeInstance(id);
+    State.removeInstance(id, instance);
 
     State._emit('destroyed', { id });
     QueueManager.processNext(open);
@@ -395,7 +430,6 @@
     // Resize repositioning for anchored popups
     if (opts.anchor) {
       OverlayService.attachResize(id, dom.rootEl, opts, function() {
-        // Re-apply anchor positioning
         var anchorEl = document.querySelector(opts.anchor);
         if (!anchorEl) return;
         var rect = anchorEl.getBoundingClientRect();
@@ -468,27 +502,29 @@
         return onInstance(id, fn);
       },
 
+      onClose: function(fn) {
+        return onInstance(id, function(e) {
+          if (e.type === 'close') fn(e.result);
+        });
+      },
+
       destroy: function() {
         destroy(id);
       },
     };
   }
 
-  // ── Quick-open helpers (convenience methods) ────────────────────────────────
+  // ── Convenience helpers ────────────────────────────────────────────────────
 
   /**
-   * Show an alert dialog with a single "OK" button.
+   * Show a simple alert dialog (one OK button).
    * @param {string} message
    * @param {Object} [opts]
    * @returns {Promise<void>}
    */
-  async function alert(message, opts = {}) {
-    var lang = opts.lang ||
-      (typeof localStorage !== 'undefined' && localStorage.getItem('selectedLang')) || 'en';
-    var okLabel = lang === 'th' ? 'ตกลง' : 'OK';
-
-    var footerHtml = '<button class="fp-btn fp-btn-primary" data-fp-action="confirm">' +
-      Utils.escapeHTML(okLabel) + '</button>';
+  function alert(message, opts = {}) {
+    var okLabel = opts.okLabel || CONFIG.LABELS.ALERT_OK;
+    var footerHtml = '<button class="fp-btn fp-btn-primary" data-fp-action="ok">' + Utils.escapeHTML(okLabel) + '</button>';
 
     return new Promise(function(resolve) {
       open(Object.assign({}, opts, {
@@ -496,31 +532,27 @@
         title   : opts.title || '',
         body    : '<div class="fp-alert-body">' + Utils.sanitizeHTML(message) + '</div>',
         footer  : footerHtml,
-        onClose : function(id, result) { resolve(result); },
+        onClose : function() { resolve(); },
         onMount : function(bodyEl, handle) {
-          // Listen for confirm button click
-          var btn = bodyEl.closest('[data-fp-root]').querySelector('[data-fp-action="confirm"]');
-          if (btn) {
-            btn.addEventListener('click', function() {
-              handle.close({ action: 'confirm' });
-            });
-          }
+          var root = bodyEl.closest('[data-fp-root]');
+          var okBtn = root ? root.querySelector('[data-fp-action="ok"]') : null;
+          if (okBtn) okBtn.addEventListener('click', function() {
+            handle.close({ action: 'ok' });
+          });
         },
       }));
     });
   }
 
   /**
-   * Show a confirm dialog with OK and Cancel buttons.
+   * Show a confirmation dialog (Confirm + Cancel buttons).
    * @param {string} message
    * @param {Object} [opts]
-   * @returns {Promise<boolean>} true if confirmed, false if cancelled
+   * @returns {Promise<boolean>} Resolves true if confirmed, false if cancelled
    */
-  async function confirm(message, opts = {}) {
-    var lang = opts.lang ||
-      (typeof localStorage !== 'undefined' && localStorage.getItem('selectedLang')) || 'en';
-    var okLabel = lang === 'th' ? 'ตกลง' : 'OK';
-    var cancelLabel = lang === 'th' ? 'ยกเลิก' : 'Cancel';
+  function confirm(message, opts = {}) {
+    var okLabel = opts.confirmLabel || opts.okLabel || CONFIG.LABELS.CONFIRM_OK;
+    var cancelLabel = opts.cancelLabel || CONFIG.LABELS.CONFIRM_CANCEL;
 
     var footerHtml =
       '<button class="fp-btn fp-btn-secondary" data-fp-action="cancel">' + Utils.escapeHTML(cancelLabel) + '</button>' +
@@ -535,8 +567,8 @@
         onClose : function(id, result) { resolve(result.action === 'confirm'); },
         onMount : function(bodyEl, handle) {
           var root = bodyEl.closest('[data-fp-root]');
-          var confirmBtn = root.querySelector('[data-fp-action="confirm"]');
-          var cancelBtn = root.querySelector('[data-fp-action="cancel"]');
+          var confirmBtn = root ? root.querySelector('[data-fp-action="confirm"]') : null;
+          var cancelBtn = root ? root.querySelector('[data-fp-action="cancel"]') : null;
           if (confirmBtn) confirmBtn.addEventListener('click', function() {
             handle.close({ action: 'confirm' });
           });

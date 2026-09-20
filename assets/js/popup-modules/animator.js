@@ -11,6 +11,30 @@
   
   const { CONFIG } = M;
   const { Utils } = M;
+
+  // Active animation handles per popup element.
+  // Allows cancelling pending timeouts and rAFs on re-entry or rapid toggle.
+  const _activeAnimations = new WeakMap();
+
+  /**
+   * Cancel any active animation on an element.
+   * Resolves the previous animation promise so awaiters don't hang,
+   * and clears pending timers/rAFs.
+   * @param {HTMLElement} el
+   */
+  function cancel(el) {
+    if (!el) return;
+    const active = _activeAnimations.get(el);
+    if (active) {
+      if (active.timerId) clearTimeout(active.timerId);
+      if (active.raf1) cancelAnimationFrame(active.raf1);
+      if (active.raf2) cancelAnimationFrame(active.raf2);
+      _activeAnimations.delete(el);
+      if (typeof active.resolve === 'function') {
+        active.resolve();
+      }
+    }
+  }
   
   // ── Helpers ──────────────────────────────────────────────────────────────
   
@@ -34,13 +58,27 @@
    * @returns {Promise<void>}
    */
   function enter(popupEl, overlayEl, options) {
+    if (!popupEl) return Promise.resolve();
+    cancel(popupEl);
+
     const duration = options._enterDuration;
     const easing = options._easing;
     const reducedMotion = Utils.prefersReducedMotion();
     const isFS = _isFullscreen(popupEl);
     
     return new Promise(function(resolve) {
+      let timerId = null;
+      let raf1 = null;
+      let raf2 = null;
+
+      function finish() {
+        _activeAnimations.delete(popupEl);
+        if (popupEl) popupEl.style.transition = '';
+        resolve();
+      }
+
       // Add entering class immediately
+      popupEl.classList.remove(CONFIG.DOM.CLOSING_CLASS);
       popupEl.classList.add(CONFIG.DOM.ENTERING_CLASS);
       
       // Show overlay with fade-in
@@ -59,8 +97,8 @@
       
       // Double-rAF: ensures the initial (pre-animation) state has been
       // painted by the browser before we add the transition class.
-      requestAnimationFrame(function() {
-        requestAnimationFrame(function() {
+      raf1 = requestAnimationFrame(function() {
+        raf2 = requestAnimationFrame(function() {
           if (isFS) {
             // Fullscreen: opacity-only fade (no transform since it fills viewport)
             popupEl.style.transition = 'opacity ' + duration + 'ms ' + easing;
@@ -74,10 +112,14 @@
       });
       
       // Resolve after animation completes
-      setTimeout(function() {
-        popupEl.style.transition = '';
-        resolve();
-      }, duration + CONFIG.TIMING.RAF_DOUBLE_BUFFER);
+      timerId = setTimeout(finish, duration + CONFIG.TIMING.RAF_DOUBLE_BUFFER);
+
+      _activeAnimations.set(popupEl, {
+        timerId: timerId,
+        raf1: raf1,
+        raf2: raf2,
+        resolve: finish,
+      });
     });
   }
   
@@ -92,12 +134,27 @@
    * @returns {Promise<void>}
    */
   function exit(popupEl, overlayEl, options) {
+    if (!popupEl) return Promise.resolve();
+    cancel(popupEl);
+
     const duration = options._exitDuration;
     const easing = CONFIG.EASING.EXIT; // Always use ease-in for exit
     const reducedMotion = Utils.prefersReducedMotion();
     const isFS = _isFullscreen(popupEl);
     
     return new Promise(function(resolve) {
+      let timerId = null;
+
+      function finish() {
+        _activeAnimations.delete(popupEl);
+        if (popupEl) {
+          popupEl.style.transition = '';
+          popupEl.classList.remove(CONFIG.DOM.CLOSING_CLASS);
+        }
+        resolve();
+      }
+
+      popupEl.classList.remove(CONFIG.DOM.ENTERING_CLASS);
       popupEl.classList.add(CONFIG.DOM.CLOSING_CLASS);
       
       // Fade out overlay
@@ -122,11 +179,12 @@
       }
       popupEl.classList.remove(CONFIG.DOM.VISIBLE_CLASS);
       
-      setTimeout(function() {
-        popupEl.style.transition = '';
-        popupEl.classList.remove(CONFIG.DOM.CLOSING_CLASS);
-        resolve();
-      }, duration + CONFIG.TIMING.DESTROY_CLEANUP);
+      timerId = setTimeout(finish, duration + CONFIG.TIMING.DESTROY_CLEANUP);
+
+      _activeAnimations.set(popupEl, {
+        timerId: timerId,
+        resolve: finish,
+      });
     });
   }
   
@@ -144,6 +202,6 @@
     });
   }
   
-  M.Animator = Object.freeze({ enter, exit, staggerDelay });
+  M.Animator = Object.freeze({ enter, exit, cancel, staggerDelay });
   
 })(window.PopupModules = window.PopupModules || {});
