@@ -1,16 +1,6 @@
 /* What's New page v2.0 - Read surface mode tokenized redesign */
 
-body {
-  margin: 0;
-  padding: 0;
-  background: var(--surface-base, #ffffff);
-  font-family: var(--font-sans, system-ui, sans-serif);
-  color: var(--text-main, #0f172a);
-  font-size: 15px;
-  line-height: 1.72;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+
 
 /* Legacy */
 h1 {

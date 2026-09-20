@@ -20,37 +20,21 @@
 #clp-overlay.entering { will-change: opacity; animation: _ld_in 0.15s ease-out forwards; }
 #clp-overlay.leaving  { will-change: opacity; animation: _ld_out 0.18s ease-in forwards; pointer-events: none; }
 
-#clp-overlay .clp-spinner {
-  width: var(--space-16, 64px); height: var(--space-16, 64px);
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  will-change: transform; isolation: isolate; contain: size style;
-}
+#clp-overlay 
 #clp-overlay .clp-spinner svg { width: 100%; height: 100%; overflow: visible; display: block; }
-#clp-overlay .clp-track       { stroke: var(--border-subtle, rgba(0, 0, 0, 0.06)); stroke-width: 3.5; fill: none; }
-#clp-overlay .clp-arc {
-  stroke: var(--color-brand-primary, #009688);
-  stroke-width: 3.5; stroke-linecap: round; stroke-dasharray: 88 132; fill: none;
-  transform-box: fill-box; transform-origin: center;
-  will-change: transform; animation: _ld_spin 0.7s linear infinite;
-}
+#clp-overlay 
+#clp-overlay 
 
-#clp-overlay .clp-text   { display: flex; flex-direction: column; align-items: center; gap: 6px; contain: layout style; }
-#clp-overlay .clp-msg    { font-size: var(--step-0, 1rem); font-weight: var(--font-semibold, 600); color: var(--text-main, #0f172a); text-align: center; line-height: 1.4; min-width: 100px; min-height: 1.4em; }
-#clp-overlay .clp-sub    { font-size: var(--step--1, 0.875rem); font-weight: 400; color: var(--text-muted, #757575); text-align: center; line-height: 1.4; }
+#clp-overlay 
+#clp-overlay 
+#clp-overlay 
 #clp-overlay .clp-sub:empty { display: none; }
 
-#content-loading-overlay, #instant-loading-overlay {
-  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-  background: var(--surface-page, #ffffff); z-index: var(--fv-z-overlay, 500);
-  opacity: 1; transition: opacity 0.18s ease; contain: strict;
-}
+#content-loading-overlay, 
 #content-loading-overlay[hidden], #instant-loading-overlay[hidden],
 #content-loading-overlay.hidden,  #instant-loading-overlay.hidden { display: none !important; opacity: 0; pointer-events: none; }
 
-#content-loading-overlay .fg, #content-loading-overlay .svg-fg, #instant-loading-overlay .spinner-svg-fg {
-  transform-box: fill-box; transform-origin: center;
-  will-change: transform; animation: _ld_spin 0.7s linear infinite;
-}
+#content-loading-overlay .fg, #content-loading-overlay .svg-fg, #instant-loading-overlay 
 
 /* ── Calm, white-canvas notification toasts ──────────────────────────── */
 .notification {
@@ -66,11 +50,11 @@
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
 }
 
-.notification-success { border-left: 3px solid var(--color-success, #16a34a); }
-.notification-error   { border-left: 3px solid var(--color-danger, #dc2626); }
-.notification-warning { border-left: 3px solid var(--color-warning, #d97706); }
-.notification-info    { border-left: 3px solid var(--color-brand-primary, #009688); }
-.notification-loading { border-left: 3px solid var(--text-muted, #757575); }
+
+
+
+
+
 
 .notification-icon              { font-size: 16px; flex-shrink: 0; line-height: 1.3; color: var(--color-brand-primary, #009688); }
 .notification-message-container { flex: 1; display: flex; flex-direction: column; gap: 2px; }
@@ -83,8 +67,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   #clp-overlay.entering, #clp-overlay.leaving { animation: none; will-change: auto; }
-  #clp-overlay .clp-arc { animation: none; }
-  #content-loading-overlay .fg, #content-loading-overlay .svg-fg, #instant-loading-overlay .spinner-svg-fg { animation: none; }
+  #clp-overlay 
+  #content-loading-overlay .fg, #content-loading-overlay .svg-fg, #instant-loading-overlay 
   .notification { animation: none; opacity: 1; }
   .notification-slideout { animation: none; opacity: 0; }
   .notification-loading .notification-icon { animation: none; }

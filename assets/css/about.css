@@ -1,36 +1,13 @@
 /* About / License / Privacy page — Read surface mode */
 
 /* ── Base ── */
-html {
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  box-sizing: border-box;
-}
 
-*, *::before, *::after {
-  box-sizing: inherit;
-}
 
-body {
-  margin: 0;
-  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
-  color: var(--text-main, #0f172a);
-  background-color: var(--surface-base, #ffffff);
-  font-size: var(--step-0, 1rem);
-  line-height: var(--lh-normal, 1.72);
-  -webkit-text-size-adjust: 100%;
-  -webkit-tap-highlight-color: transparent;
-  min-height: 100vh;
-}
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-  }
-}
+
+
+
+
 
 /* ── Main container ── */
 main, #main {

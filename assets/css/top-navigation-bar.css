@@ -1,6 +1,6 @@
 @import url('variables.css');
 
-html, body { margin:0; padding:0; }
+html, 
 
 nav {
   display: grid;

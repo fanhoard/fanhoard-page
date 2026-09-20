@@ -3,7 +3,7 @@
    assets/css/popup.css
    Redesigned to FanHoard Design Method & Systems Quality Standard.
    Pure white canvas, hairline 1px dividers/borders, solid teal primary,
-   WCAG AA small-text teal (#0f766e), 12-16px radii, 2px focus ring.
+   WCAG AA small-text teal (var(--color-brand-hover, #0f766e)), 12-16px radii, 2px focus ring.
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── Reset & Base ───────────────────────────────────────────────────────── */
@@ -21,7 +21,7 @@
   font-family: var(--fv-font-stack, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   font-size: var(--fv-text-base, 15px);
   line-height: var(--fv-leading-normal, 1.5);
-  color: var(--fp-text, #0f172a);
+  color: var(--fp-text, var(--text-main, #0f172a));
   background: var(--fp-bg, #ffffff);
   border: 1px solid var(--fp-border, rgba(0, 0, 0, 0.06));
   border-radius: var(--fp-radius, 14px);
@@ -39,9 +39,9 @@
 .fp-popup select:focus-visible,
 .fp-popup textarea:focus-visible,
 .fp-popup [tabindex]:focus-visible {
-  outline: 2px solid #009688 !important;
+  outline: 2px solid var(--color-brand-primary, #0d9488);
   outline-offset: 2px !important;
-  box-shadow: none !important;
+  box-shadow: none;
 }
 
 /* ── Inner Container ────────────────────────────────────────────────────── */
@@ -68,7 +68,7 @@
 .fp-title {
   font-size: var(--fv-text-lg, 18px);
   font-weight: var(--fv-font-semibold, 600);
-  color: var(--fp-text-heading, #0f172a);
+  color: var(--fp-text-heading, var(--text-main, #0f172a));
   line-height: var(--fv-leading-tight, 1.25);
   flex: 1;
   min-width: 0;
@@ -90,7 +90,7 @@
   border: none;
   border-radius: 12px;
   background: transparent;
-  color: var(--fp-text-muted, #64748b);
+  color: var(--fp-text-muted, var(--text-muted, #64748b));
   cursor: pointer;
   flex-shrink: 0;
   margin-left: var(--fv-space-2, 8px);
@@ -101,7 +101,7 @@
 
 .fp-close-btn:hover {
   background: var(--fp-close-hover-bg, rgba(0, 0, 0, 0.04));
-  color: var(--fp-text, #0f172a);
+  color: var(--fp-text, var(--text-main, #0f172a));
 }
 
 .fp-close-btn:active {
@@ -122,7 +122,7 @@
   overscroll-behavior: contain;
   flex: 1;
   min-height: 0;
-  color: var(--fp-text, #0f172a);
+  color: var(--fp-text, var(--text-main, #0f172a));
   line-height: var(--fv-leading-relaxed, 1.6);
   font-size: var(--fv-text-base, 15px);
   -webkit-overflow-scrolling: touch;
@@ -187,7 +187,7 @@
 }
 
 .fp-btn-primary {
-  background: #009688;
+  background: var(--color-brand-primary, #0d9488);
   color: #ffffff;
 }
 
@@ -198,13 +198,13 @@
 
 .fp-btn-secondary {
   background: transparent;
-  color: #334155;
+  color: var(--color-slate-700, #334155);
   border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 .fp-btn-secondary:hover {
   background: rgba(0, 0, 0, 0.04);
-  color: #0f172a;
+  color: var(--text-main, #0f172a);
 }
 
 /* ── WCAG AA Small Text Teal Overrides ─────────────────────────────────── */
@@ -214,16 +214,14 @@
 .fp-popup .fp-tag,
 .fp-popup .fp-text-small,
 .fp-popup .fp-meta-teal,
-.fp-popup .fp-teal-text {
-  color: #0f766e;
-}
+.fp-popup 
 
 /* ── Alert & Confirm body styles ────────────────────────────────────────── */
 
 .fp-alert-body,
 .fp-confirm-body {
   padding: 16px 0;
-  color: #334155;
+  color: var(--color-slate-700, #334155);
   line-height: var(--fv-leading-relaxed, 1.6);
 }
 
@@ -231,19 +229,14 @@
    SIZES
    ═══════════════════════════════════════════════════════════════════════ */
 
-.fp-size-xs { width: 320px; max-width: calc(100vw - 2rem); }
-.fp-size-sm { width: 400px; max-width: calc(100vw - 2rem); }
-.fp-size-md { width: 540px; max-width: calc(100vw - 2rem); }
-.fp-size-lg { width: 720px; max-width: calc(100vw - 2rem); }
-.fp-size-xl { width: 900px; max-width: calc(100vw - 2rem); }
+
+
+
+
+
 
 /* Full-size: covers viewport */
-.fp-size-full {
-  width: 100vw;
-  height: 100vh;
-  max-width: 100vw;
-  border-radius: 0;
-}
+
 
 /* ═══════════════════════════════════════════════════════════════════════
    POSITIONS & ENTER/EXIT ANIMATIONS
@@ -360,13 +353,7 @@
 
 /* ── Corner positions (for toasts, small popups) ───────────────────────── */
 
-.fp-pos-top-left {
-  top: 24px;
-  left: 24px;
-  transform: translateY(-16px) scale(0.96);
-  opacity: 0;
-  transition: transform 200ms ease, opacity 200ms ease;
-}
+
 
 .fp-pos-top-left.fp-is-visible,
 .fp-pos-top-left.fp-is-entering {
@@ -398,13 +385,7 @@
   opacity: 0;
 }
 
-.fp-pos-bottom-left {
-  bottom: 24px;
-  left: 24px;
-  transform: translateY(16px) scale(0.96);
-  opacity: 0;
-  transition: transform 200ms ease, opacity 200ms ease;
-}
+
 
 .fp-pos-bottom-left.fp-is-visible,
 .fp-pos-bottom-left.fp-is-entering {
@@ -417,13 +398,7 @@
   opacity: 0;
 }
 
-.fp-pos-bottom-right {
-  bottom: 24px;
-  right: 24px;
-  transform: translateY(16px) scale(0.96);
-  opacity: 0;
-  transition: transform 200ms ease, opacity 200ms ease;
-}
+
 
 .fp-pos-bottom-right.fp-is-visible,
 .fp-pos-bottom-right.fp-is-entering {
@@ -466,8 +441,8 @@
 /* ── Sheet (bottom sheet) ──────────────────────────────────────────────── */
 
 .fp-sheet {
-  width: 100% !important;
-  max-width: 100vw !important;
+  width: 100%;
+  max-width: 100vw;
   border-radius: 16px 16px 0 0;
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-bottom: none;
@@ -494,7 +469,7 @@
 
 .fp-drawer {
   width: 360px;
-  max-width: 85vw !important;
+  max-width: 85vw;
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
@@ -534,7 +509,7 @@
   border-radius: 12px;
   font-size: 13px;
   background: #ffffff;
-  color: #0f172a;
+  color: var(--text-main, #0f172a);
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: none;
   pointer-events: none;
@@ -567,9 +542,9 @@
 /* ── Fullscreen ────────────────────────────────────────────────────────── */
 
 .fp-fullscreen {
-  border-radius: 0 !important;
-  border: none !important;
-  box-shadow: none !important;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
   background: #ffffff;
 }
 
@@ -633,14 +608,14 @@
 /* ── Glassmorphism (Overridden to clean white canvas) ──────────────────── */
 
 .fp-glass {
-  background: #ffffff !important;
-  box-shadow: none !important;
+  background: #ffffff;
+  box-shadow: none;
 }
 
 /* ── Borderless ────────────────────────────────────────────────────────── */
 
 .fp-borderless {
-  border-color: transparent !important;
+  border-color: transparent;
 }
 
 /* ── Persistent ────────────────────────────────────────────────────────── */
@@ -676,14 +651,11 @@
   .fp-size-sm,
   .fp-size-md,
   .fp-size-lg,
-  .fp-size-xl {
-    width: calc(100vw - 2rem);
-    max-width: calc(100vw - 2rem);
-  }
+  
 
   .fp-drawer {
     width: 100vw;
-    max-width: 100vw !important;
+    max-width: 100vw;
   }
 
   .fp-header {
@@ -724,13 +696,9 @@
   bottom: env(safe-area-inset-bottom, 0px);
 }
 
-.fp-pos-bottom-left {
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
-}
 
-.fp-pos-bottom-right {
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
-}
+
+
 
 .fp-sheet {
   bottom: env(safe-area-inset-bottom, 0px);

@@ -4,29 +4,16 @@
    FanHoard Design Method v1.0
 */
 
-/* ---------- RESET & BASE ---------- */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
 
-body {
-  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
-  margin: 0;
-  color: var(--text-main, #0f172a);
-  background-color: var(--surface-base, #ffffff);
-  line-height: 1.6;
-  min-height: 100vh;
-  letter-spacing: 0.01em;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-font-smoothing: antialiased;
-}
+
+
 
 /* ---------- TYPOGRAPHY ---------- */
 h1, .h1 {
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   font-size: var(--step-4, 2.25rem);
   font-weight: var(--font-bold, 700);
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, var(--text-main, #0f172a));
   margin: 0 0 var(--space-4, 1rem) 0;
   letter-spacing: -0.01em;
   line-height: 1.25;
@@ -41,7 +28,7 @@ h2, .h2,
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   font-size: var(--step-2, 1.375rem);
   font-weight: var(--font-bold, 700);
-  color: var(--color-brand-primary, #009688);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   margin: 0 0 var(--space-4, 1rem) 0;
   letter-spacing: 0.01em;
 }
@@ -50,7 +37,7 @@ h3, .h3 {
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   font-size: var(--step-0, 1rem);
   font-weight: var(--font-semibold, 600);
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, var(--text-main, #0f172a));
   margin: 0 0 var(--space-1, 0.25rem) 0;
 }
 
@@ -65,7 +52,7 @@ h3, .h3 {
 }
 
 strong, b {
-  color: var(--color-brand-primary, #009688);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   font-weight: var(--font-bold, 700);
 }
 
@@ -151,7 +138,7 @@ section.mn {
   font-weight: var(--font-bold, 700);
   line-height: 1.25;
   letter-spacing: -0.01em;
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, var(--text-main, #0f172a));
   user-select: none;
 }
 
@@ -178,7 +165,7 @@ section.mn {
   padding: var(--space-3, 0.75rem) var(--space-6, 1.5rem);
   border-radius: var(--radius-full, 9999px);
   background-color: var(--surface-base, #ffffff);
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, var(--text-main, #0f172a));
   border: 1px solid var(--border-subtle, rgba(0,0,0,0.12));
   box-shadow: none;
   cursor: pointer;
@@ -188,14 +175,14 @@ section.mn {
 
 .button:hover, .btn:hover {
   background-color: var(--surface-hover, rgba(0,0,0,0.03));
-  border-color: var(--color-brand-primary, #009688);
-  color: var(--color-brand-primary, #009688);
+  border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
 }
 
 .button-primary, .btn-primary {
-  background-color: var(--color-brand-primary, #009688);
+  background-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   color: #ffffff;
-  border: 1px solid var(--color-brand-primary, #009688);
+  border: 1px solid var(--color-brand-primary, var(--color-brand-primary, #0d9488));
 }
 
 .button-primary:hover, .btn-primary:hover {
@@ -206,14 +193,14 @@ section.mn {
 
 .button-secondary, .btn-secondary {
   background-color: var(--surface-base, #ffffff);
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, var(--text-main, #0f172a));
   border: 1px solid var(--border-subtle, rgba(0,0,0,0.12));
 }
 
 .button-secondary:hover, .btn-secondary:hover {
   background-color: var(--surface-hover, rgba(0,0,0,0.03));
-  color: var(--color-brand-primary, #009688);
-  border-color: var(--color-brand-primary, #009688);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
 }
 
 /* Fixed icon bounding box & single axis vertical alignment */
@@ -280,7 +267,7 @@ section.mn {
 .feature-card h3 {
   font-size: var(--step-0, 1rem);
   font-weight: var(--font-semibold, 600);
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, var(--text-main, #0f172a));
   margin-bottom: var(--space-1, 0.25rem);
 }
 
@@ -327,7 +314,7 @@ section.mn {
 
 .faq-question {
   font-weight: var(--font-semibold, 600);
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, var(--text-main, #0f172a));
   cursor: pointer;
   position: relative;
   padding: 14px var(--space-8, 2rem) 14px 0;
@@ -350,7 +337,7 @@ section.mn {
 }
 
 .faq-question:hover {
-  color: var(--color-brand-primary, #009688);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
 }
 
 .faq-question::after {
@@ -365,13 +352,13 @@ section.mn {
 }
 
 .faq-question:hover::after {
-  color: var(--color-brand-primary, #009688);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
 }
 
 details[open] > .faq-question::after,
 details.faq-item[open] .faq-question::after {
   transform: translateY(-50%) rotate(-180deg);
-  color: var(--color-brand-primary, #009688);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
 }
 
 .faq-answer {
@@ -409,14 +396,14 @@ details[open] .faq-answer {
 .text-h h2 {
   font-size: var(--step-2, 1.375rem);
   font-weight: var(--font-bold, 700);
-  color: var(--color-brand-primary, #009688);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   margin: 0;
 }
 
 .button-h {
   font-size: var(--step--1, 0.875rem);
   font-weight: var(--font-semibold, 600);
-  color: #0f766e;
+  color: var(--color-brand-hover, #0f766e);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -468,7 +455,7 @@ details[open] .faq-answer {
 }
 
 .item-card:hover, .item-card.fv-card:hover {
-  border-color: var(--color-brand-primary, #009688);
+  border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   background-color: var(--surface-hover, rgba(0,0,0,0.02));
   transform: none;
   box-shadow: none;
@@ -482,7 +469,7 @@ details[open] .faq-answer {
 
 .item-card .name {
   font-size: var(--step--1, 0.8125rem);
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, var(--text-main, #0f172a));
   font-weight: var(--font-semibold, 600);
   max-width: 100%;
   white-space: nowrap;
@@ -497,12 +484,12 @@ details[open] .faq-answer {
 .item-card--view-all {
   background: var(--surface-base, #ffffff);
   border: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
-  color: #0f766e;
+  color: var(--color-brand-hover, #0f766e);
 }
 
 .item-card--view-all:hover {
   background: var(--surface-hover, rgba(0,0,0,0.02));
-  border-color: var(--color-brand-primary, #009688);
+  border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
 }
 
 .view-all-icon {
@@ -514,13 +501,13 @@ details[open] .faq-answer {
   border-radius: var(--radius-full, 9999px);
   background: transparent;
   border: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
-  color: var(--color-brand-primary, #009688);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   flex-shrink: 0;
 }
 
 .view-all-label {
   font-size: var(--step--1, 0.8125rem);
-  color: #0f766e;
+  color: var(--color-brand-hover, #0f766e);
   text-align: center;
   background: transparent;
   border: none;
@@ -582,8 +569,8 @@ details[open] .faq-answer {
 
 .carousel-arrow:hover .ca-icon-wrap {
   background: #ffffff;
-  color: var(--color-brand-primary, #009688);
-  border-color: var(--color-brand-primary, #009688);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   transform: none;
 }
 
@@ -675,7 +662,7 @@ details[open] .faq-answer {
   clip: auto;
   overflow: visible;
   white-space: normal;
-  background: var(--color-brand-primary, #009688);
+  background: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   color: #ffffff;
   font-weight: var(--font-bold, 700);
   font-size: var(--step--1, 0.875rem);
@@ -687,7 +674,7 @@ details[open] .faq-answer {
 .btn:focus-visible,
 .item-card:focus-visible,
 .faq-question:focus-visible {
-  outline: 2px solid var(--color-brand-primary, #009688);
+  outline: 2px solid var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   outline-offset: 2px;
 }
 

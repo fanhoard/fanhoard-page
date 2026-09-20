@@ -92,24 +92,14 @@ main {
   padding-right: var(--space-4, 16px);
 }
 
-.container-wide {
-  width: 100%;
-  max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: var(--space-4, 16px);
-  padding-right: var(--space-4, 16px);
-}
+
 
 @media (min-width: 768px) {
   .container-narrow,
   .container-md,
   .container-lg,
   .container-full,
-  .container-wide {
-    padding-left: var(--space-6, 24px);
-    padding-right: var(--space-6, 24px);
-  }
+  
 }
 
 /* ── Row-Based Grid Primitives ── */
@@ -119,63 +109,30 @@ main {
   align-items: stretch;
 }
 
-.grid-2 {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4, 16px);
-  align-items: stretch;
-}
 
-.grid-3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-4, 16px);
-  align-items: stretch;
-}
 
-.grid-4 {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-4, 16px);
-  align-items: stretch;
-}
 
-.grid-auto-fit {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-  gap: var(--space-4, 16px);
-  align-items: stretch;
-}
 
-.grid-aside {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: var(--space-6, 24px);
-  align-items: stretch;
-}
+
+
+
+
+
 
 @media (min-width: 768px) {
-  .grid-2, .grid-3, .grid-4, .grid-auto-fit {
-    gap: var(--space-6, 24px);
-  }
+  .grid-2, .grid-3, .grid-4, 
 }
 
 @media (max-width: 1023px) {
   .grid-4,
-  .grid-3 {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  
 }
 
 @media (max-width: 767px) {
   .grid-4,
   .grid-3,
-  .grid-2 {
-    grid-template-columns: 1fr;
-  }
-  .grid-aside {
-    grid-template-columns: 1fr;
-  }
+  
+  
 }
 
 /* ── Stack & Cluster Primitives ── */
@@ -184,11 +141,11 @@ main {
   flex-direction: column;
 }
 
-.stack-xs { display: flex; flex-direction: column; gap: var(--space-1, 4px); }
-.stack-sm { display: flex; flex-direction: column; gap: var(--space-2, 8px); }
+
+
 .stack-md { display: flex; flex-direction: column; gap: var(--space-4, 16px); }
 .stack-lg { display: flex; flex-direction: column; gap: var(--space-6, 24px); }
-.stack-xl { display: flex; flex-direction: column; gap: var(--space-8, 32px); }
+
 
 .cluster {
   display: flex;
@@ -216,32 +173,13 @@ main {
   box-shadow: none;
 }
 
-.fv-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3, 12px);
-  margin-bottom: var(--space-4, 16px);
-}
 
-.fv-card__title {
-  font-family: var(--font-sans);
-  font-size: var(--step-1);
-  font-weight: var(--font-semibold, 600);
-  color: var(--text-main);
-  margin: 0;
-}
 
-.fv-card__body {
-  color: var(--text-muted);
-}
 
-.fv-card__footer {
-  margin-top: var(--space-6, 24px);
-  display: flex;
-  align-items: center;
-  gap: var(--space-3, 12px);
-}
+
+
+
+
 
 /* 2. Section Scaffold (.fv-section) */
 .fv-section {
@@ -256,23 +194,11 @@ main {
   }
 }
 
-.fv-section__header {
-  margin-bottom: var(--space-6, 24px);
-}
 
-.fv-section__title {
-  font-family: var(--font-sans);
-  font-size: var(--step-3);
-  font-weight: var(--font-bold, 700);
-  color: var(--text-main);
-  margin-bottom: var(--space-2, 8px);
-}
 
-.fv-section__desc {
-  font-size: var(--step-0);
-  color: var(--text-muted);
-  margin-bottom: 0;
-}
+
+
+
 
 /* 3. Setting / Form Row (.fv-setting-row) */
 .fv-setting-row {
@@ -288,23 +214,11 @@ main {
   border-bottom: none;
 }
 
-.fv-setting-row__info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1, 4px);
-}
 
-.fv-setting-row__label {
-  font-family: var(--font-sans);
-  font-weight: var(--font-semibold, 600);
-  color: var(--text-main);
-  font-size: var(--step-0);
-}
 
-.fv-setting-row__help {
-  font-size: var(--step--1);
-  color: var(--text-muted);
-}
+
+
+
 
 /* 4. Hero Header Scaffold (.fv-hero) */
 .fv-hero {
@@ -313,22 +227,9 @@ main {
   text-align: center;
 }
 
-.fv-hero__title {
-  font-family: var(--font-sans);
-  font-size: var(--step-4);
-  font-weight: var(--font-bold, 700);
-  color: var(--text-main);
-  margin-bottom: var(--space-4, 16px);
-}
 
-.fv-hero__subtitle {
-  font-size: var(--step-1);
-  color: var(--text-muted);
-  max-width: 60ch;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: var(--space-6, 24px);
-}
+
+
 
 /* ── Ergonomic Touch Targets & Focus Floor ── */
 .btn,
@@ -349,11 +250,7 @@ main {
 }
 
 /* ── Policy Rules & Chrome Ban Enforcement ── */
-h1, h2, h3, h4, h5, h6, .page-title, .fv-section__title, .fv-hero__title {
-  -webkit-text-fill-color: initial;
-  background: none;
-  color: var(--text-main);
-}
+h1, h2, h3, h4, h5, h6, .page-title, .fv-section__title, 
 
 .side-stripe, [class*="stripe-"] {
   border-left: none !important;
@@ -393,8 +290,4 @@ main,
   min-height: 60vh;
 }
 
-.shell-header {
-  width: 100%;
-  background-color: var(--surface-base, #ffffff);
-  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
-}
+

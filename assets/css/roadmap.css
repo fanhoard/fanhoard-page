@@ -1,15 +1,6 @@
 /* ── Roadmap / Planned Features Page Styles ── */
 
-body {
-  margin: 0;
-  padding: 0;
-  background: var(--surface-base, #ffffff);
-  font-family: var(--font-sans, system-ui, sans-serif);
-  color: var(--text-main, #0f172a);
-  font-size: var(--step-0, 1rem);
-  line-height: 1.72;
-  -webkit-font-smoothing: antialiased;
-}
+
 
 /* ── Container ── */
 .container {
@@ -35,7 +26,7 @@ body {
 h1.roadmap-title {
   font-size: var(--step-3, 1.5rem);
   font-weight: var(--font-bold, 700);
-  color: var(--color-brand-primary, #009688);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   margin: 0 0 var(--space-2, 0.5rem) 0;
   letter-spacing: -0.01em;
   line-height: 1.3;
@@ -49,12 +40,12 @@ h1.roadmap-title {
 }
 
 .roadmap-subtitle a.new-feature-link {
-  color: var(--color-brand-primary, #009688);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 .roadmap-subtitle a.new-feature-link:hover {
-  color: var(--color-brand-hover, #0f766e);
+  color: var(--color-brand-hover, var(--color-brand-hover, #0f766e));
 }
 
 /* ── Version Badge ── */
@@ -62,7 +53,7 @@ h1.roadmap-title {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2, 0.5rem);
-  background: var(--color-brand-primary, #009688);
+  background: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   color: #ffffff;
   font-size: clamp(0.7rem, 0.68rem + 0.1vw, 0.75rem);
   font-weight: var(--font-bold, 700);
@@ -74,132 +65,53 @@ h1.roadmap-title {
 }
 
 /* ── Section Label ── */
-.roadmap-section-label {
-  font-size: clamp(0.75rem, 0.7rem + 0.1vw, 0.8rem);
-  font-weight: var(--font-semibold, 600);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #0f766e;
-  padding: var(--space-6, 1.5rem) 0 var(--space-3, 0.75rem);
-}
+
 
 /* ── Feature Release Cards (Unboxed Rows) ── */
-.roadmap-card {
-  background: transparent;
-  border-radius: 0;
-  border: none;
-  border-bottom: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06));
-  margin-bottom: 0;
-  overflow: hidden;
-  display: flex;
-  align-items: stretch;
-  box-shadow: none;
-}
 
-.roadmap-card__bar {
-  width: 3px;
-  flex-shrink: 0;
-  border-radius: 2px;
-  margin-right: var(--space-3, 0.75rem);
-}
+
+
 
 /* Status colors for card bar */
-.roadmap-card--released .roadmap-card__bar { background: var(--color-brand-primary, #009688); }
-.roadmap-card--upcoming .roadmap-card__bar { background: var(--color-info, #2563eb); }
-.roadmap-card--new      .roadmap-card__bar { background: var(--color-emerald-500, #10b981); }
-.roadmap-card--planned  .roadmap-card__bar { background: var(--color-brand-primary, #009688); }
-.roadmap-card--not-yet  .roadmap-card__bar { background: var(--text-muted, #757575); }
+.roadmap-card--released 
+.roadmap-card--upcoming 
+.roadmap-card--new      
+.roadmap-card--planned  
+.roadmap-card--not-yet  
 
-.roadmap-card__body {
-  padding: var(--space-4, 1rem) 0;
-  flex: 1;
-  min-width: 0;
-}
 
-.roadmap-card__title {
-  font-size: var(--step-0, 1rem);
-  font-weight: var(--font-semibold, 600);
-  margin: 0 0 var(--space-1, 0.25rem);
-  line-height: 1.45;
-  color: var(--text-main, #0f172a);
-}
 
-.roadmap-card__meta {
-  font-size: var(--step--1, 0.875rem);
-  color: #0f766e;
-  font-weight: var(--font-medium, 500);
-  margin-bottom: var(--space-1, 0.25rem);
-}
 
-.roadmap-card__desc {
-  font-size: var(--step--1, 0.875rem);
-  color: var(--text-muted, #757575);
-  line-height: 1.68;
-  font-weight: var(--font-normal, 400);
-  margin: 0;
-}
+
+
+
+
 
 /* Status Pill */
-.roadmap-status-pill {
-  display: inline-flex;
-  align-items: center;
-  font-size: clamp(0.65rem, 0.62rem + 0.1vw, 0.72rem);
-  font-weight: var(--font-semibold, 600);
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  padding: var(--space-1, 0.25rem) var(--space-3, 0.75rem);
-  border-radius: var(--radius-full, 9999px);
-  border: 1px solid transparent;
-  margin-top: var(--space-2, 0.5rem);
-}
 
-.roadmap-card--released .roadmap-status-pill {
-  background: var(--teal-50, #f0fdf4);
-  color: var(--color-brand-primary, #009688);
-  border-color: rgba(0, 150, 136, 0.2);
-}
-.roadmap-card--upcoming .roadmap-status-pill {
-  background: var(--surface-hover, #f8fafc);
-  color: var(--color-info, #2563eb);
-  border-color: rgba(37, 99, 235, 0.2);
-}
-.roadmap-card--new .roadmap-status-pill {
-  background: var(--teal-50, #f0fdf4);
-  color: var(--color-emerald-600, #059669);
-  border-color: rgba(16, 185, 129, 0.2);
-}
-.roadmap-card--planned .roadmap-status-pill {
-  background: var(--teal-50, #f0fdf4);
-  color: var(--color-brand-primary, #009688);
-  border-color: rgba(0, 150, 136, 0.2);
-}
-.roadmap-card--not-yet .roadmap-status-pill {
-  background: var(--surface-hover, #f8fafc);
-  color: var(--text-muted, #757575);
-  border-color: rgba(0, 0, 0, 0.06);
-}
+
+.roadmap-card--released 
+.roadmap-card--upcoming 
+.roadmap-card--new 
+.roadmap-card--planned 
+.roadmap-card--not-yet 
 
 /* ── Headings ── */
 h2 {
-  color: var(--color-brand-primary, #009688);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   font-weight: var(--font-semibold, 600);
   font-size: var(--step-1, 1.125rem);
   margin: var(--space-6, 1.5rem) 0 var(--space-3, 0.75rem);
 }
 h3 {
-  color: var(--color-brand-primary, #009688);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   font-weight: var(--font-semibold, 600);
   font-size: var(--step-0, 1rem);
   margin: 0 0 var(--space-3, 0.75rem);
 }
 
 /* ── Version Info ── */
-#current-version {
-  text-align: center;
-  margin: 0 0 var(--space-4, 1rem);
-  font-size: var(--step--1, 0.875rem);
-  color: var(--color-brand-primary, #009688);
-}
+
 
 /* ── Milestone Timeline List ── */
 #feature-list {
@@ -221,7 +133,7 @@ h3 {
   padding: var(--space-4, 1rem) 0;
   margin: 0;
   font-size: var(--step-0, 1rem);
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, var(--text-main, #0f172a));
   line-height: 1.6;
   box-shadow: none;
   transition: none;
@@ -255,7 +167,7 @@ h3 {
 #feature-list li.past-feature small {
   display: block;
   font-size: 0.85em;
-  color: #0f766e;
+  color: var(--color-brand-hover, #0f766e);
   font-weight: var(--font-medium, 500);
   margin-top: var(--space-1, 0.25rem);
 }
@@ -281,7 +193,7 @@ h3 {
   box-shadow: none;
 }
 #feature-list li.new-feature::before {
-  background: var(--color-brand-primary, #009688);
+  background: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   width: 12px;
   height: 12px;
   left: calc(-1 * var(--space-5, 1.25rem) - 7px);
@@ -289,7 +201,7 @@ h3 {
 #feature-list li.new-feature small {
   display: block;
   font-size: 0.85em;
-  color: #0f766e;
+  color: var(--color-brand-hover, #0f766e);
   font-weight: var(--font-semibold, 600);
   margin-top: var(--space-1, 0.25rem);
 }
@@ -302,15 +214,9 @@ h3 {
   background: var(--text-muted, #757575);
 }
 
-.question-mark {
-  margin-left: var(--space-2, 0.5rem);
-  font-size: 1.4em;
-  color: var(--color-brand-primary, #009688);
-  cursor: pointer;
-  transition: color var(--transition-fast, 150ms ease-out);
-}
+
 .question-mark:hover {
-  color: var(--color-brand-hover, #0f766e);
+  color: var(--color-brand-hover, var(--color-brand-hover, #0f766e));
 }
 
 /* ── Responsive ── */
@@ -318,8 +224,8 @@ h3 {
   .container { padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem) var(--space-12, 3rem); }
   .roadmap-header { padding: 0 0 var(--space-4, 1rem) 0; }
   h1.roadmap-title { font-size: var(--step-1, 1.25rem); }
-  .roadmap-card__title { font-size: var(--step-0, 1rem); }
-  .roadmap-card__desc { font-size: var(--step--1, 0.875rem); }
+  
+  
 }
 
 @media (max-width: 450px) {
