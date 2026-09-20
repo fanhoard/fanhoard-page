@@ -67,9 +67,9 @@
 .cm-group{contain:layout style;isolation:isolate;margin-bottom:var(--space-8, 32px);}
 
 .ure-btn-row{
-  display:flex!important;flex-wrap:wrap!important;
+  display:grid!important;grid-template-columns:repeat(auto-fill, minmax(min(100%, 140px), 1fr))!important;
+  align-items:stretch!important;
   background:transparent!important;
-  justify-content:flex-start!important;align-items:center!important;
   gap:var(--space-2, 8px)!important;
   contain:layout style;
 }
