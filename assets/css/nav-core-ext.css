@@ -194,8 +194,9 @@
 ::-webkit-scrollbar-thumb { background: var(--border-subtle, #cbd5e1); border-radius: var(--radius-full); }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-strong, #94a3b8); }
 
-.img-d1 { padding: 0 var(--space-8, 32px); }
-.img-d1 img { width: 100%; border-radius: var(--radius-md, 8px); }
+.img-d1 { padding: 0 var(--space-8, 32px); max-width: 800px; width: 100%; margin: 0 auto; display: flex; justify-content: center; }
+.img-d1 picture { display: block; width: 100%; max-width: 100%; }
+.img-d1 img { width: 100%; max-width: 100%; height: auto; object-fit: contain; border-radius: var(--radius-md, 8px); display: block; }
 
 @media (prefers-reduced-motion: reduce) {
   :where(.button-content), :where(.card) { transition: none; }

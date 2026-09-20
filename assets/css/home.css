@@ -599,10 +599,21 @@ details[open] .faq-answer {
   padding: 0 var(--space-4, 1rem);
   max-width: 800px;
   width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.img-d1 picture {
+  display: block;
+  width: 100%;
+  max-width: 100%;
 }
 
 .img-d1 img {
   width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
   border-radius: var(--radius-lg, 12px);
   display: block;
 }
