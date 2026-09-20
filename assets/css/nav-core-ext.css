@@ -145,7 +145,6 @@
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr)) !important;
   align-items: stretch !important;
   justify-content: stretch !important;
-  margin-bottom: var(--space-8, 32px) !important;
   padding: 0 !important;
   background: transparent !important; 
   border-radius: 0 !important;
@@ -160,7 +159,7 @@
 .ure-btn-row--last {
   border-radius: 0 !important;
   padding: 0 !important;
-  margin: 0 0 var(--space-8, 32px) 0 !important;
+  margin: 0 !important;
 }
 
 .card-content-container {

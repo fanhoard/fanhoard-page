@@ -76,7 +76,7 @@
 .ure-btn-row--only,
 .ure-btn-row--first,
 .ure-btn-row--mid,
-.ure-btn-row--last {border-radius:0!important;padding:0!important;margin:0 0 var(--space-8, 32px)!important;}
+.ure-btn-row--last {border-radius:0!important;padding:0!important;margin:0!important;}
 
 .card-content-container--h{
   flex-wrap:nowrap!important;
@@ -732,20 +732,12 @@
         out.push({ ...group, _ureKey: `k${k.v++}` });
         return;
       }
-      // btn-group → แบ่งเป็น btn-row (BTN_ROW_SIZE items ต่อ row)
-      const rows = [];
-      for (let i = 0; i < group.items.length; i += BTN_ROW_SIZE)
-        rows.push(group.items.slice(i, i + BTN_ROW_SIZE));
-
-      rows.forEach((row, ri) => {
-        const only = rows.length === 1, last = ri === rows.length - 1;
-        out.push({
-          _ureKey : `k${k.v++}`,
-          _ureType: 'btn-row',
-          header  : ri === 0 ? (group.header || null) : null,
-          items   : row,
-          _rowPos : only ? 'only' : ri === 0 ? 'first' : last ? 'last' : 'mid',
-        });
+      out.push({
+        _ureKey : `k${k.v++}`,
+        _ureType: 'btn-row',
+        header  : group.header || null,
+        items   : group.items || [],
+        _rowPos : 'only',
       });
     },
 
