@@ -87,8 +87,8 @@
   --fv-brand-teal-light: var(--color-brand-primary);
   --fv-brand-teal-dark:  var(--color-brand-hover);
 
-  --fv-gradient-teal: linear-gradient(135deg, var(--color-emerald-600) 0%, var(--color-teal-600) 100%);
-  --fv-gradient-btn:  linear-gradient(135deg, var(--color-teal-600) 0%, var(--color-teal-700) 100%);
+  --fv-gradient-teal: var(--color-brand-primary, #009688);
+  --fv-gradient-btn:  var(--color-brand-primary, #009688);
 
   --fv-surface-page:       var(--surface-card);
   --fv-surface-soft:       var(--surface-hover);

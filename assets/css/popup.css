@@ -24,7 +24,7 @@
   background: var(--fp-bg, var(--fv-surface-card));
   border: 1px solid var(--fp-border, var(--fv-border-default));
   border-radius: var(--fp-radius, var(--fv-radius-md));
-  box-shadow: var(--fp-shadow, var(--fv-shadow-lg));
+  box-shadow: none;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -33,7 +33,7 @@
 .fp-btn:focus-visible {
   outline: 3px solid var(--fv-focus-ring, #0a9273);
   outline-offset: 2px;
-  box-shadow: var(--fp-shadow, var(--fv-shadow-lg)), var(--fv-shadow-focus);
+  box-shadow: none;
 }
 
 /* ── Inner container ────────────────────────────────────────────────────── */
@@ -184,7 +184,7 @@
 
 .fp-btn-primary:hover {
   background: var(--fp-accent-light, var(--fv-brand-teal-light));
-  box-shadow: 0 4px 12px rgba(19, 180, 127, 0.2);
+  box-shadow: none;
 }
 
 .fp-btn-secondary {
@@ -476,7 +476,7 @@
 .fp-toast {
   border-radius: var(--fv-radius-lg, 37px);
   padding: 0;
-  box-shadow: var(--fv-shadow-lg), 0 0 0 1px var(--fv-border-default);
+  box-shadow: none; border: 1px solid var(--fv-border-default, rgba(0,0,0,0.08));
 }
 
 .fp-toast .fp-inner {
@@ -498,7 +498,7 @@
   padding: var(--fv-space-2) var(--fv-space-3);
   border-radius: var(--fv-radius-xs, 12px);
   font-size: var(--fv-text-xs);
-  box-shadow: var(--fv-shadow-md);
+  box-shadow: none; border: 1px solid var(--fv-border-default, rgba(0,0,0,0.08));
   pointer-events: none;
   max-width: 280px;
   white-space: normal;
@@ -516,7 +516,7 @@
 
 .fp-popover {
   border-radius: var(--fv-radius-sm, 17px);
-  box-shadow: var(--fv-shadow-lg), 0 0 0 1px var(--fv-border-default);
+  box-shadow: none; border: 1px solid var(--fv-border-default, rgba(0,0,0,0.08));
 }
 
 .fp-popover .fp-inner {
@@ -593,9 +593,8 @@
 /* ── Glassmorphism ─────────────────────────────────────────────────────── */
 
 .fp-glass {
-  background: var(--fv-surface-card-alpha, rgba(255, 255, 255, 0.94)) !important;
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  background: var(--fv-surface-card, #ffffff) !important;
+
 }
 
 /* ── Borderless ────────────────────────────────────────────────────────── */

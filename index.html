@@ -46,12 +46,12 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8233915433564101" crossorigin="anonymous"></script>
 
   <style>
-    /* 404 landing shell styles — token-based native elevation & 4/8px spacing */
+    /* 404 landing shell styles — minimal centered Read/Persuade design */
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-      background: var(--surface-base, #ffffff);
+      background: #ffffff;
       color: var(--text-main, #0f172a);
     }
 
@@ -65,7 +65,7 @@
     }
 
     .wrap {
-      max-width: 640px;
+      max-width: 520px;
       width: 100%;
     }
 
@@ -77,49 +77,47 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: var(--space-1, 4px);
-      padding: var(--space-1, 4px) var(--space-3, 12px);
-      border-radius: var(--radius-full, 9999px);
-      background: var(--surface-hover, #f1f5f9);
-      color: var(--color-brand-primary, #0d9488);
-      border: 1px solid var(--border-subtle, #cbd5e1);
-      font-size: var(--step--1, 13px);
+      padding: 0;
+      background: transparent;
+      color: var(--color-brand-primary, #009688);
+      border: none;
+      font-size: var(--step-0, 16px);
       font-weight: var(--font-semibold, 600);
       letter-spacing: 0.04em;
       margin-bottom: var(--space-4, 16px);
-      min-height: 32px;
     }
 
     /* Visual 404 heading */
     h1 {
       font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-      font-size: clamp(3.5rem, 2.5rem + 5vw, 4.25rem);
+      font-size: clamp(4rem, 8vw, 6rem);
       margin: 0 0 var(--space-2, 8px);
       line-height: 1;
-      color: var(--color-brand-primary, #0d9488);
+      color: var(--color-brand-primary, #009688);
       letter-spacing: -0.04em;
+      font-weight: var(--font-bold, 700);
     }
 
     h2 {
       font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-      margin: 0 0 var(--space-3, 12px);
-      font-size: var(--step-2, 24px);
-      font-weight: var(--font-bold, 700);
+      margin: 0 0 var(--space-2, 8px);
+      font-size: var(--step-2, 22px);
+      font-weight: var(--font-semibold, 600);
       letter-spacing: -0.02em;
       color: var(--text-main, #0f172a);
     }
 
     p {
       margin: 0 auto var(--space-6, 24px);
-      color: var(--text-muted, #64748b);
+      color: var(--text-muted, #757575);
       font-size: var(--step-0, 16px);
-      line-height: var(--lh-normal, 1.65);
-      max-width: 520px;
+      line-height: var(--lh-normal, 1.6);
+      max-width: 480px;
     }
 
     .actions {
       display: flex;
-      gap: var(--space-4, 16px);
+      gap: var(--space-3, 12px);
       justify-content: center;
       flex-wrap: wrap;
     }
@@ -133,63 +131,58 @@
       font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
       font-weight: var(--font-semibold, 600);
       font-size: var(--step-0, 16px);
-      letter-spacing: 0.015em;
       padding: var(--space-3, 12px) var(--space-6, 24px);
       border-radius: var(--radius-full, 9999px);
       text-decoration: none;
       line-height: 1.5;
-      vertical-align: middle;
       cursor: pointer;
       user-select: none;
       min-height: 44px;
       min-width: 44px;
-      box-shadow: none;
+      box-shadow: none !important;
       transition: background-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
                   color var(--duration-fast, 150ms) var(--ease-out, ease-out),
-                  border-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
-                  box-shadow var(--duration-fast, 150ms) var(--ease-out, ease-out);
+                  border-color var(--duration-fast, 150ms) var(--ease-out, ease-out);
     }
 
     .btn-primary {
-      background: var(--color-brand-primary, #0d9488);
+      background: var(--color-brand-primary, #009688);
       color: #ffffff;
       border: 1px solid transparent;
     }
 
     .btn-primary:hover {
-      background: var(--color-brand-hover, #0f766e);
+      background: var(--color-brand-hover, #00796b);
       color: #ffffff;
-      box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.08));
     }
 
     .btn-secondary {
-      background: var(--surface-card, #ffffff);
-      color: var(--text-main, #0f172a);
-      border: 1px solid var(--border-subtle, #cbd5e1);
-      border-radius: var(--radius-xl, 16px);
+      background: transparent;
+      color: var(--text-muted, #757575);
+      border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
     }
 
     .btn-secondary:hover {
-      background: var(--surface-hover, #f1f5f9);
-      border-color: var(--border-strong, #94a3b8);
-      box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.08));
+      background: rgba(0, 0, 0, 0.03);
+      color: var(--text-main, #0f172a);
+      border-color: rgba(0, 0, 0, 0.12);
     }
 
     .fv-hero {
-      padding: var(--space-12, 48px) var(--space-4, 16px);
+      padding: var(--space-8, 32px) var(--space-4, 16px);
     }
 
     .note {
       margin-top: var(--space-5, 20px);
       font-size: var(--step--1, 13px);
-      color: var(--text-muted, #64748b);
+      color: var(--text-muted, #757575);
     }
 
     @media (max-width: 480px) {
-      h1 { font-size: 3.25rem; }
-      h2 { font-size: 1.3rem; }
+      h1 { font-size: 3.5rem; }
+      h2 { font-size: 1.25rem; }
       p { font-size: 0.95rem; }
-      .fv-hero { padding: var(--space-8, 32px) var(--space-3, 12px); }
+      .fv-hero { padding: var(--space-6, 24px) var(--space-3, 12px); }
       .btn-primary, .btn-secondary {
         font-size: var(--step-0, 16px);
         padding: var(--space-3, 12px) var(--space-5, 20px);

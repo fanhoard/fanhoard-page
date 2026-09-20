@@ -1,23 +1,27 @@
 /* Path: assets/css/back-to-top.css
-   Purpose: Styles for the back-to-top button */
+   Purpose: Calm, token-aligned styles for the back-to-top button */
 
 #back-to-top {
   position: fixed;
   right: 4vw;
   bottom: 140px;
-  width: 50px; height: 50px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; visibility: hidden; pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
   padding: 0;
   cursor: pointer;
 
-  background: var(--color-brand-primary, #0d9488);
-  border: 2px solid var(--color-teal-400, #2dd4bf);
-  box-shadow: var(--shadow-md);
+  background: var(--color-brand-primary, #009688);
+  border: none;
+  box-shadow: none;
 
   transform-origin: center;
-
   -webkit-tap-highlight-color: transparent;
 
   will-change: transform, opacity;
@@ -26,54 +30,65 @@
   contain: layout style;
 
   transition:
-    opacity 450ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    transform 450ms cubic-bezier(0.175, 0.885, 0.32, 1.275),
-    visibility 0s linear 450ms;
+    opacity 300ms ease-out,
+    transform 300ms ease-out,
+    background-color 150ms ease-out,
+    visibility 0s linear 300ms;
 
   z-index: var(--z-popover, 300);
   user-select: none;
 }
 
+#back-to-top:hover {
+  background: var(--color-brand-hover, #00796b);
+}
+
 #back-to-top svg {
   display: block;
   pointer-events: none;
-  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  width: 20px;
+  height: 20px;
+  transition: transform 150ms ease-out;
   color: #ffffff;
 }
 
 #back-to-top.btt-shown {
-  opacity: 1; visibility: visible; pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
   transform: translateY(0) scale(1.0);
   transition-delay: 0s;
 }
 
 #back-to-top.btt-hidden {
-  opacity: 0; pointer-events: none;
+  opacity: 0;
+  pointer-events: none;
   transform: translateY(15px) scale(0.6);
 }
 
 #back-to-top:active {
-  transform: translateY(0) scale(0.85);
-  transition: transform 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: translateY(0) scale(0.92);
+  transition: transform 120ms ease-out;
 }
 
 #back-to-top:active svg {
-  transform: scale(0.9);
+  transform: scale(0.95);
 }
 
 @media (max-width: 600px) {
   #back-to-top {
     right: 16px;
     bottom: 120px;
-    width: 45px; height: 45px;
+    width: 44px;
+    height: 44px;
   }
   #back-to-top.btt-shown  { transform: translateY(0) scale(1.0); }
   #back-to-top.btt-hidden { transform: translateY(15px) scale(0.6); }
-  #back-to-top:active     { transform: translateY(0) scale(0.85); }
+  #back-to-top:active     { transform: translateY(0) scale(0.92); }
 }
 
 #back-to-top:focus-visible {
-  outline: 3px solid var(--color-brand-primary, #0d9488);
+  outline: 2px solid var(--color-brand-primary, #009688);
   outline-offset: 2px;
 }
 

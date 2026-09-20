@@ -54,7 +54,7 @@
 
 .notification {
   position:fixed; top:20px; right:20px; padding:12px 14px; border-radius:var(--fv-radius-sm);
-  box-shadow: var(--shadow-md); z-index:var(--fv-z-toast);
+  border: 1px solid var(--border-subtle, rgba(0,0,0,0.08)); box-shadow: none; z-index:var(--fv-z-toast);
   opacity:0; animation:_ld_notif_in 0.22s ease-out forwards;
   display:flex; align-items:flex-start; gap:10px;
   max-width:320px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;

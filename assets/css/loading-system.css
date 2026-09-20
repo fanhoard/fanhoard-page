@@ -246,8 +246,7 @@
   }
   .fvl-scoped.fvl-scoped-overlay {
     background: var(--fvl-overlay-bg);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+
   }
   .fvl-scoped .fvl-scoped-inner {
     display: flex;
@@ -317,7 +316,7 @@
     left: 0;
     height: 100%;
     background: var(--fvl-topbar-bg);
-    box-shadow: 0 0 8px rgba(19, 180, 127, 0.4);
+    box-shadow: none;
     will-change: transform, width;
   }
   /* Determinate: width is set via inline style */
