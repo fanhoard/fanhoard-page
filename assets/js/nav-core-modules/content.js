@@ -39,8 +39,6 @@
   const _esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const _txt = (v, l) => !v ? '' : typeof v === 'object' ? (v[l] || v.en || '') : String(v);
 
-  const BTN_ROW_SIZE = 10;
-
   const LAYOUT = Object.freeze({ BUTTON: 'button', CARD: 'card' });
 
   function _toLayout(val) {

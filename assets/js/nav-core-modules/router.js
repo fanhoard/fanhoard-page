@@ -343,7 +343,7 @@
         const hasCachedScroll = Boolean(
           M.RouteCache &&
           M.RouteCache.has(targetRouteKey) &&
-          (M.RouteCache.get(targetRouteKey)?.scrollPosition > 0)
+          (M.RouteCache.peek(targetRouteKey)?.scrollPosition > 0)
         );
 
         if (main === CONFIG.ALL_BUTTON.URL) {

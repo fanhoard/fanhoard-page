@@ -362,7 +362,14 @@ function buildTypeSection(typeObj, lang) {
 function buildError(msg, detail = '') {
   const el = document.createElement('div');
   el.className = 'home-error';
-  el.innerHTML = `<strong>${msg}</strong>${detail ? `<small>${detail}</small>` : ''}`;
+  const strong = document.createElement('strong');
+  strong.textContent = msg;
+  el.appendChild(strong);
+  if (detail) {
+    const small = document.createElement('small');
+    small.textContent = detail;
+    el.appendChild(small);
+  }
   return el;
 }
 

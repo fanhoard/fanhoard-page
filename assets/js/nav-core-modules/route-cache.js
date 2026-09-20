@@ -94,10 +94,24 @@
     },
 
     /**
-     * ดึง state ของ route — คืน null ถ้าไม่มี หรือหมดอายุ
+     * ดึง state ของ route โดยไม่ reorder ใน LRU Map และไม่เปลี่ยน _currentRouteKey — ใช้สำหรับ decision ใน router
      * @param {string} routeKey
      * @returns {RouteCacheEntry|null}
      */
+    peek(routeKey) {
+      if (!routeKey) return null;
+      const entry = this._cache.get(routeKey);
+      if (!entry) return null;
+
+      // TTL check
+      if (Date.now() - entry.timestamp > RC.TTL_MS) {
+        this._cache.delete(routeKey);
+        return null;
+      }
+
+      return entry;
+    },
+
     get(routeKey) {
       const res = this._cache.get(routeKey);
       if (!routeKey) return null;

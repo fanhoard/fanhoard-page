@@ -259,8 +259,7 @@ body {
   font-weight: 500;
   background: transparent;
   border: 1px solid var(--border-subtle, rgba(14, 95, 153, 0.09));
-  color: var(--text-muted, #757575);
-  opacity: 0.85;
+  color: var(--text-secondary, #374151);
 }
 
 .filter-pill--cat.active {
