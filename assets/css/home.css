@@ -612,6 +612,8 @@ details[open] .faq-answer {
 .img-d1 img {
   width: 100%;
   max-width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: var(--surface-hover, #f0f0f0);
   height: auto;
   object-fit: contain;
   border-radius: var(--radius-lg, 12px);

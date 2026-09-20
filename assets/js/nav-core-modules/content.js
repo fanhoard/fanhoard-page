@@ -130,6 +130,7 @@
 .feed-page{
   content-visibility: auto;
   contain-intrinsic-block-size: auto 300px;
+  overflow-anchor: auto;
 }
 #${FEED_SENTINEL_ID}{
   height: 1px;
@@ -175,6 +176,10 @@
 
     async clearContent() {
       _sess++;
+
+      if (typeof window !== 'undefined' && (window.pageYOffset || window.scrollY)) {
+        window.scrollTo(0, 0);
+      }
 
       // WHY disconnect ก่อน destroy: ป้องกัน observer fire ระหว่าง DOM clear
       if (_feedObserver) {
@@ -495,6 +500,8 @@
       let html = '';
       for (const item of resolvedItems) html += this._tpl(item, lang);
       page.innerHTML = html;
+
+      await new Promise(resolve => requestAnimationFrame(resolve));
 
       if (sentinel && sentinel.parentNode === ctr) {
         ctr.insertBefore(page, sentinel);

@@ -278,7 +278,7 @@ body {
   max-width: var(--fv-container-md, 1200px);
   margin: 24px auto;
   padding: 0 16px;
-  overflow-anchor: none;
+  overflow-anchor: auto;
   container-type: inline-size;
   container-name: search;
 }
