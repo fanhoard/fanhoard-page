@@ -109,7 +109,7 @@
 
     // ARIA
     rootEl.setAttribute('role', opts.role || preset.defaultRole);
-    if (opts.ariaLabel) rootEl.setAttribute('aria-label', opts.ariaLabel);
+    rootEl.setAttribute('aria-label', opts.ariaLabel || opts.title || opts.id || 'Dialog');
     if (opts.ariaDescribedBy) rootEl.setAttribute('aria-describedby', opts.ariaDescribedBy);
 
     // ── Inner container ────────────────────────────────────────────────────
