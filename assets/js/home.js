@@ -86,52 +86,40 @@ function injectStyles() {
   s.textContent = `
     .item-card--view-all {
       text-decoration: none;
-      background: linear-gradient(160deg, #f0fdf9 0%, #f5f0ff 100%);
-      border-color: #c8ede4;
-      color: var(--brand-1);
+      background: var(--surface-base, #ffffff);
+      border: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
+      color: var(--color-brand-primary, #009688);
       position: relative;
-      overflow: hidden;
     }
-    .item-card--view-all::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.55) 50%, transparent 65%);
-      background-size: 200% 100%;
-      background-position: -100% 0;
-      transition: background-position 0.55s ease;
-      pointer-events: none;
-    }
-    .item-card--view-all:hover::before { background-position: 200% 0; }
     .item-card--view-all:hover {
-      border-color: var(--brand-1);
-      background: linear-gradient(160deg, #e8fbf5 0%, #ede8ff 100%);
+      border-color: var(--color-brand-primary, #009688);
+      background: var(--surface-hover, rgba(0,0,0,0.02));
     }
     .view-all-icon {
       display: flex; align-items: center; justify-content: center;
-      width: 42px; height: 42px; border-radius: 50%;
-      background: linear-gradient(135deg, #13b47f26, #9B6EFF22);
-      border: 1.5px solid #13b47f55;
-      color: var(--brand-1);
-      transition: transform 0.2s ease, background 0.2s;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: transparent;
+      border: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
+      color: var(--color-brand-primary, #009688);
+      transition: border-color 0.15s ease, background-color 0.15s ease;
       margin-bottom: 0.12rem; flex-shrink: 0;
     }
     .item-card--view-all:hover .view-all-icon {
-      background: linear-gradient(135deg, #13b47f40, #9B6EFF35);
-      transform: translateX(3px);
+      background: var(--surface-hover, rgba(0,0,0,0.03));
+      border-color: var(--color-brand-primary, #009688);
     }
     .view-all-icon svg { display: block; }
     .view-all-label {
       white-space: normal !important; text-align: center;
-      line-height: 1.25; font-size: 0.82em !important;
-      letter-spacing: 0.02em; color: var(--brand-1) !important;
-      background: rgba(19,180,127,0.08) !important;
-      border: 1px solid rgba(19,180,127,0.15) !important;
+      line-height: 1.25; font-size: 0.8125rem !important;
+      letter-spacing: 0.02em; color: var(--color-brand-primary, #009688) !important;
+      background: transparent !important;
+      border: none !important;
     }
     .carousel-wrapper {
       position: relative;
       overflow: hidden;
-      border-radius: var(--fv-radius-lg, 12px);
+      border-radius: var(--radius-lg, 12px);
     }
     .carousel-arrow {
       position: absolute; top: 0; bottom: 0; height: 100%;
@@ -142,42 +130,24 @@ function injectStyles() {
       touch-action: manipulation;
       opacity: 0; pointer-events: none;
       transition: opacity 0.22s ease;
+      background: transparent;
     }
     .carousel-arrow.visible { opacity: 1; pointer-events: auto; }
-    .carousel-arrow--left {
-      left: 0;
-      background: linear-gradient(to right, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.80) 38%, rgba(255,255,255,0.30) 68%, rgba(255,255,255,0.00) 100%);
-      justify-content: flex-start; padding-left: 4px;
-    }
-    .carousel-arrow--right {
-      right: 0;
-      background: linear-gradient(to left, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.80) 38%, rgba(255,255,255,0.30) 68%, rgba(255,255,255,0.00) 100%);
-      justify-content: flex-end; padding-right: 4px;
-    }
-    .carousel-arrow--left:hover {
-      background: linear-gradient(to right, rgba(255,255,255,1.00) 0%, rgba(255,255,255,0.88) 42%, rgba(255,255,255,0.20) 72%, rgba(255,255,255,0.00) 100%);
-    }
-    .carousel-arrow--right:hover {
-      background: linear-gradient(to left, rgba(255,255,255,1.00) 0%, rgba(255,255,255,0.88) 42%, rgba(255,255,255,0.20) 72%, rgba(255,255,255,0.00) 100%);
-    }
+    .carousel-arrow--left { left: 0; justify-content: flex-start; padding-left: 4px; }
+    .carousel-arrow--right { right: 0; justify-content: flex-end; padding-right: 4px; }
     .ca-icon-wrap {
       display: flex; align-items: center; justify-content: center;
       width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-      background: rgba(255,255,255,0.92);
-      border: 1.5px solid rgba(14,176,213,0.18);
-      box-shadow: 0 2px 8px rgba(6,20,40,0.10);
-      color: #3a4a5a;
-      transition: background 0.15s ease, color 0.15s ease,
-                  border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      background: #ffffff;
+      border: 1px solid var(--border-subtle, rgba(0,0,0,0.12));
+      color: var(--text-muted, #757575);
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
     .carousel-arrow:hover .ca-icon-wrap {
-      background: #fff; color: var(--brand-1, #13b47f);
-      border-color: rgba(19,180,127,0.35);
-      box-shadow: 0 3px 12px rgba(19,180,127,0.18);
-      transform: scale(1.08);
+      background: #ffffff; color: var(--color-brand-primary, #009688);
+      border-color: var(--color-brand-primary, #009688);
     }
-    .carousel-arrow:active .ca-icon-wrap { transform: scale(0.93); transition-duration: 0.06s; }
-    .carousel-arrow:focus-visible .ca-icon-wrap { outline: 2px solid var(--brand-1, #13b47f); outline-offset: 2px; }
+    .carousel-arrow:focus-visible .ca-icon-wrap { outline: 2px solid var(--color-brand-primary, #009688); outline-offset: 2px; }
     .ca-icon-wrap svg { display: block; pointer-events: none; flex-shrink: 0; }
     @media (max-width: 600px) {
       .carousel-arrow { width: 40px; }
@@ -185,8 +155,8 @@ function injectStyles() {
     }
     .carousel-wrapper::before, .carousel-wrapper::after { display: none !important; }
     .home-error {
-      padding: 2rem 1rem; border-radius: 20px;
-      background: #fff5f5; border: 1.5px solid #ffd0d0;
+      padding: 2rem 1rem; border-radius: 12px;
+      background: #fff5f5; border: 1px solid #ffd0d0;
       color: #c0392b; font-size: .95rem; text-align: center;
     }
     .home-error small { display: block; margin-top: .4rem; color: #ff8a8a; font-family: monospace; font-size: .82em; }
