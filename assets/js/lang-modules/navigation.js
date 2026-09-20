@@ -71,25 +71,37 @@
      */
     _setupPageshow() {
       window.addEventListener('pageshow', (event) => {
-        // event.persisted=false → โหลดหน้าใหม่ปกติ, initialize() จัดการอยู่แล้ว
         if (!event.persisted) return;
-        if (M.DetectorService.isLocalDev()) return;
         
         try {
+          // On BFCache restoration (return navigation), clear caches and reset render state
+          if (M.RouteCache) M.RouteCache.invalidate();
+          if (M.FeedCache) M.FeedCache.clearFeedState();
+          if (M.FeedService) M.FeedService.reset();
+          if (M.SourcePaginator) M.SourcePaginator.reset();
+
+          if (M.ContentService) {
+            const lang = localStorage.getItem('selectedLang') || 'en';
+            const ctr = document.getElementById(M.CONFIG?.DOM?.CONTENT_LOADING_ID || 'content-loading');
+            if (ctr) {
+              const activeRoute = M.State?.navigation?.currentMainRoute || '_all';
+              if (activeRoute === '_all' || !activeRoute) {
+                M.ContentService.renderFeed(lang, '_all');
+              }
+            }
+          }
+
           const { State, DetectorService, URLService } = M;
-          const storedLang = DetectorService.getLangFromStorage();
-          if (!storedLang) return;
-          
-          if (storedLang !== State.selectedLang) {
-            // localStorage บอกภาษาต่างจาก JS state ที่ restore กลับมา
-            // → user เปลี่ยนภาษาในหน้าอื่นระหว่างที่ออกจากหน้านี้
-            State._userExplicitLang = storedLang;
-            M.LanguageManager.updatePageLanguage(storedLang, true).catch(e => {
-              console.error('[NavigationService/pageshow] language sync error:', e);
-            });
-          } else {
-            // ภาษาตรงกันแล้ว แต่ URL อาจมี prefix เก่า → fix URL เฉยๆ
-            URLService.updateURLForLanguage(storedLang);
+          if (DetectorService) {
+            const storedLang = DetectorService.getLangFromStorage();
+            if (storedLang && storedLang !== State?.selectedLang) {
+              State._userExplicitLang = storedLang;
+              M.LanguageManager?.updatePageLanguage(storedLang, true).catch(e => {
+                console.error('[NavigationService/pageshow] language sync error:', e);
+              });
+            } else if (storedLang && URLService) {
+              URLService.updateURLForLanguage(storedLang);
+            }
           }
         } catch (e) {
           console.error('[NavigationService/pageshow] handler error:', e);

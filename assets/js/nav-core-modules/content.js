@@ -277,54 +277,10 @@
       _activeRouteKey  = routeKey;
       _activeRouteKind = 'feed';
 
-      // ── v2: ลอง restore จาก RouteCache ก่อน ────────────────────────────────
-      const cached = M.RouteCache?.get?.(routeKey);
-      if (cached && cached.routeKind === 'feed'
-          && cached.domSnapshot
-          && M.FeedService.canResume?.()) {
-
-        // restore DOM (clone snapshot ลง container)
-        M.RouteCache.restoreDom(ctr, cached.domSnapshot);
-        // restore FeedService state
-        M.FeedService.restore?.(cached.feedState);
-
-        // re-attach delegated click + observer
-        this._ensureFeedClickDelegate(ctr);
-
-        // รอ 1 rAF ให้ browser paint ก่อน hide overlay (render-behind-overlay pattern)
-        try { M.LoadingService?.hideInstant(); } catch (_) {}
-
-        // restore scroll position (ใน frame ถัดไปเพื่อให้ DOM paint เสร็จ)
-        const savedScroll = cached.scrollPosition || 0;
-        requestAnimationFrame(() => {
-          try { window.scrollTo({ top: savedScroll, behavior: 'instant' }); }
-          catch (_) { window.scrollTo(0, savedScroll); }
-        });
-
-        // re-attach observer ถ้ายังมี content ให้โหลดต่อ
-        if (cached.hasMore) {
-          this._attachFeedSentinel(ctr, lang, _sess);
-        }
-        return;
-      }
-
-      // ── v1 path: ไม่มี RouteCache → render ใหม่ ──────────────────────────
-      // v2.1: ลอง restore จาก FeedCache ก่อนที่จะ reset
-      //   - cache hit → ใช้ seed + state เดิม → "deliver feed ครั้งก่อน", resume ที่เดิม
-      //   - cache miss → reset → FeedCache.getOrCreateSeed() อาจให้ seed เดิม (TTL) หรือใหม่
-      //
-      // WHY tryRestoreFromCache ก่อน reset:
-      //   tryRestoreFromCache อ่าน seed จาก localStorage และ queue state ไว้
-      //   ถ้าเรียก reset() หลังจากนั้น _pendingRestore จะหาย → feed เริ่มใหม่
-      //   ต้องเรียก reset() เฉพาะตอน cache miss เท่านั้น
-      const ttlMs = M.CONFIG?.ALL_BUTTON?.FEED_SEED_TTL;
-      const feedCacheHit = M.FeedService?.tryRestoreFromCache?.(ttlMs) === true;
-
-      if (!feedCacheHit) {
-        // WHY reset ก่อน clearContent: FeedService.reset() ต้องเรียกก่อน
-        //   เพื่อให้ _ensureInit() ใน loadNextPage() สร้าง segments ใหม่ได้ถูกต้อง
-        M.FeedService.reset();
-      }
+      // On return/re-entry, reset render state to show only initial chunk
+      if (M.RouteCache) M.RouteCache.invalidate(routeKey);
+      if (M.FeedCache) M.FeedCache.clearFeedState();
+      M.FeedService.reset();
 
       await this.clearContent();
       const sess = _sess;
@@ -395,35 +351,8 @@
       _activeRouteKey  = routeKey;
       _activeRouteKind = 'lazy';
 
-      // ── ลอง restore จาก RouteCache ก่อน ───────────────────────────────────
-      const cached = M.RouteCache?.get?.(routeKey);
-      if (cached && cached.routeKind === 'lazy'
-          && cached.domSnapshot
-          && cached.paginatorState) {
-
-        // restore DOM
-        M.RouteCache.restoreDom(ctr, cached.domSnapshot);
-        // restore paginator state
-        M.SourcePaginator?.restore?.(cached.paginatorState);
-
-        // re-attach delegated click + observer
-        this._ensureFeedClickDelegate(ctr);
-
-        try { M.LoadingService?.hideInstant(); } catch (_) {}
-
-        // restore scroll position
-        const savedScroll = cached.scrollPosition || 0;
-        requestAnimationFrame(() => {
-          try { window.scrollTo({ top: savedScroll, behavior: 'instant' }); }
-          catch (_) { window.scrollTo(0, savedScroll); }
-        });
-
-        // re-attach observer ถ้ายังมี content ให้โหลดต่อ
-        if (cached.hasMore) {
-          this._attachLazySentinel(ctr, lang, _sess);
-        }
-        return;
-      }
+      // On return/re-entry, reset render state to show only initial chunk
+      if (M.RouteCache) M.RouteCache.invalidate(routeKey);
 
       // ── ไม่มี cache → render ใหม่ ───────────────────────────────────────────
       await this.clearContent();
@@ -928,19 +857,11 @@
         hasMore:   false,
       };
 
-      // ดึง state จาก service ที่เกี่ยวข้อง
-      if (_activeRouteKind === 'feed') {
-        partial.feedState = M.FeedService?.snapshot?.() || null;
-        // hasMore: ถ้า FeedService ยังไม่ exhausted → ยังโหลดได้
-        partial.hasMore = !!(M.FeedService?._isExhausted === false
-                             && M.FeedService?._unseenPool?.length > 0);
-        // v2.1: บันทึก state ลง FeedCache ด้วย — สำหรับ cross-session resume
-        //   RouteCache ใช้ได้แค่ใน session เดียวกัน (TTL 5 นาที)
-        //   FeedCache เก็บใน localStorage → ใช้ข้าม session ได้ (TTL 30 นาที)
-        try { M.FeedService?.saveToCache?.(); } catch (_) {}
-      } else if (_activeRouteKind === 'lazy') {
-        partial.paginatorState = M.SourcePaginator?.snapshot?.() || null;
-        partial.hasMore = !!(partial.paginatorState?.hasMore);
+      if (_activeRouteKind === 'feed' || _activeRouteKind === 'lazy') {
+        // Reset render state memory on route exit: clear cached multi-chunk DOM snapshots
+        M.RouteCache.invalidate(_activeRouteKey);
+        if (M.FeedCache) M.FeedCache.clearFeedState();
+        return true;
       }
 
       M.RouteCache.save(_activeRouteKey, partial);

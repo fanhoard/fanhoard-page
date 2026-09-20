@@ -408,6 +408,20 @@
           }
         };
         DOMService.on(window, 'popstate', Handlers.popstate);
+
+        Handlers.pageshow = function (e) {
+          if (e && e.persisted) {
+            try {
+              if (M.RenderingService) M.RenderingService.disconnectRenderObserver();
+              const st = URLService.readStateFromURL();
+              _restoreUIState(st);
+            } catch (err) {
+              console.error('[Search] pageshow handler failed:', err);
+            }
+          }
+        };
+        DOMService.on(window, 'pageshow', Handlers.pageshow);
+
         State._handlersAttached = true;
 
       } catch (e) {
@@ -463,6 +477,7 @@
 
         DOMService.off(window,   'resize',   Handlers.resize);
         DOMService.off(window,   'popstate', Handlers.popstate);
+        if (Handlers.pageshow) DOMService.off(window, 'pageshow', Handlers.pageshow);
         DOMService.off(DOMService.get(CONFIG.DOM.searchFormId),    'submit', Handlers.formSubmit);
         DOMService.off(DOMService.get(CONFIG.DOM.searchResultsId), 'click',  Handlers.copyClick);
 
