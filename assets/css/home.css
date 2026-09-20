@@ -416,7 +416,7 @@ details[open] .faq-answer {
 .button-h {
   font-size: var(--step--1, 0.875rem);
   font-weight: var(--font-semibold, 600);
-  color: var(--color-brand-primary, #009688);
+  color: #0f766e;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -497,7 +497,7 @@ details[open] .faq-answer {
 .item-card--view-all {
   background: var(--surface-base, #ffffff);
   border: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
-  color: var(--color-brand-primary, #009688);
+  color: #0f766e;
 }
 
 .item-card--view-all:hover {
@@ -520,7 +520,7 @@ details[open] .faq-answer {
 
 .view-all-label {
   font-size: var(--step--1, 0.8125rem);
-  color: var(--color-brand-primary, #009688);
+  color: #0f766e;
   text-align: center;
   background: transparent;
   border: none;

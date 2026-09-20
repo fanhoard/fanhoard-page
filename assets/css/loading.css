@@ -1,86 +1,93 @@
-/* loading.css v6 */
+/* loading.css v7 — Token-aligned loading & notification surfaces */
 
 @layer loading {
 
-@keyframes _ld_spin   { to { transform: rotate(360deg); } }
-@keyframes _ld_in     { from{opacity:0;} to{opacity:1;} }
-@keyframes _ld_out    { from{opacity:1;} to{opacity:0;} }
-@keyframes _ld_notif_in  { from{opacity:0;transform:translateY(-14px);} to{opacity:1;transform:translateY(0);} }
-@keyframes _ld_notif_out { from{opacity:1;transform:translateY(0);}     to{opacity:0;transform:translateY(-14px);} }
+@keyframes _ld_spin      { to { transform: rotate(360deg); } }
+@keyframes _ld_in        { from { opacity: 0; } to { opacity: 1; } }
+@keyframes _ld_out       { from { opacity: 1; } to { opacity: 0; } }
+@keyframes _ld_notif_in  { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes _ld_notif_out { from { opacity: 1; transform: translateY(0); }     to { opacity: 0; transform: translateY(-10px); } }
 
 :root { --clp-top: 0px; }
 
 #clp-overlay {
-  position:fixed; top:var(--clp-top); left:0; right:0; bottom:0;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap: var(--space-6, 24px); background:var(--fv-surface-page); z-index:var(--fv-z-overlay);
-  contain:strict;
+  position: fixed; top: var(--clp-top); left: 0; right: 0; bottom: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--space-6, 24px); background: var(--fv-surface-page, #ffffff); z-index: var(--fv-z-overlay, 500);
+  contain: strict;
 }
-#clp-overlay[hidden]  { display:none!important; }
-#clp-overlay.entering { will-change:opacity; animation:_ld_in  0.14s ease-out forwards; }
-#clp-overlay.leaving  { will-change:opacity; animation:_ld_out 0.18s ease-in  forwards; pointer-events:none; }
+#clp-overlay[hidden]  { display: none !important; }
+#clp-overlay.entering { will-change: opacity; animation: _ld_in 0.15s ease-out forwards; }
+#clp-overlay.leaving  { will-change: opacity; animation: _ld_out 0.18s ease-in forwards; pointer-events: none; }
 
 #clp-overlay .clp-spinner {
   width: var(--space-16, 64px); height: var(--space-16, 64px);
-  display:flex; align-items:center; justify-content:center; flex-shrink:0;
-  will-change:transform; isolation:isolate; contain:size style;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  will-change: transform; isolation: isolate; contain: size style;
 }
-#clp-overlay .clp-spinner svg { width:100%; height:100%; overflow:visible; display:block; }
-#clp-overlay .clp-track       { stroke: var(--surface-tertiary, var(--border-subtle, #e8f5ef)); stroke-width:3.5; fill:none; }
+#clp-overlay .clp-spinner svg { width: 100%; height: 100%; overflow: visible; display: block; }
+#clp-overlay .clp-track       { stroke: var(--border-subtle, rgba(0, 0, 0, 0.06)); stroke-width: 3.5; fill: none; }
 #clp-overlay .clp-arc {
-  stroke: var(--fv-brand-teal-light);
-  stroke-width:3.5; stroke-linecap:round; stroke-dasharray:88 132; fill:none;
-  transform-box:fill-box; transform-origin:center;
-  will-change:transform; animation:_ld_spin 0.8s linear infinite;
+  stroke: var(--color-brand-primary, #009688);
+  stroke-width: 3.5; stroke-linecap: round; stroke-dasharray: 88 132; fill: none;
+  transform-box: fill-box; transform-origin: center;
+  will-change: transform; animation: _ld_spin 0.7s linear infinite;
 }
 
-#clp-overlay .clp-text   { display:flex; flex-direction:column; align-items:center; gap:6px; contain:layout style; }
-#clp-overlay .clp-msg    { font-size: var(--step-0, 1rem); font-weight: var(--fv-font-semibold); color: var(--text-main); text-align:center; line-height:1.4; min-width:100px; min-height:1.4em; }
-#clp-overlay .clp-sub    { font-size: var(--step--1, 0.875rem); font-weight: 400; color: var(--text-muted); text-align:center; line-height:1.4; }
-#clp-overlay .clp-sub:empty { display:none; }
+#clp-overlay .clp-text   { display: flex; flex-direction: column; align-items: center; gap: 6px; contain: layout style; }
+#clp-overlay .clp-msg    { font-size: var(--step-0, 1rem); font-weight: var(--font-semibold, 600); color: var(--text-main, #0f172a); text-align: center; line-height: 1.4; min-width: 100px; min-height: 1.4em; }
+#clp-overlay .clp-sub    { font-size: var(--step--1, 0.875rem); font-weight: 400; color: var(--text-muted, #757575); text-align: center; line-height: 1.4; }
+#clp-overlay .clp-sub:empty { display: none; }
 
 #content-loading-overlay, #instant-loading-overlay {
-  position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-  background: var(--surface-page, rgba(255,255,255,0.96)); z-index:var(--fv-z-overlay);
-  opacity:1; transition:opacity 0.18s ease; contain:strict;
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: var(--surface-page, #ffffff); z-index: var(--fv-z-overlay, 500);
+  opacity: 1; transition: opacity 0.18s ease; contain: strict;
 }
 #content-loading-overlay[hidden], #instant-loading-overlay[hidden],
-#content-loading-overlay.hidden,  #instant-loading-overlay.hidden { display:none!important; opacity:0; pointer-events:none; }
+#content-loading-overlay.hidden,  #instant-loading-overlay.hidden { display: none !important; opacity: 0; pointer-events: none; }
 
 #content-loading-overlay .fg, #content-loading-overlay .svg-fg, #instant-loading-overlay .spinner-svg-fg {
-  transform-box:fill-box; transform-origin:center;
-  will-change:transform; animation:_ld_spin 0.9s linear infinite;
+  transform-box: fill-box; transform-origin: center;
+  will-change: transform; animation: _ld_spin 0.7s linear infinite;
 }
 
+/* ── Calm, white-canvas notification toasts ──────────────────────────── */
 .notification {
-  position:fixed; top:20px; right:20px; padding:12px 14px; border-radius:var(--fv-radius-sm);
-  border: 1px solid var(--border-subtle, rgba(0,0,0,0.08)); box-shadow: none; z-index:var(--fv-z-toast);
-  opacity:0; animation:_ld_notif_in 0.22s ease-out forwards;
-  display:flex; align-items:flex-start; gap:10px;
-  max-width:320px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  position: fixed; top: var(--space-5, 20px); right: var(--space-5, 20px); padding: var(--space-3, 12px) var(--space-4, 16px);
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06));
+  background: var(--surface-card, #ffffff);
+  color: var(--text-main, #0f172a);
+  box-shadow: none; z-index: var(--fv-z-toast, 700);
+  opacity: 0; animation: _ld_notif_in 0.2s ease-out forwards;
+  display: flex; align-items: flex-start; gap: var(--space-3, 12px);
+  max-width: 340px; min-height: 44px;
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
 }
-.notification-success { background: var(--color-success, #1e8e3e); color: var(--text-inverse, #fff); }
-.notification-error   { background: var(--color-danger, #d93025); color: var(--text-inverse, #fff); }
-.notification-warning { background: var(--color-warning, #f29900); color: var(--text-inverse, #fff); }
-.notification-info    { background: var(--color-info, #1a73e8); color: var(--text-inverse, #fff); }
-.notification-loading { background:#5f6368; color:#fff; }
 
-.notification-icon              { font-size:15px; flex-shrink:0; line-height:1.3; }
-.notification-message-container { flex:1; display:flex; flex-direction:column; gap:2px; }
-.notification-title             { font-size: var(--step--1); font-weight:var(--fv-font-semibold); line-height:1.3; }
-.notification-content           { font-size: var(--step--1); opacity:0.9; word-break:break-word; line-height:1.4; }
-.notification-close             { background:none; border:none; color:inherit; font-size:17px; cursor:pointer; padding:0; width:18px; height:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0; opacity:0.6; margin-top:1px; }
-.notification-close:hover       { opacity:1; }
-.notification-loading .notification-icon { display:inline-block; animation:_ld_spin 1s linear infinite; }
-.notification-slideout { animation:_ld_notif_out 0.22s ease-in forwards; }
+.notification-success { border-left: 3px solid var(--color-success, #16a34a); }
+.notification-error   { border-left: 3px solid var(--color-danger, #dc2626); }
+.notification-warning { border-left: 3px solid var(--color-warning, #d97706); }
+.notification-info    { border-left: 3px solid var(--color-brand-primary, #009688); }
+.notification-loading { border-left: 3px solid var(--text-muted, #757575); }
 
-@media (prefers-reduced-motion:reduce) {
-  #clp-overlay.entering, #clp-overlay.leaving { animation:none; will-change:auto; }
-  #clp-overlay .clp-arc { animation:none; }
-  #content-loading-overlay .fg, #content-loading-overlay .svg-fg, #instant-loading-overlay .spinner-svg-fg { animation:none; }
-  .notification { animation:none; opacity:1; }
-  .notification-slideout { animation:none; opacity:0; }
-  .notification-loading .notification-icon { animation:none; }
+.notification-icon              { font-size: 16px; flex-shrink: 0; line-height: 1.3; color: var(--color-brand-primary, #009688); }
+.notification-message-container { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.notification-title             { font-size: var(--step--1, 0.875rem); font-weight: var(--font-semibold, 600); color: var(--text-main, #0f172a); line-height: 1.3; }
+.notification-content           { font-size: var(--step--1, 0.8125rem); color: var(--text-muted, #757575); word-break: break-word; line-height: 1.4; }
+.notification-close             { background: none; border: none; color: var(--text-muted, #757575); font-size: 16px; cursor: pointer; padding: 0; width: 28px; height: 28px; min-width: 28px; min-height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; opacity: 0.7; margin-top: -2px; border-radius: var(--radius-sm, 6px); transition: opacity 0.15s ease, background 0.15s ease; }
+.notification-close:hover       { opacity: 1; background: var(--surface-hover, rgba(0, 0, 0, 0.04)); }
+.notification-loading .notification-icon { display: inline-block; animation: _ld_spin 0.7s linear infinite; }
+.notification-slideout { animation: _ld_notif_out 0.18s ease-in forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  #clp-overlay.entering, #clp-overlay.leaving { animation: none; will-change: auto; }
+  #clp-overlay .clp-arc { animation: none; }
+  #content-loading-overlay .fg, #content-loading-overlay .svg-fg, #instant-loading-overlay .spinner-svg-fg { animation: none; }
+  .notification { animation: none; opacity: 1; }
+  .notification-slideout { animation: none; opacity: 0; }
+  .notification-loading .notification-icon { animation: none; }
 }
 
 } /* end @layer loading */

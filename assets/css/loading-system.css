@@ -1,26 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   FVL (FanHoardVerse Loader) v1.0.7 — loading-system.css
+   FVL (FanHoardVerse Loader) v1.0.8 — loading-system.css
    assets/css/loading-system.css
-
-   Designed for maximum lightweight:
-   • CSS animations only (no JS-driven animation)
-   • `contain: layout style` on overlay layers (isolation = better perf,
-     but NOT `strict` which can freeze child animations)
-   • `will-change` + `backface-visibility` for GPU-accelerated rotation
-     (we avoid `transform: translateZ(0)` on the arc because it would
-     override the animation's `transform: rotate()`)
-   • prefers-reduced-motion: reduce → animations disabled
-   • All colors via FanHoard design tokens (--fv-*)
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Keyframes (OUTSIDE @layer for maximum browser compatibility) ────────
-   WHY outside @layer: Some older browsers (and headless test environments)
-   don't fully support CSS `@layer`. Putting keyframes inside @layer caused
-   them to be ignored in those environments, freezing the spinner.
-   Keyframes are global by nature — they don't need layer isolation. */
-
-/* WHY 0.7s (was 0.8s): slightly snappier, feels more responsive without
-   being too fast. 0.7s is the de-facto standard for Material/iOS spinners. */
 @keyframes _fvl_spin       { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes _fvl_in         { from { opacity: 0; } to { opacity: 1; } }
 @keyframes _fvl_out        { from { opacity: 1; } to { opacity: 0; } }
@@ -29,9 +11,6 @@
   50%  { transform: translateX(0%)     scaleX(0.7); }
   100% { transform: translateX(250%)   scaleX(0.4); }
 }
-/* Pulse animation: brief opacity dip + scale to signal that a new
-   operation has started (used when show() is called while overlay
-   is already visible from a previous navigation). */
 @keyframes _fvl_pulse {
   0%   { opacity: 1; transform: scale(1); }
   30%  { opacity: 0.6; transform: scale(0.97); }
@@ -40,83 +19,57 @@
 
 @layer fvl {
 
-  /* ── Top offset var (fullscreen mode) ────────────────────────────────────── */
   :root {
     --fvl-top: 0px;
-    /* Keep --clp-top in sync for back-compat with legacy loading.css */
     --clp-top: 0px;
 
-    /* FVL-internal theme tokens (override per [data-fvl-theme]) */
-    --fvl-bg:          var(--fv-surface-page);
-    --fvl-text:        #3c4043;
-    --fvl-text-sub:    #9aa0a6;
-    --fvl-spinner-track: #e8f5ef;
-    --fvl-spinner-arc: var(--fv-brand-teal-light);
-    --fvl-overlay-bg:  rgba(255, 255, 255, 0.96);
-    --fvl-topbar-bg:   var(--fv-brand-teal-light);
+    --fvl-bg:            var(--fv-surface-page, #ffffff);
+    --fvl-text:          var(--text-main, #0f172a);
+    --fvl-text-sub:      var(--text-muted, #757575);
+    --fvl-spinner-track: var(--border-subtle, rgba(0, 0, 0, 0.06));
+    --fvl-spinner-arc:   var(--color-brand-primary, #009688);
+    --fvl-overlay-bg:    rgba(255, 255, 255, 0.96);
+    --fvl-topbar-bg:     var(--color-brand-primary, #009688);
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════
-     Root element — base styles shared across all modes
-     ═══════════════════════════════════════════════════════════════════════════ */
-
   .fvl {
-    font-family: var(--fv-font-stack);
+    font-family: var(--fv-font-stack, system-ui, -apple-system, sans-serif);
     box-sizing: border-box;
   }
 
-  /* ── Theme variants ───────────────────────────────────────────────────────── */
   .fvl[data-fvl-theme="light"] {
-    --fvl-bg:            var(--fv-surface-page);
-    --fvl-text:          #3c4043;
-    --fvl-text-sub:      #9aa0a6;
-    --fvl-spinner-track: #e8f5ef;
-    --fvl-spinner-arc:   var(--fv-brand-teal-light);
+    --fvl-bg:            var(--fv-surface-page, #ffffff);
+    --fvl-text:          var(--text-main, #0f172a);
+    --fvl-text-sub:      var(--text-muted, #757575);
+    --fvl-spinner-track: var(--border-subtle, rgba(0, 0, 0, 0.06));
+    --fvl-spinner-arc:   var(--color-brand-primary, #009688);
     --fvl-overlay-bg:    rgba(255, 255, 255, 0.96);
-    --fvl-topbar-bg:     var(--fv-brand-teal-light);
+    --fvl-topbar-bg:     var(--color-brand-primary, #009688);
   }
   .fvl[data-fvl-theme="dark"] {
     --fvl-bg:            #1a1d23;
     --fvl-text:          #e8eaed;
     --fvl-text-sub:      #9aa0a6;
     --fvl-spinner-track: #2a2d33;
-    --fvl-spinner-arc:   var(--fv-brand-teal-light);
+    --fvl-spinner-arc:   var(--color-brand-primary, #009688);
     --fvl-overlay-bg:    rgba(20, 22, 26, 0.96);
-    --fvl-topbar-bg:     var(--fv-brand-teal-light);
+    --fvl-topbar-bg:     var(--color-brand-primary, #009688);
   }
   .fvl[data-fvl-theme="brand"] {
-    --fvl-bg:            var(--fv-brand-teal);
+    --fvl-bg:            var(--color-brand-primary, #009688);
     --fvl-text:          #ffffff;
-    --fvl-text-sub:      rgba(255, 255, 255, 0.78);
-    --fvl-spinner-track: rgba(255, 255, 255, 0.18);
+    --fvl-text-sub:      rgba(255, 255, 255, 0.85);
+    --fvl-spinner-track: rgba(255, 255, 255, 0.2);
     --fvl-spinner-arc:   #ffffff;
-    --fvl-overlay-bg:    rgba(19, 180, 127, 0.96);
-    --fvl-topbar-bg:     var(--fv-brand-teal-light);
+    --fvl-overlay-bg:    rgba(0, 150, 136, 0.96);
+    --fvl-topbar-bg:     var(--color-brand-primary, #009688);
   }
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     Spinner (ring visualization) — shared element, sized per mode
-     ═══════════════════════════════════════════════════════════════════════════ */
 
   .fvl-spinner {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    /* WHY no `contain: size style` (was here before):
-       `contain: size` tells the browser the element's size is fixed and
-       independent of its contents. Combined with `contain: style`, this
-       caused some browsers to skip repainting the spinning arc — the
-       spinner would appear "frozen" because the browser thought nothing
-       inside the container could affect the rest of the page.
-       
-       Removing `contain` here lets the browser repaint the arc on every
-       animation frame, which is what we want for a smooth spinner. */
-    /* Promote to compositor layer for GPU-accelerated animation.
-       We use `backface-visibility: hidden` instead of `transform: translateZ(0)`
-       because the arc itself uses `transform: rotate()` for the spin animation —
-       setting `transform: translateZ(0)` on the parent would NOT conflict, but
-       setting it on the arc WOULD override the animation's transform. */
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     will-change: transform;
@@ -142,30 +95,15 @@
     fill: none;
     transform-box: fill-box;
     transform-origin: center;
-    /* WHY will-change but NOT transform: translateZ(0):
-       The arc uses `transform: rotate()` via the _fvl_spin animation.
-       If we set `transform: translateZ(0)` here, it would OVERRIDE the
-       animation's transform (CSS specificity: inline/declared transform
-       beats animation transform in some browsers), freezing the spinner.
-       
-       `will-change: transform` is enough to promote the arc to its own
-       compositor layer for GPU-accelerated rotation, without conflicting
-       with the animation. */
     will-change: transform;
-    /* 0.7s linear infinite — standard spinner duration, smooth rotation */
     animation: _fvl_spin 0.7s linear infinite;
     animation-play-state: running;
   }
 
-  /* Inline variant — slightly thicker stroke for visibility at small sizes */
   .fvl-spinner-inline .fvl-track,
   .fvl-spinner-inline .fvl-arc {
     stroke-width: 5;
   }
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     MODE 1: fullscreen — overlay covering viewport below header
-     ═══════════════════════════════════════════════════════════════════════════ */
 
   .fvl-fullscreen {
     position: fixed;
@@ -180,27 +118,14 @@
     gap: 22px;
     background: var(--fvl-bg);
     box-sizing: border-box;
-    /* WHY `contain: layout style` instead of `contain: strict`:
-       `contain: strict` = `size + layout + style + paint`. The `paint`
-       and `size` containment caused the spinner animation to freeze in
-       some browsers because they thought nothing inside the overlay
-       needed repainting. `layout style` is enough to isolate the overlay
-       from the rest of the page without freezing child animations. */
     contain: layout style;
-    /* Force overlay onto its own compositor layer so the enter/leave
-       opacity transitions don't interfere with the spinner's rotation. */
     transform: translateZ(0);
+    z-index: var(--fv-z-overlay, 500);
   }
-  /* WHY no `.fvl-fullscreen[hidden] { display: none }` rule:
-     We deliberately do NOT set the `hidden` attribute on the fullscreen
-     overlay (see buildFullscreen() in fvl.js). Visibility is controlled
-     via the .fvl-entering / .fvl-shown / .fvl-leaving classes.
-     If we had a `[hidden]` rule here AND the attribute was set, the
-     overlay would be permanently invisible. */
 
   .fvl-fullscreen .fvl-spinner {
-    width: 68px;
-    height: 68px;
+    width: 64px;
+    height: 64px;
   }
   .fvl-fullscreen .fvl-text {
     display: flex;
@@ -210,8 +135,8 @@
     contain: layout style;
   }
   .fvl-fullscreen .fvl-msg {
-    font-size: 16px;
-    font-weight: var(--fv-font-semibold);
+    font-size: var(--step-0, 1rem);
+    font-weight: var(--font-semibold, 600);
     color: var(--fvl-text);
     text-align: center;
     line-height: 1.4;
@@ -219,17 +144,13 @@
     min-height: 1.4em;
   }
   .fvl-fullscreen .fvl-sub {
-    font-size: 13px;
+    font-size: var(--step--1, 0.875rem);
     font-weight: 400;
     color: var(--fvl-text-sub);
     text-align: center;
     line-height: 1.4;
   }
   .fvl-fullscreen .fvl-sub:empty { display: none; }
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     MODE 2: scoped — covers a specific container (absolute positioned)
-     ═══════════════════════════════════════════════════════════════════════════ */
 
   .fvl-scoped {
     position: absolute;
@@ -240,13 +161,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1; /* above content in target, can be overridden via JS */
+    z-index: 1;
     contain: layout style;
     pointer-events: auto;
   }
   .fvl-scoped.fvl-scoped-overlay {
     background: var(--fvl-overlay-bg);
-
   }
   .fvl-scoped .fvl-scoped-inner {
     display: flex;
@@ -262,39 +182,12 @@
     height: 40px;
   }
   .fvl-scoped .fvl-msg {
-    font-size: 13px;
-    font-weight: var(--fv-font-semibold);
+    font-size: var(--step--1, 0.875rem);
+    font-weight: var(--font-medium, 500);
     color: var(--fvl-text);
-    line-height: 1.4;
-    max-width: 240px;
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════
-     MODE 3: inline — small spinner inside target (e.g. button)
-     ═══════════════════════════════════════════════════════════════════════════ */
-
-  .fvl-inline {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    vertical-align: middle;
-    line-height: 0;
-  }
-  .fvl-inline .fvl-spinner {
-    width: 18px;
-    height: 18px;
-  }
-  .fvl-inline .fvl-inline-msg {
-    font-size: inherit;
-    font-weight: inherit;
-    color: inherit;
-    line-height: 1.4;
-  }
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     MODE 4: topbar — thin progress bar at top of viewport (NProgress-style)
-     ═══════════════════════════════════════════════════════════════════════════ */
-
+  /* ── Topbar Progress Indicator ── */
   .fvl-topbar {
     position: fixed;
     top: 0;
@@ -303,94 +196,30 @@
     height: 3px;
     z-index: var(--fv-z-overlay, 500);
     background: transparent;
+    overflow: hidden;
     pointer-events: none;
-    /* WHY `contain: layout style` instead of `contain: strict`:
-       Same reason as fullscreen — `strict` (which includes `paint` + `size`)
-       can freeze the indeterminate bar animation. `layout style` is enough. */
-    contain: layout style;
-    transform: translateZ(0);
   }
   .fvl-topbar-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
     height: 100%;
     background: var(--fvl-topbar-bg);
-    box-shadow: none;
-    will-change: transform, width;
-  }
-  /* Determinate: width is set via inline style */
-  .fvl-topbar-bar.fvl-topbar-determinate {
-    transition: width 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  /* Indeterminate: bar slides back and forth */
-  .fvl-topbar-bar.fvl-topbar-indeterminate {
-    width: 40%;
     transform-origin: left center;
-    animation: _fvl_topbar_indeterminate 1.2s ease-in-out infinite;
+    will-change: transform;
+    box-shadow: none;
   }
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     Animation states — entering / shown / leaving / pulse
-     ═══════════════════════════════════════════════════════════════════════════ */
+  .fvl-topbar-bar.fvl-topbar-indeterminate {
+    animation: _fvl_topbar_indeterminate 1.5s ease-in-out infinite;
+  }
 
   .fvl.fvl-entering {
-    will-change: opacity;
-    opacity: 0;
-  }
-  .fvl.fvl-shown {
-    will-change: auto;
-    opacity: 1;
-    transition: opacity 140ms cubic-bezier(0.4, 0, 0.2, 1);
+    animation: _fvl_in 0.15s ease-out forwards;
   }
   .fvl.fvl-leaving {
-    will-change: opacity;
-    opacity: 0;
-    transition: opacity 180ms cubic-bezier(0.4, 0, 0.2, 1);
+    animation: _fvl_out 0.18s ease-in forwards;
     pointer-events: none;
   }
-
-  /* Pulse state: brief opacity dip + scale to signal that a new operation
-     has started. Added by LoadingService._pulse() when show() is called
-     while the overlay is already visible. The animation runs once over
-     350ms and the class is removed by JS when it completes. */
   .fvl.fvl-pulse {
-    animation: _fvl_pulse 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    animation: _fvl_pulse 0.3s ease-in-out;
   }
-
-  /* Topbar has special enter/leave — slide in/out vertically */
-  .fvl-topbar.fvl-entering {
-    transform: translateY(-100%);
-    transition: transform 140ms cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 1;
-    will-change: transform;
-  }
-  .fvl-topbar.fvl-shown {
-    transform: translateY(0);
-    transition: transform 140ms cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: auto;
-    opacity: 1;
-  }
-  .fvl-topbar.fvl-leaving {
-    transform: translateY(-100%);
-    transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: transform;
-    opacity: 1;
-    pointer-events: none;
-  }
-
-  /* Inline doesn't fade — just appears/disappears to avoid jank */
-  .fvl-inline.fvl-entering,
-  .fvl-inline.fvl-shown,
-  .fvl-inline.fvl-leaving {
-    opacity: 1;
-    transition: none;
-    will-change: auto;
-  }
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     prefers-reduced-motion — disable all animations
-     ═══════════════════════════════════════════════════════════════════════════ */
 
   @media (prefers-reduced-motion: reduce) {
     .fvl-spinner .fvl-arc { animation: none; }
@@ -410,63 +239,22 @@
     }
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════
-     NAV-CORE INTEGRATION — fullscreen overlay respects bottom nav
-     ═══════════════════════════════════════════════════════════════════════════
-     When body has class "fvl-nav-mode" (added by nav-core router), the
-     fullscreen overlay leaves room for the bottom nav:
-       • Mobile (default): leave 64px + safe-area at bottom for bottom nav
-       • Desktop (>=768px): leave 88px at left for left-rail nav
-     This ensures the spinner is centered in the VISIBLE area (between
-     header and bottom nav), not the full viewport.
-     ═══════════════════════════════════════════════════════════════════════════ */
-
   body.fvl-nav-mode .fvl-fullscreen {
-    /* Mobile: leave room at bottom for bottom nav + safe area */
     bottom: calc(var(--fv-nav-bottom-h, 64px) + env(safe-area-inset-bottom, 0px));
   }
 
   @media (min-width: 768px) {
-    /* Desktop: bottom nav becomes left rail (88px wide) */
     body.fvl-nav-mode .fvl-fullscreen {
       bottom: 0;
       left: 88px;
     }
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════
-     COVER-ALL VARIANT — full-viewport coverage including header
-     ═══════════════════════════════════════════════════════════════════════════
-     When .fvl-cover-all is added (via FVL option coverAll: true), the
-     fullscreen overlay covers the ENTIRE viewport from top: 0, hiding
-     the header and all navigation. Used for initial page load where
-     the user should not see any unready UI state.
-
-     The fvl-nav-mode bottom/left rules still apply, so the bottom nav
-     (or left-rail on desktop) remains accessible.
-     ═══════════════════════════════════════════════════════════════════════════ */
-
   .fvl-fullscreen.fvl-cover-all {
     top: 0;
   }
 
 } /* end @layer fvl */
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   NAV-LOADING STATE — UNLAYERED (high priority over nav-core.css)
-   ═══════════════════════════════════════════════════════════════════════════
-   When body has class "nav-loading" (added by nav-core router during
-   content fetch), the main nav buttons and sub-nav fade out + become
-   non-interactive. This prevents the user from clicking another category
-   while the previous one is still loading, and signals "we're switching".
-
-   The header container itself stays visible (logo, layout) — only the
-   interactive nav buttons fade.
-
-   IMPORTANT: This rule lives OUTSIDE @layer fvl so it has higher priority
-   than unlayered rules in nav-core.css / nav-core-ext.css that might
-   otherwise set opacity:1 on `header nav`.
-   ═══════════════════════════════════════════════════════════════════════════ */
 
 body.nav-loading header nav,
 body.nav-loading #sub-nav {
@@ -475,7 +263,6 @@ body.nav-loading #sub-nav {
   transition: opacity 180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* When NOT loading, fade in smoothly */
 header nav,
 #sub-nav {
   transition: opacity 220ms cubic-bezier(0.4, 0, 0.2, 1);

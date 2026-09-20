@@ -79,7 +79,7 @@ h1.roadmap-title {
   font-weight: var(--font-semibold, 600);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-brand-primary, #009688);
+  color: #0f766e;
   padding: var(--space-6, 1.5rem) 0 var(--space-3, 0.75rem);
 }
 
@@ -126,7 +126,7 @@ h1.roadmap-title {
 
 .roadmap-card__meta {
   font-size: var(--step--1, 0.875rem);
-  color: var(--color-brand-primary, #009688);
+  color: #0f766e;
   font-weight: var(--font-medium, 500);
   margin-bottom: var(--space-1, 0.25rem);
 }
@@ -255,7 +255,7 @@ h3 {
 #feature-list li.past-feature small {
   display: block;
   font-size: 0.85em;
-  color: var(--color-brand-primary, #009688);
+  color: #0f766e;
   font-weight: var(--font-medium, 500);
   margin-top: var(--space-1, 0.25rem);
 }
@@ -289,7 +289,7 @@ h3 {
 #feature-list li.new-feature small {
   display: block;
   font-size: 0.85em;
-  color: var(--color-brand-primary, #009688);
+  color: #0f766e;
   font-weight: var(--font-semibold, 600);
   margin-top: var(--space-1, 0.25rem);
 }

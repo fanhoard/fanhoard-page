@@ -1,13 +1,13 @@
 /* Path: assets/css/back-to-top.css
-   Purpose: Calm, token-aligned styles for the back-to-top button */
+   Purpose: Safe-area aware, token-aligned back-to-top button */
 
 #back-to-top {
   position: fixed;
-  right: 4vw;
-  bottom: 140px;
+  right: var(--space-6, 24px);
+  bottom: calc(var(--space-6, 24px) + env(safe-area-inset-bottom, 0px));
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: var(--radius-full, 9999px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -30,17 +30,17 @@
   contain: layout style;
 
   transition:
-    opacity 300ms ease-out,
-    transform 300ms ease-out,
-    background-color 150ms ease-out,
-    visibility 0s linear 300ms;
+    opacity 250ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 250ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms ease,
+    visibility 0s linear 250ms;
 
-  z-index: var(--z-popover, 300);
+  z-index: var(--fv-z-popover, 300);
   user-select: none;
 }
 
 #back-to-top:hover {
-  background: var(--color-brand-hover, #00796b);
+  background: var(--color-brand-hover, #00897b);
 }
 
 #back-to-top svg {
@@ -48,7 +48,7 @@
   pointer-events: none;
   width: 20px;
   height: 20px;
-  transition: transform 150ms ease-out;
+  transition: transform 150ms ease;
   color: #ffffff;
 }
 
@@ -63,27 +63,27 @@
 #back-to-top.btt-hidden {
   opacity: 0;
   pointer-events: none;
-  transform: translateY(15px) scale(0.6);
+  transform: translateY(12px) scale(0.85);
 }
 
 #back-to-top:active {
   transform: translateY(0) scale(0.92);
-  transition: transform 120ms ease-out;
+  transition: transform 120ms ease;
 }
 
 #back-to-top:active svg {
   transform: scale(0.95);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 767px) {
   #back-to-top {
-    right: 16px;
-    bottom: 120px;
-    width: 44px;
-    height: 44px;
+    right: var(--space-4, 16px);
+    bottom: calc(var(--fv-nav-bottom-h, 64px) + var(--space-4, 16px) + env(safe-area-inset-bottom, 0px));
+    width: 48px;
+    height: 48px;
   }
   #back-to-top.btt-shown  { transform: translateY(0) scale(1.0); }
-  #back-to-top.btt-hidden { transform: translateY(15px) scale(0.6); }
+  #back-to-top.btt-hidden { transform: translateY(12px) scale(0.85); }
   #back-to-top:active     { transform: translateY(0) scale(0.92); }
 }
 
