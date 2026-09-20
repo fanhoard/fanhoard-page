@@ -67,11 +67,17 @@
 .cm-group{contain:layout style;isolation:isolate;margin-bottom:var(--space-8, 32px);}
 
 .ure-btn-row{
-  display:grid!important;grid-template-columns:repeat(auto-fill, minmax(min(100%, 140px), 1fr))!important;
+  display:grid!important;grid-template-columns:repeat(auto-fill, minmax(min(100%, 64px), 1fr))!important;
   align-items:stretch!important;
   background:transparent!important;
   gap:var(--space-2, 8px)!important;
   contain:layout style;
+}
+@media (min-width: 600px) {
+  .ure-btn-row { grid-template-columns: repeat(auto-fill, minmax(min(100%, 88px), 1fr)) !important; }
+}
+@media (min-width: 1024px) {
+  .ure-btn-row { grid-template-columns: repeat(auto-fill, minmax(min(100%, 100px), 1fr)) !important; }
 }
 .ure-btn-row--only,
 .ure-btn-row--first,
