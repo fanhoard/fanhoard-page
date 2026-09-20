@@ -1,75 +1,245 @@
 /* ═══════════════════════════════════════════════════
-   Report Form Styles
+   Community & Report Form Styles
    assets/css/report.css
+   FanHoard Design Method: Pure white canvas, airy row spacing,
+   teal section headers, gray subtext, hairline dividers, unboxed containers.
    ═══════════════════════════════════════════════════ */
 
-/* ── Description & Section Labels ── */
-.report-desc {
-  font-size: var(--step-0, 1rem);
-  line-height: 1.5;
-  color: var(--text-muted, #475569);
-  margin-top: var(--space-2, 0.5rem);
+/* ── Global Canvas & Container Overrides ── */
+body[data-page="contact"],
+body[data-page="report"],
+.fv-app[data-page="contact"],
+.fv-app[data-page="report"] {
+  background-color: var(--surface-base, #ffffff);
 }
 
-/* ── Textarea ── */
-.report-textarea {
-  width: 100%;
-  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
-  font-size: var(--step-0, 0.95rem);
-  font-family: var(--font-sans, inherit);
-  border: 1px solid var(--border-subtle, #cbd5e1);
-  border-radius: var(--radius-lg, 0.75rem);
-  background-color: var(--surface-card, #ffffff);
+/* ── Section & Intro Header (Unboxed) ── */
+section.con,
+.fv-section.con,
+.fv-card.con {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 0 var(--space-4, 1rem) 0 !important;
+  margin-bottom: var(--space-6, 1.5rem) !important;
+}
+
+section.con .fv-section-label,
+.fv-section-label {
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  font-size: var(--step-2, 1.5rem);
+  font-weight: var(--font-bold, 700);
+  color: var(--color-brand-primary, #009688) !important;
+  margin-bottom: var(--space-2, 0.5rem);
+  display: block;
+}
+
+section.con .fv-section-desc,
+.report-desc,
+.fv-section-desc {
+  font-size: var(--step-0, 0.9375rem);
+  line-height: 1.6;
+  color: var(--text-muted, #757575) !important;
+  margin-top: var(--space-1, 0.25rem);
+  margin-bottom: 0;
+}
+
+/* ── Unbox Card Containers (.fv-card.pad, .fv-card) ── */
+.fv-card.pad,
+.fv-section.fv-card {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* ── Community Landing Link Rows (community/index.html) ── */
+.community-portal-links {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-4, 1rem);
+}
+
+.community-link-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: var(--space-3, 0.75rem) var(--space-1, 0.25rem);
+  border-bottom: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06));
+  text-decoration: none;
   color: var(--text-main, #0f172a);
-  transition: border-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
-              box-shadow var(--duration-fast, 150ms) var(--ease-out, ease-out);
-  resize: vertical;
-  min-height: 90px;
-  line-height: 1.5;
-  -webkit-appearance: none;
-  box-sizing: border-box;
+  transition: background-color var(--duration-fast, 150ms) ease-out;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.report-textarea:focus {
-  border-color: var(--color-brand-primary, #0d9488);
-  box-shadow: var(--shadow-focus, 0 0 0 3px rgba(13, 148, 136, 0.2));
-  outline: none;
+.community-link-row:last-child {
+  border-bottom: none;
 }
 
-.report-textarea::placeholder {
-  color: var(--text-muted, #94a3b8);
+.community-link-row:hover {
+  background-color: var(--surface-hover, rgba(0, 0, 0, 0.02));
 }
 
-/* ── Text Input ── */
+.community-link-content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  font-size: var(--step-0, 0.9375rem);
+  font-weight: var(--font-medium, 500);
+  color: var(--text-main, #0f172a);
+}
+
+.community-link-content svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  stroke: var(--text-muted, #757575);
+  stroke-width: 1.5;
+}
+
+.community-link-row svg.chevron {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  stroke: var(--text-muted, #757575);
+  stroke-width: 2;
+}
+
+/* ── Contact Page Settings Rows (community/contact/index.html) ── */
+.contact-options-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-options-group .fv-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: var(--space-3, 0.75rem) var(--space-1, 0.25rem);
+  border-bottom: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06));
+}
+
+.contact-options-group .fv-setting-row:last-child {
+  border-bottom: none;
+}
+
+.contact-action-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+}
+
+.contact-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2, 0.5rem);
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  font-size: var(--step-0, 0.9375rem);
+  font-weight: var(--font-semibold, 600);
+  color: #ffffff;
+  background-color: var(--color-brand-primary, #009688);
+  border: none;
+  border-radius: var(--radius-md, 0.5rem);
+  cursor: pointer;
+  transition: background-color var(--duration-fast, 150ms) ease-out;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.contact-action-btn:hover {
+  background-color: var(--color-brand-primary-hover, #0d9488);
+}
+
+.contact-action-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+/* ── Report Form Field Layout (community/report/index.html) ── */
+#report-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5, 1.25rem);
+}
+
+#report-form .setting-item.fv-setting-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0 0 var(--space-4, 1rem) 0;
+  margin: 0;
+  min-height: auto;
+  border-bottom: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06));
+}
+
+#report-form .setting-item.fv-setting-row:last-of-type,
+#report-form .fv-setting-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+#report-form label {
+  display: block;
+  font-size: var(--step-0, 0.9375rem);
+  font-weight: var(--font-semibold, 600);
+  color: var(--text-main, #0f172a);
+  margin-bottom: var(--space-2, 0.5rem);
+  letter-spacing: 0.01em;
+}
+
+/* Quiet Field Style for Form Controls */
+select.setting-item.select,
+.report-textarea,
 .report-textinput {
   width: 100%;
+  min-height: 44px;
   padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
-  font-size: var(--step-0, 0.95rem);
-  font-family: var(--font-sans, inherit);
-  border: 1px solid var(--border-subtle, #cbd5e1);
-  border-radius: var(--radius-lg, 0.75rem);
-  background-color: var(--surface-card, #ffffff);
+  font-size: var(--step-0, 0.9375rem);
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.15));
+  border-radius: var(--radius-md, 0.5rem);
+  background-color: var(--surface-base, #ffffff);
   color: var(--text-main, #0f172a);
-  transition: border-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
-              box-shadow var(--duration-fast, 150ms) var(--ease-out, ease-out);
-  -webkit-appearance: none;
+  transition: border-color var(--duration-fast, 150ms) ease-out,
+              box-shadow var(--duration-fast, 150ms) ease-out;
   box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
-.report-textinput:focus {
-  border-color: var(--color-brand-primary, #0d9488);
-  box-shadow: var(--shadow-focus, 0 0 0 3px rgba(13, 148, 136, 0.2));
+select.setting-item.select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23009688' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25rem;
+  padding-right: var(--space-8, 2.25rem);
+}
+
+.report-textarea:focus,
+.report-textinput:focus,
+select.setting-item.select:focus {
+  border-color: var(--color-brand-primary, #009688);
+  box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.15);
   outline: none;
 }
 
+.report-textarea::placeholder,
 .report-textinput::placeholder {
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted, #757575);
 }
 
-/* ── Optional Label Badge ── */
 .report-optional {
   font-weight: var(--font-normal, 400);
-  color: var(--text-muted, #64748b);
+  color: var(--text-muted, #757575);
   font-size: 0.85em;
   margin-left: var(--space-1, 0.25rem);
 }
@@ -77,37 +247,36 @@
 /* ── Submit Button ── */
 .report-submit {
   width: 100%;
+  min-height: 48px;
   padding: var(--space-3, 0.75rem) var(--space-6, 1.5rem);
   font-size: var(--step-0, 1rem);
-  font-family: var(--font-sans, inherit);
-  font-weight: var(--font-bold, 700);
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  font-weight: var(--font-semibold, 600);
   color: #ffffff;
-  background-color: var(--color-brand-primary, #0d9488);
+  background-color: var(--color-brand-primary, #009688);
   border: none;
-  border-radius: var(--radius-lg, 0.75rem);
+  border-radius: var(--radius-md, 0.5rem);
   cursor: pointer;
-  transition: background-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
-              transform var(--duration-fast, 150ms) var(--ease-out, ease-out),
-              box-shadow var(--duration-normal, 250ms) var(--ease-out, ease-out);
-  margin-top: var(--space-6, 1.5rem);
+  transition: background-color var(--duration-fast, 150ms) ease-out;
+  margin-top: var(--space-4, 1rem);
+  box-shadow: none;
   -webkit-tap-highlight-color: transparent;
 }
 
 .report-submit:hover {
-  background-color: var(--color-brand-primary-hover, #0f766e);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+  background-color: var(--color-brand-primary-hover, #0d9488);
+  transform: none;
+  box-shadow: none;
 }
 
 .report-submit:active {
-  transform: translateY(0) scale(0.98);
+  transform: none;
+  background-color: #0b726b;
 }
 
 .report-submit:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }
 
 /* ── Field Validation Error ── */
@@ -115,8 +284,8 @@
 select.report-field-error,
 textarea.report-field-error,
 input.report-field-error {
-  border-color: #dc2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
 }
 
 .report-error-text {
@@ -144,9 +313,12 @@ input.report-field-error {
 /* ── Focus Visible Accessibility ── */
 .report-textarea:focus-visible,
 .report-textinput:focus-visible,
-.report-submit:focus-visible {
-  border-color: var(--color-brand-primary, #0d9488);
-  outline: 2px solid var(--color-brand-primary, #0d9488);
+select.setting-item.select:focus-visible,
+.report-submit:focus-visible,
+.contact-action-btn:focus-visible,
+.community-link-row:focus-visible {
+  border-color: var(--color-brand-primary, #009688);
+  outline: 2px solid var(--color-brand-primary, #009688);
   outline-offset: 2px;
 }
 
@@ -154,7 +326,9 @@ input.report-field-error {
 @media (prefers-reduced-motion: reduce) {
   .report-submit,
   .report-textarea,
-  .report-textinput {
+  .report-textinput,
+  .contact-action-btn,
+  .community-link-row {
     transition: none;
     transform: none;
   }

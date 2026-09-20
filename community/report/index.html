@@ -53,7 +53,7 @@
           <p class="report-desc" data-translate="report-new-desc">Found a bug or have a suggestion? Let us know so we can improve FanHoard.</p>
         </section>
 
-        <section class="fv-section fv-card pad">
+        <section class="fv-section report-form-section">
           <form id="report-form" class="stack-md" novalidate>
 
             <!-- Issue Type -->
@@ -170,329 +170,255 @@
       { value: '/data/verse/scope/',    label: { en: 'Verse Scope',     th: 'Verse \u0E02\u0E2D\u0E1A\u0E40\u0E02\u0E15' } },
       { value: '/setting/',             label: { en: 'Settings',        th: '\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32' } },
       { value: '/search/',              label: { en: 'Search',          th: '\u0E04\u0E49\u0E19\u0E2B\u0E32' } },
-      { value: 'other',                 label: { en: 'Other Page (Enter URL below)', th: '\u0E2B\u0E19\u0E49\u0E32\u0E2D\u0E37\u0E48\u0E19\u0E46 (\u0E23\u0E30\u0E1A\u0E38 URL \u0E14\u0E49\u0E22\u0E19\u0E25\u0E48\u0E32\u0E07)' } }
+      { value: 'custom',                label: { en: 'Other / Specific URL', th: '\u0E2D\u0E37\u0E48\u0E19\u0E46 / URL \u0E40\u0E0 me\u0E1E\u0E32\u0E00' } }
     ];
 
     /* ── Common Browsers ── */
     var BROWSERS = [
       { value: 'chrome-desktop',  label: 'Chrome (Desktop)' },
-      { value: 'chrome-android',  label: 'Chrome (Android)' },
-      { value: 'safari-iOS',      label: 'Safari (iPhone/iPad)' },
-      { value: 'safari-mac',      label: 'Safari (Mac)' },
+      { value: 'safari-desktop',  label: 'Safari (Desktop)' },
       { value: 'firefox-desktop', label: 'Firefox (Desktop)' },
       { value: 'edge-desktop',    label: 'Edge (Desktop)' },
+      { value: 'safari-ios',      label: 'Safari (iPhone / iPad)' },
+      { value: 'chrome-android',  label: 'Chrome (Android)' },
       { value: 'samsung-internet',label: 'Samsung Internet' },
-      { value: 'opera',           label: 'Opera' },
-      { value: 'brave',           label: 'Brave' },
-      { value: 'other',           label: 'Other / Not Listed' }
+      { value: 'other',           label: { en: 'Other', th: '\u0E2D\u0E37\u0E48\u0E19\u0E46' } }
     ];
 
     /* ══════════════════════════════════════════════
-       STATE & TRANSLATIONS
+       HELPERS
        ══════════════════════════════════════════════ */
-    var currentLang = 'en';
-    var appVersion = VERSION_FALLBACK;
-
-    function getTranslations() {
-      if (currentLang === 'th') {
-        return {
-          placeholder: 'กรุณาเลือก…',
-          submitting: 'กำลังส่งรายงาน…',
-          submitBtn: 'ส่งรายงาน',
-          successTitle: 'ส่งรายงานสำเร็จ',
-          successBody: 'ขอบคุณสำหรับข้อมูล ทีมงานจะนำไปปรับปรุง FanHoard ให้ดียิ่งขึ้น',
-          errorTitle: 'เกิดข้อผิดพลาด',
-          errorBody: 'ไม่สามารถส่งรายงานได้ กรุณาลองใหม่อีกครั้งในภายหลัง',
-          errCategory: 'กรุณาเลือกประเภทปัญหา',
-          errDetails: 'กรุณาระบุรายละเอียดปัญหา',
-          errPage: 'กรุณาเลือกหน้าที่พบปัญหา'
-        };
-      }
-      return {
-        placeholder: 'Select an option…',
-        submitting: 'Submitting report…',
-        submitBtn: 'Submit Report',
-        successTitle: 'Report Submitted',
-        successBody: 'Thank you for your feedback! We will review your report to help improve FanHoard.',
-        errorTitle: 'Submission Error',
-        errorBody: 'Failed to submit report. Please try again later.',
-        errCategory: 'Please select an issue category',
-        errDetails: 'Please describe the problem',
-        errPage: 'Please select the page where the issue occurred'
-      };
+    function getLang() {
+      return localStorage.getItem('fv_lang') || 'en';
     }
 
-    /* ══════════════════════════════════════════════
-       POPULATE DROPDOWNS
-       ══════════════════════════════════════════════ */
-
-    function populateSelect(selectEl, items, selectedVal) {
-      var t = getTranslations();
-      selectEl.innerHTML = '';
-
-      var placeholderOpt = document.createElement('option');
-      placeholderOpt.value = '';
-      placeholderOpt.disabled = true;
-      placeholderOpt.selected = !selectedVal;
-      placeholderOpt.textContent = t.placeholder;
-      selectEl.appendChild(placeholderOpt);
-
+    function populateSelect(selectEl, items) {
+      var lang = getLang();
       items.forEach(function(item) {
         var opt = document.createElement('option');
         opt.value = item.value;
-        opt.textContent = typeof item.label === 'object'
-          ? (item.label[currentLang] || item.label.en)
-          : item.label;
-        if (selectedVal && selectedVal === item.value) {
-          opt.selected = true;
+        if (typeof item.label === 'object') {
+          opt.textContent = item.label[lang] || item.label.en;
+        } else {
+          opt.textContent = item.label;
         }
         selectEl.appendChild(opt);
       });
     }
 
-    function updateDropdowns() {
-      var catSel = document.getElementById('report-category');
-      var pageSel = document.getElementById('report-page');
-      var browserSel = document.getElementById('report-browser');
+    function getAppVersion() {
+      if (window.FANHOARD_VERSION && window.FANHOARD_VERSION.VERSION) {
+        return window.FANHOARD_VERSION.VERSION;
+      }
+      return VERSION_FALLBACK;
+    }
 
-      var catVal = catSel.value;
-      var pageVal = pageSel.value;
-      var browserVal = browserSel.value;
-
-      populateSelect(catSel, CATEGORIES, catVal);
-      populateSelect(pageSel, PAGES, pageVal);
-      populateSelect(browserSel, BROWSERS, browserVal);
+    function detectUserAgent() {
+      var ua = navigator.userAgent;
+      if (/iPhone|iPad|iPod/.test(ua) && /Safari/.test(ua)) return 'safari-ios';
+      if (/Android/.test(ua) && /Chrome/.test(ua)) return 'chrome-android';
+      if (/SamsungBrowser/.test(ua)) return 'samsung-internet';
+      if (/Chrome/.test(ua)) return 'chrome-desktop';
+      if (/Safari/.test(ua)) return 'safari-desktop';
+      if (/Firefox/.test(ua)) return 'firefox-desktop';
+      if (/Edg/.test(ua)) return 'edge-desktop';
+      return 'other';
     }
 
     /* ══════════════════════════════════════════════
-       VERSION DETECTION
+       VALIDATION
        ══════════════════════════════════════════════ */
-
-    async function fetchVersion() {
-      try {
-        var resp = await fetch('/assets/json/version.json');
-        if (resp.ok) {
-          var json = await resp.json();
-          if (json && json.version) {
-            appVersion = json.version;
-          }
-        }
-      } catch (_) {
-        // Fallback version is pre-set
-      }
+    function clearErrors() {
+      var errorEls = document.querySelectorAll('.report-error-text');
+      errorEls.forEach(function(el) {
+        el.textContent = '';
+        el.classList.remove('visible');
+      });
+      var fieldEls = document.querySelectorAll('.report-field-error');
+      fieldEls.forEach(function(el) {
+        el.classList.remove('report-field-error');
+      });
     }
 
-    /* ══════════════════════════════════════════════
-       FORM HANDLERS
-       ══════════════════════════════════════════════ */
-
-    function handlePageSelect() {
-      var pageSel = document.getElementById('report-page');
-      var customInput = document.getElementById('report-page-custom');
-      var customLabel = document.getElementById('label-report-page-custom');
-      if (pageSel.value === 'other') {
-        customInput.classList.add('visible');
-        customInput.required = true;
-        if (customLabel) customLabel.classList.remove('fv-sr-only');
-        customInput.focus();
-      } else {
-        customInput.classList.remove('visible');
-        customInput.required = false;
-        if (customLabel) customLabel.classList.add('fv-sr-only');
-        customInput.value = '';
-      }
-      clearError('page');
-    }
-
-    function setError(fieldId, errorTextId, message) {
-      var inputEl = document.getElementById('report-' + fieldId);
-      var errEl = document.getElementById('error-' + fieldId);
-      if (inputEl) inputEl.classList.add('report-field-error');
+    function showError(fieldId, errorId, msgEn, msgTh) {
+      var lang = getLang();
+      var msg = lang === 'th' ? msgTh : msgEn;
+      var field = document.getElementById(fieldId);
+      var errEl = document.getElementById(errorId);
+      if (field) field.classList.add('report-field-error');
       if (errEl) {
-        errEl.textContent = message;
+        errEl.textContent = msg;
         errEl.classList.add('visible');
       }
     }
 
-    function clearError(fieldId) {
-      var inputEl = document.getElementById('report-' + fieldId);
-      var errEl = document.getElementById('error-' + fieldId);
-      if (inputEl) inputEl.classList.remove('report-field-error');
-      if (errEl) {
-        errEl.textContent = '';
-        errEl.classList.remove('visible');
-      }
-    }
-
-    function clearAllErrors() {
-      ['category', 'details', 'page'].forEach(clearError);
-    }
-
     function validateForm() {
-      clearAllErrors();
-      var isValid = true;
-      var t = getTranslations();
+      clearErrors();
+      var valid = true;
 
       var category = document.getElementById('report-category').value;
       if (!category) {
-        setError('category', 'error-category', t.errCategory);
-        isValid = false;
+        showError('report-category', 'error-category',
+          'Please select an issue category.',
+          '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E21\u0E25\u0E37\u0E2D\u0E01\u0E2B\u0E21\u0E27\u0E14\u0E2B\u0E21\u0E39\u0E48\u0E1B\u0E31\u0E0D\u0E2B\u0E32');
+        valid = false;
       }
 
       var details = document.getElementById('report-details').value.trim();
       if (!details) {
-        setError('details', 'error-details', t.errDetails);
-        isValid = false;
+        showError('report-details', 'error-details',
+          'Please describe the problem details.',
+          '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E23\u0E30\u0E1A\u0E38\u0E23\u0E32\u0E22\u0E25\u0E30\u0E40\u0E2D\u0E35\u0E22\u0E14\u0E1B\u0E31\u0E0D\u0E2B\u0E32');
+        valid = false;
       }
 
-      var page = document.getElementById('report-page').value;
-      if (!page) {
-        setError('page', 'error-page', t.errPage);
-        isValid = false;
-      } else if (page === 'other') {
+      var pageVal = document.getElementById('report-page').value;
+      if (!pageVal) {
+        showError('report-page', 'error-page',
+          'Please select the page where the issue occurred.',
+          '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E21\u0E25\u0E37\u0E2D\u0E01\u0E2B\u0E19\u0E49\u0E32\u0E17\u0E35\u0E48\u0E1E\u0E1A\u0E1B\u0E31\u0E0D\u0E2B\u0E32');
+        valid = false;
+      } else if (pageVal === 'custom') {
         var customPage = document.getElementById('report-page-custom').value.trim();
         if (!customPage) {
-          setError('page', 'error-page', t.errPage);
-          isValid = false;
+          showError('report-page-custom', 'error-page',
+            'Please specify the page URL or name.',
+            '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E23\u0E30\u0E1A\u0E38 URL \u0E2B\u0E23\u0E37\u0E2D\u0E0A\u0E37\u0E48\u0E2D\u0E2B\u0E19\u0E49\u0E32');
+          valid = false;
         }
       }
 
-      if (!isValid) {
-        var firstErr = document.querySelector('.report-field-error');
-        if (firstErr) firstErr.focus();
-      }
-
-      return isValid;
-    }
-
-    function getFormData() {
-      var pageVal = document.getElementById('report-page').value;
-      if (pageVal === 'other') {
-        pageVal = document.getElementById('report-page-custom').value.trim();
-      }
-
-      return {
-        category:         document.getElementById('report-category').value,
-        details:          document.getElementById('report-details').value.trim(),
-        expectedBehavior: document.getElementById('report-expected').value.trim() || undefined,
-        pageUrl:          pageVal,
-        browser:          document.getElementById('report-browser').value || undefined,
-        userEmail:        document.getElementById('report-email').value.trim() || undefined,
-        userAgent:        navigator.userAgent,
-        appVersion:       appVersion,
-        submittedLang:    currentLang,
-        timestamp:        new Date().toISOString()
-      };
-    }
-
-    function setSubmitLoading(loading) {
-      var btn = document.getElementById('report-submit');
-      var t = getTranslations();
-      if (loading) {
-        btn.disabled = true;
-        btn.textContent = t.submitting;
-      } else {
-        btn.disabled = false;
-        btn.textContent = t.submitBtn;
-      }
-    }
-
-    function showPopup(title, body) {
-      if (window.PopupSystem && window.PopupSystem.open) {
-        PopupSystem.open({
-          title: title,
-          body: '<p style="text-align:center;margin:0;">' + body + '</p>',
-          size: 'sm',
-          showHeader: true,
-          hideOnBack: true
-        });
-      } else {
-        alert(title + '\n' + body);
-      }
-    }
-
-    async function handleSubmit(e) {
-      e.preventDefault();
-      if (!validateForm()) return;
-
-      var t = getTranslations();
-      setSubmitLoading(true);
-      if (window.announceToScreenReader) {
-        window.announceToScreenReader(currentLang === "th" ? "กำลังส่งรายงาน…" : "Submitting report…", "polite");
-      }
-
-      var data = getFormData();
-
-      try {
-        var resp = await fetch(API_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-
-        if (!resp.ok) {
-          var errData = {};
-          try { errData = await resp.json(); } catch (_) {}
-          throw new Error(errData.error || 'HTTP ' + resp.status);
-        }
-
-        document.getElementById('report-form').reset();
-        updateDropdowns();
-        if (window.announceToScreenReader) {
-          window.announceToScreenReader(currentLang === "th" ? "ส่งรายงานสำเร็จเรียบร้อยแล้ว" : "Report submitted successfully.", "polite");
-        }
-        showPopup(t.successTitle, t.successBody);
-      } catch (err) {
-        console.error('[report] Submit failed:', err);
-        if (window.announceToScreenReader) {
-          window.announceToScreenReader(currentLang === "th" ? "เกิดข้อผิดพลาดในการส่งรายงาน" : "Failed to submit report.", "assertive");
-        }
-        showPopup(t.errorTitle, t.errorBody);
-      } finally {
-        setSubmitLoading(false);
-      }
+      return valid;
     }
 
     /* ══════════════════════════════════════════════
-       LANGUAGE CHANGE HANDLER
+       SUBMISSION
        ══════════════════════════════════════════════ */
+    function handleSubmit(e) {
+      e.preventDefault();
 
-    function onLangChange() {
-      if (window.FvLang) {
-        currentLang = window.FvLang.lang || 'en';
+      if (!validateForm()) return;
+
+      var submitBtn = document.getElementById('report-submit');
+      var origText = submitBtn.textContent;
+      var lang = getLang();
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = lang === 'th' ? '\u0E01\u0E33\u0E25\u0E31\u0E07\u0E2A\u0E48\u0E07...' : 'Submitting…';
+
+      var category = document.getElementById('report-category').value;
+      var details  = document.getElementById('report-details').value.trim();
+      var expected = document.getElementById('report-expected').value.trim();
+      var pageVal  = document.getElementById('report-page').value;
+      var customPage = document.getElementById('report-page-custom').value.trim();
+      var browser  = document.getElementById('report-browser').value;
+      var email    = document.getElementById('report-email').value.trim();
+
+      var finalPage = pageVal === 'custom' ? customPage : pageVal;
+
+      var payload = {
+        category: category,
+        details: details,
+        expected: expected || null,
+        page: finalPage,
+        browser: browser || detectUserAgent(),
+        email: email || null,
+        app_version: getAppVersion(),
+        screen_resolution: window.screen.width + 'x' + window.screen.height,
+        viewport: window.innerWidth + 'x' + window.innerHeight,
+        timestamp: new Date().toISOString(),
+        referrer: document.referrer || null,
+        lang: lang
+      };
+
+      fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function() {
+        showSuccessModal();
+        document.getElementById('report-form').reset();
+      })
+      .catch(function() {
+        showErrorModal();
+      })
+      .finally(function() {
+        submitBtn.disabled = false;
+        submitBtn.textContent = origText;
+      });
+    }
+
+    function showSuccessModal() {
+      var lang = getLang();
+      var title = lang === 'th' ? '\u0E2A\u0E48\u0E07\u0E23\u0E32\u0E22\u0E07\u0E32\u0E19\u0E41\u0E25\u0E49\u0E27' : 'Report Sent!';
+      var body  = lang === 'th'
+        ? '\u0E02\u0E2D\u0E1A\u0E04\u0E38\u0E13\u0E2A\u0E33\u0E2B\u0E23\u0E31\u0E1A\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25 \u0E40\u0E23\u0E32\u0E0A\u0E48\u0E27\u0E22\u0E1B\u0E23\u0E31\u0E1A\u0E1B\u0E23\u0E38\u0E07 FanHoard \u0E43\u0E2B\u0E49\u0E14\u0E35\u0E02\u0E36\u0E42\u0E19\u0E21\u0E35\u0E41\u0E25\u0E49\u0E27'
+        : 'Thank you for your feedback! Your report helps us make FanHoard better.';
+
+      if (window.showPopup) {
+        window.showPopup({ title: title, message: body });
+      } else {
+        alert(title + '\n\n' + body);
       }
-      updateDropdowns();
+    }
+
+    function showErrorModal() {
+      var lang = getLang();
+      var title = lang === 'th' ? '\u0E40\u0E01\u0E34\u0E14\u0E02\u0E49\u0E2D\u0E1C\u0E34\u0E14\u0E1E\u0E25\u0E32\u0E14' : 'Submission Failed';
+      var body  = lang === 'th'
+        ? '\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E2A\u0E48\u0E07\u0E23\u0E32\u0E22\u0E07\u0E32\u0E19\u0E44\u0E14\u0E49 \u0E01\u0E23\u0E38\u0E13\u0E32\u0E25\u0E2D\u0E07\u0E43\u0E2B\u0E21\u0E48\u0E2D\u0E35\u0E01\u0E04\u0E23\u0E31\u0E4B\u0E07'
+        : 'Could not send report. Please check your network connection and try again.';
+
+      if (window.showPopup) {
+        window.showPopup({ title: title, message: body });
+      } else {
+        alert(title + '\n\n' + body);
+      }
     }
 
     /* ══════════════════════════════════════════════
        INIT
        ══════════════════════════════════════════════ */
+    document.addEventListener('DOMContentLoaded', function() {
+      var categorySelect = document.getElementById('report-category');
+      var pageSelect     = document.getElementById('report-page');
+      var browserSelect  = document.getElementById('report-browser');
+      var customPageInp  = document.getElementById('report-page-custom');
 
-    function init() {
-      if (window.FvLang) {
-        currentLang = window.FvLang.lang || 'en';
+      populateSelect(categorySelect, CATEGORIES);
+      populateSelect(pageSelect, PAGES);
+      populateSelect(browserSelect, BROWSERS);
+
+      /* Auto-select browser */
+      var detectedBrowser = detectUserAgent();
+      if (detectedBrowser && browserSelect) {
+        browserSelect.value = detectedBrowser;
       }
 
-      updateDropdowns();
+      /* Toggle custom page field */
+      pageSelect.addEventListener('change', function() {
+        if (pageSelect.value === 'custom') {
+          customPageInp.classList.add('visible');
+          customPageInp.focus();
+        } else {
+          customPageInp.classList.remove('visible');
+          customPageInp.value = '';
+        }
+      });
 
-      document.getElementById('report-page').addEventListener('change', handlePageSelect);
-      document.getElementById('report-form').addEventListener('submit', handleSubmit);
-
-      document.addEventListener('fv:langchange', onLangChange);
-      if (window.FvLang && window.FvLang.onChange) {
-        window.FvLang.onChange(onLangChange);
+      /* Form submission handler */
+      var form = document.getElementById('report-form');
+      if (form) {
+        form.addEventListener('submit', handleSubmit);
       }
+    });
 
-      fetchVersion();
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
   })();
   </script>
-
 </body>
 </html>

@@ -19,6 +19,7 @@
 
     <!-- Other CSS -->
     <link rel="stylesheet" href="/assets/css/top-navigation-bar.css?v=1.0.0-20250322" media="all" />
+    <link rel="stylesheet" href="/assets/css/report.css?v=1.6.2_2" media="all" />
 
     <link rel="icon" type="image/x-icon" href="/assets/images/fanhoard-verse360.ico" />
 </head>
@@ -48,7 +49,7 @@
                     <p class="fv-section-desc" data-translate="contact-other-desc">If you have any questions or feedback, please reach out using one of the contact options below.</p>
                 </section>
 
-                <div class="fv-card pad stack-md">
+                <div class="fv-setting-group contact-options-group">
                     <div class="setting-item fv-setting-row">
                         <label for="contact-method" data-translate="contact-method-label">Contact Method</label>
                         <section>
@@ -61,26 +62,26 @@
 
                     <div class="setting-item fv-setting-row" id="contact-form-section" style="display:none;">
                         <label for="contact-form-lang" data-translate="contact-form-lang-label">Select Form Language</label>
-                        <section>
+                        <section class="contact-action-box">
                             <select id="contact-form-lang" class="setting-item select m5">
                                 <!-- Dynamic options populated by JS -->
                             </select>
-                            <button class="buttons tap" id="goto-form-btn">Go to Contact Form</button>
+                            <button class="contact-action-btn" id="goto-form-btn">Go to Contact Form</button>
                         </section>
                     </div>
 
                     <div class="setting-item fv-setting-row" id="gmail-section">
                         <label for="goto-gmail-btn" data-translate="contact-gmail-text">Email Support</label>
-                        <section>
-                            <button id="goto-gmail-btn" onclick="window.location.href='mailto:fanhoard.official@gmail.com'" class="buttons tap" data-translate="contact-gmail-btn">
+                        <section class="contact-action-box">
+                            <button id="goto-gmail-btn" onclick="window.location.href='mailto:fanhoard.official@gmail.com'" class="contact-action-btn" data-translate="contact-gmail-btn">
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
-                                  width="24"
-                                  height="24"
+                                  width="20"
+                                  height="20"
                                   viewBox="0 0 24 24"
                                   fill="none"
                                   stroke="currentColor"
-                                  stroke-width="1.25"
+                                  stroke-width="1.5"
                                   stroke-linecap="round"
                                   stroke-linejoin="round"
                                   aria-hidden="true"
