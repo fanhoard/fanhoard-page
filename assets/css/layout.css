@@ -27,7 +27,7 @@ main {
 }
 
 /* Automatic top-nav spacing: applied only on pages that render a top nav component */
-.fv-page-shell:has(.fv-nav, .search-filters-panel) {
+.fv-page-shell:has(.fv-nav):not([data-page="discover"]) {
   padding-top: var(--fv-nav-height, 56px);
 }
 
