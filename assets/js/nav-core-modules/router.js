@@ -506,13 +506,27 @@
     // ── Initialization ─────────────────────────────────────────────────────────
 
     init() {
-      if (typeof history !== 'undefined' && 'scrollRestoration' in history) {
-        history.scrollRestoration = 'manual';
-      }
+      // Default browser behavior is 'auto'. Do not set history.scrollRestoration = 'manual' site-wide.
       window.addEventListener('popstate', async () => {
         try {
+          const search = window.location.search || '';
+          const { main } = this.parseUrl(search);
+          const isRenderRoute = main === CONFIG.ALL_BUTTON.URL || await this.validateUrl(search);
+
+          if (!isRenderRoute) {
+            // Normal page / non-render route: let browser handle scroll restoration natively
+            if (typeof history !== 'undefined' && 'scrollRestoration' in history) {
+              history.scrollRestoration = 'auto';
+            }
+            return;
+          }
+
+          if (typeof history !== 'undefined' && 'scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+          }
+
           try { this.updateActiveFromLocation(); } catch (_) {}
-          await this.navigateTo(window.location.search || '', {
+          await this.navigateTo(search, {
             isPopState:    true,
             skipUrlUpdate: true,
             maintainScroll: true,

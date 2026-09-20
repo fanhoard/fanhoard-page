@@ -85,6 +85,7 @@
         routeKind:      partial.routeKind || 'ure',
         paginatorState: partial.paginatorState || null,
         feedState:      partial.feedState || null,
+        chunkCount:     partial.chunkCount || 0,
         hasMore:        partial.hasMore ?? false,
         timestamp:      Date.now(),
       };
@@ -151,7 +152,9 @@
      */
     invalidate(routeKey) {
       if (routeKey) this._cache.delete(routeKey);
-      else this._cache.clear();
+    },
+    clear() {
+      this._cache.clear();
     },
 
     /**

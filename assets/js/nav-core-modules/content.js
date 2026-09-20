@@ -175,7 +175,7 @@
     async clearContent(options = {}) {
       _sess++;
 
-      if (!options?.skipScroll && typeof window !== 'undefined' && (window.pageYOffset || window.scrollY)) {
+      if (!options?.skipScroll && !options?.isNormalPage && typeof window !== 'undefined' && (window.pageYOffset || window.scrollY)) {
         window.scrollTo(0, 0);
       }
 
@@ -324,13 +324,13 @@
           try { M.LoadingService?.hideInstant(); } catch (_) {}
           if (sess !== _sess) return;
 
-          if (hasMore !== false) {
-            this._attachFeedSentinel(ctr, lang, sess);
-          }
-
           await this._restoreScrollPosition(ctr, cached.scrollPosition, cached.chunkCount || 1, async () => {
             return await M.FeedService.loadNextPage(lang, FEED_PAGE_SIZE);
           }, lang, sess);
+
+          if (hasMore !== false && sess === _sess) {
+            this._attachFeedSentinel(ctr, lang, sess);
+          }
 
           return;
         } catch (e) {
@@ -444,13 +444,13 @@
           try { M.LoadingService?.hideInstant(); } catch (_) {}
           if (sess !== _sess) return;
 
-          if (hasMore !== false) {
-            this._attachLazySentinel(ctr, lang, sess);
-          }
-
           await this._restoreScrollPosition(ctr, cached.scrollPosition, cached.chunkCount || 1, async () => {
             return await M.SourcePaginator.loadNextPage(lang, M.SourcePaginator.PAGE_SIZE);
           }, lang, sess);
+
+          if (hasMore !== false && sess === _sess) {
+            this._attachLazySentinel(ctr, lang, sess);
+          }
 
           return;
         } catch (e) {
@@ -931,6 +931,7 @@
     // @returns {boolean} true ถ้า save สำเร็จ
     saveActiveRoute() {
       if (!_activeRouteKey || !M.RouteCache) return false;
+      if (!['feed', 'lazy', 'ure'].includes(_activeRouteKind)) return false;
 
       const ctr = document.getElementById(CONFIG.DOM.CONTENT_LOADING_ID);
       if (!ctr || !ctr.childNodes.length) return false;
@@ -960,13 +961,30 @@
      * Clear active route tracking — เรียกเมื่อต้องการ reset (เช่น language change)
      */
 
+    _stabilizeRestoredRange(ctr, targetY) {
+      if (!ctr) return;
+      const cutoff = targetY + (typeof window !== 'undefined' ? window.innerHeight : 800);
+      const chunks = ctr.querySelectorAll('.feed-page');
+      chunks.forEach(chunk => {
+        const rect = chunk.getBoundingClientRect();
+        const chunkTop = rect.top + (typeof window !== 'undefined' ? (window.pageYOffset || document.documentElement.scrollTop || 0) : 0);
+        if (chunkTop <= cutoff) {
+          /** @type {HTMLElement} */ (chunk).style.contentVisibility = 'visible';
+          const lazyImgs = chunk.querySelectorAll('img[loading=lazy]');
+          lazyImgs.forEach(img => {
+            img.setAttribute('loading', 'eager');
+          });
+        }
+      });
+    },
+
     async _restoreScrollPosition(ctr, targetY, targetChunks, loadNextPageFn, lang, sess) {
       if (!targetY || targetY <= 0) return;
 
-      let chunks = ctr.querySelectorAll('.feed-page').length;
+      let hasMore = true;
       while (
-        document.documentElement.scrollHeight < targetY + window.innerHeight &&
-        chunks < targetChunks
+        Math.max(document.documentElement.scrollHeight, document.body ? document.body.scrollHeight : 0) < targetY + (typeof window !== 'undefined' ? window.innerHeight : 800) &&
+        hasMore
       ) {
         if (sess !== _sess) return;
         const res = await loadNextPageFn();
@@ -975,14 +993,22 @@
 
         const sentinel = ctr.querySelector('#' + FEED_SENTINEL_ID);
         await this._appendFeedGroups(ctr, res.groups, lang, sentinel);
-        chunks = ctr.querySelectorAll('.feed-page').length;
-        if (res.hasMore === false) break;
+        hasMore = res.hasMore !== false;
+        await new Promise(r => requestAnimationFrame(r));
       }
 
-      window.scrollTo(0, targetY);
-      requestAnimationFrame(() => {
+      if (sess !== _sess) return;
+
+      this._stabilizeRestoredRange(ctr, targetY);
+
+      if (typeof window !== 'undefined') {
         window.scrollTo(0, targetY);
-      });
+        await new Promise(r => requestAnimationFrame(r));
+        const actualY = window.pageYOffset || document.documentElement.scrollTop || 0;
+        if (Math.abs(actualY - targetY) > 5) {
+          window.scrollTo(0, targetY);
+        }
+      }
     },
 
     clearActiveRoute() {
