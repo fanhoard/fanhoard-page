@@ -200,6 +200,7 @@
     // ── navigateTo ─────────────────────────────────────────────────────────────
 
     async navigateTo(route, options = {}) {
+      try { M.ContentService._didRestoreScroll = false; } catch (_) {}
       // ── v3: Reset loading state ทันทีทุกครั้งที่เริ่ม navigation ใหม่ ──────
       // WHY: ถ้าผู้ใช้คลิกรัวๆ session counter จะสะสม ทำให้ overlay ไม่ซ่อน
       //   _forceReset() จะรีเซ็ต counter เป็น 0 และลบ overlay เดิมทิ้งทันที
@@ -414,7 +415,10 @@
           detail: { main, sub: chosenSub?.url || chosenSub?.jsonFile || sub },
         }));
 
-        if (!options.maintainScroll && !hasCachedScroll) {
+        // v6.1: ข้ามาเมื่อ restore เพิ่งเกิดขึ้นใน navigation นี้
+        //   (cross-document back/forward restore ใน renderFeed — RouteCache
+        //   ใน memory ว่างจึงทำให้ hasCachedScroll เป็น false และพลาดเคสนี้)
+        if (!options.maintainScroll && !hasCachedScroll && !M.ContentService?._didRestoreScroll) {
           try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (_) {}
         }
 
@@ -506,18 +510,8 @@
     // ── Initialization ─────────────────────────────────────────────────────────
 
     init() {
-      try {
-        const navType = (typeof performance !== 'undefined' && performance.getEntriesByType)
-          ? performance.getEntriesByType('navigation')[0]?.type
-          : null;
-        const isReload = navType === 'reload' || (typeof performance !== 'undefined' && performance.navigation?.type === 1);
-        if (isReload) {
-          if (typeof history !== 'undefined' && 'scrollRestoration' in history) {
-            history.scrollRestoration = 'manual';
-          }
-          window.scrollTo(0, 0);
-        }
-      } catch (_) {}
+      // Reload-top behavior (refresh = fresh start) is handled site-wide by
+      // /assets/js/reload-top.js — single source of truth, loaded on every page.
 
       // Default browser behavior is 'auto'. Do not set history.scrollRestoration = 'manual' site-wide.
       window.addEventListener('popstate', async () => {

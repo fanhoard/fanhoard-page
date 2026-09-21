@@ -286,6 +286,8 @@
       _activeRouteKey  = routeKey;
       _activeRouteKind = 'feed';
 
+      this._ensureScrollPersist();
+
       const cached = M.RouteCache ? M.RouteCache.get(routeKey) : null;
 
       if (cached && cached.scrollPosition > 0) {
@@ -363,6 +365,30 @@
 
         try { M.FeedService?.saveToCache?.(); } catch (_) {}
         try { M.LoadingService?.hideInstant(); } catch (_) {}
+
+        if (sess !== _sess) return;
+
+        // ── Cross-document back/forward restore (v6.1) ──────────────────────
+        // กลับเข้าหน้า feed แบบ full page load (discover -> หน้าอื่น -> back)
+        // RouteCache ใน memory ไม่เหลือ → ใช้ตำแหน่งที่ persist ไว้ใน
+        // sessionStorage แทน แล้ว append จนเนื้อหาครอบเป้าก่อน scroll ตรงเป้า
+        try {
+          const navType = (typeof performance !== 'undefined' && performance.getEntriesByType)
+            ? performance.getEntriesByType('navigation')[0]?.type
+            : null;
+          if (navType === 'back_forward' && sess === _sess) {
+            const saved = this._readPersistedScroll(10 * 60 * 1000);
+            if (saved && saved.y > 0) {
+              await this._restoreScrollPosition(ctr, saved.y, 1, async () => {
+                return await M.FeedService.loadNextPage(lang, FEED_PAGE_SIZE);
+              }, lang, sess);
+              // บอก navigateTo ว่า restore เสร็จแล้ว — อย่า smooth-scroll ขึ้นบนสุดทับ
+              this._didRestoreScroll = true;
+            }
+          }
+        } catch (persistErr) {
+          console.warn('[NavCore/Content] back_forward persisted restore failed:', persistErr);
+        }
 
         if (sess !== _sess) return;
 
@@ -978,6 +1004,43 @@
       });
     },
 
+    // ── Cross-document scroll persistence (v6.1) ─────────────────────────────
+    // RouteCache เป็น in-memory → ตายพร้อม document เมื่อออกจากหน้าแบบ
+    // full page load (เช่น discover -> setting -> back) ต้อง persist ผ่าน
+    // sessionStorage เพื่อ restore จุดเดิมได้แม้ข้ามหน้า
+    _persistScrollKey() {
+      return 'fv_spos:' + window.location.pathname + (window.location.search || '');
+    },
+
+    _ensureScrollPersist() {
+      if (this._scrollPersistBound) return;
+      this._scrollPersistBound = true;
+      let deb = null;
+      const write = () => {
+        try {
+          const y = window.pageYOffset || document.documentElement.scrollTop || 0;
+          if (y <= 0) return;
+          window.sessionStorage.setItem(this._persistScrollKey(), JSON.stringify({ y, ts: Date.now() }));
+        } catch (_) {}
+      };
+      window.addEventListener('scroll', () => {
+        if (deb) clearTimeout(deb);
+        deb = setTimeout(write, 250);
+      }, { passive: true });
+      window.addEventListener('pagehide', write);
+    },
+
+    _readPersistedScroll(maxAgeMs) {
+      try {
+        const raw = window.sessionStorage.getItem(this._persistScrollKey());
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed.y !== 'number' || parsed.y <= 0) return null;
+        if (maxAgeMs && Date.now() - parsed.ts > maxAgeMs) return null;
+        return parsed;
+      } catch (_) { return null; }
+    },
+
     async _restoreScrollPosition(ctr, targetY, targetChunks, loadNextPageFn, lang, sess) {
       if (!targetY || targetY <= 0) return;
 
@@ -1002,11 +1065,18 @@
       this._stabilizeRestoredRange(ctr, targetY);
 
       if (typeof window !== 'undefined') {
-        window.scrollTo(0, targetY);
-        await new Promise(r => requestAnimationFrame(r));
-        const actualY = window.pageYOffset || document.documentElement.scrollTop || 0;
-        if (Math.abs(actualY - targetY) > 5) {
+        // Re-assert จนกว่าจะนิ่ง: overlay ของ LoadingService (FVL) ปลดล็อค
+        // ด้วย scrollTo(0, lockedY) ของตัวเอง ซึ่งอาจยิงหลังจุดนี้แล้วทับเป้า
+        // (double-lock จับ lockedY=0) → ต้องยืนยันตำแหน่งซ้ำจนกว่าจะ settle
+        const maxScroll = () => Math.max(0, (document.documentElement.scrollHeight || 0) - window.innerHeight);
+        for (let i = 0; i < 30 && sess === _sess; i++) {
           window.scrollTo(0, targetY);
+          await new Promise(r => requestAnimationFrame(r));
+          const actualY = window.pageYOffset || document.documentElement.scrollTop || 0;
+          const atTarget = Math.abs(actualY - targetY) <= 5;
+          const clampedBottom = targetY >= maxScroll() && Math.abs(actualY - maxScroll()) <= 5;
+          if (atTarget || clampedBottom) break;
+          await new Promise(r => setTimeout(r, 100));
         }
       }
     },

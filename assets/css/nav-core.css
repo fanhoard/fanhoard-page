@@ -86,7 +86,7 @@ nav ul li button.active::after {
   nav ul li button, nav ul li button::after { transition: none; }
 }
 
-@media print { header, nav,  }
+@media print { header, nav, .navbar-toggle { display:none; } }
 main { margin-top: var(--space-6, 24px); margin-bottom: var(--space-12, 48px); contain: layout style; }
 
 #content-loading { contain: layout style; }

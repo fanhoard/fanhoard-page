@@ -99,7 +99,10 @@ main {
   .container-md,
   .container-lg,
   .container-full,
-  
+  .container-wide {
+    padding-left: var(--space-6, 24px);
+    padding-right: var(--space-6, 24px);
+  }
 }
 
 /* ── Row-Based Grid Primitives ── */
@@ -109,30 +112,63 @@ main {
   align-items: stretch;
 }
 
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4, 16px);
+  align-items: stretch;
+}
 
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4, 16px);
+  align-items: stretch;
+}
 
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4, 16px);
+  align-items: stretch;
+}
 
+.grid-auto-fit {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: var(--space-4, 16px);
+  align-items: stretch;
+}
 
-
-
-
-
-
+.grid-aside {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--space-6, 24px);
+  align-items: stretch;
+}
 
 @media (min-width: 768px) {
-  .grid-2, .grid-3, .grid-4, 
+  .grid-2, .grid-3, .grid-4, .grid-auto-fit {
+    gap: var(--space-6, 24px);
+  }
 }
 
 @media (max-width: 1023px) {
   .grid-4,
-  
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 767px) {
   .grid-4,
   .grid-3,
-  
-  
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .grid-aside {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ── Stack & Cluster Primitives ── */

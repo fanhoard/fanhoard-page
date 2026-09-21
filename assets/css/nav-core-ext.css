@@ -215,4 +215,6 @@
   :where(.button-content), :where(.card) { transition: none; }
 }
 
-#content-loading, 
+#content-loading, #content-area {
+  overflow-anchor: auto;
+}
