@@ -20,6 +20,9 @@
      * @returns {HTMLElement}
      */
     create(tag, id, className, styles) {
+      if (window.NavCoreModules?.createElement) {
+        return window.NavCoreModules.createElement(tag, id, className, styles);
+      }
       const el = document.createElement(tag);
       if (id) el.id = id;
       if (className) el.className = className;
@@ -34,6 +37,9 @@
      * @returns {Element|null}
      */
     query(selector, parent) {
+      if (window.NavCoreModules?.qs) {
+        return window.NavCoreModules.qs(selector, parent);
+      }
       return (parent || document).querySelector(selector);
     },
 
@@ -44,6 +50,9 @@
      * @returns {Element[]}
      */
     queryAll(selector, parent) {
+      if (window.NavCoreModules?.qsa) {
+        return window.NavCoreModules.qsa(selector, parent);
+      }
       return Array.from((parent || document).querySelectorAll(selector));
     },
 
@@ -64,6 +73,9 @@
    * @returns {string}
    */
   function escapeHTML(str) {
+    if (window.NavCoreModules?.escapeHtml) {
+      return window.NavCoreModules.escapeHtml(str);
+    }
     if (typeof str !== 'string') return '';
     return str.replace(/[&<>"']/g, function(match) {
       switch (match) {

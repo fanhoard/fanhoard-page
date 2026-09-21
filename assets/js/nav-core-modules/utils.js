@@ -411,10 +411,74 @@
     return navigator.onLine;
   }
 
+  // ── Shared Helper Utilities ──────────────────────────────────────────────────
+
+  /**
+   * Escape HTML special characters in a string.
+   * @param {unknown} str
+   * @returns {string}
+   */
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    const s = String(str);
+    let out = '';
+    for (let i = 0; i < s.length; i++) {
+      const c = s.charCodeAt(i);
+      if      (c === 38) out += '&amp;';
+      else if (c === 60) out += '&lt;';
+      else if (c === 62) out += '&gt;';
+      else if (c === 34) out += '&quot;';
+      else if (c === 39) out += '&#39;';
+      else               out += s[i];
+    }
+    return out;
+  }
+
+  /**
+   * Shortcut for querySelector.
+   * @param {string} selector
+   * @param {Element|Document} [parent=document]
+   * @returns {Element|null}
+   */
+  function qs(selector, parent = document) {
+    return (parent || document).querySelector(selector);
+  }
+
+  /**
+   * Shortcut for querySelectorAll → Array.
+   * @param {string} selector
+   * @param {Element|Document} [parent=document]
+   * @returns {Element[]}
+   */
+  function qsa(selector, parent = document) {
+    return Array.from((parent || document).querySelectorAll(selector));
+  }
+
+  /**
+   * Create an element with optional id, className, and inline styles.
+   * @param {string} tag
+   * @param {string|null} [id]
+   * @param {string|null} [className]
+   * @param {Object} [styles]
+   * @returns {HTMLElement}
+   */
+  function createElement(tag, id, className, styles) {
+    const el = document.createElement(tag);
+    if (id) el.id = id;
+    if (className) el.className = className;
+    if (styles) Object.assign(el.style, styles);
+    return el;
+  }
+
   // ── Export ────────────────────────────────────────────────────────────────────
 
   /** Utils namespace — mirrors original _headerV2_utils public API */
   const Utils = {
+    escapeHtml,
+    escapeHTML: escapeHtml,
+    qs,
+    qsa,
+    createElement,
     showNotification,
     showErrorFullscreen,
     debounce,
@@ -429,6 +493,11 @@
   M.ErrorManager = ErrorManager;
 
   // Public function aliases
+  M.escapeHtml          = escapeHtml;
+  M.escapeHTML          = escapeHtml;
+  M.qs                  = qs;
+  M.qsa                 = qsa;
+  M.createElement       = createElement;
   M.showNotification    = showNotification;
   M.showErrorFullscreen = showErrorFullscreen;
 

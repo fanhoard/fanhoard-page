@@ -228,6 +228,12 @@
    * @returns {string}
    */
   function escapeHtml(s) {
+    if (window.NavCoreModules?.escapeHtml) {
+      return window.NavCoreModules.escapeHtml(s);
+    }
+    if (window.SearchModules?.StringService?.escapeHtml) {
+      return window.SearchModules.StringService.escapeHtml(s);
+    }
     const str = String(s);
     let out = '';
     for (let i = 0; i < str.length; i++) {

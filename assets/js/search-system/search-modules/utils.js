@@ -155,11 +155,11 @@
     /** @param {string} id @returns {HTMLElement|null} */
     get: (id) => document.getElementById(id),
 
-    /** @param {string} sel @returns {Element|null} */
-    query: (sel) => document.querySelector(sel),
+    /** @param {string} sel @param {Element|Document} [parent] @returns {Element|null} */
+    query: (sel, parent) => window.NavCoreModules?.qs ? window.NavCoreModules.qs(sel, parent) : (parent || document).querySelector(sel),
 
-    /** @param {string} sel @returns {NodeListOf<Element>} */
-    queryAll: (sel) => document.querySelectorAll(sel),
+    /** @param {string} sel @param {Element|Document} [parent] @returns {NodeListOf<Element>|Element[]} */
+    queryAll: (sel, parent) => window.NavCoreModules?.qsa ? window.NavCoreModules.qsa(sel, parent) : (parent || document).querySelectorAll(sel),
 
     /**
      * Get the main landmark element (#fv-main with fallbacks).
@@ -212,6 +212,9 @@
      * @returns {HTMLElement}
      */
     create(tag, id, cls, styles) {
+      if (window.NavCoreModules?.createElement) {
+        return window.NavCoreModules.createElement(tag, id, cls, styles);
+      }
       const el = document.createElement(tag);
       if (id)     el.id        = id;
       if (cls)    el.className = cls;
@@ -257,6 +260,9 @@
      * @returns {string}
      */
     escapeHtml(s) {
+      if (window.NavCoreModules?.escapeHtml) {
+        return window.NavCoreModules.escapeHtml(s);
+      }
       const str = String(s);
       let out = '';
       for (let i = 0; i < str.length; i++) {

@@ -1026,9 +1026,9 @@
       else M.RouteCache.invalidate();
     },
 
-    createContainer()        { return document.createElement('div'); },
-    async createButton()     { return document.createElement('button'); },
-    async createCard()       { return document.createElement('div'); },
+    createContainer()        { return (Utils?.createElement || M.createElement)('div'); },
+    async createButton()     { return (Utils?.createElement || M.createElement)('button'); },
+    async createCard()       { return (Utils?.createElement || M.createElement)('div'); },
     async renderGroupItems() {},
     async renderSingleItem() {},
   };
