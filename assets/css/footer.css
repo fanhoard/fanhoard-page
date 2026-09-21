@@ -32,7 +32,7 @@
   letter-spacing: -0.015em;
   box-shadow: 0 -1px 0 0 var(--border-subtle, var(--border-subtle, #e2e8f0));
   border: none;
-  border-radius: 32px 32px 0 0;
+  border-radius: 0;
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
@@ -43,13 +43,10 @@
 
 .footer-minimal .footer-inner {
   max-width: var(--fv-container-max, 1110px);
-  width: calc(100% - 2rem);
-  margin: 2.5rem auto;
-  background: var(--surface-card, #ffffff);
-  box-shadow: 0 0 0 1px var(--border-subtle, var(--border-subtle, #e2e8f0)), 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  margin: 0 auto;
   border: none;
-  border-radius: 28px;
-  padding: 4rem 3rem 3rem;
+  padding: 3.5rem 2rem 2.5rem;
   contain: content;
 }
 
@@ -273,15 +270,6 @@
 }
 
 @media (max-width: 860px) {
-  .footer-minimal .footer-inner {
-    width: 100%;
-    margin: 0;
-    border-radius: 32px 32px 0 0;
-    box-shadow: 0 -1px 0 0 var(--border-subtle, var(--border-subtle, #e2e8f0));
-    border: none;
-    padding: 3.5rem 1.5rem 2.5rem;
-  }
-
   .footer-minimal .footer-grid {
     grid-template-columns: 1fr 1fr;
     gap: 3rem 1.5rem;
@@ -297,7 +285,7 @@
 
 @media (max-width: 560px) {
   .footer-minimal .footer-inner {
-    padding: 3rem 1.2rem 2.5rem;
+    padding: 2.5rem 1rem 2rem;
   }
 
   .footer-minimal .footer-grid {
