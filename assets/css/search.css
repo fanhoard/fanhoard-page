@@ -641,13 +641,19 @@ body {
 
 
 /* ── Accessible Focus Rings ── */
-#searchInput:focus-visible,
 #search-clear-btn:focus-visible,
 .filter-pill:focus-visible,
 .sc:focus-visible,
 .suggestion-item:focus-visible {
   outline: 2px solid var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   outline-offset: 2px;
+}
+
+/* #searchInput relies on .search-input-wrapper:focus-within (border-color + glow) as its sole
+   visible focus indicator, so it doesn't stack a second outline box on top of the pill. */
+#searchInput:focus,
+#searchInput:focus-visible {
+  outline: none;
 }
 
 /* ── Hover States ── */
