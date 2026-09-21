@@ -22,7 +22,6 @@
   box-shadow: none;
 
   transform-origin: center;
-  -webkit-tap-highlight-color: transparent;
 
   will-change: transform, opacity;
   backface-visibility: hidden;

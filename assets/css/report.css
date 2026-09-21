@@ -72,7 +72,6 @@ section.con .fv-section-desc,
   text-decoration: none;
   color: var(--text-main, var(--text-main, #0f172a));
   transition: background-color var(--duration-fast, 150ms) ease-out;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .community-link-row:last-child {
@@ -149,7 +148,6 @@ section.con .fv-section-desc,
   cursor: pointer;
   transition: background-color var(--duration-fast, 150ms) ease-out;
   text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .contact-action-btn:hover {
@@ -260,7 +258,6 @@ select.setting-item.select:focus {
   transition: background-color var(--duration-fast, 150ms) ease-out;
   margin-top: var(--space-4, 1rem);
   box-shadow: none;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .report-submit:hover {

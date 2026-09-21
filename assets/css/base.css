@@ -16,6 +16,7 @@ html {
   font-size: 16px;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -96,7 +97,6 @@ a.btn-primary,
   text-align: center;
   white-space: nowrap;
   user-select: none;
-  -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   transition: background-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
               border-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
@@ -139,7 +139,6 @@ a.btn-secondary,
   text-align: center;
   white-space: nowrap;
   user-select: none;
-  -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   transition: background-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
               border-color var(--duration-fast, 150ms) var(--ease-out, ease-out);

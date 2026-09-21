@@ -12,7 +12,6 @@ body {
   background: var(--surface-base, #ffffff);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-  -webkit-tap-highlight-color: transparent;
 }
 
 /* ── Screen Reader Utility ── */

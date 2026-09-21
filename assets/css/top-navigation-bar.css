@@ -21,7 +21,6 @@ nav {
   justify-self: center;
   background: none; border:none; cursor:pointer;
   padding:6px; z-index:var(--fv-z-overlay);
-  -webkit-tap-highlight-color:transparent;
   border-radius:var(--fv-radius-sm);
   transition: background-color 0.2s cubic-bezier(0.4,0,0.2,1), transform 0.2s cubic-bezier(0.4,0,0.2,1);
   display:flex; align-items:center; justify-content:center;

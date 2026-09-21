@@ -42,7 +42,7 @@ nav ul li button {
   padding: var(--space-3, 12px) var(--space-4, 16px); min-height: 44px; border-radius:var(--fv-radius-pill, 9999px);
   font-size: var(--step--1, 0.875rem); font-weight: 500; background:transparent; border:1px solid transparent;
   color:var(--text-muted, #757575); cursor:pointer; white-space:nowrap;
-  user-select:none; -webkit-tap-highlight-color:transparent; 
+  user-select:none; 
   touch-action: manipulation; 
   transition: background var(--transition-fast, 150ms) ease-in-out, border-color var(--transition-fast, 150ms) ease-in-out, color var(--transition-fast, 150ms) ease-in-out;
 }

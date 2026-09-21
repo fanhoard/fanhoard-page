@@ -186,7 +186,6 @@ section.con h1 {
   transition: background-color var(--duration-fast, 150ms) var(--ease-out, ease-out);
   cursor: pointer;
   appearance: none;
-  -webkit-tap-highlight-color: transparent;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -253,7 +252,6 @@ section.con h1 {
 .buttons.buy {
   position: relative;
   overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
   user-select: none;
   color: var(--text-main, var(--text-main, #0f172a));
 }
