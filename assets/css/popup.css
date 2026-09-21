@@ -651,11 +651,14 @@
   .fp-size-sm,
   .fp-size-md,
   .fp-size-lg,
-  
+  .fp-size-xl {
+    width: calc(100vw - 2rem);
+    max-width: calc(100vw - 2rem);
+  }
 
   .fp-drawer {
     width: 100vw;
-    max-width: 100vw;
+    max-width: 100vw !important;
   }
 
   .fp-header {

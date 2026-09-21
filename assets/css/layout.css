@@ -286,7 +286,11 @@ main {
 }
 
 /* ── Policy Rules & Chrome Ban Enforcement ── */
-h1, h2, h3, h4, h5, h6, .page-title, .fv-section__title, 
+h1, h2, h3, h4, h5, h6, .page-title, .fv-section__title, .fv-hero__title {
+  -webkit-text-fill-color: initial;
+  background: none;
+  color: var(--text-main);
+}
 
 .side-stripe, [class*="stripe-"] {
   border-left: none !important;
