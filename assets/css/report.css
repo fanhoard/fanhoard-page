@@ -30,7 +30,7 @@ section.con .fv-section-label,
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   font-size: var(--step-2, 1.5rem);
   font-weight: var(--font-bold, 700);
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, var(--color-brand-primary, #0d9488));
   margin-bottom: var(--space-2, 0.5rem);
   display: block;
 }
@@ -142,7 +142,7 @@ section.con .fv-section-desc,
   font-size: var(--step-0, 0.9375rem);
   font-weight: var(--font-semibold, 600);
   color: #ffffff;
-  background-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  background-color: var(--color-brand-hover, var(--color-brand-primary, #0d9488));
   border: none;
   border-radius: var(--radius-md, 0.5rem);
   cursor: pointer;
@@ -251,7 +251,7 @@ select.setting-item.select:focus {
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   font-weight: var(--font-semibold, 600);
   color: #ffffff;
-  background-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  background-color: var(--color-brand-hover, #0f766e);
   border: none;
   border-radius: var(--radius-md, 0.5rem);
   cursor: pointer;

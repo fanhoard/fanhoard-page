@@ -61,6 +61,7 @@
   --color-brand-primary: var(--color-teal-600);
   --color-brand-hover:   var(--color-teal-700);
   --color-brand-active:  var(--color-teal-800);
+  --color-brand-text:    var(--color-teal-700);
   --color-brand-accent:  var(--color-emerald-600);
 
   --surface-base:   var(--color-slate-50);
@@ -218,6 +219,7 @@
   :root:not([data-theme="light"]) {
     --color-brand-primary: var(--color-teal-400);
     --color-brand-hover:   var(--color-teal-500);
+    --color-brand-text:    var(--color-teal-400);
 
     --surface-base:   var(--color-slate-900);
     --surface-card:   var(--color-slate-800);

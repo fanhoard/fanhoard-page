@@ -50,7 +50,7 @@ nav ul li button:hover { color: var(--text-main, #0f172a); }
 nav ul li button:active { background: var(--fv-surface-hover, #f0f0f0); }
 
 nav ul li button.active {
-  color:var(--color-brand-primary, #009688);
+  color:var(--color-brand-text, #0f766e);
   background:var(--fv-surface-teal-hover, rgba(0, 150, 136, 0.08));
   border-color: var(--border-brand, #009688);
   transform: none;

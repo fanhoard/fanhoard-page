@@ -160,7 +160,7 @@ section.con .fv-section-desc {
 
 section.con span {
   font-weight: var(--font-bold, 700);
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, #0f766e);
 }
 
 section.con h1 {

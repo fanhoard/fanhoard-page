@@ -225,8 +225,7 @@ body {
   font-family: inherit;
   background: transparent;
   border: none;
-  color: var(--text-muted, #757575);
-  opacity: 0.65;
+  color: var(--text-muted, #475569);
   cursor: pointer;
   white-space: nowrap;
   letter-spacing: 0.01em;
@@ -243,7 +242,7 @@ body {
   box-shadow: 0 0 0 1px rgba(13, 148, 136, 0.51);
   background: var(--surface-hover, rgba(13, 148, 136, 0.08));
   opacity: 1;
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, var(--color-brand-primary, #0d9488));
   font-weight: 600;
 }
 
@@ -261,7 +260,7 @@ body {
 .filter-pill--cat.active {
   background: rgba(13, 148, 136, 0.07);
   border-color: rgba(13, 148, 136, 0.42);
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, var(--color-brand-primary, #0d9488));
   font-weight: 600;
   opacity: 1;
   box-shadow: none;
