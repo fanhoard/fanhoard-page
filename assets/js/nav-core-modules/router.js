@@ -506,6 +506,19 @@
     // ── Initialization ─────────────────────────────────────────────────────────
 
     init() {
+      try {
+        const navType = (typeof performance !== 'undefined' && performance.getEntriesByType)
+          ? performance.getEntriesByType('navigation')[0]?.type
+          : null;
+        const isReload = navType === 'reload' || (typeof performance !== 'undefined' && performance.navigation?.type === 1);
+        if (isReload) {
+          if (typeof history !== 'undefined' && 'scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+          }
+          window.scrollTo(0, 0);
+        }
+      } catch (_) {}
+
       // Default browser behavior is 'auto'. Do not set history.scrollRestoration = 'manual' site-wide.
       window.addEventListener('popstate', async () => {
         try {
