@@ -77,8 +77,11 @@ body {
   transition: border-color var(--duration-fast, 150ms) ease, box-shadow var(--duration-fast, 150ms) ease, background-color var(--duration-fast, 150ms) ease;
 }
 
-/* Focus: no added frame on the input pill (owner request) - the wrapper keeps its
-   resting border and the text caret indicates focus. */
+.search-input-wrapper:focus-within {
+  background: var(--surface-card, #ffffff);
+  border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.15);
+}
 
 .search-input-icon {
   position: static;
