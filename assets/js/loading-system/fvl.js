@@ -1137,8 +1137,12 @@
       try {
         bootIds.forEach(function(id) {
           var el = document.getElementById(id);
-          if (el && el.parentNode) {
-            el.parentNode.removeChild(el);
+          if (el && !el.classList.contains('fv-boot-hidden')) {
+            if (typeof window.__removeBootLoader === 'function' && id === 'fv-boot-loader') {
+              window.__removeBootLoader();
+            } else if (el.parentNode) {
+              el.parentNode.removeChild(el);
+            }
           }
         });
       } catch (_) {}

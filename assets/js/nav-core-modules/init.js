@@ -146,31 +146,22 @@
         console.error('[NavCore/Init] bootstrap error:', error);
         try { Utils.showErrorFullscreen(error, { label: 'App Bootstrap', title: 'เกิดข้อผิดพลาดในการโหลดแอพพลิเคชัน กรุณารีเฟรชหน้า' }); } catch (_) {}
       } finally {
-        // v4: ตรวจว่า LoadingService ยัง active อยู่หรือไม่ — ถ้าใช่ ให้ force hide
-        //   (defensive: บาง route ไม่ได้เรียก renderContent ก็จะไม่ถึง hideInstant)
+        // Readiness Handshake cleans up boot elements and hides active fullscreen overlay in single coordinated step
         try {
-          if (LoadingService.isShown()) {
-            await LoadingService.hideInstant();
+          if (LoadingService && typeof LoadingService.readinessHandshake === "function") {
+            await LoadingService.readinessHandshake();
+          } else if (window.FVL && typeof window.FVL.readinessHandshake === "function") {
+            await window.FVL.readinessHandshake();
+          } else if (typeof window.__removeBootLoader === "function") {
+            window.__removeBootLoader();
           }
         } catch (_) {}
 
         try {
-          if (typeof window.__removeInstantLoadingOverlay === 'function'
+          if (typeof window.__removeInstantLoadingOverlay === "function"
             && window.__instantLoadingOverlayShown) {
             window.__removeInstantLoadingOverlay();
             window.__instantLoadingOverlayShown = false;
-          }
-        } catch (_) {}
-
-        // v4: ลบ boot loader inline (ถ้ามี) — เผื่อกรณีที่ user มาจากหน้า
-        //   discover ที่มี inline boot loader แสดงอยู่ก่อน NavCore พร้อม
-        try {
-          if (typeof window.__removeBootLoader === 'function') {
-            window.__removeBootLoader();
-          } else {
-            // Fallback: remove by ID ถ้า function ไม่ถูก export
-            var bl = document.getElementById('fv-boot-loader');
-            if (bl && bl.parentNode) bl.parentNode.removeChild(bl);
           }
         } catch (_) {}
 

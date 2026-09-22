@@ -55,7 +55,8 @@
 
   // Lightweight inline overlay so user sees "loading" quickly.
   function showEarlyOverlay() {
-    if (q('#nc-early-overlay')) return;
+    // If inline boot loader (#fv-boot-loader) or FVL fullscreen overlay is present, do NOT inject redundant nc-early-overlay
+    if (q('#nc-early-overlay') || q('#fv-boot-loader') || q('.fvl-fullscreen')) return;
     const ov = ce('div', { id: 'nc-early-overlay', role: 'status', 'aria-live': 'polite' });
     ov.style.position = 'fixed';
     ov.style.left = '0';
@@ -76,7 +77,7 @@
     </svg><div id="nc-early-msg">Loading…</div>`;
     document.documentElement.appendChild(ov);
     // auto-hide after 2s if nothing else happens (safety)
-    setTimeout(() => { try { const e = q('#nc-early-overlay'); if (e) e.remove(); } catch (_) {} }, 2000);
+    setTimeout(() => { try { if (!q('#fv-boot-loader')) hideEarlyOverlay(); } catch (_) {} }, 2000);
   }
 
   function hideEarlyOverlay() {
@@ -132,7 +133,7 @@
 
     // choose default
     const chosen = def || mainButtons[0];
-    if (!chosen) { hideEarlyOverlay(); return; }
+    if (!chosen) { if (!q('#fv-boot-loader')) hideEarlyOverlay(); return; }
 
     // mark active visually
     const activeBtn = ul.querySelector('button');
@@ -140,7 +141,7 @@
 
     // render first batch of content (fetch jsonFile if available)
     const contentCtr = document.getElementById('content-loading');
-    if (!contentCtr) { hideEarlyOverlay(); return; }
+    if (!contentCtr) { if (!q('#fv-boot-loader')) hideEarlyOverlay(); return; }
     contentCtr.innerHTML = '<div style="opacity:0.6">Loading content…</div>';
 
     try {
@@ -183,7 +184,7 @@
     } catch (e) {
       contentCtr.innerHTML = '<div style="opacity:0.6">Unable to load preview.</div>';
     } finally {
-      hideEarlyOverlay();
+      if (!q('#fv-boot-loader')) hideEarlyOverlay();
     }
   }
 
@@ -191,14 +192,13 @@
   try {
     ensureDom();
     showEarlyOverlay();
-    // run fetch and render, but don't block longer than ~800ms for the early UI
-    const t = setTimeout(() => { /* safety: hide overlay if still visible */ hideEarlyOverlay(); }, 800);
+    const t = setTimeout(() => { if (!q('#fv-boot-loader')) hideEarlyOverlay(); }, 800);
     fetchButtonsConfig().then(cfg => {
       clearTimeout(t);
-      if (cfg) renderMinimal(cfg).catch(() => hideEarlyOverlay());
-      else hideEarlyOverlay();
-    }).catch(() => { clearTimeout(t); hideEarlyOverlay(); });
+      if (cfg) renderMinimal(cfg).catch(() => { if (!q('#fv-boot-loader')) hideEarlyOverlay(); });
+      else if (!q('#fv-boot-loader')) hideEarlyOverlay();
+    }).catch(() => { clearTimeout(t); if (!q('#fv-boot-loader')) hideEarlyOverlay(); });
   } catch (e) {
-    try { hideEarlyOverlay(); } catch (_) {}
+    try { if (!q('#fv-boot-loader')) hideEarlyOverlay(); } catch (_) {}
   }
 })();

@@ -187,7 +187,7 @@
       // Expose remove function for InitService.start() finally block
       window.__removeBootLoader = function () {
         var el = document.getElementById('fv-boot-loader');
-        if (!el) return;
+        if (!el || el.classList.contains('fv-boot-hidden')) return;
         el.setAttribute('aria-busy', 'false');
         el.classList.add('fv-boot-hidden');
         setTimeout(function () {

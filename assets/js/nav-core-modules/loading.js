@@ -137,25 +137,7 @@
     },
 
     // ── Phase API (kept for back-compat but no-op visually) ─────────────────
-    //
-    // v2.1: setPhase() ยังคงไว้เพื่อไม่ให้ code ที่เรียกใช้ (router.js,
-    //   content.js, init.js) พัง แต่ไม่เปลี่ยนข้อความที่แสดงผล
-    //   ข้อความยังคงเป็น "Loading…" / "กำลังโหลด…" เสมอ
-    //
-    //   ถ้าต้องการเปิด phase messages ภายหลัง สามารถ uncomment โค้ดด้านล่าง
-    //   และใส่ PHASE_MESSAGES + step indicator กลับเข้าไปได้
-
-    /**
-     * Set the current loading phase.
-     * v2.1: NO-OP visually — just updates internal state.
-     * Kept for back-compat with router.js / content.js / init.js that call it.
-     *
-     * @param {string} phase    One of: 'initializing' | 'fetching' | 'processing' | 'rendering' | 'ready'
-     * @param {string} [customMsg] Optional override message (ignored in v2.1)
-     */
     setPhase: function (phase, customMsg) {
-      // v2.1: NO-OP — แสดงแค่ "Loading…" เสมอ ไม่เปลี่ยนตาม phase
-      // เก็บไว้เพื่อ back-compat เท่านั้น
       this._currentPhase = phase || 'initializing';
     },
 
@@ -165,26 +147,41 @@
     /**
      * Show the loading overlay (open a navigation session).
      *
-     * v2.1 behavior:
-     *   1. Increment session counter
-     *   2. ALWAYS call FVL.show() — idempotent
-     *   3. Apply single "Loading…" message (localized)
-     *   4. If overlay was already visible, pulse to signal new operation
-     *
-     * NO DELAY. The overlay shows immediately on every show() call.
-     *
      * @param {LoadingOptions} [opts]
      */
     show: function (opts) {
       _ensureFVL();
       var fvl = _fvl();
+
+      // Open a new session
+      this._sessionCount++;
+
+      // If an inline boot loader (#fv-boot-loader) or early overlay (#nc-early-overlay) is currently visible,
+      // adopt it instead of mounting a duplicate .fvl-fullscreen overlay DOM node.
+      var bootEl = document.getElementById('fv-boot-loader') || document.getElementById('nc-early-overlay');
+      var isBootVisible = bootEl && !bootEl.classList.contains('fv-boot-hidden') && (typeof window.getComputedStyle !== 'function' || window.getComputedStyle(bootEl).display !== 'none');
+
+      if (isBootVisible) {
+        this._visibleSince = Date.now();
+        this._el = bootEl;
+        var self = this;
+        return {
+          id: DEFAULT_ID,
+          mode: 'fullscreen',
+          element: bootEl,
+          hide: function () { return self.readinessHandshake(); },
+          update: function () {},
+          setMessage: function () {},
+          setProgress: function () {},
+          getState: function () { return 'showing'; },
+          on: function () { return function () {}; }
+        };
+      }
+
       if (!fvl) {
         console.warn('[LoadingService] FVL not available, cannot show');
         return;
       }
-
-      // Open a new session
-      this._sessionCount++;
 
       // Normalize opts — v2.1: ใส่ข้อความ "Loading…" เสมอ ไม่รับ message จาก caller
       var o = (typeof opts === 'string') ? { message: opts } : (opts || {});
@@ -219,7 +216,6 @@
 
     /**
      * Pulse the overlay: briefly dip opacity + restart spinner animation.
-     * (Unchanged from v1.7.2)
      */
     _pulse: function () {
       if (this._pulseInProgress) return;
@@ -244,14 +240,29 @@
     },
 
     /**
+     * Readiness Handshake — cleans up boot elements and hides FVL fullscreen overlay in single phase.
+     */
+    readinessHandshake: function (opts) {
+      this._sessionCount = 0;
+      var fvl = _fvl();
+      if (fvl && typeof fvl.readinessHandshake === 'function') {
+        return fvl.readinessHandshake(opts);
+      }
+      try {
+        if (typeof window.__removeBootLoader === 'function') {
+          window.__removeBootLoader();
+        } else {
+          var bl = document.getElementById('fv-boot-loader');
+          if (bl && bl.parentNode) bl.parentNode.removeChild(bl);
+        }
+        var eo = document.getElementById('nc-early-overlay');
+        if (eo && eo.parentNode) eo.parentNode.removeChild(eo);
+      } catch (_) {}
+      return Promise.resolve({ success: true, timestamp: Date.now() });
+    },
+
+    /**
      * Hide the loading overlay (close one navigation session).
-     *
-     * Decrements session counter. Only hides the overlay when ALL sessions
-     * are closed (counter reaches 0).
-     *
-     * MIN_VISIBLE_MS: if the overlay was shown less than 300ms ago, defer
-     * the hide until the 300ms has elapsed (prevents 1-frame flashes).
-     *
      * @returns {Promise<void>}
      */
     hide: function () {
@@ -259,6 +270,10 @@
 
       if (this._sessionCount > 0) {
         return Promise.resolve();
+      }
+
+      if (document.getElementById('fv-boot-loader') || document.getElementById('nc-early-overlay')) {
+        return this.readinessHandshake();
       }
 
       var elapsed = Date.now() - this._visibleSince;
@@ -327,19 +342,15 @@
     },
 
     /**
-     * v2.1: Hide loading แบบ instant — ไม่มี fade-out animation
-     *
-     * RENDER-BEHIND-OVERLAY PATTERN (Netflix/Spotify/Instagram):
-     *   Content is already mounted into the DOM BEFORE hideInstant() is
-     *   called. We then:
-     *     1. Wait 1 rAF so the browser paints the content under the overlay
-     *     2. Remove the overlay instantly (no fade-out)
-     *   This eliminates the "blank flash" between hide-loading and
-     *   show-content.
+     * Hide loading แบบ instant — ไม่มี fade-out animation
      */
     hideInstant: function () {
       if (this._sessionCount > 0) this._sessionCount--;
       if (this._sessionCount > 0) return Promise.resolve();
+
+      if (document.getElementById('fv-boot-loader') || document.getElementById('nc-early-overlay')) {
+        return this.readinessHandshake();
+      }
 
       this._visibleSince = 0;
       if (this._pendingHideTimer) {
@@ -357,23 +368,12 @@
       }
 
       if (inst && inst.state === 'showing') {
-        // Overlay was created but browser hasn't painted it yet.
-        // Wait 1 frame so the user sees at least 1 frame of loading,
-        // then remove. This prevents content jank from being visible.
         requestAnimationFrame(function () {
           self._removeOverlayNow(fvl);
         });
         return Promise.resolve();
       }
 
-      // v2.0: Wait 1 rAF before removing overlay so any pending content
-      // mount (which happened just before hideInstant() was called) gets
-      // painted by the browser FIRST. Then the overlay is removed,
-      // revealing the already-painted content underneath.
-      //
-      // This is the "render behind overlay" pattern: content paints under
-      // the overlay, then overlay disappears — user sees smooth transition
-      // from loading → content with no blank frame.
       requestAnimationFrame(function () {
         self._removeOverlayNow(fvl);
       });
@@ -381,8 +381,7 @@
     },
 
     /**
-     * v4: Internal — actually remove overlay DOM + FVL instance.
-     * (Preserved from v1.7.2 with scroll-lock restore fix)
+     * Internal — actually remove overlay DOM + FVL instance.
      */
     _removeOverlayNow: function (fvl) {
       if (!fvl) fvl = _fvl();
@@ -409,7 +408,7 @@
         } catch (_) {}
       }
 
-      if (this._el) {
+      if (this._el && this._el.id !== 'fv-boot-loader' && this._el.id !== 'nc-early-overlay') {
         try {
           if (this._el.parentNode) this._el.parentNode.removeChild(this._el);
         } catch (_) {}
@@ -425,8 +424,7 @@
     showInContent: function (opts) { return this.show(opts); },
     hideFromContent: function ()   { return this.hide(); },
 
-    // ── Emergency reset (used at start of each navigateTo) ───────────────
-    // (Preserved from v1.7.2)
+    // ── Emergency reset ───────────────────────────────────────────────────
     _forceReset: function () {
       this._sessionCount = 0;
       this._pulseInProgress = false;
@@ -436,8 +434,8 @@
         clearTimeout(this._pendingHideTimer);
         this._pendingHideTimer = null;
       }
-      // Remove fullscreen overlay
-      if (this._el) {
+      // If boot loader is active during bootstrapping, do not destroy it on forceReset
+      if (this._el && this._el.id !== 'fv-boot-loader' && this._el.id !== 'nc-early-overlay') {
         try {
           if (this._el.parentNode) this._el.parentNode.removeChild(this._el);
         } catch (_) {}
@@ -466,12 +464,13 @@
       }
     },
 
-    /** Get current phase. Useful for debugging. */
+    /** Get current phase. */
     getCurrentPhase: function () {
       return this._currentPhase;
     },
   };
 
+  // Expose as M.LoadingService
   // ── Auto-init ──────────────────────────────────────────────────────────────
 
   function _autoInit() { LoadingService.init(); }
