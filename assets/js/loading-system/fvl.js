@@ -168,10 +168,10 @@
 
     // ── Z-index layers (one per mode, separated by 100 for safety) ──
     Z_INDEX: Object.freeze({
-      topbar:     500,
-      fullscreen: 500,  // matches --fv-z-overlay (500)
-      scoped:     100,
-      inline:     0,      // inline participates in normal flow
+      topbar:     17500,
+      fullscreen: 17000, // matches --fv-z-fullscreen-overlay (17000)
+      scoped:     1600,  // matches --fv-z-scoped-overlay (1600)
+      inline:     0,     // inline participates in normal flow
     }),
 
     // ── Animation timing (ms) ──
@@ -406,7 +406,10 @@
       _instances.delete(id);
     }
 
-    function getInstance(id) { return _instances.get(id) || null; }
+    function getInstance(id) {
+      if (!id) id = CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
+      return _instances.get(id) || null;
+    }
     function getAllInstances() { return Array.from(_instances.values()); }
     function getActiveCount() { return _instances.size; }
     function getByGroup(group) {
@@ -775,10 +778,13 @@
         return false;
       }
       // Save original position to restore on hide
-      inst.origTargetPos = window.getComputedStyle(target).position;
-      if (inst.origTargetPos === 'static') {
-        target.style.position = 'relative';
-      }
+      try {
+        inst.origTargetPos = window.getComputedStyle(target).position;
+        if (inst.origTargetPos === 'static') {
+          target.style.position = 'relative';
+        }
+      } catch (_) {}
+      target.setAttribute('aria-busy', 'true');
       target.appendChild(inst.rootEl);
       return true;
     }
@@ -790,6 +796,7 @@
         console.warn('[FVL] inline mode requires a target');
         return false;
       }
+      target.setAttribute('aria-busy', 'true');
       if (inst.options.replaceContent) {
         inst.origTargetHTML = target.innerHTML;
         target.textContent = '';
@@ -821,7 +828,7 @@
       // Generate ID
       var id = opts.id;
       if (!id) {
-        if (mode === 'fullscreen' && !State.getByMode('fullscreen')) {
+        if (mode === 'fullscreen' && !State.getByMode('fullscreen').length) {
           // Use stable default ID for back-compat (singleton-style)
           id = CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
         } else {
@@ -1043,6 +1050,9 @@
       if (inst.rootEl && inst.rootEl.parentNode) {
         inst.rootEl.parentNode.removeChild(inst.rootEl);
       }
+      if (inst.targetEl) {
+        inst.targetEl.setAttribute('aria-busy', 'false');
+      }
       State.removeInstance(inst.id);
     }
 
@@ -1121,11 +1131,34 @@
       });
     }
 
+    function readinessHandshake(opts) {
+      opts = opts || {};
+      var bootIds = opts.bootElementIds || ['fv-boot-loader', 'nc-early-overlay', 'nc-early-msg'];
+      try {
+        bootIds.forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el && el.parentNode) {
+            el.parentNode.removeChild(el);
+          }
+        });
+      } catch (_) {}
+
+      var fullscreenId = opts.id || CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
+      var inst = State.getInstance(fullscreenId);
+      if (inst && (inst.state === 'showing' || inst.state === 'shown')) {
+        return hide(fullscreenId).then(function() {
+          return { success: true, timestamp: Date.now() };
+        });
+      }
+      return Promise.resolve({ success: true, timestamp: Date.now() });
+    }
+
     return Object.freeze({
       show: show,
       hide: hide,
       hideAll: hideAll,
       hideByGroup: hideByGroup,
+      readinessHandshake: readinessHandshake,
       update: update,
       stats: stats,
       _updateTopVar: _updateTopVar,
@@ -1277,61 +1310,34 @@
   }
 
   // ── Public API ──
-  window.FVL = Object.freeze({
+  var FVL_API = Object.freeze({
     _initialized: true,
     version: VERSION,
 
-    /**
-     * Show a loader. Returns a handle or null on failure.
-     * @param {FVLOptions|string} [opts]
-     * @returns {FVLHandle|null}
-     */
     show: function(opts) { return Engine.show(opts); },
-
-    /**
-     * Hide a loader by ID.
-     * @param {string} [id]  - Defaults to the default fullscreen ID.
-     * @returns {Promise<void>}
-     */
     hide: function(id) {
       if (!id) id = CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
       return Engine.hide(id);
     },
-
-    /** Hide all active loaders. */
     hideAll: function() { return Engine.hideAll(); },
-
-    /** Hide the loader in a specific group. */
     hideByGroup: function(group) { return Engine.hideByGroup(group); },
-
-    /** Update options on a live loader. */
+    readinessHandshake: function(opts) { return Engine.readinessHandshake(opts); },
+    boot: function(opts) { return Engine.readinessHandshake(opts); },
     update: function(id, opts) { Engine.update(id, opts); },
-
-    /** Get a handle for an existing loader. Returns null if not found. */
     get: function(id) {
       var inst = State.getInstance(id);
       return inst ? Engine._makeHandle(inst) : null;
     },
-
-    /** Check if a loader is currently active. */
     isActive: function(id) {
+      if (!id) id = CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
       var inst = State.getInstance(id);
       return !!(inst && (inst.state === 'showing' || inst.state === 'shown'));
     },
-
-    /** Subscribe to system events: showing, shown, hiding, hidden, destroyed, updated. */
     on: function(event, fn) { return State.on(event, fn); },
-
-    /** Get diagnostic stats. */
     stats: function() { return Engine.stats(); },
-
-    /** Access internal modules namespace. */
     modules: function() { return M; },
-
-    /** Access config constants. */
     config: function() { return CONFIG; },
 
-    // ── Convenience shortcuts per mode ──
     fullscreen: function(opts) {
       opts = (typeof opts === 'string') ? { message: opts } : (opts || {});
       opts.mode = 'fullscreen';
@@ -1339,12 +1345,20 @@
       return Engine.show(opts);
     },
     scoped: function(opts) {
-      opts = opts || {};
+      if (typeof opts === 'string' || (typeof HTMLElement !== 'undefined' && opts instanceof HTMLElement)) {
+        opts = { target: opts };
+      } else {
+        opts = Object.assign({}, opts);
+      }
       opts.mode = 'scoped';
       return Engine.show(opts);
     },
     inline: function(opts) {
-      opts = opts || {};
+      if (typeof opts === 'string' || (typeof HTMLElement !== 'undefined' && opts instanceof HTMLElement)) {
+        opts = { target: opts };
+      } else {
+        opts = Object.assign({}, opts);
+      }
       opts.mode = 'inline';
       return Engine.show(opts);
     },
@@ -1354,6 +1368,9 @@
       return Engine.show(opts);
     },
   });
+
+  window.FVL = FVL_API;
+  window.FLV = FVL_API;
 
   // ── Boot ──
   _boot();

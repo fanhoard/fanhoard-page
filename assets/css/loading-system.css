@@ -120,7 +120,7 @@
     box-sizing: border-box;
     contain: layout style;
     transform: translateZ(0);
-    z-index: var(--fv-z-overlay, 500);
+    z-index: var(--fv-z-fullscreen-overlay, 17000);
   }
 
   .fvl-fullscreen .fvl-spinner {
@@ -161,7 +161,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1;
+    z-index: var(--fv-z-scoped-overlay, 1600);
     contain: layout style;
     pointer-events: auto;
   }
@@ -194,7 +194,7 @@
     left: 0;
     right: 0;
     height: 3px;
-    z-index: var(--fv-z-overlay, 500);
+    z-index: var(--fv-z-fullscreen-overlay, 17000);
     background: transparent;
     overflow: hidden;
     pointer-events: none;
