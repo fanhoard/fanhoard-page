@@ -207,7 +207,7 @@ suggestion items แสดง badge เล็กๆ ข้างหน้า เ
 - `[TYPE]` = type match (เช่น "อีโมจิ")
 - `[CATEGORY]` = category match (เช่น "Arrows")
 
-CSS class: `.suggestion-badge`, `.suggestion-badge--type`, `.suggestion-badge--category`
+CSS class: `.suggestion-badge` (เดิม) → `.search-suggestion-badge--type` / `.search-suggestion-badge--category` ตอนนี้
 
 ### Robust Short Query Handling
 

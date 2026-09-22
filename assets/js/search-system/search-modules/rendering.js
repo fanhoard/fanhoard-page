@@ -106,13 +106,13 @@
         const esc      = StringService.escapeHtml;
         const titleStr = nameStr || data?.api || text;
         const subStr   = itemApi || typeName || '';
-        const tags     = (typeName ? `<span class="tag">${esc(typeName)}</span>` : '')
-                       + (catName  ? `<span class="tag">${esc(catName)}</span>`  : '');
+        const tags     = (typeName ? `<span class="result-card__tag">${esc(typeName)}</span>` : '')
+                       + (catName  ? `<span class="result-card__tag">${esc(catName)}</span>`  : '');
         const encodedName = nameStr ? StringService.encodeUrl(nameStr) : '';
 
-        return `<div class="sc${vertical ? ' sv' : ''}" role="button" tabindex="0" aria-label="${esc(nameStr || text)}" data-text="${StringService.encodeUrl(text)}" data-name="${encodedName}"><div class="scc">${esc(disp)}</div><div class="scb"><div class="sct">${esc(titleStr)}</div><div class="scs">${esc(subStr)}</div>${tags ? `<div class="scg" aria-hidden="true">${tags}</div>` : ''}</div></div>`;
+        return `<div class="result-card${vertical ? ' result-card--vertical' : ''}" role="button" tabindex="0" aria-label="${esc(nameStr || text)}" data-text="${StringService.encodeUrl(text)}" data-name="${encodedName}"><div class="result-card__glyph">${esc(disp)}</div><div class="result-card__body"><div class="result-card__title">${esc(titleStr)}</div><div class="result-card__subtitle">${esc(subStr)}</div>${tags ? `<div class="result-card__tags" aria-hidden="true">${tags}</div>` : ''}</div></div>`;
       } catch {
-        return '<div class="sc"><div class="scc">-</div></div>';
+        return '<div class="result-card"><div class="result-card__glyph">-</div></div>';
       }
     },
 
@@ -332,14 +332,14 @@
       };
 
       Handlers.copyClick = (e) => {
-        const card = e.target.closest('.sc');
+        const card = e.target.closest('.result-card');
         if (card) { e.preventDefault(); _copy(card); }
       };
       DOMService.on(container, 'click', Handlers.copyClick);
 
       DOMService.on(container, 'keydown', (e) => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
-        const card = e.target.closest('.sc');
+        const card = e.target.closest('.result-card');
         if (card) { e.preventDefault(); _copy(card); }
       });
 

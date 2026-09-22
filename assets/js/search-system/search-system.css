@@ -19,7 +19,7 @@
  *
  *  Design language:
  *    Discovery section uses the same card grid as primary results
- *    (.sc / .scc / .scb classes from search.css) so users see a
+ *    (.result-card / .result-card__glyph / .result-card__body classes from search.css) so users see a
  *    consistent visual language across both lists. The only new
  *    styles are the section header (title + hint) and the empty-state
  *    compact message.
@@ -30,12 +30,12 @@
  * indicate the source: "Type" or "Category". Item-name matches render
  * without a badge (the default).
  *
- * Layout: the suggestion item is a flex row (.suggestion-body takes
+ * Layout: the suggestion item is a flex row (.search-suggestion-body takes
  * flex:1). The badge sits at the end with shrink:0 so long suggestion
- * text wraps inside .suggestion-body and never pushes the badge off-screen.
+ * text wraps inside .search-suggestion-body and never pushes the badge off-screen.
  * ───────────────────────────────────────────────────────────────────────── */
 
-.suggestion-badge {
+.search-suggestion-badge {
   flex-shrink: 0;
   align-self: center;
   display: inline-flex;
@@ -54,13 +54,13 @@
   color: var(--fv-text-secondary, #52638A);
 }
 
-.suggestion-badge--type {
+.search-suggestion-badge--type {
   /* Teal tint — matches the FanHoard brand accent */
   background: rgba(19, 180, 127, 0.12);
   color: #0f7a55;
 }
 
-.suggestion-badge--category {
+.search-suggestion-badge--category {
   /* Blue tint — distinct from type badge */
   background: rgba(14, 95, 153, 0.10);
   color: #1a5276;
@@ -69,15 +69,15 @@
 /* Dark-mode adjustments — FanHoard uses light theme by default but the
  * tokens flip on prefers-color-scheme. Make sure badges stay readable. */
 @media (prefers-color-scheme: dark) {
-  .suggestion-badge {
+  .search-suggestion-badge {
     background: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.65);
   }
-  .suggestion-badge--type {
+  .search-suggestion-badge--type {
     background: rgba(19, 180, 127, 0.18);
     color: #6ce0b1;
   }
-  .suggestion-badge--category {
+  .search-suggestion-badge--category {
     background: rgba(96, 165, 250, 0.16);
     color: #93c5fd;
   }
@@ -86,7 +86,7 @@
 /* Compact screens (≤ 480px) — slightly smaller badge to save horizontal
  * space for the suggestion text on narrow phones. */
 @media (max-width: 480px) {
-  .suggestion-badge {
+  .search-suggestion-badge {
     font-size: 0.62rem;
     padding: 2px 6px;
     border-radius: 5px;
@@ -106,7 +106,7 @@
  *        <p class="discovery-hint">Scroll down for more</p>
  *      </div>
  *      <div class="discovery-list">
- *        <!-- URE renders .sc cards here, same as primary results -->
+ *        <!-- URE renders .result-card cards here, same as primary results -->
  *      </div>
  *    </section>
  *
@@ -117,7 +117,7 @@
  *      to "more to explore".
  *    • Hint is small and muted — it tells the user there's more content
  *      below without competing with the title.
- *    • Card grid inherits from .sc styles in search.css so discovery
+ *    • Card grid inherits from .result-card styles in search.css so discovery
  *      cards look identical to primary result cards.
  * ───────────────────────────────────────────────────────────────────────── */
 
@@ -147,7 +147,7 @@
 }
 
 .discovery-title {
-  /* h2 sizing — larger than card titles (.sct) but smaller than page h1.
+  /* h2 sizing — larger than card titles (.result-card__title) but smaller than page h1.
    * Use the page's font stack so it matches the rest of the UI. */
   font-size: 1.15rem;
   font-weight: 700;
@@ -170,7 +170,7 @@
 
 .discovery-list {
   /* The URE mount target. URE creates its own internal DOM structure
-   * (.vs-container etc.) so we don't need to add layout here — just
+   * (.vscroll-container etc.) so we don't need to add layout here — just
    * make sure the container takes up the full width of its parent. */
   width: 100%;
   /* Match the horizontal padding of .discovery-header so cards align

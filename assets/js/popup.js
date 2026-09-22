@@ -36,7 +36,7 @@
   //   จึงไม่ถูก regex ?v= ของ update-version.js จับได้
   //   FV_BUILD_ID ถูก inject buildId จริงตอน build → ใช้ต่อ ?v= ท้าย URL
   //   dev mode: ค่า '' → _v() คืน '' → URL ไม่มี ?v= → browser cache ปกติ
-  var FV_BUILD_ID = '2.3.0-202609220254';
+  var FV_BUILD_ID = '2.3.0-202609220313';
   
   /** คืน query string '?v=<buildId>' ถ้าไม่มี buildId คืน '' */
   function _v() { return FV_BUILD_ID ? '?v=' + FV_BUILD_ID : ''; }

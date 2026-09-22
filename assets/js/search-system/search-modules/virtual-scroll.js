@@ -95,7 +95,7 @@
       this._scrollTarget = this._windowScroll ? window : viewport;
 
       const box = document.createElement('div');
-      box.className = 'vs-container';
+      box.className = 'vscroll-container';
       box.style.cssText = `position:relative;height:${this._total}px;min-height:2px;contain:layout style;`;
       host.appendChild(box);
       this._box = box;
@@ -275,7 +275,7 @@
           this._setContent(el, i);
         } else {
           el           = document.createElement('div');
-          el.className = 'vs-item';
+          el.className = 'vscroll-item';
           el.style.cssText = `position:absolute;left:0;right:0;top:0;contain:layout style paint;transform:translateY(${y}px);`;
           this._setContent(el, i);
           frag.appendChild(el);
@@ -290,7 +290,7 @@
     },
 
     /**
-     * Set content into a vs-item node.
+     * Set content into a vscroll-item node.
      * Uses innerHTML — O(1) memory, no pre-render cache needed.
      * V8 parser: ~0.3ms/card × 30 visible = ~10ms per frame (budget: 16.7ms).
      */

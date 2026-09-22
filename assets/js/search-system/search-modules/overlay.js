@@ -8,7 +8,7 @@
  * │                                                             │
  * │  #searchOverlayContainer  (position:fixed, full screen)    │
  * │  ├── #overlay-header-bar                                    │
- * │  │    └── .search-input-wrapper  ← moved from header       │
+ * │  │    └── .search-pill  ← moved from header       │
  * │  └── .search-overlay-scrollable-content                     │
  * │       └── #searchSuggestions                                │
  * │                                                             │
@@ -26,7 +26,7 @@
  * close() owns:
  *   ① History collapse (collapseOverlayEntry or clear flag)
  *   ② VirtualScroll + keyboard auto-toggle cleanup
- *   ③ Return .search-input-wrapper to original header position
+ *   ③ Return .search-pill to original header position
  *   ④ Remove overlay DOM
  *   ⑤ Restore page scroll
  *   ⑥ Remove document keydown listener
@@ -114,8 +114,8 @@
           document.body.appendChild(ov);
         }
 
-        // Move .search-input-wrapper into the overlay header bar
-        const wrapper = DOMService.query('.search-input-wrapper');
+        // Move .search-pill into the overlay header bar
+        const wrapper = DOMService.query('.search-pill');
         if (wrapper) {
           State._wrapperParent = wrapper.parentNode;
           State._wrapperNext   = wrapper.nextSibling;
@@ -255,8 +255,8 @@
         // ② Cleanup — VS owned by RenderingService, not overlay
         KeyboardAutoToggleService.disableAutoToggle();
 
-        // ③ Return .search-input-wrapper to its original header position
-        const wrapper = DOMService.query('.search-input-wrapper');
+        // ③ Return .search-pill to its original header position
+        const wrapper = DOMService.query('.search-pill');
         if (wrapper && State._wrapperParent) {
           if (State._wrapperNext && State._wrapperNext.parentNode === State._wrapperParent) {
             State._wrapperParent.insertBefore(wrapper, State._wrapperNext);

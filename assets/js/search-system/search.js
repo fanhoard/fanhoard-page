@@ -319,7 +319,7 @@
             document.body.style.marginBottom = '';
             const sr = DOMService.get(CONFIG.DOM.searchResultsId) || (DOMService.getMainLandmark ? DOMService.getMainLandmark() : null);
             if (sr) {
-              sr.innerHTML = `<div class="search-result-here">${M.LanguageService.t('search_result_here')}</div>`;
+              sr.innerHTML = `<div class="search-result-placeholder">${M.LanguageService.t('search_result_here')}</div>`;
             }
             UIService.updateUILanguage();
 

@@ -239,12 +239,12 @@
    *
    * WHY re-use the same handler as RenderingService:
    *   RenderingService._attachCopyHandler() already handles delegated
-   *   clicks on .sc cards inside #searchResults. Discovery cards use
-   *   the same .sc markup (we use the same renderResultItem template),
+   *   clicks on .result-card cards inside #searchResults. Discovery cards use
+   *   the same .result-card markup (we use the same renderResultItem template),
    *   so we want the same behaviour: tap → copy → show notification.
    *
    *   However, RenderingService's guard (window._copyResultTextHandlerSet)
-   *   is attached to #searchResults only — clicks on .sc inside
+   *   is attached to #searchResults only — clicks on .result-card inside
    *   #searchDiscovery won't trigger it because the listener is on a
    *   different container.
    *
@@ -269,13 +269,13 @@
       };
 
       listEl.addEventListener('click', (e) => {
-        const card = e.target.closest('.sc');
+        const card = e.target.closest('.result-card');
         if (card) { e.preventDefault(); _copy(card); }
       });
 
       listEl.addEventListener('keydown', (e) => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
-        const card = e.target.closest('.sc');
+        const card = e.target.closest('.result-card');
         if (card) { e.preventDefault(); _copy(card); }
       });
 
@@ -411,7 +411,7 @@
                 return M.RenderingService.renderResultItem(item, l);
               }
               // Fallback: minimal template if RenderingService is missing.
-              return '<div class="sc"><div class="scc">-</div></div>';
+              return '<div class="result-card"><div class="result-card__glyph">-</div></div>';
             },
             lang,
             buffer    : 700,

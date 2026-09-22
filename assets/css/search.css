@@ -60,7 +60,7 @@ body {
   box-sizing: border-box;
 }
 
-.search-input-wrapper {
+.search-pill {
   display: flex;
   align-items: center;
   flex-direction: row;
@@ -77,13 +77,13 @@ body {
   transition: border-color var(--duration-fast, 150ms) ease, box-shadow var(--duration-fast, 150ms) ease, background-color var(--duration-fast, 150ms) ease;
 }
 
-.search-input-wrapper:focus-within {
+.search-pill:focus-within {
   background: var(--surface-card, #ffffff);
   border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.15);
 }
 
-.search-input-icon {
+.search-pill__icon {
   position: static;
   flex-shrink: 0;
   width: 39px;
@@ -99,17 +99,17 @@ body {
   pointer-events: none;
 }
 
-.search-input-icon[role="button"] {
+.search-pill__icon[role="button"] {
   pointer-events: auto;
   cursor: pointer;
   touch-action: manipulation;
 }
 
-.search-input-icon[role="button"]:active {
+.search-pill__icon[role="button"]:active {
   opacity: 0.65;
 }
 
-.search-input-icon svg {
+.search-pill__icon svg {
   width: 20px;
   height: 20px;
   stroke-width: 2.2;
@@ -289,7 +289,7 @@ body {
 }
 
 /* ── Search Cards ── */
-.sc {
+.result-card {
   display: flex;
   gap: var(--space-4, 16px);
   align-items: flex-start;
@@ -305,18 +305,18 @@ body {
   cursor: pointer;
 }
 
-.sc:hover {
+.result-card:hover {
   border-color: rgba(0, 150, 136, 0.25);
   background: rgba(0, 150, 136, 0.03);
   box-shadow: none;
 }
 
-.sc:active {
+.result-card:active {
   background: rgba(13, 148, 136, 0.05);
   border-color: rgba(13, 148, 136, 0.18);
 }
 
-.sc .scc {
+.result-card .result-card__glyph {
   flex: 0 0 56px;
   height: 56px;
   font-size: 24px;
@@ -331,7 +331,7 @@ body {
   flex-shrink: 0;
 }
 
-.sc .scb {
+.result-card .result-card__body {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
@@ -339,7 +339,7 @@ body {
   gap: 5px;
 }
 
-.sc .sct {
+.result-card .result-card__title {
   font-size: 1.02rem;
   font-weight: 700;
   color: var(--text-main, #152a2f);
@@ -350,7 +350,7 @@ body {
   letter-spacing: -0.01em;
 }
 
-.sc .scs {
+.result-card .result-card__subtitle {
   font-size: 0.89rem;
   font-weight: 500;
   color: var(--text-muted, #757575);
@@ -360,7 +360,7 @@ body {
   text-overflow: ellipsis;
 }
 
-.sc .scg {
+.result-card .result-card__tags {
   display: flex;
   gap: 5px;
   margin-top: 5px;
@@ -369,7 +369,7 @@ body {
   overflow: hidden;
 }
 
-.sc .tag {
+.result-card .result-card__tag {
   background: rgba(13, 148, 136, 0.06);
   color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   padding: 3px 10px;
@@ -383,13 +383,13 @@ body {
   letter-spacing: 0.1px;
 }
 
-.sc.sv {
+.result-card.result-card--vertical {
   flex-direction: column;
   gap: 10px;
   padding: 14px;
 }
 
-.sc.sv .scc {
+.result-card.result-card--vertical .result-card__glyph {
   flex: 0 0 auto;
   height: auto;
   width: 100%;
@@ -403,13 +403,13 @@ body {
   overflow: hidden;
 }
 
-.vs-container {
+.vscroll-container {
   position: relative;
   min-height: 2px;
   contain: layout style paint;
 }
 
-.vs-item {
+.vscroll-item {
   position: absolute;
   left: 0;
   right: 0;
@@ -419,37 +419,37 @@ body {
   box-sizing: border-box;
 }
 
-.vs-item .sc {
+.vscroll-item .result-card {
   contain: layout style paint;
   margin-bottom: 0;
 }
 
 /* ── Container Queries for Search Cards ── */
 @container search (max-width: 640px) {
-  .sc {
+  .result-card {
     padding: 13px 14px;
     gap: 12px;
     border-radius: var(--radius-md, 16px);
   }
-  .sc .scc {
+  .result-card .result-card__glyph {
     flex: 0 0 52px;
     height: 52px;
     font-size: 21px;
   }
-  .sc .sct {
+  .result-card .result-card__title {
     font-size: 0.93rem;
   }
-  .sc .scs {
+  .result-card .result-card__subtitle {
     font-size: 0.87rem;
   }
 }
 
 @container search (max-width: 480px) {
-  .sc {
+  .result-card {
     padding: 12px 13px;
     gap: 10px;
   }
-  .sc .scc {
+  .result-card .result-card__glyph {
     flex: 0 0 48px;
     height: 48px;
     font-size: 20px;
@@ -465,7 +465,7 @@ body {
   contain: layout style paint;
 }
 
-.suggestions-head {
+.search-suggestions-title {
   padding: 20px 16px 8px;
   font-size: 0.80rem;
   font-weight: 700;
@@ -475,7 +475,7 @@ body {
   user-select: none;
 }
 
-.suggestion-item {
+.search-suggestion-item {
   padding: 13px 20px;
   cursor: pointer;
   display: flex;
@@ -486,11 +486,11 @@ body {
   contain: layout style paint;
 }
 
-.suggestion-item:active {
+.search-suggestion-item:active {
   background: rgba(103, 115, 135, 0.08);
 }
 
-.suggestion-body {
+.search-suggestion-body {
   flex: 1;
   word-break: break-word;
   font-size: 0.95rem;
@@ -499,7 +499,7 @@ body {
   line-height: 1.5;
 }
 
-.suggestion-body mark {
+.search-suggestion-body mark {
   background: rgba(13, 148, 136, 0.18);
   color: var(--text-main, #152a2f);
   font-weight: 600;
@@ -525,7 +525,7 @@ body {
   margin-inline: auto;
 }
 
-.search-result-here {
+.search-result-placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -643,8 +643,8 @@ body {
 /* ── Accessible Focus Rings ── */
 #search-clear-btn:focus-visible,
 .filter-pill:focus-visible,
-.sc:focus-visible,
-.suggestion-item:focus-visible {
+.result-card:focus-visible,
+.search-suggestion-item:focus-visible {
   outline: 2px solid var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   outline-offset: 2px;
 }
@@ -660,16 +660,16 @@ body {
 
 /* ── Hover States ── */
 @media (hover: hover) {
-  .search-input-icon[role="button"]:hover {
+  .search-pill__icon[role="button"]:hover {
     background: rgba(14, 95, 153, 0.06);
   }
   #search-clear-btn:hover {
     background: rgba(14, 95, 153, 0.16);
   }
-  .suggestion-item:hover {
+  .search-suggestion-item:hover {
     background: rgba(14, 95, 153, 0.03);
   }
-  .sc:hover {
+  .result-card:hover {
     background: rgba(0, 150, 136, 0.03);
     border-color: rgba(0, 150, 136, 0.25);
     box-shadow: none;
@@ -695,23 +695,23 @@ body {
   #searchForm {
     padding: 0 12px;
   }
-  .search-input-wrapper {
+  .search-pill {
     height: 44px;
     padding: 0 8px 0 4px;
   }
-  .search-input-icon {
+  .search-pill__icon {
     width: 38px;
     height: 38px;
     min-width: 38px;
   }
-  .search-input-icon svg {
+  .search-pill__icon svg {
     width: 20px;
     height: 20px;
   }
   #searchInput {
     font-size: 0.95rem;
   }
-  .suggestion-item {
+  .search-suggestion-item {
     padding: 12px 16px;
   }
   .filter-pills-row {
@@ -751,10 +751,10 @@ body {
   #searchForm {
     padding: 0 10px;
   }
-  .search-input-wrapper {
+  .search-pill {
     height: 46px;
   }
-  .search-input-icon {
+  .search-pill__icon {
     width: 40px;
     height: 40px;
     min-width: 40px;
@@ -798,7 +798,7 @@ body {
     margin: 0;
     padding: 0;
   }
-  .sc {
+  .result-card {
     page-break-inside: avoid;
     contain: none;
     box-shadow: none;

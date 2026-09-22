@@ -1,16 +1,16 @@
 // @ts-check
 /**
  * @file input-bar.js
- * Manages the .search-input-wrapper widget.
+ * Manages the .search-pill widget.
  *
  * ┌─────────────────────────────────────────────────────────────┐
- * │  .search-input-wrapper  (flex row)                         │
+ * │  .search-pill  (flex row)                         │
  * │  ┌──────────┐ ┌──────────────────────────┐ ┌────────────┐  │
  * │  │ icon-slot│ │     #searchInput          │ │ clear-btn  │  │
  * │  └──────────┘ └──────────────────────────┘ └────────────┘  │
  * └─────────────────────────────────────────────────────────────┘
  *
- * IconSlotService   — swaps 🔍 ↔ ← inside .search-input-icon.
+ * IconSlotService   — swaps 🔍 ↔ ← inside .search-pill__icon.
  *   Icon modes:
  *     A) Overlay open           → ← → history.back()
  *        (popstate fires → OverlayService.close('popstate'))
@@ -40,7 +40,7 @@
     /** @type {Function|null} */ _keyHandler   : null,
 
     /** @returns {Element|null} */
-    _slot: () => DOMService.query('.search-input-icon'),
+    _slot: () => DOMService.query('.search-pill__icon'),
 
     /**
      * Recalculate which icon to show and rebind listeners.
@@ -146,22 +146,22 @@
     /** @type {boolean} */ _wrapperBuilt: false,
 
     /**
-     * Ensure .search-input-wrapper contains elements in correct flex order:
-     *   [.search-input-icon] [#searchInput] [#search-clear-btn]
+     * Ensure .search-pill contains elements in correct flex order:
+     *   [.search-pill__icon] [#searchInput] [#search-clear-btn]
      *
      * Must be called once after data loads.
      * Idempotent — safe to call again (guarded by _wrapperBuilt).
      */
     buildWrapper() {
       if (this._wrapperBuilt) return;
-      const wrapper = DOMService.query('.search-input-wrapper');
+      const wrapper = DOMService.query('.search-pill');
       const inp     = DOMService.get(CONFIG.DOM.searchInputId);
       if (!wrapper || !inp) return;
 
       // 1. Ensure icon slot is the first child
-      let slot = wrapper.querySelector('.search-input-icon');
+      let slot = wrapper.querySelector('.search-pill__icon');
       if (!slot) {
-        slot = DOMService.create('span', null, 'search-input-icon');
+        slot = DOMService.create('span', null, 'search-pill__icon');
         wrapper.insertBefore(slot, wrapper.firstChild);
       }
       slot.innerHTML = M.CONFIG.Icons.search;
@@ -206,7 +206,7 @@
             M.SearchService.doSearch();
             this.closeKB();
           } else if (e.key === 'ArrowDown') {
-            DOMService.get(CONFIG.DOM.suggestionContainerId)?.querySelector('.suggestion-item')?.focus?.();
+            DOMService.get(CONFIG.DOM.suggestionContainerId)?.querySelector('.search-suggestion-item')?.focus?.();
           } else if (e.key === 'Backspace') {
             clearTimeout(State.debounceTimeout);
             State.debounceTimeout = setTimeout(() => {

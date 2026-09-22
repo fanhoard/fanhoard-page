@@ -10,7 +10,7 @@
  *
  * ── Quick start ──────────────────────────────────────────────────────────────
  *
- *  1. Add ONE script tag to any page (before your page script):
+ *  1. Add ONE script result-card__tag to any page (before your page script):
  *
  *       <script src="/assets/js/ure/ure.js"></script>
  *
@@ -196,14 +196,14 @@ function example_searchRenderResults(results, lang = 'en') {
       const typeName = item.typeObj?.name?.[lang] || item.typeName || '';
       const catName  = item.category?.name?.[lang] || item.catName || '';
       return `
-        <div class="sc" role="button" tabindex="0"
+        <div class="result-card" role="button" tabindex="0"
              data-text="${encodeURIComponent(text)}"
              aria-label="${name}">
-          <div class="scc">${text}</div>
-          <div class="scb">
-            <div class="sct">${name}</div>
-            <div class="scs">${typeName}</div>
-            ${catName ? `<span class="tag">${catName}</span>` : ''}
+          <div class="result-card__glyph">${text}</div>
+          <div class="result-card__body">
+            <div class="result-card__title">${name}</div>
+            <div class="result-card__subtitle">${typeName}</div>
+            ${catName ? `<span class="result-card__tag">${catName}</span>` : ''}
           </div>
         </div>
       `;

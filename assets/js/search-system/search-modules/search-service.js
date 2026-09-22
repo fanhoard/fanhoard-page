@@ -27,9 +27,9 @@
  *   _showPlaceholder() was calling _syncPlaceholderHeight() which sets
  *   --placeholder-h to a px snapshot of window.innerHeight. When the browser
  *   nav bar hides, innerHeight grows but --placeholder-h stays stale, so
- *   .search-result-here is clipped at the bottom.
+ *   .search-result-placeholder is clipped at the bottom.
  *   FIX: removed _syncPlaceholderHeight() and _ensureResizeListener() entirely.
- *   CSS already handles .search-result-here height correctly without any JS.
+ *   CSS already handles .search-result-placeholder height correctly without any JS.
  *   JS does not set --placeholder-h at all.
  *
  * @module search-service
@@ -129,8 +129,8 @@
           if (!docsReady) {
             window.__pendingSearch = { q: q.trim(), type: State.selectedType || 'all' };
             const rc = DOMService.get(CONFIG.DOM.searchResultsId);
-            if (rc && !rc.querySelector('.search-result-here')) {
-              rc.innerHTML = `<div class="search-result-here" style="opacity:.5">${LanguageService.t('search_result_here')}</div>`;
+            if (rc && !rc.querySelector('.search-result-placeholder')) {
+              rc.innerHTML = `<div class="search-result-placeholder" style="opacity:.5">${LanguageService.t('search_result_here')}</div>`;
             }
             window.__renderIsRestore = false;
             return;
@@ -268,7 +268,7 @@
      * BUG FIX: Removed _syncPlaceholderHeight() and _ensureResizeListener().
      * Those functions set --placeholder-h to a px snapshot of window.innerHeight,
      * which becomes stale when the browser nav bar shows/hides (innerHeight changes).
-     * CSS already handles .search-result-here height correctly without any JS.
+     * CSS already handles .search-result-placeholder height correctly without any JS.
      *
      * @private
      */
@@ -280,7 +280,7 @@
       RenderingService.disconnectRenderObserver();
       const rc = DOMService.get(CONFIG.DOM.searchResultsId);
       if (rc) {
-        rc.innerHTML = `<div class="search-result-here">${LanguageService.t('search_result_here')}</div>`;
+        rc.innerHTML = `<div class="search-result-placeholder">${LanguageService.t('search_result_here')}</div>`;
       }
       // VirtualScrollEngine.destroy() removed — rendering uses URE, not the old VSE
       FilterService.setupCategoryFilter([], 'all');
