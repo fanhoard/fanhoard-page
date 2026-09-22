@@ -646,10 +646,13 @@ body {
   outline-offset: 2px;
 }
 
-/* Focus: no outline box on the input; resting wrapper border + text caret remain (owner request). */
+/* Focus: no outline box or glow on the input itself (owner request).
+   Overrides the universal :focus-visible ring from base.css; the wrapper keeps
+   its resting border and the text caret indicates focus. */
 #searchInput:focus,
 #searchInput:focus-visible {
   outline: none;
+  box-shadow: none;
 }
 
 /* ── Hover States ── */
