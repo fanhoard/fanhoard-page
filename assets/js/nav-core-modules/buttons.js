@@ -333,7 +333,7 @@
       let defBtn = null;
       const frag = document.createDocumentFragment();
 
-      subBtns.forEach(cfg => {
+      subBtns.forEach((cfg, idx) => {
         const label = cfg[`${lang}_label`];
         if (!label) return;
 
@@ -344,7 +344,7 @@
 
         const fullUrl = `${mainUrl}-${cfg.url || cfg.jsonFile}`;
         btn.setAttribute('data-url', fullUrl);
-        if (cfg.isDefault) defBtn = btn;
+        if (cfg.isDefault || (!defBtn && idx === 0)) defBtn = btn;
         if (fullUrl === activeUrl) btn.classList.add('active');
 
         btn.addEventListener('click', async () => {
@@ -364,8 +364,10 @@
       ctr.appendChild(frag);
 
       const needDef = !activeUrl || !ctr.querySelector('.button-sub.active');
-      if (needDef && defBtn)
-        setTimeout(() => { try { this.triggerSubButtonClick(defBtn); } catch (_) {} }, 0);
+      if (needDef && defBtn) {
+        defBtn.classList.add('active');
+        State.buttons.currentSubButton = defBtn;
+      }
     },
 
     // ── Utilities ──────────────────────────────────────────────────────────────
