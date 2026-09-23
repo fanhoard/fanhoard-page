@@ -256,11 +256,10 @@
 
 } /* end @layer fvl */
 
+/* Preserve header nav visibility & hit-testing during action transitions */
 body.nav-loading header nav,
 body.nav-loading #sub-nav {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transition: opacity 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: auto;
 }
 
 header nav,

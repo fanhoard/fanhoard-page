@@ -207,17 +207,17 @@
       //   ทำให้ navigation ใหม่เริ่มต้นด้วยสถานะสะอาดเสมอ
       try { M.LoadingService?._forceReset(); } catch (_) {}
 
-      // ── Smart loading: enable fvl-nav-mode + nav-loading state ──────────────
-      // WHY fvl-nav-mode: tells FVL CSS to leave room for bottom nav so the
-      //   spinner is centered in the visible area, not the full viewport.
-      // WHY nav-loading: fades out the main nav buttons + sub-nav buttons so
-      //   the user can't click another category mid-fetch, and gets a clear
-      //   visual signal that "we're switching". Restored in finally block.
+      // ── Smart loading: preserve nav buttons visible/interactive, use content-scoped loader
       this._setNavLoading(true);
 
-      // ── Show loading overlay (เริ่ม session ใหม่ หลัง reset แล้ว) ────────
-      // v4: show() จะแสดงข้อความ "Loading…" / "กำลังโหลด…" เท่านั้น
-      try { M.LoadingService?.show(); } catch (_) {}
+      // Show content-scoped loading overlay for Discover main/sub action transitions
+      try {
+        if (M.LoadingService?.showInContent) {
+          M.LoadingService.showInContent();
+        } else {
+          M.LoadingService?.show?.({ mode: 'scoped', target: '#content-loading' });
+        }
+      } catch (_) {}
 
       // ── v4: Guarantee overlay paint before mutating content ──────────
       // WHY: LoadingService.show() ใช้ instant=true ซึ่ง set fvl-shown
@@ -471,25 +471,20 @@
     _setNavLoading(isLoading) {
       try {
         if (isLoading) {
-          document.body.classList.add('fvl-nav-mode', 'nav-loading');
-        } else {
-          document.body.classList.remove('nav-loading');
-          // Keep fvl-nav-mode — it's a persistent page-mode class
+          document.body.classList.add('fvl-nav-mode');
         }
+        document.body.classList.remove('nav-loading');
 
-        // Direct style application (more reliable than CSS rules in some browsers)
         const nav    = document.querySelector('header nav, nav.fv-nav, .fv-nav');
         const subNav = document.getElementById('sub-nav');
-        const opacity = isLoading ? '0' : '';
-        const pe      = isLoading ? 'none' : '';
 
         if (nav) {
-          nav.style.setProperty('opacity', opacity, 'important');
-          nav.style.setProperty('pointer-events', pe, 'important');
+          nav.style.removeProperty('opacity');
+          nav.style.removeProperty('pointer-events');
         }
         if (subNav) {
-          subNav.style.setProperty('opacity', opacity, 'important');
-          subNav.style.setProperty('pointer-events', pe, 'important');
+          subNav.style.removeProperty('opacity');
+          subNav.style.removeProperty('pointer-events');
         }
       } catch (_) {}
     },

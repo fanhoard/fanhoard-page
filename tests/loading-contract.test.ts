@@ -161,4 +161,33 @@ describe('Central Loader Architecture & Loading Contract (FVL)', () => {
       expect(target.getAttribute('aria-busy')).toBe('false');
     });
   });
+
+  describe('Router Nav-Loading Isolation Contract', () => {
+    it('keeps header nav buttons visible and interactive when _setNavLoading is called', () => {
+      const headerNav = document.createElement('nav');
+      headerNav.className = 'fv-nav';
+      const subNav = document.createElement('div');
+      subNav.id = 'sub-nav';
+
+      const header = document.createElement('header');
+      header.appendChild(headerNav);
+      document.body.appendChild(header);
+      document.body.appendChild(subNav);
+
+      // Load router.js
+      (window as any).NavCoreModules = { CONFIG: { ALL_BUTTON: { URL: 'all' } }, State: { buttons: {} }, Utils: {} };
+      const routerCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/nav-core-modules/router.js'), 'utf-8');
+      const runRouter = new Function('window', 'document', 'localStorage', routerCode);
+      runRouter(window, document, window.localStorage);
+
+      const RouterService = (window as any).NavCoreModules.RouterService;
+      RouterService._setNavLoading(true);
+
+      expect(document.body.classList.contains('nav-loading')).toBe(false);
+      expect(headerNav.style.opacity).not.toBe('0');
+      expect(headerNav.style.pointerEvents).not.toBe('none');
+      expect(subNav.style.opacity).not.toBe('0');
+      expect(subNav.style.pointerEvents).not.toBe('none');
+    });
+  });
 });
