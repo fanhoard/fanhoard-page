@@ -44,10 +44,11 @@ describe('Central Loader Architecture & Loading Contract (FVL)', () => {
       expect((window as any).FLV).toBe((window as any).FVL);
     });
 
-    it('exports version, show, hide, scoped, inline, topbar, readinessHandshake', () => {
+    it('exports version, show, hide, hideInstant, scoped, inline, topbar, readinessHandshake', () => {
       const FVL = (window as any).FVL;
       expect(typeof FVL.show).toBe('function');
       expect(typeof FVL.hide).toBe('function');
+      expect(typeof FVL.hideInstant).toBe('function');
       expect(typeof FVL.scoped).toBe('function');
       expect(typeof FVL.inline).toBe('function');
       expect(typeof FVL.topbar).toBe('function');
@@ -99,6 +100,39 @@ describe('Central Loader Architecture & Loading Contract (FVL)', () => {
       expect(target.getAttribute('aria-busy')).toBe('true');
 
       await handle.hide();
+      expect(target.getAttribute('aria-busy')).toBe('false');
+    });
+
+    it('clears target aria-busy attribute from "true" to "false" on hideInstant', async () => {
+      const target = document.createElement('div');
+      target.id = 'content-loading';
+      document.body.appendChild(target);
+
+      const LoadingService = (window as any).NavCoreModules.LoadingService;
+      const handle = LoadingService.showInContent({ message: 'Loading symbols…' });
+
+      expect(handle).toBeDefined();
+      expect(target.getAttribute('aria-busy')).toBe('true');
+
+      await LoadingService.hideInstant(handle.id);
+      expect(target.getAttribute('aria-busy')).toBe('false');
+    });
+
+    it('FVL.hideInstant is idempotent and clears target aria-busy', async () => {
+      const target = document.createElement('div');
+      target.id = 'content-loading';
+      document.body.appendChild(target);
+
+      const FVL = (window as any).FVL;
+      const handle = FVL.scoped({ target: '#content-loading', instant: true });
+
+      expect(target.getAttribute('aria-busy')).toBe('true');
+
+      await FVL.hideInstant(handle.id);
+      expect(target.getAttribute('aria-busy')).toBe('false');
+
+      // Second call should be idempotent without throwing
+      await FVL.hideInstant(handle.id);
       expect(target.getAttribute('aria-busy')).toBe('false');
     });
 

@@ -1010,6 +1010,10 @@
 
       return new Promise(function(resolve) {
         Animator.leave(inst, function() {
+          if (inst.state === 'hidden' || inst.state === 'destroyed') {
+            resolve();
+            return;
+          }
           _cleanup(inst);
           inst.state = 'hidden';
           State.emit('hidden', { id: id, mode: inst.mode });
@@ -1019,6 +1023,26 @@
           resolve();
         });
       });
+    }
+
+    // ── Hide instantly by ID (no exit animation) ──
+    function hideInstant(id) {
+      if (!id) id = CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
+      var inst = State.getInstance(id);
+      if (!inst || inst.state === 'hidden' || inst.state === 'destroyed') return Promise.resolve();
+
+      if (inst.autoHideTimer) { clearTimeout(inst.autoHideTimer); inst.autoHideTimer = null; }
+      if (inst.state !== 'hiding') {
+        State.emit('hiding', { id: id, mode: inst.mode });
+      }
+
+      _cleanup(inst);
+      inst.state = 'hidden';
+      State.emit('hidden', { id: id, mode: inst.mode });
+      if (typeof inst.options.onHide === 'function') {
+        try { inst.options.onHide(id); } catch (e) { console.error('[FVL] onHide error:', e); }
+      }
+      return Promise.resolve();
     }
 
     // ── Cleanup DOM + restore target ──
@@ -1121,6 +1145,7 @@
         options: inst.options,
         element: inst.rootEl,
         hide: function() { return hide(inst.id); },
+        hideInstant: function() { return hideInstant(inst.id); },
         update: function(o) { update(inst.id, o); },
         setMessage: function(msg) { update(inst.id, { message: msg }); },
         setProgress: function(p) { update(inst.id, { progress: p }); },
@@ -1160,8 +1185,10 @@
     return Object.freeze({
       show: show,
       hide: hide,
+      hideInstant: hideInstant,
       hideAll: hideAll,
       hideByGroup: hideByGroup,
+      getByMode: function(mode) { return State.getByMode(mode); },
       readinessHandshake: readinessHandshake,
       update: update,
       stats: stats,
@@ -1217,6 +1244,10 @@
 
       hide: function() {
         return Engine.hide(CONFIG.DOM.DEFAULT_FULLSCREEN_ID);
+      },
+
+      hideInstant: function(id) {
+        return Engine.hideInstant(id || CONFIG.DOM.DEFAULT_FULLSCREEN_ID);
       },
 
       updateMessage: function(msg) {
@@ -1323,6 +1354,11 @@
       if (!id) id = CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
       return Engine.hide(id);
     },
+    hideInstant: function(id) {
+      if (!id) id = CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
+      return Engine.hideInstant(id);
+    },
+    getByMode: function(mode) { return State.getByMode(mode); },
     hideAll: function() { return Engine.hideAll(); },
     hideByGroup: function(group) { return Engine.hideByGroup(group); },
     readinessHandshake: function(opts) { return Engine.readinessHandshake(opts); },
