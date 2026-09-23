@@ -30,10 +30,6 @@
   'use strict';
 
   // ── Build ID (replaced at build time by scripts/update-version.js) ──────────
-  // WHY: FVL (loading-system/fvl.js) ไม่ได้อยู่ใน HTML ทุกหน้า
-  //   บางหน้า loading.js โหลด FVL เองแบบ dynamic → URL ไม่มี ?v= → ใช้ cache เดิม
-  //   FV_BUILD_ID ถูก inject buildId จริงตอน build → ใช้ต่อ ?v= ท้าย URL
-  //   dev mode: ค่า '' → _v() คืน '' → URL ไม่มี ?v= → browser cache ปกติ
   var FV_BUILD_ID = '2.3.0-202609220313';
 
   /** คืน query string '?v=<buildId>' ถ้าไม่มี buildId คืน '' */
@@ -42,20 +38,12 @@
   var DEFAULT_ID = 'fvl-default-fullscreen';
 
   // ── Z-index strategy ──────────────────────────────────────────────────────
-  // WHY 15999: Bottom nav uses --fv-z-nav (16000). Loading overlay must sit
-  // BEHIND the bottom nav so the nav remains visible and clickable while
-  // loading is in progress. 15999 = (16000 - 1).
   var NAV_BEHIND_Z = 15999;
 
   // ── Minimum visible time ──────────────────────────────────────────────────
-  // WHY 300ms: UX research (NN/g, virtuslab.com) recommends 300-600ms as the
-  // sweet spot. 300ms prevents 1-frame flashes on cached loads while still
-  // feeling snappy. The overlay shows INSTANTLY on show() — this is only a
-  // delay on the FINAL hide.
   var MIN_VISIBLE_MS = 300;
 
   // ── Single loading message (localized) ─────────────────────────────────────
-  // v2.1: แสดงแค่ข้อความเดียว ไม่มี phase indicators
   var LOADING_MESSAGE = Object.freeze({
     en: 'Loading…',
     th: 'กำลังโหลด…',
@@ -80,7 +68,6 @@
       }
       if (!base) return false;
       var s = document.createElement('script');
-      // WHY _v(): ต่อ ?v=<buildId> เพื่อ cache-bust fvl.js ที่ loading.js โหลดเองแบบ dynamic
       s.src = base + '/loading-system/fvl.js' + _v();
       s.async = false;
       document.head.appendChild(s);
@@ -146,6 +133,7 @@
 
     /**
      * Show the loading overlay (open a navigation session).
+     * Supports both fullscreen navigation and content-scoped action loading.
      *
      * @param {LoadingOptions} [opts]
      */
@@ -156,12 +144,15 @@
       // Open a new session
       this._sessionCount++;
 
+      var o = (typeof opts === 'string') ? { message: opts } : (opts || {});
+      o.mode = o.mode || (o.target ? 'scoped' : 'fullscreen');
+
       // If an inline boot loader (#fv-boot-loader) or early overlay (#nc-early-overlay) is currently visible,
-      // adopt it instead of mounting a duplicate .fvl-fullscreen overlay DOM node.
+      // adopt it ONLY when requested mode is 'fullscreen'. Scoped/inline actions must render content-scoped.
       var bootEl = document.getElementById('fv-boot-loader') || document.getElementById('nc-early-overlay');
       var isBootVisible = bootEl && !bootEl.classList.contains('fv-boot-hidden') && (typeof window.getComputedStyle !== 'function' || window.getComputedStyle(bootEl).display !== 'none');
 
-      if (isBootVisible) {
+      if (isBootVisible && o.mode === 'fullscreen') {
         this._visibleSince = Date.now();
         this._el = bootEl;
         var self = this;
@@ -183,31 +174,37 @@
         return;
       }
 
-      // Normalize opts — v2.1: ใส่ข้อความ "Loading…" เสมอ ไม่รับ message จาก caller
-      var o = (typeof opts === 'string') ? { message: opts } : (opts || {});
-      o.mode = 'fullscreen';
-      o.id = o.id || DEFAULT_ID;
-      if (o.zIndex == null) o.zIndex = NAV_BEHIND_Z;
-      o.instant = o.instant !== false;       // default true
-      o.lockScroll = o.lockScroll !== false; // default true
-
-      // v2.1: แสดงแค่ "Loading…" ไม่รับ message อื่น
-      o.message = _loadingMessage();
+      if (o.mode === 'fullscreen') {
+        o.id = o.id || DEFAULT_ID;
+        if (o.zIndex == null) o.zIndex = NAV_BEHIND_Z;
+        o.lockScroll = o.lockScroll !== false; // default true
+      } else {
+        if (!o.id) {
+          if (o.target === '#content-loading' || !o.target) {
+            o.id = 'fvl-scoped-content';
+          } else if (typeof o.target === 'string') {
+            o.id = 'fvl-scoped-' + o.target.replace(/[^a-zA-Z0-9_-]/g, '');
+          } else {
+            o.id = 'fvl-scoped-content';
+          }
+        }
+        o.lockScroll = false; // content-scoped mode never locks scroll
+      }
+      o.instant = o.instant !== false; // default true
+      o.message = o.message || _loadingMessage();
 
       this._lastOpts = o;
 
-      // Check if overlay was already active (for pulse decision)
-      var wasActive = fvl.isActive(DEFAULT_ID);
+      var targetId = o.id || DEFAULT_ID;
+      var wasActive = fvl.isActive(targetId);
 
-      // ALWAYS call FVL.show() — it's idempotent and handles all states
       var handle = fvl.show(o);
       if (handle) {
         this._el = handle.element;
         this._visibleSince = Date.now();
       }
 
-      // If overlay was already visible, pulse to signal new operation
-      if (wasActive) {
+      if (wasActive && o.mode === 'fullscreen') {
         this._pulse();
       }
 
@@ -263,70 +260,108 @@
 
     /**
      * Hide the loading overlay (close one navigation session).
+     * @param {string} [id] Optional instance ID
      * @returns {Promise<void>}
      */
-    hide: function () {
+    hide: function (id) {
       if (this._sessionCount > 0) this._sessionCount--;
 
-      if (this._sessionCount > 0) {
+      var targetId = (typeof id === 'string') ? id : DEFAULT_ID;
+
+      if (this._sessionCount > 0 && targetId === DEFAULT_ID) {
         return Promise.resolve();
       }
 
-      if (document.getElementById('fv-boot-loader') || document.getElementById('nc-early-overlay')) {
+      if ((document.getElementById('fv-boot-loader') || document.getElementById('nc-early-overlay')) && targetId === DEFAULT_ID) {
         return this.readinessHandshake();
       }
 
       var elapsed = Date.now() - this._visibleSince;
-      if (this._visibleSince > 0 && elapsed < MIN_VISIBLE_MS) {
+      if (this._visibleSince > 0 && elapsed < MIN_VISIBLE_MS && targetId === DEFAULT_ID) {
         var self = this;
         if (this._pendingHideTimer) clearTimeout(this._pendingHideTimer);
         return new Promise(function(resolve) {
           self._pendingHideTimer = setTimeout(function() {
             self._pendingHideTimer = null;
             var fvl = _fvl();
-            if (fvl) fvl.hide(DEFAULT_ID);
-            resolve();
+            if (fvl) {
+              fvl.hide(DEFAULT_ID).then(function() {
+                self._hideScopedInstances(fvl);
+                resolve();
+              }).catch(function() { resolve(); });
+            } else {
+              resolve();
+            }
           }, MIN_VISIBLE_MS - elapsed);
         });
       }
 
       var fvl = _fvl();
       if (!fvl) return Promise.resolve();
-      return fvl.hide(DEFAULT_ID);
+      var hidePromise = fvl.hide(targetId);
+      if (targetId === DEFAULT_ID) {
+        this._hideScopedInstances(fvl);
+      }
+      return hidePromise || Promise.resolve();
+    },
+
+    _hideScopedInstances: function (fvl) {
+      if (!fvl) fvl = _fvl();
+      if (!fvl) return;
+      try {
+        var scopedInsts = typeof fvl.getByMode === 'function' ? fvl.getByMode('scoped') : [];
+        if (Array.isArray(scopedInsts)) {
+          scopedInsts.forEach(function(inst) {
+            if (inst && inst.id) fvl.hide(inst.id);
+          });
+        }
+      } catch (_) {}
+    },
+
+    _hideScopedInstancesInstant: function (fvl) {
+      if (!fvl) fvl = _fvl();
+      if (!fvl) return;
+      try {
+        var scopedInsts = typeof fvl.getByMode === 'function' ? fvl.getByMode('scoped') : [];
+        if (Array.isArray(scopedInsts)) {
+          scopedInsts.forEach(function(inst) {
+            if (inst && inst.id) fvl.hideInstant(inst.id);
+          });
+        }
+      } catch (_) {}
     },
 
     /** @param {string|null} [msg] */
     updateMessage: function (msg) {
       var fvl = _fvl();
       if (!fvl) return;
-      fvl.update(DEFAULT_ID, { message: msg });
+      fvl.update(DEFAULT_ID, { message: msg || _loadingMessage() });
     },
 
     /**
      * Check if loading is active.
+     * @param {string} [id]
      * @returns {boolean}
      */
-    isShown: function () {
-      if (this._sessionCount > 0) return true;
+    isShown: function (id) {
+      var targetId = (typeof id === 'string') ? id : DEFAULT_ID;
+      if (targetId === DEFAULT_ID && this._sessionCount > 0) return true;
       var fvl = _fvl();
       if (!fvl) return false;
-      return fvl.isActive(DEFAULT_ID);
+      return fvl.isActive(targetId);
     },
 
-    /** @returns {typeof CONFIG.LOADING_MESSAGES} */
+    /** @returns {typeof LOADING_MESSAGE} */
     getMessages: function () {
       var fvl = _fvl();
       if (fvl) return fvl.config().MESSAGES;
-      return Object.freeze({
-        en: Object.freeze({ loading: 'Loading...' }),
-        th: Object.freeze({ loading: 'กำลังโหลด...' }),
-      });
+      return LOADING_MESSAGE;
     },
 
     // ── Internal aliases (called by Nav-Core router/init) ──────────────────
     _updateTopVar: function () {
       var fvl = _fvl();
-      if (fvl) fvl.modules().Engine._updateTopVar();
+      if (fvl && typeof fvl.updateTopVar === 'function') fvl.updateTopVar();
     },
 
     _setTexts: function () {
@@ -342,87 +377,36 @@
     },
 
     /**
-     * Hide loading แบบ instant — ไม่มี fade-out animation
+     * Hide loading instantly — no fade-out animation.
+     * @param {string} [id]
+     * @returns {Promise<void>}
      */
-    hideInstant: function () {
-      if (this._sessionCount > 0) this._sessionCount--;
-      if (this._sessionCount > 0) return Promise.resolve();
-
-      if (document.getElementById('fv-boot-loader') || document.getElementById('nc-early-overlay')) {
-        return this.readinessHandshake();
-      }
-
-      this._visibleSince = 0;
+    hideInstant: function (id) {
+      this._sessionCount = 0;
       if (this._pendingHideTimer) {
         clearTimeout(this._pendingHideTimer);
         this._pendingHideTimer = null;
       }
-
-      var self = this;
       var fvl = _fvl();
-      var inst = null;
-      if (fvl) {
-        try {
-          inst = fvl.modules().State.getInstance(DEFAULT_ID);
-        } catch (_) {}
+      if (!fvl) return Promise.resolve();
+      var targetId = (typeof id === 'string') ? id : DEFAULT_ID;
+      fvl.hideInstant(targetId);
+      if (targetId === DEFAULT_ID) {
+        this._hideScopedInstancesInstant(fvl);
       }
-
-      if (inst && inst.state === 'showing') {
-        requestAnimationFrame(function () {
-          self._removeOverlayNow(fvl);
-        });
-        return Promise.resolve();
-      }
-
-      requestAnimationFrame(function () {
-        self._removeOverlayNow(fvl);
-      });
       return Promise.resolve();
     },
 
-    /**
-     * Internal — actually remove overlay DOM + FVL instance.
-     */
-    _removeOverlayNow: function (fvl) {
-      if (!fvl) fvl = _fvl();
-
-      var inst = null;
-      if (fvl) {
-        try { inst = fvl.modules().State.getInstance(DEFAULT_ID); } catch (_) {}
-      }
-      if (inst && inst.mode === 'fullscreen' && inst._lockedScrollY != null) {
-        try {
-          document.body.style.position = '';
-          document.body.style.top      = '';
-          document.body.style.width    = '';
-          window.scrollTo(0, inst._lockedScrollY);
-          inst._lockedScrollY = null;
-        } catch (_) {}
-      } else {
-        try {
-          if (document.body.style.position === 'fixed') {
-            document.body.style.position = '';
-            document.body.style.top      = '';
-            document.body.style.width    = '';
-          }
-        } catch (_) {}
-      }
-
-      if (this._el && this._el.id !== 'fv-boot-loader' && this._el.id !== 'nc-early-overlay') {
-        try {
-          if (this._el.parentNode) this._el.parentNode.removeChild(this._el);
-        } catch (_) {}
-        this._el = null;
-      }
-      if (fvl && inst) {
-        try {
-          inst.state = 'destroyed';
-          fvl.modules().State.removeInstance(DEFAULT_ID);
-        } catch (_) {}
-      }
+    showInContent: function (opts) {
+      var o = (typeof opts === 'string') ? { message: opts } : (opts || {});
+      o.mode = o.mode || 'scoped';
+      o.target = o.target || '#content-loading';
+      return this.show(o);
     },
-    showInContent: function (opts) { return this.show(opts); },
-    hideFromContent: function ()   { return this.hide(); },
+
+    hideFromContent: function (id) {
+      return this.hide(id || 'fvl-scoped-content');
+    },
 
     // ── Emergency reset ───────────────────────────────────────────────────
     _forceReset: function () {
@@ -434,7 +418,6 @@
         clearTimeout(this._pendingHideTimer);
         this._pendingHideTimer = null;
       }
-      // If boot loader is active during bootstrapping, do not destroy it on forceReset
       if (this._el && this._el.id !== 'fv-boot-loader' && this._el.id !== 'nc-early-overlay') {
         try {
           if (this._el.parentNode) this._el.parentNode.removeChild(this._el);
@@ -443,34 +426,17 @@
       }
       var fvl = _fvl();
       if (fvl) {
-        try {
-          var modules = fvl.modules();
-          var inst = modules.State.getInstance(DEFAULT_ID);
-          if (inst) {
-            if (inst.mode === 'fullscreen' && inst._lockedScrollY != null) {
-              try {
-                document.body.style.position = '';
-                document.body.style.top = '';
-                document.body.style.width = '';
-                window.scrollTo(0, inst._lockedScrollY);
-              } catch (_) {}
-            }
-            inst.state = 'destroyed';
-            modules.State.removeInstance(DEFAULT_ID);
-          }
-        } catch (_) {
-          try { fvl.hide(DEFAULT_ID); } catch (__) {}
-        }
+        fvl.hideInstant(DEFAULT_ID);
+        this._hideScopedInstancesInstant(fvl);
       }
     },
 
     /** Get current phase. */
     getCurrentPhase: function () {
       return this._currentPhase;
-    },
+    }
   };
 
-  // Expose as M.LoadingService
   // ── Auto-init ──────────────────────────────────────────────────────────────
 
   function _autoInit() { LoadingService.init(); }
@@ -492,9 +458,9 @@
     if (!window.showInstantLoadingOverlay)
       window.showInstantLoadingOverlay = function (opts) { return LoadingService.show(opts); };
     if (!window.removeInstantLoadingOverlay)
-      window.removeInstantLoadingOverlay = function () { return LoadingService.hide(); };
+      window.removeInstantLoadingOverlay = function (id) { return LoadingService.hide(id); };
     if (!window.__removeInstantLoadingOverlay)
-      window.__removeInstantLoadingOverlay = function () { return LoadingService.hide(); };
+      window.__removeInstantLoadingOverlay = function (id) { return LoadingService.hide(id); };
   } catch (_) {}
 
 })(window.NavCoreModules = window.NavCoreModules || {});

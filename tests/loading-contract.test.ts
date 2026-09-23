@@ -7,6 +7,10 @@ describe('Central Loader Architecture & Loading Contract (FVL)', () => {
     // Reset window and document DOM
     document.body.innerHTML = '';
     document.head.innerHTML = '';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+
     // Clear globals
     delete (window as any).FVL;
     delete (window as any).FLV;
@@ -20,6 +24,11 @@ describe('Central Loader Architecture & Loading Contract (FVL)', () => {
     const fvlCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/loading-system/fvl.js'), 'utf-8');
     const runScript = new Function('window', 'document', 'localStorage', fvlCode);
     runScript(window, document, window.localStorage);
+
+    // Load loading.js source code into window scope
+    const loadingCode = fs.readFileSync(path.resolve(__dirname, '../assets/js/nav-core-modules/loading.js'), 'utf-8');
+    const runLoading = new Function('window', 'document', 'localStorage', loadingCode);
+    runLoading(window, document, window.localStorage);
   });
 
   afterEach(() => {
@@ -134,6 +143,22 @@ describe('Central Loader Architecture & Loading Contract (FVL)', () => {
 
       expect(typeof (window as any).showInstantLoadingOverlay).toBe('function');
       expect(typeof (window as any).removeInstantLoadingOverlay).toBe('function');
+    });
+
+    it('supports content-scoped action loading via LoadingService.showInContent without body lock', async () => {
+      const target = document.createElement('div');
+      target.id = 'content-loading';
+      document.body.appendChild(target);
+
+      const LoadingService = (window as any).NavCoreModules.LoadingService;
+      const handle = LoadingService.showInContent({ message: 'Loading symbols…' });
+
+      expect(handle).toBeDefined();
+      expect(target.getAttribute('aria-busy')).toBe('true');
+      expect(document.body.style.position).not.toBe('fixed');
+
+      await LoadingService.hideFromContent();
+      expect(target.getAttribute('aria-busy')).toBe('false');
     });
   });
 });
