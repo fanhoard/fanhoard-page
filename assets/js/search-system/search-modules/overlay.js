@@ -87,6 +87,12 @@
         if (_scrollRestorationOrig !== null) history.scrollRestoration = 'manual';
 
         const inp = DOMService.get(CONFIG.DOM.searchInputId);
+        if (inp) {
+          inp.setAttribute('role', 'combobox');
+          inp.setAttribute('aria-expanded', 'true');
+          inp.setAttribute('aria-haspopup', 'listbox');
+          inp.setAttribute('aria-controls', CONFIG.DOM.suggestionContainerId);
+        }
 
         // Snapshot search state before overlay opens
         State.preOverlayState = {
@@ -136,6 +142,8 @@
 
         // Suggestions scrollable area
         const sg = DOMService.create('div', CONFIG.DOM.suggestionContainerId, 'search-suggestions-fullscreen');
+        sg.setAttribute('role', 'listbox');
+        sg.setAttribute('aria-label', 'Search suggestions');
         const sc = DOMService.create('div', null, 'search-overlay-scrollable-content', {
           flex              : '1',
           width             : '100%',
@@ -318,6 +326,14 @@
         State.suggestionsLocked = false;
         State.overlayOpenedAt   = null;
 
+        const inpClose = DOMService.get(CONFIG.DOM.searchInputId);
+        if (inpClose) {
+          inpClose.setAttribute('aria-expanded', 'false');
+          if (document.activeElement && document.activeElement !== inpClose && document.activeElement.closest && document.activeElement.closest('#' + CONFIG.DOM.overlayContainerId)) {
+            try { inpClose.focus(); } catch {}
+          }
+        }
+        
         // ⑧ Update icon slot (may show ← if query is still present, or 🔍)
         IconSlotService.update();
         ClearBtnService.sync();
