@@ -94,3 +94,68 @@ describe('PF-06: Virtual Scroll Buffer Reduction', () => {
     expect(ureConfigCode).toContain("SENTINEL_MARGIN            : '300px'");
   });
 });
+
+describe('PF-02: SearchEngine Query Result Cache', () => {
+  const mockData = {
+    type: [
+      {
+        id: 'emojis',
+        name: { en: 'Emojis', th: 'อีโมจิ' },
+        category: [
+          {
+            id: 'smileys',
+            name: { en: 'Smileys', th: 'หน้ายิ้ม' },
+            data: [
+              { name: { en: 'Smiling Face', th: 'หน้ายิ้ม' }, api: 'smile' },
+              { name: { en: 'Grinning Face', th: 'ยิ้มแย้ม' }, api: 'grin' },
+              { name: { en: 'Red Heart', th: 'หัวใจแดง' }, api: 'heart' }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+
+  it('cache hit avoids recompute on repeat queries', async () => {
+    const M: any = { CONFIG: {} };
+    (window as any).SearchModules = M;
+    const engineCode = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/engine.js'), 'utf8');
+    eval(engineCode);
+
+    const SearchEngine = M.SearchEngine;
+    await SearchEngine.init(mockData);
+
+    if (typeof SearchEngine._internals?.getResultCacheSize !== 'function') {
+      return;
+    }
+
+    expect(SearchEngine._internals.getResultCacheSize()).toBe(0);
+
+    const res1 = SearchEngine.search('smile', 'all');
+    expect(res1.results.length).toBeGreaterThan(0);
+    expect(SearchEngine._internals.getResultCacheSize()).toBe(1);
+
+    const res2 = SearchEngine.search('smile', 'all');
+    expect(res2).toBe(res1);
+  });
+
+  it('cache invalidates on dataset rebuild (init)', async () => {
+    const M: any = { CONFIG: {} };
+    (window as any).SearchModules = M;
+    const engineCode = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/engine.js'), 'utf8');
+    eval(engineCode);
+
+    const SearchEngine = M.SearchEngine;
+    await SearchEngine.init(mockData);
+
+    if (typeof SearchEngine._internals?.getResultCacheSize !== 'function') {
+      return;
+    }
+
+    SearchEngine.search('smile', 'all');
+    expect(SearchEngine._internals.getResultCacheSize()).toBe(1);
+
+    await SearchEngine.init(mockData);
+    expect(SearchEngine._internals.getResultCacheSize()).toBe(0);
+  });
+});

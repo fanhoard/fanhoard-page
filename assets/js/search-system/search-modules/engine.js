@@ -117,6 +117,14 @@
   /** Detected languages from data scan. */
   let _langs = ['en'];
 
+  /** PF-02: Query result cache (Map, capped at 50 entries). */
+  const _resultCache = new Map();
+  const RESULT_CACHE_CAP = 50;
+
+  function _clearResultCache() {
+    _resultCache.clear();
+  }
+
   // ── Utilities ────────────────────────────────────────────────────────────
 
   /**
@@ -814,6 +822,15 @@
     const q = String(qRaw || '').trim();
     if (!q) return { results: [], keywords: generateAllKeywords() };
 
+    const langKey = Array.isArray(_langs) ? _langs.join(',') : 'en';
+    const filterKey = typeFilter && typeFilter !== 'all' ? String(typeFilter).toLowerCase() : 'all';
+    const cacheKey = q.toLowerCase() + '|' + filterKey + '|' + langKey;
+
+    if (_resultCache.has(cacheKey)) {
+      return _resultCache.get(cacheKey);
+    }
+
+    let res;
     if (_fuse) {
       try {
         const fuseResults = _fuse.search(q, { limit: 200 }) || [];
@@ -838,13 +855,24 @@
             matchExact: (r.score !== undefined ? (r.score === 0) : false),
           });
         }
-        return { results, keywords: generateAllKeywords() };
+        res = { results, keywords: generateAllKeywords() };
       } catch (e) {
         console.error('[SearchEngine] Fuse search failed, falling back to immediate:', e);
-        return immediateSearch(qRaw, typeFilter);
+        res = immediateSearch(qRaw, typeFilter);
+      }
+    } else {
+      res = immediateSearch(qRaw, typeFilter);
+    }
+
+    if (_resultCache.size >= RESULT_CACHE_CAP) {
+      const firstKey = _resultCache.keys().next().value;
+      if (firstKey !== undefined) {
+        _resultCache.delete(firstKey);
       }
     }
-    return immediateSearch(qRaw, typeFilter);
+    _resultCache.set(cacheKey, res);
+
+    return res;
   }
 
   // ── Discovery: related-content query (v4.0) ──────────────────────────────
@@ -1143,6 +1171,7 @@
 
       // 1) Detect languages
       _langs = detectLangs(_data || {});
+      _clearResultCache();
 
       // 2) Build immediate docs — these power instant substring search
       //    and the comprehensive suggestion engine.
@@ -1213,6 +1242,8 @@
       pickFuseThreshold,
       // v4.0 — Exposed for unit testing discovery
       tokenizeQuery: _tokenizeQuery,
+      clearResultCache: () => _clearResultCache(),
+      getResultCacheSize: () => _resultCache.size,
     },
   };
 
