@@ -1,77 +1,179 @@
-# Search System v3.0
+# FanHoard Search System
 
-> Unified, aerospace-grade search system for FanHoard.
-> Consolidates legacy `search-engine.js` + `search-ui.js` into a single
-> self-loading entry point — same pattern as the URE system.
+- **System Described**: FanHoard Search System v3.0.0 Architecture & Service Contracts
+- **Entry File**: `assets/js/search-system/search.js`
+- **Dependencies**: `assets/js/search-system/search-system.css`, `assets/js/search-system/search-modules/*`, `ConDataService`, `URE`
+- **Verification**: `npm test`
 
-## ไฟล์ในโฟลเดอร์นี้
+---
+
+## 1. System Architecture & 5-Layer Model
+
+The FanHoard search system provides aerospace-grade, deterministic, low-latency search capabilities across all FanHoard pages. It operates as a self-loading entry point (`assets/js/search-system/search.js`) that dynamically loads 14 modular sub-services in 5 sequential phases.
 
 ```
-search-system/
-├── search.js                    ← Entry point (load ไฟล์นี้ใน HTML)
-├── search-system.css            ← CSS เสริม (auto-inject)
-├── MIGRATION.md                 ← คู่มือ migration จาก v2.x
-├── README.md                    ← ไฟล์นี้
-└── search-modules/              ← 13 modules
-    ├── types.js                 ← JSDoc typedefs
-    ├── config.js                ← Constants (Object.freeze)
-    ├── state.js                 ← Shared mutable state
-    ├── utils.js                 ← Stateless helpers
-    ├── virtual-scroll.js        ← Legacy VSE (backup, URE used in prod)
-    ├── url-history.js           ← Two-stack browser history
-    ├── keyboard.js              ← Soft keyboard detection
-    ├── rendering.js             ← URE-backed result rendering
-    ├── suggestions.js           ← Multi-source suggestions + badges
-    ├── input-bar.js             ← Input widget + clear button + icon
-    ├── overlay.js               ← Fullscreen search overlay
-    ├── engine.js                ← ★ NEW — comprehensive search engine
-    └── search-service.js        ← Search orchestrator (rename จาก search.js)
+┌────────────────────────────────────────────────────────────────────────┐
+│ Layer 5: UI Layer                                                       │
+│   OverlayService  •  UIService  •  SuggestionService  •  Discovery     │
+├────────────────────────────────────────────────────────────────────────┤
+│ Layer 4: Service Orchestration Layer                                    │
+│   SearchService (Manages data loading, debouncing, history, rendering)  │
+├────────────────────────────────────────────────────────────────────────┤
+│ Layer 3: Search & Query Layer                                          │
+│   SearchEngine (search, querySuggestions, queryRelated)                 │
+├────────────────────────────────────────────────────────────────────────┤
+│ Layer 2: Indexing Layer                                                │
+│   Bucket Index (Map<char, SearchDoc[]>) • Fuse.js • Type/Cat Index     │
+├────────────────────────────────────────────────────────────────────────┤
+│ Layer 1: Data Ingestion Layer                                          │
+│   ConDataService (Prefetched) → db.min.json Fallback                    │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
-## การใช้งาน
+---
 
-### HTML (เพิ่ม 1 บรรทัด)
+## 2. Directory Structure & File Map
+
+```
+assets/js/search-system/
+├── search.js                    # Primary Entry Point (Auto-loader & Bootstrap)
+├── search-system.css            # Supplemental Styles & Badge Definitions
+├── MIGRATION.md                 # Migration Guide from Legacy Search Scripts
+├── NAMING.md                    # DOM & CSS Class Naming Conventions
+├── README.md                    # Architecture & Contract Specifications
+└── search-modules/              # 14 Sub-Service Modules
+    ├── types.js                 # JSDoc Type Definitions & Enums
+    ├── config.js                # Immutable Configuration (Object.freeze)
+    ├── state.js                 # Shared Mutable State Store
+    ├── utils.js                 # Stateless Helpers & Text Normalizer
+    ├── virtual-scroll.js        # Legacy Virtual Scroll Engine (Fallback)
+    ├── url-history.js           # Two-Stack Browser History Sync
+    ├── keyboard.js              # KeyboardService, GapBasedKeyboardService, KeyboardAutoToggleService
+    ├── rendering.js             # URE-Backed Result Rendering Service
+    ├── suggestions.js           # Multi-Source Suggestion Engine
+    ├── input-bar.js             # IconSlotService, ClearBtnService, UIService
+    ├── overlay.js               # Fullscreen Search Overlay Controller
+    ├── discovery.js             # Related Content Discovery Engine
+    ├── engine.js                # Modular Search Engine Core
+    └── search-service.js        # Search Orchestrator & Lifecycle Manager
+```
+
+---
+
+## 3. Module Loading Order & Phase Sequence
+
+The entry point `assets/js/search-system/search.js` loads all modules in 5 sequential phases. Scripts within the same phase execute in parallel, while each phase must resolve completely before the subsequent phase starts:
+
+```
+Phase 1 (Foundation):    types.js, config.js, state.js
+                               │
+                               ▼
+Phase 2 (Utilities):     utils.js, virtual-scroll.js
+                               │
+                               ▼
+Phase 3 (Features):      url-history.js, keyboard.js, rendering.js, suggestions.js, input-bar.js
+                               │
+                               ▼
+Phase 4 (UI / Overlay):  overlay.js, discovery.js
+                               │
+                               ▼
+Phase 5 (Engine Core):   engine.js, search-service.js
+```
+
+---
+
+## 4. Key System Invariants & Performance Constants
+
+| Invariant / Rule | Enforcing File & Location | Value / Code Reference |
+| :--- | :--- | :--- |
+| **LRU Result Cache Cap** | `search-modules/engine.js:122` | `RESULT_CACHE_CAP = 50` |
+| **Short Query Early-Exit** | `search-modules/engine.js:616` | `nq.length <= 3` uses `_bucketIndex` lookup |
+| **Data Fetch Timeout** | `search-modules/config.js:57` | `conDataServiceWaitMs: 1200` |
+| **Early Prefetch Window** | `search.js:77` | 40 attempts × 20ms = 800ms window |
+| **Debounce Interval** | `search-modules/config.js:56` | `debounceMs: 150` |
+| **Escape Key Handling** | `search-modules/overlay.js:192` | Centralized via `OverlayService.close('escape')` |
+
+### Grounded Code Examples
+
+#### 4.1 LRU Result Cache Cap (`engine.js`)
+```javascript
+/** PF-02: Query result cache (Map, capped at 50 entries). */
+const RESULT_CACHE_CAP = 50;
+
+if (_resultCache.size >= RESULT_CACHE_CAP) {
+  const oldestKey = _resultCache.keys().next().value;
+  _resultCache.delete(oldestKey);
+}
+```
+
+#### 4.2 Candidate Bucket Index Fast-Path (`engine.js`)
+```javascript
+/** PF-04: Candidate bucket index Map: char -> SearchDoc[] */
+let _bucketIndex = new Map();
+
+// Fast-path candidate retrieval for short queries (<= 3 characters)
+if (nq.length <= 3 && _bucketIndex) {
+  const firstChar = nq.charAt(0);
+  if (_bucketIndex.has(firstChar)) {
+    candidates = _bucketIndex.get(firstChar);
+  }
+}
+```
+
+#### 4.3 Soft Keyboard Detection & Gap Throttling (`keyboard.js`)
+```javascript
+const GapBasedKeyboardService = {
+  isGapExpired:      () => (Date.now() - State.lastKeyboardToggleTime) >= CONFIG.TIMING.keyboardGapMinMs,
+  isRecoveryExpired: () => (Date.now() - State.lastKeyboardToggleTime) >= CONFIG.TIMING.keyboardGapRecoveryMs,
+  recordToggle:      () => { State.lastKeyboardToggleTime = Date.now(); },
+};
+```
+
+---
+
+## 5. Public API Contracts
+
+### 5.1 HTML Inclusion
+Single-line inclusion in HTML document `<head>` or body:
 
 ```html
-<script defer src="/assets/js/ure/ure.js?v=..."></script>
-<script defer src="/assets/js/search-system/search.js?v=..."></script>
+<script defer src="/assets/js/ure/ure.js"></script>
+<script defer src="/assets/js/search-system/search.js"></script>
 ```
 
-### Public API
-
+### 5.2 `window.SearchEngine` Interface
 ```javascript
-// UI orchestrator
-window.__searchUI.init();
-window.__searchUI.destroy();
-window.__searchUI.getState();
-window.__searchUI.getConfig();
-window.__searchUI.querySuggestions('heart');
-
-// Search engine (also available via window.SearchModules.SearchEngine)
-window.SearchEngine.search('heart', 'all');
-window.SearchEngine.querySuggestions('heart', 8);
-window.SearchEngine.generateAllKeywords();
-window.SearchEngine._internals.getDocs();
-window.SearchEngine._internals.getTypeIndex();
-window.SearchEngine._internals.getCategoryIndex();
-window.SearchEngine._internals.getFuse();
-window.SearchEngine._internals.isFuseReady();
+window.SearchEngine = {
+  init(data, options): Promise<boolean>,
+  search(query, typeFilter): { results: SearchDoc[], keywords: Keyword[] },
+  querySuggestions(query, maxCount): Suggestion[],
+  queryRelated(query, maxCount): RelatedItem[],
+  generateAllKeywords(): Keyword[],
+  _internals: {
+    getDocs(): SearchDoc[],
+    getTypeIndex(): Map<string, SearchDoc[]>,
+    getCategoryIndex(): Map<string, SearchDoc[]>,
+    getFuse(): Fuse|null,
+    isFuseReady(): boolean
+  }
+};
 ```
 
-## การปรับปรุงจาก v2.x
+### 5.3 `window.__searchUI` Interface
+```javascript
+window.__searchUI = {
+  init(): void,
+  destroy(): void,
+  getState(): StateObject,
+  getConfig(): ConfigObject,
+  querySuggestions(query): Suggestion[]
+};
+```
 
-1. **Unified entry point** — 1 ไฟล์แทน 2 ไฟล์ (เหมือน `ure.js`)
-2. **Comprehensive index** — index ครอบคลุม type names + category names + sub-names + descriptions
-3. **Multi-source suggestions** — พิมพ์ "อี" เสนอ "อีโมจิ" (type), พิมพ์ "arr" เสนอ "Arrows" (category)
-4. **Source badges in UI** — badge เล็กๆ บอกว่า suggestion มาจาก type/category/item
-5. **Robust short queries** — single-char queries ได้ผลลัพธ์เสมอ (adaptive Fuse threshold)
-6. **Aerospace standards** — fail-safe defaults, no silent failure, bounded loops, layered architecture
+---
 
-ดูรายละเอียดเต็มใน [`MIGRATION.md`](./MIGRATION.md).
+## 6. Development Standards & Compliance
 
-## มาตรฐานการพัฒนา
-
-ปฏิบัติตาม:
-- [`AI_CODING_GUIDE.md`](../../fanhoard-docs/AI_CODING_GUIDE.md) — IIFE pattern, 2-space indent, single quotes
-- [`AI_FORBIDDEN.md`](../../fanhoard-docs/AI_FORBIDDEN.md) — ห้าม ES modules, ห้าม React/jQuery
-- [`02-Search-System.md`](../../fanhoard-docs/02-Search-System.md) — เอกสารระบบ Search
+- **ES Specifications**: IIFE design pattern, strictly `'use strict'`, no ES modules (`import`/`export`), no external framework dependencies (React, jQuery, Vue).
+- **DOM & CSS Standard**: Refer strictly to [`NAMING.md`](./NAMING.md) for BEM and DOM element conventions.
+- **Migration & History**: Refer to [`MIGRATION.md`](./MIGRATION.md) for upgrade history from legacy search scripts.
