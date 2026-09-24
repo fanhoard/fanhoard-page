@@ -167,7 +167,17 @@
       return _createHandle(instance);
     }
 
-    // 14. Play enter animation
+    // 14. Fire onMount callback (DOM ready, BEFORE enter animation)
+    //     Moved ahead of Animator.enter: the dialog DOM is visible to the user
+    //     during the enter animation, so listeners must already be attached —
+    //     clicks landing mid-animation were silently dropped.
+    if (typeof opts.onMount === 'function') {
+      try { opts.onMount(dom.bodyEl, _createHandle(instance)); } catch (e) {
+        console.error('[PopupSystem] onMount error:', e);
+      }
+    }
+
+    // 15. Play enter animation
     await Animator.enter(dom.rootEl, dom.overlayEl, opts);
 
     // Guard: check if close() or destroy() was called mid-animation
@@ -192,12 +202,6 @@
       }, opts.timeout + CONFIG.TIMING.AUTO_CLOSE_GRACE);
     }
 
-    // 17. Fire onMount callback (DOM ready, before onOpen)
-    if (typeof opts.onMount === 'function') {
-      try { opts.onMount(dom.bodyEl, _createHandle(instance)); } catch (e) {
-        console.error('[PopupSystem] onMount error:', e);
-      }
-    }
 
     // 18. Fire onOpen callback
     if (typeof opts.onOpen === 'function') {

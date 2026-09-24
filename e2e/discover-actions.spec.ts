@@ -184,11 +184,15 @@ test.describe('Discover Main & Sub Action Scoped Loading & Hit-Testing', () => {
   test('Release update modal dismiss path functional when modal is open', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
 
-    // Ensure fv_noupdate is cleared so release modal opens legitimately
-    await page.addInitScript(() => {
+    // Ensure fv_noupdate is cleared so release modal opens legitimately.
+    // Dismiss token key is version-scoped (fv_dismissed_v<version>) — read the
+    // served version so this test survives future releases.
+    const versionRes = await page.request.get('/assets/json/version.json');
+    const currentVersion: string = (await versionRes.json()).version;
+    await page.addInitScript((version: string) => {
       localStorage.removeItem('fv_noupdate');
-      localStorage.removeItem('fv_dismissed_v2.3.0');
-    });
+      localStorage.removeItem('fv_dismissed_v' + version);
+    }, currentVersion);
 
     await page.goto('/data/verse/discover/index.html');
 
@@ -202,9 +206,9 @@ test.describe('Discover Main & Sub Action Scoped Loading & Hit-Testing', () => {
     // Verify modal overlay closes and dismiss token is written
     await expect(dismissBtn).toBeHidden({ timeout: 10000 });
 
-    const isDismissed = await page.evaluate(() => {
-      return localStorage.getItem('fv_dismissed_v2.3.0') === '1';
-    });
+    const isDismissed = await page.evaluate((version: string) => {
+      return localStorage.getItem('fv_dismissed_v' + version) === '1';
+    }, currentVersion);
     expect(isDismissed).toBe(true);
   });
 
