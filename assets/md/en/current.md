@@ -1,23 +1,33 @@
 ---
-version: 2.3.0
-date: 2026-08-23T07:18:47.421Z
-title: Search gets Google-like filters + SEO overhaul
-subtitle: Filter pills now scroll naturally instead of sticking, the English home page is finally indexable by Google, and the discover feed remembers what you were looking at.
+version: 3.0.0
+date: 2026-09-24T12:00:00.000Z
+title: New name FanHoard, a redesigned interface, and search that's 5× faster
+subtitle: We renamed from Fantrove to FanHoard, refreshed the look of every page, and gave the search system its biggest stability and speed upgrade ever.
 notify: true
 ---
 
-**TL;DR** — The search filters now behave like Google (scroll with the page instead of floating), the English home page should start showing up in Google search results, and the discover feed now remembers your scroll position and content order within a 30-minute window.
+**TL;DR** — The site has a new name: FanHoard. Every page got a visual refresh with a consistent design system, back/forward navigation now remembers your scroll position like a native app, and the search engine is over 5× faster with 20 stability defects fixed.
 
-## Search filters, reimagined
+## A new name: FanHoard
 
-Previously, the search page had a toggle arrow to show or hide category filters, and the whole filter bar stuck to the screen while scrolling. It worked, but it felt clunky — the toggle added an extra tap, and the sticky bar ate screen space on mobile.
+The site formerly known as Fantrove is now FanHoard. Nothing else changed — same emojis, same links (your bookmarks still work), and everything you copied is still right where you left it. New name on the cover, same site inside.
 
-Now the search bar still sticks (so you can always type a new query), but the filter pills scroll naturally with the page — just like Google's search results. Category filters appear automatically when relevant, and hide themselves when there's nothing to filter. No more toggle button.
+## A redesigned interface, top to bottom
 
-## Google can now index the English home page
+We rebuilt the design foundation from scratch, then polished every page to sit on one consistent standard — home, discover, search, settings, community pages, even the 404. Colors and contrast were tuned to meet WCAG AA so everything reads comfortably, and popups, dialogs, and toasts got a modern redesign.
 
-For months, Google could see the Thai home page but not the English one. The root cause was a chain of redirects and missing canonical tags that told Google "this page redirects, don't index it." The build system now generates correct canonical URLs with trailing slashes (matching how Cloudflare serves the pages), the root URL returns a proper 404 instead of redirecting, and the language detection script no longer forces automatic redirects. The English home page should start appearing in Google's index after the next crawl.
+## Back/forward navigation that behaves like an app
 
-## Discover feed now remembers your session
+Press back (or swipe back) and the page remembers exactly where you scrolled to — you land right where you left off, not at the top. A refresh now takes you to the top, as it should. And the scroll-jank while lazy-loaded emojis stream in is gone.
 
-The discover page used to reshuffle its content every time you refreshed — every visit felt like starting from scratch. Now the feed generates a unique order per browser and remembers it for 30 minutes, so refreshing or coming back shows the same content and scrolls you back to where you left off.
+## Loading where it matters, not full-screen flashes
+
+Every navigation used to flash a full-screen loader, sometimes twice. Now the loading indicator appears only over the content that's actually loading, and first boot flows straight from the loading screen into content with no extra flashes.
+
+## Search that's 5× faster and far more stable
+
+The search system got a full engineering audit: 20 stability defects were fixed, including memory leaks and overly silent error handling. Repeating a previous query now answers in under 0.1ms (down from 42ms), brand-new queries run about 5× faster, and the search page passes accessibility checks with zero violations.
+
+## Other improvements worth knowing
+
+The discover feed packs more items per screen, the rapid-open-close popup freeze is fixed, and the update notice now shows once per version and then stays quiet.
