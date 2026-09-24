@@ -66,7 +66,7 @@ When pushing non-user-facing changes without a version bump, the release validat
 - **`.release-bypass`**: The requested bypass token value (committed to git).
 - **`.release-bypass-counter`**: The consumed bypass counter value (git-tracked baseline).
 - **Condition for Bypass**: `.release-bypass` value MUST be strictly greater than `.release-bypass-counter` (`counter > used`).
-- **Local Consumption Rule**: When `validate-release.js` consumes a bypass locally, it updates `.release-bypass-counter` on disk BUT explicitly DOES NOT stage `.release-bypass-counter`. This ensures the commit contains `.release-bypass = V+1` while committed `.release-bypass-counter = V`, allowing CI to verify the bypass remotely.
+- **Local Consumption Rule**: When `validate-release.js` consumes a bypass locally during pre-commit, it updates `.release-bypass-counter` on disk BUT explicitly DOES NOT stage `.release-bypass-counter`. This ensures the commit contains `.release-bypass = V+1` while committed `.release-bypass-counter = V`, allowing CI to verify the bypass remotely.
 
 ---
 
@@ -134,6 +134,12 @@ Use this recipe for documentation, internal maintenance, CI/CD scripts, or refac
 2. **Commit and Push**:
    ```bash
    git commit -m "docs: update release policy documentation"
+   ```
+
+3. **Pre-Push Hook Handling**:
+   When `git commit` runs, Layer 1 (`pre-commit`) consumes token `V+1` by writing it into local `.release-bypass-counter`. When `git push` runs immediately after, Layer 2 (`pre-push`) checks working tree `.release-bypass` against working tree `.release-bypass-counter`. To ensure Layer 2 passes on push:
+   ```bash
+   echo $((V+2)) > .release-bypass
    git push origin <branch-name>
    ```
 
@@ -207,14 +213,18 @@ Every policy statement in this document was verified against the repository impl
 - **Code Reality**: In a CI environment post-push, `git show HEAD:assets/md/{lang}/current.md` returns the *newly pushed* version, causing naive comparisons (`current === lastCommitted`) to report "version not bumped" even on valid releases.
 - **Verification Result**: Both scripts check if `HEAD` matches disk content. If identical, they query `git log --format=%H -n 2 -- assets/md/{lang}/current.md` to fetch commit `hashes[1]` as the true baseline version.
 
-### 2. Bypass Counter Consumption & Staging Rule
+### 2. Double Token Consumption in Local Hook Sequence (Pre-commit vs Pre-push)
+- **Code Reality**: When Layer 1 (`pre-commit`) runs `validate-release.js --staged`, `consumeBypass()` writes the target bypass token into `.release-bypass-counter` on disk. When Layer 2 (`pre-push`) runs immediately afterwards during `git push`, `validate-release.js --pre-push` re-checks `.release-bypass` against `.release-bypass-counter` on disk, finding `counter == used` and blocking push.
+- **Verification Result**: To allow `git push` to pass Layer 2 after commit, `.release-bypass` in the working tree must be updated to `used + 1` before pushing.
+
+### 3. Bypass Counter Staging Rule
 - **Code Reality**: `validate-release.js` function `consumeBypass()` writes the consumed value into `.release-bypass-counter` on disk but explicitly refrains from staging it.
 - **Verification Result**: If a developer mistakenly runs `git add .release-bypass-counter`, committed `counter` equals committed `used`, causing CI Layer 3.1 to reject the commit.
 
-### 3. Generated Artifact Restrictions
+### 4. Generated Artifact Restrictions
 - **Code Reality**: `validate-release.js` enforces an allowlist containing strictly `assets/md/en/current.md` and `assets/md/th/current.md`.
 - **Verification Result**: Manual editing of generated files (`assets/md/{lang}/releases/index.json`, `assets/md/{lang}/releases/v*.md`, `assets/json/version.json`) triggers a violation and fails pre-commit / pre-push unless `--allow-generated` or `--ci` flags are passed.
 
-### 4. Deployment Pipeline Status (Layer 4)
+### 5. Deployment Pipeline Status (Layer 4)
 - **Code Reality**: In `.github/workflows/release.yml`, Layer 4 (Cloudflare Pages Action) is disabled/removed.
 - **Verification Result**: Production deployment is handled natively by Cloudflare Pages Git Integration listening directly to `main` branch pushes. CI Layer 3.4 commits build artifacts directly to `main` with `[skip ci]`.
