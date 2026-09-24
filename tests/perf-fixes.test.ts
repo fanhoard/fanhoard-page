@@ -166,3 +166,41 @@ describe('PF-02: SearchEngine Query Result Cache', () => {
     expect(SearchEngine._internals.getResultCacheSize()).toBe(50);
   });
 });
+
+describe("PF-04: First-Character Bucket Index", () => {
+  const mockData = {
+    type: [
+      {
+        id: "emojis",
+        name: { en: "Emojis", th: "อีโมจิ" },
+        category: [
+          {
+            id: "smileys",
+            name: { en: "Smileys", th: "หน้ายิ้ม" },
+            data: [
+              { name: { en: "Smiling Face", th: "หน้ายิ้ม" }, api: "smile" },
+              { name: { en: "Grinning Face", th: "ยิ้มแย้ม" }, api: "grin" },
+              { name: { en: "Red Heart", th: "หัวใจแดง" }, api: "heart" }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+
+  it("builds bucket index on init and filters candidates for short queries", async () => {
+    const M: any = { CONFIG: {} };
+    (window as any).SearchModules = M;
+    const engineCode = fs.readFileSync(path.join(__dirname, "../assets/js/search-system/search-modules/engine.js"), "utf8");
+    eval(engineCode);
+
+    const SearchEngine = M.SearchEngine;
+    await SearchEngine.init(mockData);
+
+    expect(SearchEngine._internals.getBucketIndexSize()).toBeGreaterThan(0);
+
+    const resShort = SearchEngine.search("sm", "all");
+    expect(resShort.results.length).toBeGreaterThan(0);
+    expect(resShort.results[0].itemName).toBe("Smiling Face");
+  });
+});

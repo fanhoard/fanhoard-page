@@ -121,6 +121,31 @@
   const _resultCache = new Map();
   const RESULT_CACHE_CAP = 50;
 
+  /** PF-04: Candidate bucket index Map: char -> SearchDoc[] */
+  let _bucketIndex = new Map();
+
+  function buildBucketIndex(docs) {
+    const buckets = new Map();
+    for (let i = 0; i < docs.length; i++) {
+      const d = docs[i];
+      const hay = d.combinedLower
+        || ((d.name || "") + " " + (d.api || "") + " " + (d.combined || "")).toLowerCase();
+      const seen = new Set();
+      for (let j = 0; j < hay.length; j++) {
+        const ch = hay[j];
+        if (ch <= " " || seen.has(ch)) continue;
+        seen.add(ch);
+        let list = buckets.get(ch);
+        if (!list) {
+          list = [];
+          buckets.set(ch, list);
+        }
+        list.push(d);
+      }
+    }
+    return buckets;
+  }
+
   function _clearResultCache() {
     _resultCache.clear();
   }
@@ -587,8 +612,18 @@
       ? String(typeFilter).toLowerCase()
       : null;
 
-    for (let i = 0; i < _docs.length && results.length < limit; i++) {
-      const d = _docs[i];
+    let candidates = _docs;
+    if (nq.length <= 3 && _bucketIndex) {
+      const firstChar = nq[0];
+      if (_bucketIndex.has(firstChar)) {
+        candidates = _bucketIndex.get(firstChar);
+      }
+    }
+
+    const maxResults = Math.max(limit, 500);
+
+    for (let i = 0; i < candidates.length && results.length < maxResults; i++) {
+      const d = candidates[i];
       if (typeFilterLower && (d.typeKey || '').toLowerCase() !== typeFilterLower) continue;
       // Use precomputed combinedLower — avoids re-toLowerCase per query
       const hay = d.combinedLower
@@ -607,6 +642,9 @@
           matchExact: (hay === nq),
         });
       }
+    }
+    if (results.length > limit) {
+      results.length = limit;
     }
     return { results, keywords: generateAllKeywords() };
   }
@@ -1180,6 +1218,7 @@
       //    and the comprehensive suggestion engine.
       const immediate = buildImmediateDocs(_data || {});
       _docs          = immediate.docs;
+      _bucketIndex   = buildBucketIndex(_docs);
       _keywords      = immediate.keywords.map(k => ({
         item: k.item || null,
         itemName: k.itemName || '',
@@ -1247,6 +1286,7 @@
       tokenizeQuery: _tokenizeQuery,
       clearResultCache: () => _clearResultCache(),
       getResultCacheSize: () => _resultCache.size,
+      getBucketIndexSize: () => _bucketIndex ? _bucketIndex.size : 0,
     },
   };
 
