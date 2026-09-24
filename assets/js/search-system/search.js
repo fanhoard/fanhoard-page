@@ -227,227 +227,160 @@
       return;
     }
 
+    let _beforeUnloadHandler = null;
+
     // ── Data loading ────────────────────────────────────────────────────────
     // Uses _earlyDataPromise if the prefetch already has data.
     // Falls back to the normal ConDataService poll + fetch chain.
 
     /**
-     * Poll for ConDataService availability up to `ms` milliseconds.
-     * @param {number} ms
+     * Poll for ConDataService to assemble data.
+     * Checks up to MAX_ATTEMPTS times at INTERVAL_MS spacing.
      * @returns {Promise<Object|null>}
      */
-    function waitForConDataService(ms) {
-      return new Promise(function (resolve) {
-        if (window.ConDataService?.getAssembled) return resolve(window.ConDataService);
-        const start = Date.now();
-        const id = setInterval(function () {
+    function _pollConDataService() {
+      const INTERVAL_MS  = 50;
+      const MAX_ATTEMPTS = 40; // 40 × 50ms = 2s max wait
+      let attempts = 0;
+
+      return new Promise(resolve => {
+        if (window.ConDataService?.getAssembled) {
+          window.ConDataService.getAssembled()
+            .then(data => resolve(data))
+            .catch(() => resolve(null));
+          return;
+        }
+
+        const id = setInterval(() => {
+          attempts++;
           if (window.ConDataService?.getAssembled) {
             clearInterval(id);
-            resolve(window.ConDataService);
-          } else if (Date.now() - start >= ms) {
+            window.ConDataService.getAssembled()
+              .then(data => resolve(data))
+              .catch(() => resolve(null));
+          } else if (attempts >= MAX_ATTEMPTS) {
             clearInterval(id);
             resolve(null);
           }
-        }, CONFIG.TIMING.conDataServicePollMs);
+        }, INTERVAL_MS);
       });
     }
 
     /**
-     * Load data via early-prefetch promise, or fall back to direct fetch.
+     * Fetch db.min.json directly as fallback when ConDataService is unavailable.
+     * @returns {Promise<Object>}
+     */
+    function _fetchDbFallback() {
+      return fetch('/assets/json/db.min.json')
+        .then(res => {
+          if (!res.ok) throw new Error('[Search] db.min.json HTTP ' + res.status);
+          return res.json();
+        });
+    }
+
+    /**
+     * Top-level data loader: try early prefetch → ConData poll → db.min.json.
      * @returns {Promise<Object>}
      */
     function loadData() {
-      // Fast path: prefetch already resolved
       if (_earlyDataPromise) {
-        const p = _earlyDataPromise;
-        _earlyDataPromise = null;
-        return p.then(function (data) {
+        return _earlyDataPromise.then(data => {
           if (data) return data;
-          // Prefetch returned null — fall through to normal path
-          return _normalLoadData();
+          return _pollConDataService().then(pollData => pollData || _fetchDbFallback());
         });
       }
-      return _normalLoadData();
+      return _pollConDataService().then(data => data || _fetchDbFallback());
     }
 
-    function _normalLoadData() {
-      return waitForConDataService(CONFIG.TIMING.conDataServiceWaitMs).then(function (svc) {
-        if (svc) {
-          return svc.getAssembled().catch(function (err) {
-            console.warn('[Search] ConDataService failed, using fallback:', err);
-            return fetch(CONFIG.DB.path).then(r => r.json()).catch(() => ({}));
-          });
-        }
-        console.warn('[Search] ConDataService not ready — using fallback db');
-        return fetch(CONFIG.DB.path).then(r => r.json()).catch(() => ({}));
-      });
-    }
-
-    // ── Init ────────────────────────────────────────────────────────────────
+    // ── Initialization ───────────────────────────────────────────────────────
 
     function init() {
-      try {
-        KeyboardService.initKeyboardDetection();
+      loadData()
+        .then(data => {
+          State.apiData = data;
+          SearchEngine.init(data);
+          // Pre-warm keywords cache so querySuggestions is fast from call #1
+          State.allKeywordsCache = SearchEngine.getKeywords();
+          _attachHandlers();
 
-        loadData()
-          .then(function (data) {
-            State.apiData = data || {};
-            if (!Array.isArray(State.apiData.type))
-              console.warn('[Search] apiData missing .type[] — check ConDataService');
-            return SearchEngine.init(State.apiData, {}).catch(e =>
-              console.error('[Search] SearchEngine.init failed', e)
-            );
-          })
-          .then(function () {
-            try { State.allKeywordsCache = SearchEngine.generateAllKeywords?.() ?? []; }
-            catch { State.allKeywordsCache = []; }
-
-            UIService.buildWrapper();
+          // Restore state from URL if present, otherwise set up default view
+          const urlState = URLService.readState();
+          if (urlState.q || urlState.type !== 'all' || urlState.category !== 'all') {
+            _restoreUIState(urlState);
+          } else {
             FilterService.setupTypeFilter('all');
-            FilterService.setupCategoryFilter([], 'all');
-            UIService.setupFilters();
-            UIService.setupAutoSearchInput();
+            ClearBtnService.sync();
+            IconSlotService.update();
+          }
 
-            try {
-              const sticky = document.getElementById("search-sticky");
-              if (sticky) {
-                const navH = DOMService.getNavHeight ? DOMService.getNavHeight() : 56;
-                sticky.style.setProperty("--fv-nav-height", navH + "px");
-              }
-            } catch (_) {}
+          // Cold-start pending search drain:
+          // If doSearch() was called before init finished, execute it now.
+          if (window.__pendingSearch) {
+            const { query, force } = window.__pendingSearch;
+            window.__pendingSearch = null;
+            SearchService.doSearch(query, force);
+          }
 
-            document.body.style.marginBottom = '';
-            const sr = DOMService.get(CONFIG.DOM.searchResultsId) || (DOMService.getMainLandmark ? DOMService.getMainLandmark() : null);
-            if (sr) {
-              sr.innerHTML = `<div class="search-result-placeholder">${M.LanguageService.t('search_result_here')}</div>`;
-            }
-            UIService.updateUILanguage();
-
-            _restoreLastCommitted();
-
-            // ── Drain pending search (cold-start race condition fix) ──────────
-            // If user pressed Enter before data loaded, doSearch() stashed the
-            // query in window.__pendingSearch. Run it now that docs are ready.
-            const pending = window.__pendingSearch;
-            if (pending?.q) {
-              window.__pendingSearch = null;
-              const inp = DOMService.get(CONFIG.DOM.searchInputId);
-              if (inp) inp.value = pending.q;
-              State.selectedType = pending.type || 'all';
-              FilterService.setupTypeFilter(State.selectedType);
-              SearchService.doSearch(null, false);
-              URLService.replaceSearch({ q: pending.q, type: State.selectedType, category: 'all' });
-              return;
-            }
-
-            // ── Normal path: URL-based search ─────────────────────────────────
-            const urlState = URLService.readStateFromURL();
-            if (urlState.q) {
-              SearchService.doSearchFromURL(urlState.q, urlState.type || 'all', urlState.category || 'all');
-            } else {
-              URLService.replaceSearch({ q: '', type: 'all', category: 'all' });
-            }
-          })
-          .catch(e => {
-            console.error('[Search] Initialisation failed:', e);
-            if (window.__searchUI) window.__searchUI._initialized = false;
-          });
-
-        // Form/Enter handlers — attached synchronously so they work immediately.
-        // doSearch() defers via __pendingSearch when docs aren't ready yet.
-        const form = DOMService.get(CONFIG.DOM.searchFormId);
-        if (form) {
-          Handlers.formSubmit = e => {
-            e.preventDefault();
-            const lang = M.LanguageService ? M.LanguageService.getLang() : "en";
-            if (typeof window.announceToScreenReader === "function") {
-              window.announceToScreenReader(lang === "th" ? "กำลังค้นหา..." : "Searching...", "polite");
-            }
-            SearchService.doSearch();
-            UIService.closeKB();
-          };
-          DOMService.on(form, 'submit', Handlers.formSubmit);
-        }
-
-        const inp = DOMService.get(CONFIG.DOM.searchInputId);
-        if (inp) {
-          DOMService.on(inp, 'keydown', e => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              SearchService.doSearch();
-              UIService.closeKB();
-            }
-          });
-        }
-
-        // ── Popstate ───────────────────────────────────────────────────────
-        Handlers.popstate = function (e) {
           try {
-            const s              = e.state || {};
-            const isOverlayEntry = !!s[State._overlayStateMarker];
-
-            if (State.overlayOpen) {
-              OverlayService.close('popstate');
-              if (!isOverlayEntry && s.q !== undefined) {
-                const backState = { q: s.q || '', type: s.type || 'all', category: s.category || 'all' };
-                if (!URLService.isEqual(backState, State.lastCommittedSearchState)) {
-                  setTimeout(() => _restoreUIState(backState), 50);
-                }
-              }
-              return;
-            }
-
-            if (isOverlayEntry) {
-              const st = { q: s.q || '', type: s.type || 'all', category: s.category || 'all' };
-              URLService.replaceSearch(st);
-              _restoreUIState(st);
-              return;
-            }
-
-            const st = (e.state && typeof e.state === 'object') ? e.state : URLService.readStateFromURL();
-            if (st?.q !== undefined) _restoreUIState(st);
+            KeyboardService.initKeyboardDetection();
+            KeyboardService.bindGlobalShortcut();
           } catch (e) {
-            console.error('[Search] popstate handler failed:', e);
+            console.warn('[Search] KeyboardService init warning:', e);
           }
-        };
-        DOMService.on(window, 'popstate', Handlers.popstate);
 
-        Handlers.pageshow = function (e) {
-          if (e && e.persisted) {
-            try {
-              if (M.RenderingService) M.RenderingService.disconnectRenderObserver();
-              const st = URLService.readStateFromURL();
-              _restoreUIState(st);
-            } catch (err) {
-              console.error('[Search] pageshow handler failed:', err);
-            }
+          // v4.0 — Init discovery feed pre-fetch if on home/index page
+          if (M.DiscoveryService?.init) {
+            try { M.DiscoveryService.init(); } catch (_) {}
           }
-        };
-        DOMService.on(window, 'pageshow', Handlers.pageshow);
+        })
+        .catch(err => {
+          console.error('[Search] Initialisation failed:', err);
+          if (window.__searchUI) {
+            window.__searchUI._initialized = false;
+          }
+        });
+    }
 
-        State._handlersAttached = true;
+    // ── Event bindings ───────────────────────────────────────────────────────
 
-      } catch (e) {
-        console.error('[Search] init failed', e);
+    function _attachHandlers() {
+      if (State._handlersAttached) return;
+      State._handlersAttached = true;
+
+      DOMService.on(window,   'resize',   Handlers.resize);
+      DOMService.on(window,   'popstate', Handlers.popstate);
+      if (Handlers.pageshow) DOMService.on(window, 'pageshow', Handlers.pageshow);
+
+      DOMService.on(DOMService.get(CONFIG.DOM.searchFormId),    'submit', Handlers.formSubmit);
+      DOMService.on(DOMService.get(CONFIG.DOM.searchResultsId), 'click',  Handlers.copyClick);
+
+      const inp = DOMService.get(CONFIG.DOM.searchInputId);
+      if (inp) {
+        if (Handlers.inputInput)   inp.addEventListener('input',   Handlers.inputInput);
+        if (Handlers.inputKeydown) inp.addEventListener('keydown', Handlers.inputKeydown);
+        if (Handlers.inputFocus)   inp.addEventListener('focus',   Handlers.inputFocus);
+        if (Handlers.inputClick)   inp.addEventListener('click',   Handlers.inputClick);
+      }
+
+      if (Handlers.documentKeydownOverlay) {
+        DOMService.on(document, 'keydown', Handlers.documentKeydownOverlay);
       }
     }
 
-    // ── Helpers ─────────────────────────────────────────────────────────────
+    // ── Internal helpers ─────────────────────────────────────────────────────
 
-    function _restoreLastCommitted() {
+    function _syncFromURL() {
+      const st = URLService.readState();
+      State.lastCommittedSearchState = st;
+      _restoreUIState(st);
+    }
+
+    function _syncFromHistoryAPI() {
       try {
-        const hs = history.state;
-        if (hs && hs.q !== undefined && !hs[State._overlayStateMarker]) {
-          State.lastCommittedSearchState = { q: hs.q || '', type: hs.type || 'all', category: hs.category || 'all' };
-        } else {
-          const arr = StorageService.getHistory();
-          if (arr.length) {
-            const last = arr[arr.length - 1];
-            State.lastCommittedSearchState = { q: last.q || '', type: last.type || 'all', category: last.category || 'all' };
-          } else {
-            State.lastCommittedSearchState = null;
-          }
-        }
+        const st = URLService.readState();
+        if (JSON.stringify(st) === JSON.stringify(State.lastCommittedSearchState)) return;
+        State.lastCommittedSearchState = st;
+        _restoreUIState(st);
       } catch { State.lastCommittedSearchState = null; }
     }
 
@@ -477,6 +410,11 @@
         }
         VirtualScrollEngine.destroy();
         KeyboardAutoToggleService.disableAutoToggle();
+
+        if (_beforeUnloadHandler) {
+          window.removeEventListener('beforeunload', _beforeUnloadHandler);
+          _beforeUnloadHandler = null;
+        }
 
         DOMService.off(window,   'resize',   Handlers.resize);
         DOMService.off(window,   'popstate', Handlers.popstate);
@@ -554,7 +492,12 @@
     };
 
     init();
-    window.addEventListener('beforeunload', () => { try { destroy(); } catch {} }, { passive: true });
+
+    if (_beforeUnloadHandler) {
+      window.removeEventListener('beforeunload', _beforeUnloadHandler);
+    }
+    _beforeUnloadHandler = () => { try { destroy(); } catch {} };
+    window.addEventListener('beforeunload', _beforeUnloadHandler, { passive: true });
 
     // Dispatch ready event for any listeners (matches URE pattern)
     try {

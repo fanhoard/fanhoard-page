@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import * as fs from 'fs';
+import * as path from 'path';
 
 describe('Core Search Defects Regression Suite (DS-01, DS-06, DS-07, DS-09, DS-05, DS-11, DS-02)', () => {
 
@@ -152,6 +154,65 @@ describe('Core Search Defects Regression Suite (DS-01, DS-06, DS-07, DS-09, DS-0
     expect(consoleWarn).toHaveBeenCalledWith('[URLService] pushState failed, attempting replaceState fallback:', expect.any(Error));
     expect(consoleError).toHaveBeenCalledWith('[URLService] history API failed:', expect.any(Error));
     expect(window.location.hash).toContain('#q=test-query');
+  });
+
+  // DS-02: search.js removes beforeunload listener on destroy()
+  it('DS-02: search.js removes beforeunload listener when destroy() is called', async () => {
+    delete (window as any).__searchUI;
+
+    const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
+    const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
+
+    (window as any).SearchModules = {
+      CONFIG: { DOM: {} },
+      State: {
+        overlayOpen: false,
+        _timeouts: new Set(),
+      },
+      Handlers: {},
+      DOMService: {
+        off: vi.fn(),
+        get: vi.fn().mockReturnValue(null),
+        remove: vi.fn(),
+      },
+      StorageService: {},
+      URLService: {},
+      KeyboardService: { destroy: vi.fn() },
+      FilterService: {},
+      SearchService: {},
+      UIService: {},
+      OverlayService: { close: vi.fn() },
+      ClearBtnService: {},
+      IconSlotService: {},
+      VirtualScrollEngine: { destroy: vi.fn() },
+      KeyboardAutoToggleService: { disableAutoToggle: vi.fn() },
+      SearchEngine: {},
+    };
+
+    const searchJsPath = path.resolve(__dirname, '../assets/js/search-system/search.js');
+    let searchJsCode = fs.readFileSync(searchJsPath, 'utf8');
+
+    // Replace async module script fetching with immediate resolution to trigger _boot()
+    searchJsCode = searchJsCode.replace('loadPhases(LOAD_PHASES, base)', 'Promise.resolve()');
+
+    // Evaluate search.js
+    const runCode = new Function('window', 'document', 'console', searchJsCode);
+    runCode(window, document, console);
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect((window as any).__searchUI).toBeDefined();
+
+    const beforeUnloadCalls = addEventListenerSpy.mock.calls.filter(c => c[0] === 'beforeunload');
+    expect(beforeUnloadCalls.length).toBeGreaterThan(0);
+    const beforeUnloadHandler = beforeUnloadCalls[0][1];
+
+    // Call destroy() on searchUI
+    (window as any).__searchUI.destroy();
+
+    const beforeUnloadRemovals = removeEventListenerSpy.mock.calls.filter(c => c[0] === 'beforeunload');
+    expect(beforeUnloadRemovals.length).toBeGreaterThan(0);
+    expect(beforeUnloadRemovals[0][1]).toBe(beforeUnloadHandler);
   });
 
 });
