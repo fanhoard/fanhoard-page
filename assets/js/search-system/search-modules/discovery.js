@@ -197,6 +197,9 @@
    */
   function _removeContainer() {
     _teardownHandle();
+    if (_listEl) {
+      _detachCopyHandler(_listEl);
+    }
     if (_container) {
       try { _container.parentNode?.removeChild(_container); } catch {}
     }
@@ -268,20 +271,42 @@
         }
       };
 
-      listEl.addEventListener('click', (e) => {
+      const clickHandler = (e) => {
         const card = e.target.closest('.result-card');
         if (card) { e.preventDefault(); _copy(card); }
-      });
+      };
 
-      listEl.addEventListener('keydown', (e) => {
+      const keydownHandler = (e) => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
         const card = e.target.closest('.result-card');
         if (card) { e.preventDefault(); _copy(card); }
-      });
+      };
 
+      listEl.addEventListener('click', clickHandler);
+      listEl.addEventListener('keydown', keydownHandler);
+
+      listEl._discoveryClickHandler = clickHandler;
+      listEl._discoveryKeydownHandler = keydownHandler;
       listEl._discoveryCopyAttached = true;
     } catch (e) {
       console.warn('[Discovery] _attachCopyHandler failed:', e);
+    }
+  }
+
+  function _detachCopyHandler(listEl) {
+    try {
+      if (!listEl) return;
+      if (listEl._discoveryClickHandler) {
+        listEl.removeEventListener('click', listEl._discoveryClickHandler);
+        delete listEl._discoveryClickHandler;
+      }
+      if (listEl._discoveryKeydownHandler) {
+        listEl.removeEventListener('keydown', listEl._discoveryKeydownHandler);
+        delete listEl._discoveryKeydownHandler;
+      }
+      delete listEl._discoveryCopyAttached;
+    } catch (e) {
+      console.warn('[Discovery] _detachCopyHandler failed:', e);
     }
   }
 

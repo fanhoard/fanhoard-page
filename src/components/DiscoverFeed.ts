@@ -296,6 +296,9 @@ export class DiscoverFeed {
    */
   public recyclePage(pageEl: HTMLElement): void {
     if (!pageEl) return;
+    if (this.observer) {
+      try { this.observer.unobserve(pageEl); } catch {}
+    }
     this.activePages.delete(pageEl);
 
     // Recycle all children
@@ -372,6 +375,9 @@ export class DiscoverFeed {
    */
   public clearFeed(container?: HTMLElement | null): void {
     if (this.observer) {
+      for (const page of this.activePages) {
+        try { this.observer.unobserve(page); } catch {}
+      }
       this.observer.disconnect();
       this.observer = null;
     }

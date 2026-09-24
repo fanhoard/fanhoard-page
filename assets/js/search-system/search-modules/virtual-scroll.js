@@ -77,6 +77,11 @@
      * @param {string}         lang
      */
     mount(viewport, host, items, renderFn, lang) {
+      if (this._cardRO) { try { this._cardRO.disconnect(); } catch {} this._cardRO = null; }
+      if (this._vpObs)  { try { this._vpObs.disconnect();  } catch {} this._vpObs  = null; }
+      if (this._scrollTarget && this._onScroll) {
+        try { this._scrollTarget.removeEventListener("scroll", this._onScroll); } catch {}
+      }
       this.destroy();
       this._vp    = viewport;
       this._host  = host;

@@ -117,6 +117,9 @@
           WebkitTapHighlightColor: 'transparent',
         });
 
+      }
+
+      if (!btn._clearListenerAttached) {
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -126,6 +129,7 @@
           IconSlotService.update();
           M.SearchService.doSearch(null, false);
         });
+        btn._clearListenerAttached = true;
       }
 
       this._btn = btn;

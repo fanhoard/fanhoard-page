@@ -326,8 +326,13 @@
         this._showNav();
 
         // Clear any pending timeouts registered during overlay lifetime
-        State._timeouts.forEach(t => { try { clearTimeout(t); } catch {} });
-        State._timeouts.clear();
+        if (Array.isArray(State._timeouts)) {
+          State._timeouts.forEach(t => { try { clearTimeout(t); } catch {} });
+          State._timeouts = [];
+        } else if (State._timeouts && typeof State._timeouts.clear === "function") {
+          State._timeouts.forEach(t => { try { clearTimeout(t); } catch {} });
+          State._timeouts.clear();
+        }
 
         setTimeout(() => { State.overlayTransitioning = false; }, CONFIG.TIMING.transitionDelayMs);
       } catch (e) {

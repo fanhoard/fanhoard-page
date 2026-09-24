@@ -228,7 +228,10 @@
     },
 
     /** @param {Element|null} el @param {Partial<CSSStyleDeclaration>} s */
-    setStyles(el, s) { if (el) try { Object.assign(el.style, s); } catch {} },
+    setStyles(el, s) {
+      if (!el || !s || typeof s !== "object") return;
+      try { Object.assign(el.style, s); } catch (e) { console.warn("[DOMService] setStyles failed:", e); }
+    },
 
     /** @param {Element|null} el @param {string} html */
     setHTML(el, html) { if (el) el.innerHTML = html; },

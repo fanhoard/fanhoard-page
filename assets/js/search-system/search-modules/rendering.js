@@ -125,13 +125,24 @@
      */
     disconnectRenderObserver() {
       if (_searchHandle) {
-        try { _searchHandle.destroy(); } catch (_) {}
+        try {
+          _searchHandle.destroy();
+        } catch (err) {
+          console.error('[Rendering] URE handle destroy failed:', err);
+          if (_searchHandle && typeof _searchHandle.unbindListeners === 'function') {
+            try { _searchHandle.unbindListeners(); } catch (_) {}
+          }
+        }
         _searchHandle = null;
       }
       DOMService.remove(DOMService.get(CONFIG.DOM.sentinelId));
       // v4.0 — Tear down discovery section too so it doesn't leak.
       if (M.DiscoveryService?.clearDiscovery) {
-        try { M.DiscoveryService.clearDiscovery(); } catch (_) {}
+        try {
+          M.DiscoveryService.clearDiscovery();
+        } catch (err) {
+          console.error('[Rendering] Discovery Service clear failed:', err);
+        }
       }
     },
 

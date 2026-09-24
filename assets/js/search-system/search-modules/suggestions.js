@@ -113,7 +113,7 @@
 
         let html = `<div class="search-suggestions-title">${LanguageService.t('trending')}</div>`;
         for (const s of sgs) {
-          html += `<div class="search-suggestion-item" role="option" tabindex="0" data-val="${StringService.encodeUrl(s.raw)}">
+          html += `<div class="search-suggestion-item" role="option" tabindex="0" data-val="${StringService.escapeHtml(StringService.encodeUrl(s.raw))}">
   <div class="search-suggestion-body">${s.highlightedHtml}</div>
 </div>`;
         }
@@ -224,7 +224,7 @@
         let html = `<div class="search-suggestions-title">${LanguageService.t('suggestion_label')}</div>`;
         for (const s of sgs) {
           const badge = _sourceBadge(s.source);
-          html += `<div class="search-suggestion-item" role="option" tabindex="0" data-val="${StringService.encodeUrl(s.raw)}">
+          html += `<div class="search-suggestion-item" role="option" tabindex="0" data-val="${StringService.escapeHtml(StringService.encodeUrl(s.raw))}">
   <div class="search-suggestion-body">${HighlightService.highlight(s.raw, query)}</div>${badge}
 </div>`;
         }

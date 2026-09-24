@@ -1006,6 +1006,7 @@
 
       inst.state = 'hiding';
       if (inst.autoHideTimer) { clearTimeout(inst.autoHideTimer); inst.autoHideTimer = null; }
+      if (inst.leaveTimer) { clearTimeout(inst.leaveTimer); inst.leaveTimer = null; }
       State.emit('hiding', { id: id, mode: inst.mode });
 
       return new Promise(function(resolve) {
@@ -1368,6 +1369,7 @@
       var inst = State.getInstance(id);
       return inst ? Engine._makeHandle(inst) : null;
     },
+    isShown: function(id) { return this.isActive(id); },
     isActive: function(id) {
       if (!id) id = CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
       var inst = State.getInstance(id);
