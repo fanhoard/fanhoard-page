@@ -1,700 +1,131 @@
-# AI_FORBIDDEN — กฎเหล็กสำหรับ AI Agents
+# FanHoard Prohibited Patterns & System Invariants (AI_FORBIDDEN)
 
-> เอกสารนี้คือ **กฎเหล็ก** ที่ AI agent ทุกตัวต้องปฏิบัติตามเมื่อทำงานกับโค้ดเบส FanHoard
->
-> ⚠️ **การละเว้นกฎข้อใดข้อหนึ่งในนี้อาจทำให้เว็บพังได้** — อ่านให้จบก่อนแตะโค้ด
->
-> **Priority:** HIGHEST — กฎนี้อยู่เหนือมาตรฐานอื่นทั้งหมด
-
----
-
-## สารบัญ
-
-1. [ไฟล์ที่ห้ามแก้](#1-ไฟล์ที่ห้ามแก้)
-2. [Pattern ที่ห้ามใช้](#2-pattern-ที่ห้ามใช้)
-3. [Assumption ที่ผิดบ่อย](#3-assumption-ที่ผิดบ่อย)
-4. [กฎเกี่ยวกับ Content](#4-กฎเกี่ยวกับ-content)
-5. [กฎเกี่ยวกับภาษา](#5-กฎเกี่ยวกับภาษา)
-6. [กฎเกี่ยวกับ Performance](#6-กฎเกี่ยวกับ-performance)
-7. [กฎเกี่ยวกับ Build & Deploy](#7-กฎเกี่ยวกับ-build--deploy)
-8. [เมื่อไม่แน่ใจ](#8-เมื่อไม่แน่ใจ)
+- **System Described**: Inviolable Code, Architectural, & Operational Restrictions for AI Agents
+- **Entry File**: `fanhoard-docs/AI_FORBIDDEN.md`
+- **Dependencies**: All repository source files, `scripts/validate-release.js`, `docs/engineering/ai-docs-guide.md`
+- **Verification**: `node scripts/validate-release.js --staged` | `npm run test`
 
 ---
 
-## 1. ไฟล์ที่ห้ามแก้
+## 1. Priority & Severity Rules
 
-### 1. ห้ามแก้ไฟล์เหล่านี้โดยไม่ได้รับอนุญาต
-
-| ไฟล์ | เหตุผล |
-|---|---|
-| `assets/db/con-data/index.json` | Registry ของ copyable types — การแก้ผิดทำให้ search และ home พัง |
-| `assets/json/buttons.json` | กำหนด nav bar — การแก้ผิดทำให้ routing พัง |
-| `assets/lang/options/db.json` | Registry ภาษา — การแก้ผิดทำให้ build พัง |
-| `_redirects`, `_headers` | Cloudflare routing & caching — แก้ผิดทำให้เว็บทั้งหมดพัง |
-| `scripts/build.js` | Build orchestrator — แก้ผิดทำให้ production พัง |
-| `LICENSE`, `NOTICE` | กฎหมาย — ห้ามแก้ |
-
-### 1.2 ไฟล์ที่แก้ได้แต่ต้องระวัง
-
-| ไฟล์ | ข้อควรระวัง |
-|---|---|
-| `assets/lang/en.json`, `assets/lang/th.json` | ต้องเพิ่ม key ทั้งสองไฟล์พร้อมกัน |
-| `assets/md/{en,th}/current.md` | ต้องเขียนทั้งสองภาษาพร้อมกัน ตาม [`RELEASE_NOTES_GUIDE.md`](./RELEASE_NOTES_GUIDE.md) |
-| `package.json` | อย่าเพิ่ม dependency โดยไม่จำเป็น — FanHoard ใช้ dependency น้อยมาก |
-| `00-System-Architecture.md` | อัปเดตได้แต่ต้องคงโครงสร้างหลักไว้ |
+This document defines the **highest-priority inviolable rules** for the FanHoard repository. Rules in this document supersede general conventions. Violating any invariant listed here breaks application functionality, corrupts database indices, or fails the 4-layer release validation gate.
 
 ---
 
-## 2. Pattern ที่ห้ามใช้
+## 2. Protected Files Matrix
 
-### 2.1 ห้ามใช้ ES Modules
+### 2.1 Restricted Core Files (Do Not Modify Without Authorization)
 
-FanHoard ใช้ **IIFE pattern** ทั้งระบบ ไม่ใช่ ES modules
+| Protected File Path | Functional Role | Failure Consequence of Invalid Edits |
+| :--- | :--- | :--- |
+| `assets/db/con-data/index.json` | Registry of copyable content types | Breaks search engine indexing and Home page category assembly |
+| `assets/json/buttons.json` | Navigation bar structure | Breaks SPA client-side routing and button links |
+| `assets/lang/options/db.json` | Language options registry | Breaks static HTML build generation |
+| `_redirects` & `_headers` | Cloudflare Pages routing & caching | Breaks platform HTTP redirects, security, and cache headers |
+| `scripts/build.js` | Static build orchestrator | Breaks production deployment build pipeline |
+| `scripts/validate-release.js` | 4-layer release validation script | Disables release safety gates and bypass verification |
+| `.release-bypass-counter` | Local bypass consumption counter | **NEVER STAGE THIS FILE**. Staging causes CI pipeline failures |
+| `LICENSE` & `NOTICE` | Legal licensing declarations | License violation |
 
-```javascript
-// ❌ ห้าม
-import { foo } from './foo.js';
-export function bar() { ... }
+### 2.2 Files Requiring Synchronized Updates
 
-// ✅ ถูก
-(function(M) {
-  'use strict';
-  function bar() { ... }
-  M.Bar = bar;
-})(window.SomeNamespace = window.SomeNamespace || {});
-```
+| Target File Group | Synchronization Invariant |
+| :--- | :--- |
+| `assets/lang/en.json` & `assets/lang/th.json` | New translation keys MUST be added to both language files simultaneously. |
+| `assets/md/en/current.md` & `assets/md/th/current.md` | User-facing release updates MUST be written in both languages simultaneously. |
+| Generated release files (`assets/md/{lang}/releases/*`, `version.json`) | **DO NOT EDIT DIRECTLY**. Modify `current.md` frontmatter and execute `node scripts/update-version.js`. |
 
-เหตุผล: Build system ไม่ได้ออกแบบมารองรับ ES modules และการเปลี่ยนทั้งระบบเสี่ยงพัง
+---
 
-### 2.2 ห้ามใช้ Framework (React, Vue, etc.)
+## 3. Prohibited Code Patterns
 
-FanHoard เป็น vanilla JavaScript ทั้งหมด ห้ามเพิ่ม React, Vue, Svelte, หรือ framework อื่นใด
+### 3.1 Prohibited Frontend Frameworks & ES Modules
+- **NO ES Module Syntax**: Browser scripts MUST use the IIFE pattern (`(function(M){ ... })(window.Namespace = window.Namespace || {})`). `import` and `export` statements in runtime scripts are strictly prohibited.
+- **NO Frontend Frameworks**: The application is written in pure vanilla JavaScript. Introducing React, Vue, Svelte, Angular, or jQuery is strictly prohibited.
+- **NO `var` Declarations**: Use `const` or `let` exclusively.
 
-### 2.3 ห้ามใช้ jQuery
+### 3.2 Prohibited Native Modals
+- Native browser modal calls (`alert()`, `confirm()`, `prompt()`) are prohibited.
+- Use `PopupSystem` (`assets/js/popup.js`):
+  ```javascript
+  // Prohibited
+  alert('Saved successfully!');
 
-ใช้ vanilla DOM API เท่านั้น
+  // Mandatory
+  await PopupSystem.toast('Saved successfully!');
+  ```
 
-```javascript
-// ❌ ห้าม
-$('.button').click(...)
-
-// ✅ ถูก
-document.querySelector('.button').addEventListener('click', ...)
-```
-
-### 2.4 ห้ามใช้ `var`
-
-ใช้ `const` หรือ `let` เท่านั้น
-
-### 2.5 ห้าม mutate global state โดยไม่ได้ประกาศ
-
-```javascript
-// ❌ ห้าม — เพิ่ม property เข้าไปใน window โดยไม่ประกาศ
-window.myRandomVar = '...';
-
-// ✅ ถูก — ใช้ namespace ที่มีอยู่แล้ว หรือสร้าง namespace ใหม่อย่างชัดเจน
-window.FanHoardUtils = window.FanHoardUtils || {};
-window.FanHoardUtils.myFeature = '...';
-```
-
-### 2.6 ห้ามใช้ `alert()`, `confirm()`, `prompt()`
-
-ใช้ PopupSystem แทน — ดู [`06-Popup-System.md`](./06-Popup-System.md)
-
-```javascript
-// ❌ ห้าม
-alert('Saved!');
-if (confirm('Delete?')) { ... }
-const name = prompt('Name:');
-
-// ✅ ถูก
-await PopupSystem.toast('Saved!');
-const ok = await PopupSystem.confirm('Delete?');
-```
-
-### 2.7 ห้าม fetch ไฟล์ที่ build แล้วหายไป
-
-ไฟล์เหล่านี้ถูกลบออกจาก built pages โดย build script:
-
+### 3.3 Prohibited Execution of Pruned Runtime Scripts
+Build scripts prune development utilities from generated static HTML. The following files MUST NOT be imported or fetched by production runtime code:
 - `lang-proxy.js`
 - `lang-sync.js`
 - `lang-coordinator.js`
 
-ห้ามเรียกใช้ในโค้ดที่จะรันบน production
-
-### 2.8 ห้ามใช้ `innerHTML` กับ user input
-
-```javascript
-// ❌ อันตราย — XSS
-el.innerHTML = userInput;
-
-// ✅ ปลอดภัย
-el.textContent = userInput;
-```
+### 3.4 Prohibited DOM & Security Patterns
+- **NO Unsafe `innerHTML`**: Do NOT assign user input or unsanitized strings directly to `innerHTML`. Use `textContent` or `DocumentFragment` node construction.
+- **NO Undeclared Global State**: Do NOT attach arbitrary properties directly to `window`. Export properties exclusively via designated namespaces (`window.UREModules`, `window.SearchModules`, `window.NavCoreModules`, `window.PopupModules`, `window.LangModules`, `window.ConDataService`, `window.FVLModules`).
 
 ---
 
-## 3. Assumption ที่ผิดบ่อย
+## 4. Invalid Assumptions Matrix
 
-### 3.1 "FanHoard = FanHoard Page"
-
-❌ ผิด — ชื่อโปรเจกต์คือ **FanHoard** (หรือเต็ม: **FanHoard Verse**) ไม่ใช่ "FanHoard Page"
-
-### 3.2 "มี build step ก็เลยใช้ React/Next.js ได้"
-
-❌ ผิด — Build script ใช้ Cheerio สำหรับ static HTML transformation ไม่ใช่ React/Next.js
-
-### 3.3 "Translation ทำงานใน runtime เท่านั้น"
-
-❌ ผิด — มี 2 โหมด:
-- **Production (built pages):** Translation ฝังใน HTML แล้ว ไม่ต้องรอ JS
-- **Development (localhost):** Translation ทำงานใน runtime ผ่าน `language.js`
-
-### 3.4 "Service worker จัดการ cache ทั้งหมด"
-
-❌ ผิด — Cache ทำงานผ่าน HTTP headers (`_headers`) เป็นหลัก ไม่ใช่ service worker
-
-### 3.5 "เพิ่มภาษาได้โดยเพิ่มไฟล์ JSON"
-
-❌ ผิด — ต้อง:
-1. เพิ่มใน `assets/lang/options/db.json`
-2. สร้าง `assets/lang/{lang}.json`
-3. อัปเดต build script
-4. อัปเดต `_redirects` และ `_headers`
-5. อัปเดต sitemap generator
-
-### 3.6 "URE เป็น React component"
-
-❌ ผิด — URE เป็น vanilla JS engine ที่ใช้ IIFE pattern
-
-### 3.7 "แก้แล้วรีเฟรชหน้าเว็บเห็นได้เลย"
-
-❌ ผิด — หลายการแก้ต้อง build ก่อน โดยเฉพาะ:
-- การเปลี่ยน translation
-- การเปลี่ยน HTML structure
-- การเปลี่ยน content JSON
-
-รัน `npm run build` แล้วทดสอบใน `dist/`
-
-### 3.8 "Search ค้นหาได้ทุกอย่าง"
-
-❌ ผิด — Search ค้นหาเฉพาะ **copyable** items (emoji, symbol, fancy) ที่อยู่ใน `index.json` เท่านั้น ไม่ค้นหา cards หรือ packages
-
-### 3.9 "popup กับ dialog คือคนละระบบ"
-
-❌ ผิด — ทั้งสองใช้ `PopupSystem` ตัวเดียวกัน ต่างแค่ `type` parameter
-
-### 3.10 "Production branch = main เสมอ"
-
-⚠️ ตรวจสอบใน Cloudflare Pages dashboard ก่อน — ปัจจุบันใช้ `main` แต่อาจเปลี่ยนได้
+| Common False Assumption | Fact & Code Evidence |
+| :--- | :--- |
+| **"System is named FanHoard Page"** | The official system name is **FanHoard** (or **FanHoard Verse**). "FanHoard Page" is repository folder name only. |
+| **"Build step uses React / Next.js"** | `scripts/build.js` uses **Cheerio** for static HTML AST manipulations; there is no JSX or React compiler. |
+| **"Translations run strictly at runtime"** | Dual execution: Production pages are pre-translated at build time into static HTML; Development (`localhost`) translates via `assets/js/language.js`. |
+| **"Service Worker handles all caching"** | Caching is managed primarily by Cloudflare Pages HTTP headers defined in `_headers`. |
+| **"Search indexes all data types"** | Search engine indexes **copyable items only** (emoji, symbol, fancy) registered in `index.json`. Cards and packages are excluded. |
+| **"Popup and Dialog are separate engines"** | Modal dialogs, toasts, and popups all run on `PopupSystem` (`assets/js/popup.js`). |
 
 ---
 
-## 4. กฎเกี่ยวกับ Content
+## 5. Content Data Invariants
 
-### 4.1 ห้ามเขียนข้อมูลดิบใน `content/*.json`
-
-```json
-// ❌ ห้าม — content/*.json เป็นใบสั่งงานเท่านั้น
-[
-  { "api": "U+1F600", "text": "😀", "name": { "en": "Smile" } }
-]
-
-// ✅ ถูก — เป็น descriptor
-[{ "source": "emoji" }]
-```
-
-ดู [`10-Content-Guide.md`](./10-Content-Guide.md) สำหรับรายละเอียด
-
-### 4.2 ห้ามเพิ่ม collection types ลงใน `index.json`
-
-`index.json` เก็บเฉพาะ copyable types (emoji, symbol, fancy) เท่านั้น — ห้ามเพิ่ม cards
-
-### 4.3 ห้ามลบ `api`, `text`, `name` จาก item เดิม
-
-Field เหล่านี้ใช้ใน search index และ favorites — ลบแล้วแตก
-
-### 4.4 ห้ามตั้ง `url` ซ้ำกันใน `buttons.json`
-
-routing พัง
-
-### 4.5 ห้ามใช้ emoji เดียวกันใน 2 subcategory
-
-จะทำให้ duplicates ใน assembled DB และ search แสดงซ้ำ
+1. **Content Descriptor Rule**: Files in `assets/db/con-data/content/*.json` MUST contain source descriptors (`[{ "source": "emoji" }]`), NOT raw item data.
+2. **Copyable Index Scope**: `assets/db/con-data/index.json` stores ONLY copyable items (emoji, symbol, fancy). Card collections MUST NOT be added to `index.json`.
+3. **Preserve Item Data Schema**: Never delete or rename core item fields (`api`, `text`, `name`) in item objects. Deleting these fields corrupts search index lookups and user favorites.
 
 ---
 
-## 5. กฎเกี่ยวกับภาษา
+## 6. Internationalization Invariants
 
-### 5.1 ห้ามใช้ `localStorage.getItem('selectedLang')` โดยตรง
-
-ใช้ `FvLang.lang` แทน — ดู [`11-Release-Notes-System.md`](./11-Release-Notes-System.md) ส่วน FvLang
-
-### 5.2 ห้ามใช้ `languageChange` event
-
-ใช้ `fv:langchange` แทน (v5.0+)
-
-### 5.3 ห้ามลืมเพิ่ม translation ในทั้ง 2 ภาษา
-
-ถ้าเพิ่ม key ใน `en.json` ต้องเพิ่มใน `th.json` ด้วย — ไม่งั้น fallback จะแสดง key แทนข้อความ
-
-### 5.4 ห้าม hardcode ข้อความใน HTML
-
-ใช้ `data-translate` attribute แล้วเพิ่ม key ใน translation JSON
-
-```html
-<!-- ❌ ห้าม -->
-<button>Save</button>
-
-<!-- ✅ ถูก -->
-<button data-translate="action.save"></button>
-```
+1. **Language Accessor**: Do NOT access `localStorage.getItem('selectedLang')` directly. Read current active language from `FvLang.lang` (`assets/js/lang-core.js`).
+2. **Language Event Invariant**: Use `fv:langchange` custom event. Legacy `languageChange` event is deprecated.
+3. **No Hardcoded HTML Strings**: User-visible strings in static templates MUST use `data-translate="key.path"` attributes paired with `assets/lang/{en,th}.json`.
 
 ---
 
-## 6. กฎเกี่ยวกับ Performance
+## 7. Performance & DOM Invariants
 
-### 6.1 ห้าม query DOM ใน loop
-
-```javascript
-// ❌ ห้าม — ช้ามาก
-items.forEach(item => {
-  document.querySelector(`#item-${item.id}`).textContent = item.name;
-});
-
-// ✅ ถูก — query ครั้งเดียว
-const elements = document.querySelectorAll('[data-item-id]');
-items.forEach((item, i) => {
-  elements[i].textContent = item.name;
-});
-```
-
-### 6.2 ห้าม synchronous layout thrash
-
-```javascript
-// ❌ ห้าม — read/write สลับกันไป ทำให้ browser ต้อง layout ใหม่ทุกรอบ
-elements.forEach(el => {
-  const h = el.offsetHeight;  // read
-  el.style.height = h + 10 + 'px';  // write
-});
-
-// ✅ ถูก — แยก read และ write เป็น batch
-const heights = elements.map(el => el.offsetHeight);  // read all
-elements.forEach((el, i) => {
-  el.style.height = heights[i] + 10 + 'px';  // write all
-});
-```
-
-### 6.3 ห้ามสร้าง DOM ใน loop
-
-ใช้ `DocumentFragment` หรือ URE แทน — ดู [`08-Performance-Architecture.md`](./08-Performance-Architecture.md)
-
-### 6.4 ห้ามใช้ `setInterval` สำหรับ animation
-
-ใช้ `requestAnimationFrame` เท่านั้น
-
-### 6.5 ห้าม fetch ข้อมูลที่ไม่จำเป็น
-
-ใช้ lazy loading — โหลดเฉพาะที่จะแสดงผล
+1. **Query Caching**: Never execute `document.querySelector` inside loops.
+2. **Layout Batching**: Batch DOM read operations (`offsetHeight`, `getBoundingClientRect`) before DOM write operations (`style.height`, `classList.add`).
+3. **Loop Rendering**: Use `DocumentFragment` or URE (`assets/js/ure/ure.js`) for rendering lists.
+4. **Animation Timing**: Use `requestAnimationFrame` for UI animations. `setInterval` for animations is prohibited.
+5. **Search Engine Invariants**:
+   - `RESULT_CACHE_CAP = 50` (`assets/js/search-system/search-modules/engine.js:122`).
+   - `nq.length <= 3` fast path checks `_bucketIndex` Map (`engine.js:616`).
 
 ---
 
-## 7. กฎเกี่ยวกับ Build & Deploy
+## 8. Release Control & Staging Invariants
 
-### 7.1 ห้าม push ไป `main` โดยตรง
-
-ใช้ branch แยก + PR เสมอ (เว้นแต่ hotfix วิกฤต)
-
-### 7.2 ห้าม deploy โดยไม่ build
-
-หลังแก้ source HTML/translation ต้องรัน `npm run build` ก่อน — production ใช้ไฟล์ใน `dist/`
-
-### 7.3 ห้ามลืม cache-bust
-
-ถ้าแก้ asset ต้องอัปเดต `?v=` query string — build script ทำให้อัตโนมัติ แต่ถ้า manual ต้องจำ
-
-### 7.4 ห้าม ignore `dist/`
-
-`dist/` อยู่ใน `.gitignore` — ห้าม commit ไฟล์ใน `dist/`
+1. **Never Commit `.release-bypass-counter`**: `.release-bypass-counter` tracks local bypass token usage and MUST NOT be staged in Git commits.
+2. **Bypass Token Recipe**: Increment `.release-bypass` to bypass release checks for doc-only pushes:
+   ```bash
+   V=$(cat .release-bypass-counter)
+   echo $((V+5)) > .release-bypass
+   git add <doc-file> .release-bypass
+   git commit -m "docs: description"
+   ```
+3. **Automated Version Updating**: Never manually edit generated release files (`assets/md/{lang}/releases/*`, `version.json`). Edit `assets/md/{lang}/current.md` and execute `node scripts/update-version.js`.
 
 ---
 
-## 8. กฎเกี่ยวกับ SEO (priority สูงสุด)
-
-> ⚠️ SEO เป็น priority ระดับพิเศษที่สูงสุดของ FanHoard — กฎในส่วนนี้ผิดนิดเดียวอาจทำให้ ranking ตก ดู [`12-SEO-Guide.md`](./12-SEO-Guide.md) สำหรับรายละเอียดเต็ม
-
-### 8.1 ห้ามลบ meta tags และ SEO elements
-
-```html
-<!-- ❌ ห้ามลบทั้งหมดนี้จาก HTML -->
-<title>...</title>
-<meta name="description" content="...">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="...">
-<link rel="alternate" hreflang="en" href="...">
-<link rel="alternate" hreflang="th" href="...">
-<link rel="alternate" hreflang="x-default" href="...">
-<meta property="og:*" ...>
-<meta name="twitter:*" ...>
-<meta name="viewport" content="...">
-<html lang="...">
-```
-
-### 8.2 ห้าม render เนื้อหาสำคัญด้วย JavaScript อย่างเดียว
-
-Search engine crawl static HTML — ถ้าเนื้อหาสำคัญ (title, heading, description, main content) ต้องใช้ JS ถึงจะแสดง Google อาจไม่เห็น
-
-```javascript
-// ❌ ห้าม — สำหรับเนื้อหาสำคัญ
-document.getElementById('title').textContent = 'Page Title';
-
-// ✅ ถูก — เนื้อหาสำคัญต้องอยู่ใน static HTML
-// <h1>Page Title</h1>
-```
-
-### 8.3 ห้ามใช้ `noindex` บนหน้าที่ต้องการให้ index
-
-ยกเว้น beta/test pages และหน้าที่กำลังพัฒนา
-
-### 8.4 ห้ามเปลี่ยน URL โดยไม่ตั้ง 301 redirect
-
-```javascript
-// ❌ ห้าม — URL เปลี่ยนแล้ว redirect ไม่ได้ตั้ง
-// /en/old-page/ → /en/new-page/
-
-// ✅ ถูก — ตั้ง 301 redirect ใน _redirects และอัปเดต sitemap
-```
-
-### 8.5 ห้ามใช้ `<div>` แทน semantic HTML
-
-```html
-<!-- ❌ ห้าม -->
-<div class="header">...</div>
-<div class="nav">...</div>
-<div class="main">...</div>
-
-<!-- ✅ ถูก -->
-<header>...</header>
-<nav>...</nav>
-<main>...</main>
-```
-
-### 8.6 ห้ามใช้ `<h1>` มากกว่า 1 อันต่อหน้า
-
-```html
-<!-- ❌ ห้าม -->
-<h1>Page Title</h1>
-<h1>Section Title</h1>  <!-- ห้าม -->
-
-<!-- ✅ ถูก -->
-<h1>Page Title</h1>
-<h2>Section Title</h2>
-```
-
-### 8.7 ห้าม skip heading level
-
-```html
-<!-- ❌ ห้าม — ข้าม h2 -->
-<h1>Page Title</h1>
-<h3>Section</h3>
-
-<!-- ✅ ถูก -->
-<h1>Page Title</h1>
-<h2>Section</h2>
-```
-
-### 8.8 ห้ามลืม `alt` text ในรูป
-
-```html
-<!-- ❌ ห้าม -->
-<img src="banner.jpg">
-
-<!-- ✅ ถูก -->
-<img src="banner.jpg" alt="FanHoard banner with emojis and symbols" width="1200" height="630">
-```
-
-### 8.9 ห้ามใช้ `loading="lazy"` บน hero image
-
-```html
-<!-- ❌ ห้าม — hero image ที่เห็นทันทีตอนโหลด -->
-<img src="hero.jpg" loading="lazy" alt="...">
-
-<!-- ✅ ถูก — hero image ไม่ lazy -->
-<img src="hero.jpg" alt="..." width="1200" height="630">
-```
-
-### 8.10 ห้าม deploy ถ้า Lighthouse ไม่ผ่าน
-
-ห้าม deploy ถ้า:
-- Performance < 80
-- SEO < 100
-- Accessibility < 90
-- LCP > 4s
-- CLS > 0.25
-- INP > 500ms
-
-### 8.11 ห้าม keyword stuffing
-
-```html
-<!-- ❌ ห้าม — ใส่ keyword ซ้ำ ๆ ไม่เป็นธรรมชาติ -->
-<title>Emoji Emoji Emoji - Best Emoji Site for Emoji</title>
-<meta name="description" content="Emoji site with emoji for emoji lovers who want emoji">
-
-<!-- ✅ ถูก — ใส่ keyword ตามธรรมชาติ -->
-<title>Emojis, Symbols & Fancy Text — FanHoard</title>
-<meta name="description" content="Find, copy, and use thousands of emojis, symbols, and fancy text instantly. No installation required.">
-```
-
-### 8.12 ห้ามลบหน้าจาก sitemap โดยไม่ตั้ง redirect หรือ 410
-
-ถ้าลบหน้าจริง ๆ ให้ตั้ง 410 Gone หรือ 301 redirect ไปหน้าอื่น — ไม่ใช่แค่ลบจาก sitemap
-
----
-
-## 9. กฎเกี่ยวกับ Release Notes (v5.1 — Closed System + 4-Layer Version Control)
-
-> ⚠️ **v5.1:** ระบบ release notes เป็น **closed system** + มี **4 ชั้นป้องกัน** ที่บังคับ version bump ทุกการส่งโค้ด (ยกเว้น bypass)
->
-> **v5.1:** ไม่ต้องส่ง `APP_VERSION` env var แล้ว — script อ่าน version จาก `current.md` โดยตรง
-
-### 9.0 ระบบ 4 ชั้น (4-Layer Version Control)
-
-ตั้งแต่ v5.1 เป็นต้นไป ทุกการ commit/push ต้องเปลี่ยน version (ยกเว้น bypass):
-
-| Layer | ที่ไหน | ตรวอะไร | บล็อกอะไร |
-|---|---|---|---|
-| 1. Pre-commit | local hook | version bump + generated artifacts | commit |
-| 2. Pre-push | local hook | version bump + JS syntax + current.md ครบ | push |
-| 3. CI | GitHub Actions | validate + build + verify | deploy |
-| 4. Deploy | Cloudflare Pages | (รันหลัง Layer 3 ผ่าน) | — |
-
-ติดตั้ง hooks: `bash scripts/hooks/install.sh`
-
-### 9.1 ห้ามแตะ generated artifacts (Closed System)
-
-นักพัฒนาเขียน/แก้ได้แค่ 2 ไฟล์:
-
-- `assets/md/en/current.md` — release notes ภาษาอังกฤษของ version ปัจจุบัน
-- `assets/md/th/current.md` — release notes ภาษาไทยของ version ปัจจุบัน
-
-ไฟล์อื่นทุกไฟล์ในระบบ release notes เป็น generated artifacts — ห้ามแก้/ห้ามสร้าง/ห้ามลบ:
-
-```bash
-# ❌ ห้าม — ทั้งหมดเป็น generated artifacts
-assets/md/en/releases/v*.md           # snapshot ของแต่ละ version
-assets/md/th/releases/v*.md
-assets/md/releases/index.json         # manifest สำหรับ client
-assets/json/release-dates.json        # registry ของ release dates
-assets/json/version.json              # runtime metadata
-assets/json/whats-new.json            # legacy — ควรลบถ้ามี
-assets/json/release-history.json      # legacy — ควรลบถ้ามี
-assets/md/current.md                  # legacy single-file — ควรลบถ้ามี
-
-# ✅ ถูก — แก้เฉพาะ current.md (en + th) เท่านั้น
-# แล้ว commit + push → CI/CD รัน validate-release.js + update-version.js
-```
-
-ใช้ `scripts/validate-release.js` เพื่อตรวจสอบก่อน commit:
-
-```bash
-node scripts/validate-release.js --staged
-```
-
-แนะนำให้ติดตั้งเป็น git pre-commit hook — ดู [`11-Release-Notes-System.md`](./11-Release-Notes-System.md) section 7.3
-
-### 9.2 ห้ามสร้างไฟล์ใน `assets/md/{en,th}/releases/` ด้วยตนเอง
-
-build script สร้างไฟล์ `releases/v{version}.md` อัตโนมัติเมื่อ bump version ใหม่ — นักพัฒนาไม่ต้องสร้างเอง
-
-```bash
-# ❌ ห้าม — build script สร้างให้อัตโนมัติเมื่อ bump version
-cp assets/md/en/current.md assets/md/en/releases/v2.0.0.md
-cp assets/md/th/current.md assets/md/th/releases/v2.0.0.md
-
-# ❌ ห้าม — สร้างไฟล์ release note ใหม่ใน releases/ เอง
-echo "..." > assets/md/en/releases/v2.0.0.md
-
-# ✅ ถูก — แก้ current.md อย่างเดียว (เขียนเฉพาะ version/title/subtitle/sections — ไม่ต้องเขียน date)
-# แล้ว commit + push → CI/CD รัน update-version.js → script สร้าง releases/v{version}.md ให้อัตโนมัติ
-```
-
-### 9.3 ห้ามเขียน `date:` ใน `current.md` เอง
-
-ระบบจะ sync `date:` ใน `current.md` ให้ตรงกับ registry เสมอ — นักพัฒนาไม่ต้องเขียนเอง
-
-```markdown
-# ❌ ห้าม — ระบบจะเขียนทับด้วยค่าจาก registry
----
-version: 2.0.0
-date: 2026-07-16T00:00:00.000Z
-title: ...
----
-
-# ✅ ถูก — เขียนเฉพาะ version/title/subtitle/sections
----
-version: 2.0.0
-title: ...
----
-```
-
-ห้ามลบ `version:` จาก frontmatter — build script ใช้ `version` ในการระบุ release
-
-### 9.4 ห้ามเขียน release note เป็นภาษาเดียว
-
-ต้องเขียนทั้ง `assets/md/en/current.md` และ `assets/md/th/current.md` พร้อมกัน — ถ้าเขียนภาษาเดียว อีกภาษาจะ fallback ไปใช้ของเดิม
-
-### 9.5 ห้ามใช้ legacy fallback paths
-
-ตั้งแต่ v5.0 เป็นต้นไป ระบบไม่รองรับ legacy fallback paths แล้ว — ถ้าหา `current.md` ไม่ได้ ระบบจะ fail ทันที (ไม่ fallback ไป `whats-new.json` หรือ `release-history.json`)
-
-```javascript
-// ❌ ห้าม — legacy paths ที่ยกเลิกแล้ว
-fetch('/assets/md/current.md')              // single-file legacy
-fetch('/assets/json/whats-new.json')        // legacy JSON
-fetch('/assets/json/release-history.json')  // legacy combined history
-
-// ✅ ถูก — closed system paths
-fetch('/assets/md/{lang}/current.md')
-fetch('/assets/md/releases/index.json')
-fetch('/assets/md/{lang}/releases/v{version}.md')
-fetch('/assets/json/version.json')
-```
-
-> ดูรายละเอียดใน [`11-Release-Notes-System.md`](./11-Release-Notes-System.md) และ [`RELEASE_NOTES_GUIDE.md`](./RELEASE_NOTES_GUIDE.md)
-
-### 9.6 ห้ามใช้ APP_VERSION env var (v5.1+)
-
-ตั้งแต่ v5.1 เป็นต้นไป `scripts/update-version.js` ไม่ต้องการ `APP_VERSION` แล้ว — อ่าน version จาก `current.md` โดยตรง
-
-```bash
-# ❌ ห้าม — legacy v5.0 ที่ยกเลิกแล้ว
-APP_VERSION=2.1.0 node scripts/update-version.js
-
-# ✅ ถูก — v5.1+ ไม่ต้องส่ง APP_VERSION
-node scripts/update-version.js
-```
-
-ห้ามตั้ง `APP_VERSION` ใน Cloudflare dashboard หรือ GitHub Actions secrets — ไม่จำเป็นแล้ว
-
-### 9.7 ห้ามแก้ `.release-bypass-counter` ด้วยมือ
-
-ไฟล์ `.release-bypass-counter` เป็น generated state — ระบบอัปเดตเองเมื่อใช้ bypass token
-
-```bash
-# ❌ ห้าม — แก้ counter ด้วยมือ
-echo "0" > .release-bypass-counter  # reset เพื่อ bypass ซ้ำ
-
-# ✅ ถูก — แก้เฉพาะ .release-bypass ให้เป็นเลขที่มากกว่า counter
-echo "1" > .release-bypass  # ถ้า counter=0
-```
-
-### 9.8 ห้ามลบไฟล์ bypass
-
-ห้ามลบ `.release-bypass` หรือ `.release-bypass-counter` — ระบบต้องการทั้งสองไฟล์
-
-```bash
-# ❌ ห้าม
-rm .release-bypass
-rm .release-bypass-counter
-
-# ✅ ถูก — แก้เนื้อหาได้ แต่ห้ามลบไฟล์
-echo "0" > .release-bypass  # reset เป็น 0 ได้ (ปิด bypass)
-```
-
-> ดูรายละเอียดใน [`11-Release-Notes-System.md`](./11-Release-Notes-System.md) section 4-5
-
----
-
-## 10. กฎเกี่ยวกับเอกสาร (Documentation — priority #1 สูงสุด)
-
-> 🥇 เอกสารเป็น priority สูงสุดของ FanHoard — สูงกว่า SEO และ Performance เพราะเป็นตัวอธิบายระบบ ดู [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) สำหรับมาตรฐานเต็ม
-
-### 10.1 ห้ามแก้ระบบโดยไม่อัปเดตเอกสาร
-
-ทุกการเปลี่ยนแปลงระบบที่กระทบสิ่งต่อไปนี้ **ต้องอัปเดตเอกสารใน commit เดียวกัน**:
-
-```javascript
-// ❌ ห้าม — เพิ่ม module ใหม่แต่ไม่อัปเดตเอกสารระบบ
-// (เพิ่มไฟล์ assets/js/ure/ure-modules/new-module.js แล้ว commit เลย)
-
-// ✅ ถูก — อัปเดตทั้งโค้ดและเอกสารใน commit เดียวกัน
-// - เพิ่ม assets/js/ure/ure-modules/new-module.js
-// - อัปเดต fanhoard-docs/01-Virtual-Scroll-Rendering.md (เพิ่ม section)
-// - อัปเดต fanhoard-docs/00-System-Architecture.md (ถ้ากระทบภาพรวม)
-// - อัปเดต INDEX.md (ถ้าจำเป็น)
-```
-
-ดูตาราง "สิ่งที่เปลี่ยน → เอกสารที่ต้องอัปเดต" ใน [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) section 8.1
-
-### 10.2 ห้าม commit code และ docs แยกกัน
-
-```bash
-# ❌ ห้าม — แยก commit
-git commit -m "feat(ure): add new module"
-git commit -m "docs(ure): update for new module"
-
-# ✅ ถูก — รวมใน commit เดียว
-git add assets/js/ure/ure-modules/new-module.js fanhoard-docs/01-Virtual-Scroll-Rendering.md
-git commit -m "feat(ure): add new module + update docs"
-```
-
-### 10.3 ห้ามเขียนเอกสารโดยไม่ verify กับโค้ดจริง
-
-ก่อน commit เอกสาร ต้องเช็คว่า:
-
-- ชื่อ module/function/variable ที่อ้างถึงมีจริงในโค้ด
-- เลข version ตรงกับ source code
-- File paths ตรงกับจริง
-- API signatures ตรงกับจริง
-
-ถ้าไม่แน่ใจ → ถือว่าโค้ดเป็นความจริง แล้วแก้เอกสารให้ตรง
-
-### 10.4 ห้ามปล่อยเอกสารไม่ตรงจริงไว้
-
-ถ้าเจอเอกสารที่ไม่ตรงกับโค้ดจริงระหว่างทำ task อื่น:
-
-```javascript
-// ❌ ห้าม — เห็นแล้วไม่สนใจ ทำ task ต่อ
-// (เดี๋ยวคนอื่นจะแก้เอง)
-
-// ✅ ถูก — บันทึกใน PR description หรือเปิด issue แยก
-// "พบเอกสารไม่ตรงจริงที่ fanhoard-docs/XX.md:LINE — อธิบาย..."
-```
-
-### 10.5 ห้ามละเว้นมาตรฐานเอกสาร
-
-ทุกไฟล์ markdown ใน `fanhoard-docs/` ต้องปฏิบัติตามมาตรฐานใน [`13-Documentation-Standard.md`](./13-Documentation-Standard.md):
-
-- มี H1 + header blockquote + สารบัญ + cross-references
-- ใช้ "FanHoard" ไม่ใช่ "FanHoard" หรือ "FanHoard Page"
-- ใช้ relative path ใน cross-references
-- ใช้ชื่อไฟล์จริง (หลัง rename)
-- ใช้ language tag ใน code blocks
-
-### 10.6 ห้าม rename ไฟล์โดยไม่อัปเดต cross-references
-
-```bash
-# ❌ ห้าม — rename แล้วไม่อัปเดต links
-mv fanhoard-docs/01-old-name.md fanhoard-docs/01-new-name.md
-git commit -m "rename"
-
-# ✅ ถูก — rename + อัปเดต cross-references ทุกที่
-mv fanhoard-docs/01-old-name.md fanhoard-docs/01-new-name.md
-python3 scripts/fix_cross_refs.py  # หรืออัปเดต manual
-# อัปเดต INDEX.md ด้วย
-git commit -m "docs: rename 01-old → 01-new + update cross-refs"
-```
-
----
-
-## 11. เมื่อไม่แน่ใจ
-
-ถ้า AI ไม่แน่ใจว่าสิ่งที่จะทำผิดกฎหรือไม่:
-
-1. **หยุด** — อย่าเดา
-2. **อ่านเอกสารที่เกี่ยวข้อง** — ดู [`INDEX.md`](./INDEX.md) ว่าเอกสารไหนเกี่ยวข้อง
-3. **ถ้ากระทบ SEO** — อ่าน [`12-SEO-Guide.md`](./12-SEO-Guide.md) เสมอ
-4. **ตรวจสอบโค้ดจริง** — ดู source code ในไฟล์ที่จะแก้
-5. **ถ้ายังไม่แน่ใจ** — เปิด issue ถาม อย่าเดาแล้วทำ
-
-> การถามดีกว่าการทำผิดแล้วทำให้เว็บพัง
+## 9. SEO Invariants
+
+1. **Mandatory Meta Tags**: Every static HTML page MUST contain unique `<title>`, `<meta name="description">`, `<link rel="canonical">`, and `<link rel="alternate" hreflang="...">` tags.
+2. **Static HTML Content**: Critical page content (headings, main text, titles) MUST exist in static HTML so search engine crawlers can index it without JavaScript execution.
+3. **Heading Hierarchy**: Exactly ONE `<h1>` tag per page. Sub-sections MUST follow strictly sequential hierarchy (`<h2>` -> `<h3>`).
+4. **Image Optimization**: Non-hero images MUST include `loading="lazy"` and `decoding="async"` attributes, alongside explicit `alt` text.
