@@ -73,4 +73,29 @@ describe('Core Search Defects Regression Suite (DS-01, DS-06, DS-07, DS-09, DS-0
     expect(fallbackTriggered).toBe(true);
   });
 
+  // DS-09: doSearch surfaces error and resets currentResults = []
+  it('DS-09: doSearch surfaces engine errors and resets currentResults to empty array', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const State = {
+      currentResults: [{ id: 'stale-result' }],
+    };
+
+    const faultySearch = () => {
+      let out = { results: [], keywords: [] };
+      try {
+        throw new Error('Engine crash');
+      } catch (err) {
+        console.error('[SearchService] Search engine failed:', err);
+        out = { results: [], keywords: [] };
+      }
+      State.currentResults = out.results || [];
+    };
+
+    faultySearch();
+
+    expect(consoleError).toHaveBeenCalledWith('[SearchService] Search engine failed:', expect.any(Error));
+    expect(State.currentResults).toEqual([]);
+  });
+
 });

@@ -160,7 +160,10 @@
         let out = { results: [], keywords: [] };
         try {
           if (_engine()?.search) out = _engine().search(q, State.selectedType) || out;
-        } catch {}
+        } catch (err) {
+          console.error('[SearchService] Search engine failed:', err);
+          out = { results: [], keywords: [] };
+        }
 
         State.currentResults   = out.results  || [];
         State.allKeywordsCache = out.keywords || [];
@@ -189,7 +192,8 @@
         ClearBtnService.sync();
         IconSlotService.update();
       } catch (err) {
-        console.error('[SearchService] doSearch failed', err);
+        console.error('[SearchService] doSearch failed:', err);
+        State.currentResults = [];
       }
     },
 
