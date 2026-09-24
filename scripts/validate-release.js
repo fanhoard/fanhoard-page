@@ -159,9 +159,12 @@ function checkBypass() {
 function consumeBypass() {
   const counter = readBypassCounter();
   writeBypassUsedCounter(counter);
-  try {
-    spawnSync('git', ['add', '.release-bypass-counter'], { cwd: ROOT });
-  } catch (_) {}
+  // Local-only consumption: do NOT stage .release-bypass-counter.
+  // If the counter bump is committed together with the token, the commit ends
+  // up with bypass == counter, and CI (which validates committed files, not
+  // the working tree) rejects every bypassed push. Keeping the counter as a
+  // local working-tree marker preserves hook sequencing while letting CI see
+  // bypass > committed counter.
 }
 
 // ── ดึงรายการไฟล์ที่เปลี่ยน ──────────────────────────────────────────────────
