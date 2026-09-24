@@ -1,519 +1,281 @@
-# มาตรฐานการเขียน Release Notes — FanHoard
+# FanHoard Release Notes Writing Standard (RELEASE_NOTES_GUIDE)
 
-> เอกสารฉบับนี้คือ "พรอมต์มาตรฐาน" สำหรับนักพัฒนาทุกคนที่จะเขียน release notes ของ FanHoard (หรือชื่อเต็ม FanHoard Verse) เพื่อให้ทุกเวอร์ชั่นมีรูปแบบ น้ำเสียง และความลึกซึ้งของคำอธิบายที่สอดคล้องกัน ผู้ใช้ทั่วไปที่ไม่มีพื้นฐานทางเทคนิคสามารถอ่านแล้วเข้าใจได้ว่าเราอัปเดตอะไรจริง ๆ ทำไมถึงอัปเดต และมันจะเปลี่ยนประสบการณ์การใช้งานของพวกเขาอย่างไร
-
----
-
-## 1. ทำไมต้องมีมาตรฐานนี้
-
-FanHoard เป็นเว็บไซต์ที่มีระบบภายในซับซ้อน — สร้าง engine ของตัวเองหลายตัว (URE, Nav-Core, Popup System, Language System ฯลฯ) ผู้ใช้ทั่วไปไม่เคยเห็นสิ่งเหล่านี้ พวกเขาเห็นแค่หน้าเว็บที่ใช้งาน ไม่เคยรู้ว่าเบื้องหลังมี framework อะไรบ้าง ตรงไหนสร้างเอง ตรงไหนใช้ของภายนอก ดังนั้นถ้าเราเขียน release notes แค่บอกว่า "อัปเดต URE v1.7.0" หรือ "แก้ race condition ใน FVL" ผู้ใช้จะไม่เข้าใจเลยว่ามันคืออะไร แล้วมันกระทบตัวเขายังไง
-
-เอกสารฉบับนี้ยกเลิกความคลุมเครือนั้น ทุกคนที่เขียน release notes จะใช้ชุดกฎเดียวกัน โครงสร้างเดียวกัน และระดับความลึกของคำอธิบายเดียวกัน ผลลัพธ์คือ release notes ของทุกเวอร์ชั่นจะอ่านเหมือนเขียนโดยคนคนเดียว — ต่อเนื่อง เป็นมิตร และเข้าใจง่าย
-
-เป้าหมายหลักไม่ใช่ "บอกว่าเราทำอะไร" แต่คือ "ทำให้ผู้ใช้รู้สึกว่าเขาเข้าใจสิ่งที่เราทำ" ต่างกันมาก อย่างแรกเป็นมุมมองนักพัฒนา อย่างหลังเป็นมุมมองผู้ใช้ เอกสารฉบับนี้บังคับให้เราเปลี่ยนมุมมองมาอยู่ฝั่งผู้ใช้ตลอดเวลา
+- **System Described**: Writing Standard, Tone Guidelines, Structure, & Templates for FanHoard Release Notes
+- **Entry File**: `fanhoard-docs/RELEASE_NOTES_GUIDE.md`
+- **Dependencies**: `assets/md/en/current.md`, `assets/md/th/current.md`, `scripts/update-version.js`, `scripts/validate-release.js`
+- **Verification**: `node scripts/validate-release.js --staged` | `node scripts/update-version.js`
 
 ---
 
-## 2. หลักการสำคัญ 5 ข้อ
+## Table of Contents
 
-ทุก release note ที่เขียนต้องผ่านหลักการ 5 ข้อนี้ ถ้าข้อไหนไม่ผ่าน ให้กลับไปเขียนใหม่
-
-### 2.1 เข้าใจได้โดยไม่ต้องรู้เทคนิค
-
-ผู้อ่านคือคนทั่วไปที่ใช้เว็บ — นักเรียน คนทำงาน นักเล่นเกม ที่ต้องการอีโมจิหรือสัญลักษณ์ พวกเขาไม่รู้จัก JavaScript ไม่รู้จัก virtual scrolling ไม่รู้จัก race condition ถ้าเราใช้คำเหล่านี้โดยไม่อธิบาย เท่ากับเขียนให้นักพัฒนาอ่าน ไม่ใช่ผู้ใช้ กฎคือ ถ้าใช้คำเทคนิค ต้องมีวงเล็บหรือประโยคอธิบายตามทันที หรือไม่ก็เลี่ยงไปใช้คำที่เข้าใจง่ายกว่า
-
-### 2.2 อธิบายบริบทก่อนบอกการเปลี่ยนแปลง
-
-ก่อนที่จะบอกว่า "เราปรับปรุง X" ต้องอธิบายก่อนว่า X คืออะไร ทำไมมันมีอยู่ ทำงานยังไง (สั้น ๆ) ถ้าผู้ใช้ไม่รู้จัก X มาก่อน การบอกว่า "X ดีขึ้น" จะไร้ความหมาย ตัวอย่างเช่น ถ้าจะบอกว่า "URE เร็วขึ้น" ต้องอธิบายก่อนว่า URE คือระบบที่ทำให้แสดงอีโมจินับหมื่นได้โดยไม่ช้า แล้วค่อยบอกว่าตอนนี้มันเร็วขึ้นยังไง
-
-### 2.3 บอกผลกระทบต่อผู้ใช้เสมอ
-
-ทุกการเปลี่ยนแปลงต้องตอบคำถาม "แล้วผู้ใช้จะรู้สึกยังไง" ถ้าเป็น bug fix ต้องบอกว่าก่อนหน้านี้ผู้ใช้เจออะไร แล้วตอนนี้หายไปยังไง ถ้าเป็น feature ใหม่ ต้องบอกว่าผู้ใช้จะเห็นอะไรเพิ่มขึ้น ถ้าเป็นการปรับปรุง performance ต้องบอกว่าผู้ใช้จะรู้สึกว่าเว็บเร็วขึ้นหรือลื่นขึ้น ถ้าไม่มีผลกระทบต่อผู้ใช้เลย (เช่น refactor code ล้วน) ให้พิจารณาว่าควรเขียนใน release notes หรือไม่
-
-### 2.4 ใช้ภาษาและน้ำเสียงเดียวกันทุกเวอร์ชั่น
-
-น้ำเสียงคือ "เป็นมิตร ตรงไปตรงมา อธิบายเหมือนคุยกับเพื่อนที่ไม่รู้เรื่องเทคนิค" ไม่ใช้ภาษาทางการเกินไป ไม่ใช้ภาษาโฆษณา ไม่ใช้ภาษาขายของ ไม่ใช้คำว่า "ปฏิวัติ" "พลิกโฉม" "สุดยอด" ฯลฯ ใช้คำธรรมดา ตัวอย่างเช่น "หน้าโหลดไม่กระตุกแล้ว" ดีกว่า "ประสบการณ์การโหลดที่ราบรื่นระดับพรีเมียม"
-
-### 2.5 ซื่อสัตย์ ไม่ขายของ
-
-ถ้า bug ยังแก้ไม่หมด บอกตรง ๆ ว่ายังมีปัญหาเหลืออยู่บ้าง ถ้า feature ใหม่ยังไม่สมบูรณ์ 100% บอกตรง ๆ ว่าเป็นเวอร์ชั่นแรก อาจมีขอบเขต ผู้ใช้จะไว้ใจเรามากกว่าถ้าเราซื่อสัตย์ การขายของจนเกินไปทำให้ผู้ใช้ผิดหวังเมื่อใช้จริงแล้วไม่ได้ดังที่บอก
+1. [Purpose & Scope](#1-purpose--scope)
+2. [Five Core Authoring Principles](#2-five-core-authoring-principles)
+3. [Technical Terminology Translation Guide](#3-technical-terminology-translation-guide)
+4. [Standard Release Note Structure](#4-standard-release-note-structure)
+5. [Subsystem Explanations for User Context](#5-subsystem-explanations-for-user-context)
+6. [The Four Change Categories](#6-the-four-change-categories)
+7. [Item Detail Writing Rules](#7-item-detail-writing-rules)
+8. [Copy & Paste Markdown Template](#8-copy--paste-markdown-template)
+9. [Full Standard Example](#9-full-standard-example)
 
 ---
 
-## 3. คำศัพท์ที่ควรหลีกเลี่ยง vs คำที่ควรใช้
+## 1. Purpose & Scope
 
-ตารางนี้คือคู่มือเปลี่ยนคำเทคนิคเป็นคำที่ผู้ใช้เข้าใจ ไม่ใช่กฎตายตัว — บางครั้งคำเทคนิคก็จำเป็น แต่ต้องมีคำอธิบายตาม
+This document specifies the mandatory writing standard for FanHoard release notes. Every user-facing release entry in `assets/md/en/current.md` and `assets/md/th/current.md` must follow these formatting, tone, and structural rules.
 
-| ❌ คำที่ควรหลีกเลี่ยง | ✅ คำที่ควรใช้แทน | หมายเหตุ |
-|---|---|---|
-| race condition | การแย่งกันทำงานของระบบ | อธิบายเป็นเหตุการณ์ที่มองเห็นได้ |
-| virtual scrolling | การแสดงเฉพาะที่มองเห็น | อธิบายว่าเป็นเทคนิคทำให้แสดงของเยอะได้ไม่ช้า |
-| DOM node pooling | นำกลับมาใช้ใหม่แทนสร้างใหม่ | พูดถึงผลลัพธ์ ไม่ใช่กลไก |
-| Shadow DOM isolation | แยกส่วนไม่ให้กระทบกัน | พูดถึงเหตุผล ไม่ใช่เทคโนโลยี |
-| Web Worker | ทำงานเบื้องหลัง | ภาษาธรรมดา |
-| Custom Events | ส่งสัญญาณภายในระบบ | อธิบายเป็นการสื่อสาร |
-| IIFE pattern | โครงสร้างโค้ดมาตรฐาน | ไม่จำเป็นต้องเอ่ยชื่อ |
-| generation counter | ตัวนับเลขกันสับสน | อธิบายเป็นวิธีแก้ปัญหา |
-| cache-bust | บังคับโหลดเวอร์ชั่นใหม่ | ภาษาง่ายกว่า |
-| GC pressure | ภาระการทำความสะอาดหน่วยความจำ | อธิบายเป็นเรื่องทำงานหนัก |
-| pre-built static page | หน้าเว็บที่เตรียมไว้ล่วงหน้า | ภาษาธรรมดา |
-| SPA navigation | การเปลี่ยนหน้าแบบไม่รีเฟรช | อธิบายประสบการณ์ผู้ใช้ |
-| Buffer zone | พื้นที่สำรองรอบ ๆ ที่มองเห็น | ภาษาเข้าใจง่าย |
-| Adaptive memory | ปรับการใช้หน่วยความจำตามเครื่อง | อธิบายเป็นการปรับตัว |
-
-ตัวอย่างการเปลี่ยนประโยค:
-
-- ❌ "แก้ race condition ใน FVL โดยใช้ generation counter"
-- ✅ "แก้ปัญหาหน้าโหลดค้างเมื่อกดปุ่มรัว ๆ — ระบบตอนนี้จะสนใจเฉพาะการกดครั้งล่าสุด ส่วนการกดเก่า ๆ จะถูกข้ามไปโดยอัตโนมัติ"
-
-- ❌ "URE ใช้ DOM node pooling เพื่อลด GC pressure"
-- ✅ "ระบบแสดงผลตอนนี้นำกลับมาใช้ใหม่แทนการสร้างใหม่ทุกครั้ง ทำให้เว็บไม่ช้าลงเมื่อใช้นาน ๆ"
+FanHoard contains complex internal subsystems (`URE`, `Nav-Core`, `Popup System`, `Language System`, `ConData Service`). Release notes must translate developer-centric code changes into clear, user-perceivable benefits without ungrounded jargon or marketing hyperbole.
 
 ---
 
-## 4. โครงสร้างมาตรฐานของ Release Note
+## 2. Five Core Authoring Principles
 
-ทุก release note ต้องมีโครงสร้างตามนี้เป็นมาตรฐาน ไม่มีข้อยกเว้น
+### 2.1 Accessible Without Technical Jargon
+Readers include students, professionals, and casual web users seeking emojis or symbols. Avoid uncontextualized terms like "virtual scrolling", "race condition", or "DOM node pooling". If technical terms are necessary, immediately follow them with plain explanations or parenthetical definitions.
 
-### 4.1 Frontmatter (ส่วนหัวเมตาดาต้า)
+### 2.2 Explain Subsystem Context Before Detail
+Before describing improvements, state what subsystem is involved and its role in the application. Telling users "URE is 30% faster" is meaningless unless they know URE handles large-scale rendering.
+
+### 2.3 Explicit User Impact
+Every entry must answer: *"How does this affect my user experience?"*
+- **Bug Fixes**: Describe the observed issue first, then explain how it was resolved.
+- **New Features**: Explain what new interaction or control is visible.
+- **Performance Updates**: Describe the perceived speed or responsiveness improvement.
+
+### 2.4 Consistent Tone Across All Releases
+Maintain a friendly, direct, and conversational tone. Do not use marketing buzzwords like "revolutionary", "game-changing", or "premium experience". Use plain descriptive language (e.g., "Page loading no longer stutters").
+
+### 2.5 Honest Communication
+Do not exaggerate fix coverage or feature stability. If a fix resolves an issue under specific conditions or if a feature is an initial release, state the scope accurately.
+
+---
+
+## 3. Technical Terminology Translation Guide
+
+Use this glossary to translate internal engineering concepts into user-understandable phrasing:
+
+| Technical / Internal Term | Recommended User-Facing Phrasing | Context Explanation |
+| :--- | :--- | :--- |
+| **race condition** | Conflicting system actions | Multiple rapid clicks causing loading confusion |
+| **virtual scrolling** | Viewport-only rendering | Rendering visible items first to prevent slowdowns |
+| **DOM node pooling** | Element recycling | Reusing screen elements instead of recreating them |
+| **Shadow DOM isolation** | Component separation | Preventing styles from bleeding across UI components |
+| **Web Worker** | Background processing thread | Processing data off the main UI thread |
+| **Custom Events** | Internal system signals | Communication between modular subsystems |
+| **IIFE pattern** | Standard code wrapper | Internal code structure (omit from notes) |
+| **cache-bust** | Forced version refresh | Ensuring browsers fetch the latest assets |
+| **GC pressure** | Memory cleanup load | Reducing browser memory overhead |
+| **pre-built static page** | Pre-rendered web page | Pre-computed HTML pages for faster initial load |
+| **SPA navigation** | Seamless page transitions | Changing views without full page reloads |
+
+---
+
+## 4. Standard Release Note Structure
+
+Every release note entry must include these structural sections in order:
+
+### 4.1 Frontmatter Metadata
 
 ```yaml
 ---
-version: 1.8.0
-date: 2026-06-20T00:00:00.000Z
-title: หัวข้อสั้น ๆ สรุปอัปเดต (ไม่เกิน 60 ตัวอักษร)
-subtitle: คำอธิบายขยายความ 1-2 ประโยค (ไม่เกิน 200 ตัวอักษร)
-notify: true  # ถ้าต้องการให้ popup แจ้งเตือนผู้ใช้
+version: 3.0.0
+date: 2026-09-24T00:00:00.000Z
+title: Smoother Page Loading & Click Prevention
+subtitle: Upgraded fullscreen loading dialogs and eliminated rapid click state conflicts.
+notify: true
 ---
 ```
 
-`title` ต้องสรุปประเด็นหลักให้ผู้ใช้เข้าใจทันที เช่น "หน้าโหลดเรียบเนียนขึ้น + กันการกดซ้ำ" ไม่ใช่ "v1.8.0 release"
+- **`version`**: Semantic version matching `assets/md/{lang}/current.md` frontmatter.
+- **`date`**: ISO timestamp matching release build date.
+- **`title`**: Concise headline summary (max 60 characters).
+- **`subtitle`**: 1-2 sentence user-focused overview (max 200 characters).
+- **`notify`**: Set `true` to trigger client update popup dialogs (`assets/js/version-core.js`).
 
-`subtitle` ต้องบอกว่าอัปเดตนี้เปลี่ยนอะไรในมุมผู้ใช้ หลีกเลี่ยงคำเทคนิค
-
-`notify: true` ใช้เฉพาะเวอร์ชั่นที่มีการเปลี่ยนแปลงสำคัญที่ผู้ใช้ควรรู้ ไม่ใช่ทุกเวอร์ชั่น
-
-### 4.2 TL;DR (สรุปสั้น 1-3 บรรทัด)
-
-ส่วนแรกหลัง frontmatter คือ TL;DR บอกผู้ใช้ใน 1-3 บรรทัดว่าอัปเดตนี้สรุปคืออะไร ผู้ใช้บางคนอ่านแค่นี้ก็พอ ต้องทำให้กระชับและตรงประเด็นที่สุด
+### 4.2 TL;DR Section
+A 1-3 sentence summary placed immediately after frontmatter for quick reading:
 
 ```markdown
-**TL;DR** — หน้าโหลดตอนนี้เรียบเนียนขึ้น กดปุ่มรัว ๆ ไม่ทำให้ระบบสับสน และไม่มีเนื้อหากระพริบเบื้องหลังอีกแล้ว
+**TL;DR** — Page transitions are smoother, rapid button clicks no longer stall loading, and background content flash has been eliminated.
 ```
 
-### 4.3 บริบทระบบ (Context)
-
-ก่อนจะเริ่มรายละเอียด ให้มี 1 ย่อหน้าสั้น ๆ อธิบายว่าระบบที่ถูกอัปเดตคืออะไร ทำไมมันสำคัญ ทำงานยังไงคร่าว ๆ ส่วนนี้สำคัญมากเพราะเป็นจุดที่ผู้ใช้เริ่มเข้าใจว่าเรากำลังพูดถึงอะไร ดูรายละเอียดวิธีเขียนในส่วนที่ 5
+### 4.3 Subsystem Context Section
+A 1-paragraph overview introducing the updated subsystem before listing specific changes:
 
 ```markdown
-## เกี่ยวกับระบบนี้
+## About This System
 
-FVL (Fullscreen Visual Loading) คือหน้าจอโหลดเต็มหน้าจอที่คุณเห็นตอนกดเปลี่ยนหมวดอีโมจิหรือสัญลักษณ์ — มันคลุมหน้าจอชั่วคราวเพื่อให้ระบบมีเวลาเตรียมข้อมูลใหม่โดยที่คุณไม่เห็นเนื้อหาเปลี่ยนกระตุก ๆ อยู่เบื้องหลัง การอัปเดตครั้งนี้ปรับปรุงหน้าจอนี้ให้เรียบเนียนขึ้น
+Fullscreen Visual Loading (FVL) is the loading screen displayed when switching emoji or symbol categories. It covers the screen temporarily while new dataset items prepare, preventing flickering. This update refines transition timing and prevents rapid navigation stalls.
 ```
 
-### 4.4 รายละเอียดการเปลี่ยนแปลง
+### 4.4 Change Categories
+Organized under four standard H3 headers: `### New`, `### Improved`, `### Fixed`, and `### Removed`.
 
-แบ่งเป็น 4 หมวดตามประเภทการเปลี่ยนแปลง ใส่เฉพาะหมวดที่มี (ดูรายละเอียดในส่วนที่ 6)
-
-- `### New` — ฟีเจอร์ใหม่ที่เพิ่มเข้ามา
-- `### Improved` — สิ่งที่มีอยู่แล้วแต่ทำงานดีขึ้น
-- `### Fixed` — ปัญหาที่แก้แล้ว
-- `### Removed` — สิ่งที่เอาออกไป
-
-แต่ละไอเทมในหมวดใช้รูปแบบ: `**ชื่อเด่น**` ตามด้วยขึ้นบรรทัดใหม่ แล้วตามด้วย 1 ย่อหน้าสั้น ๆ อธิบาย (ดูรายละเอียดในส่วนที่ 7)
-
-### 4.5 ผลกระทบต่อผู้ใช้ (User Impact)
-
-ส่วนสุดท้าย สรุปว่าผู้ใช้จะรู้สึกหรือเห็นอะไรเปลี่ยนไปหลังอัปเดตนี้ ใช้เป็น bullet สั้น ๆ 2-4 ข้อ ที่ตอบคำถาม "แล้วฉันจะสัมผัสได้ยังไง"
+### 4.5 User Impact Summary
+A final bulleted summary of 2-4 items highlighting perceivable UI changes:
 
 ```markdown
-### สิ่งที่คุณจะสัมผัสได้
+### What You Will Notice
 
-- กดเปลี่ยนหมวดซ้ำ ๆ รวดเดียว เว็บไม่ค้าง
-- ไม่เห็นเนื้อหากระพริบเบื้องหลังหน้าโหลดอีก
-- ระหว่างโหลด เลื่อนหน้าไม่ได้ (ป้องกันการเลื่อนผิดที่)
+- Rapid category button clicks no longer freeze the loading overlay.
+- Background content transitions seamlessly without flicker.
+- Page scrolling is paused during loading transitions to prevent misclicks.
 ```
 
 ---
 
-## 5. วิธีเขียน "บริบทระบบ" ให้ผู้ใช้เข้าใจ
+## 5. Subsystem Explanations for User Context
 
-นี่คือหัวใจของมาตรฐานนี้ — การอธิบายระบบเทคนิคในภาษาที่ผู้ใช้ทั่วไปเข้าใจได้ ด้านล่างคือคำอธิบายมาตรฐานของ 7 ระบบหลักของ FanHoard ที่นักพัฒนาสามารถ copy ไปใช้ใน release notes ได้เลย เมื่อไรที่อัปเดตเกี่ยวกับระบบใด ให้ดึงคำอธิบายนั้นมาใช้เป็นจุดเริ่มต้น
+Use these standardized context descriptions when detailing updates to core FanHoard subsystems:
 
 ### 5.1 URE (Universal Render Engine)
-
-URE คือระบบที่ทำให้เว็บเราแสดงอีโมจิและสัญลักษณ์นับหมื่นนับแสนตัวได้โดยที่หน้าเว็บไม่ช้าลง ปกติถ้าโหลดของเยอะขนาดนั้นทีเดียว เบราว์เซอร์จะช้ามาก แต่ URE จะแสดงเฉพาะตัวที่คุณกำลังมองเห็น แล้วค่อย ๆ เติมตัวอื่น ๆ เมื่อคุณเลื่อน ทำให้เว็บลื่นไหลแม้ข้อมูลจะเยอะมาก
+> URE is the rendering system that displays thousands of emojis and symbols without slowing down the page. It renders items currently inside your viewport and dynamically updates as you scroll, ensuring smooth performance even on large datasets.
 
 ### 5.2 Search System
-
-ระบบค้นหาของเว็บ — ที่ทำให้คุณพิมพ์คำว่า "หัวใจ" แล้วเจออีโมจิ ❤️ หรือพิมพ์ "ลูกศร" แล้วเจอ → ได้ทันที ระบบนี้ค้นหาแบบทันทีขณะพิมพ์ และรองรับทั้งการค้นหาแบบตรงตัวและแบบใกล้เคียง (เช่นพิมพ์ผิดนิดหน่อยก็ยังเจอ)
+> The search system enables instant query matching across emojis, symbols, and text collections. It performs real-time matching as you type, supporting both exact terms and partial word queries.
 
 ### 5.3 Nav-Core
-
-Nav-Core คือระบบที่ควบคุมการทำงานของหน้า Discover — หน้าที่คุณใช้เลือกดูอีโมจิและสัญลักษณ์แยกตามหมวดหมู่ มันจำว่าคุณอยู่หมวดไหน เปลี่ยนหมวดได้โดยไม่ต้องรีเฟรชหน้า และจัดการโหลดข้อมูลใหม่เมื่อคุณสลับหมวด
+> Nav-Core powers category routing and navigation across Discover views. It manages category state, enables instant transitions without full page reloads, and handles dynamic dataset loading.
 
 ### 5.4 Language System (i18n)
-
-ระบบภาษา — ที่ทำให้เว็บของเราสลับระหว่างไทยและอังกฤษได้ ตอนที่คุณกดเปลี่ยนภาษา ระบบนี้จะเปลี่ยนข้อความทุกตัวในเว็บเป็นภาษาที่เลือก และจำค่านั้นไว้ให้คุณในครั้งต่อไป นอกจากนี้ยังซิงค์ระหว่างแท็บด้วย — ถ้าเปิดเว็บ 2 แท็บแล้วเปลี่ยนภาษาในแท็บหนึ่ง อีกแท็บจะเปลี่ยนตามทันที
+> The language system manages seamless switching between supported languages. It updates page text instantly, saves your preferred language, and synchronizes active locale settings across open browser tabs.
 
 ### 5.5 Con-Data Service
-
-Con-Data คือคลังข้อมูลของเว็บ — ที่เก็บอีโมจิ สัญลักษณ์ ข้อความแฟนซี และคอลเลกชันอื่น ๆ ทั้งหมด เป็นชั้นกลางระหว่างข้อมูลจริงกับส่วนที่แสดงผล ทำให้เวลาเพิ่มข้อมูลใหม่ ๆ ไม่ต้องแก้โค้ดหลายที่ เพียงแค่เพิ่มไฟล์ข้อมูลแล้วระบบจะรู้จักอัตโนมัติ
+> Con-Data Service acts as the central data registry for all emoji, symbol, and fancy text collections. It decouples dataset storage from rendering UI, allowing instant updates when new collections are added.
 
 ### 5.6 Popup System
-
-ระบบหน้าต่างป๊อปอัป — ทุกครั้งที่คุณเห็นหน้าต่างเด้งขึ้นมาบนเว็บ (เช่น popup แจ้งเตือนว่ามีอัปเดต หรือ popup เลือกภาษา) มาจากระบบนี้ทั้งหมด ก่อนหน้านี้แต่ละ popup ถูกเขียนแยกกัน ตอนนี้รวมเป็นระบบเดียวทำให้หน้าตาและพฤติกรรมสอดคล้องกันทุก popup
+> The Popup System controls modal dialogs and notification banners across the application, ensuring consistent appearance, accessibility, and dismiss behavior.
 
 ### 5.7 Build System
+> The build system pre-renders static HTML pages across supported locales prior to deployment, ensuring optimal loading speed and web search crawler accessibility.
 
-ระบบสร้างเว็บ — ก่อนที่เว็บจะถูก deploy ขึ้นไปบนอินเทอร์เน็ต ระบบนี้จะเตรียมหน้าเว็บทุกหน้าให้พร้อมล่วงหน้า (ทั้งภาษาไทยและอังกฤษ) ทำให้หน้าเว็บโหลดเร็วขึ้นและ search engine อย่าง Google เข้าใจเนื้อหาของเราได้ดีขึ้น ผู้ใช้ไม่เห็นการทำงานนี้โดยตรง แต่จะรู้สึกได้ว่าเว็บเร็วและค้นหาเจอง่าย
+---
 
-### 5.8 ตัวอย่างการใช้งาน
+## 6. The Four Change Categories
 
-ถ้าอัปเดตเกี่ยวกับ URE ให้เขียนบริบทแบบนี้:
-
+### 6.1 `### New`
+Used strictly for newly added user-facing features or capabilities.
 ```markdown
-## เกี่ยวกับระบบนี้
+- **New "Scroll to Top" Control**
+  A smooth floating button now appears in the bottom-right corner when scrolling down long lists, allowing instant return to the top header.
+```
 
-URE คือระบบที่ทำให้เว็บเราแสดงอีโมจิและสัญลักษณ์นับหมื่นตัวได้โดยที่หน้าเว็บไม่ช้าลง — มันแสดงเฉพาะตัวที่คุณกำลังมองเห็น แล้วค่อย ๆ เติมตัวอื่นเมื่อคุณเลื่อน การอัปเดตครั้งนี้ปรับปรุงระบบนี้ให้ใช้หน่วยความจำน้อยลงบนมือถือรุ่นเก่า
+### 6.2 `### Improved`
+Used for enhancements to existing UI features, performance optimizations, or usability updates.
+```markdown
+- **40% Faster Search Query Execution**
+  Search query execution time has been reduced by nearly half for multi-word queries.
+```
+
+### 6.3 `### Fixed`
+Used for bug fixes. Describe the observed user issue first, followed by the resolution.
+```markdown
+- **Resolved Loading Stall During Rapid Category Clicks**
+  Rapidly clicking category buttons previously caused loading overlays to stall. The system now cancels superseded requests automatically and retains only the latest selection.
+```
+
+### 6.4 `### Removed`
+Used when removing obsolete features. Include rationale and alternative workflows.
+```markdown
+- **Removed Staggered Entrance Animations**
+  Legacy fade-in animations on individual card items have been removed in favor of instant viewport rendering, reducing loading latency.
 ```
 
 ---
 
-## 6. หมวดหมู่การเปลี่ยนแปลง 4 ประเภท
+## 7. Item Detail Writing Rules
 
-### 6.1 New — ฟีเจอร์ใหม่ที่เพิ่มเข้ามา
+Each entry under `New`, `Improved`, `Fixed`, or `Removed` must follow a 3-part structure:
+1. **Bold Short Name**: Concise title summary.
+2. **What Changed**: Clear description of the modified behavior from a user perspective.
+3. **Why / Impact**: Explanation of the benefit or problem resolved.
 
-ใช้สำหรับสิ่งที่ไม่เคยมีมาก่อนในเว็บ ผู้ใช้จะเห็นสิ่งใหม่ที่ไม่เคยเห็น
-
-**ตัวอย่างที่ดี:**
-```markdown
-- **ปุ่ม "กลับขึ้นบน" ใหม่**
-  เมื่อคุณเลื่อนลงไปไกล ๆ จะมีปุ่มเล็ก ๆ ปรากฏที่มุมขวาล่าง กดแล้วจะเลื่อนกลับขึ้นบนทันที ไม่ต้องเลื่อนเอง
-```
-
-**ตัวอย่างที่ไม่ดี (เทคนิคเกินไป):**
-```markdown
-- **BackToTop component v1.0**
-  React-like component with IntersectionObserver-based visibility trigger, RAF-smoothed scroll animation, 300ms ease-out curve
-```
-
-### 6.2 Improved — สิ่งที่มีอยู่แล้วแต่ทำงานดีขึ้น
-
-ใช้สำหรับการปรับปรุงสิ่งที่มีอยู่แล้ว — เร็วขึ้น สวยขึ้น ใช้ง่ายขึ้น เถียงน้อยลง ฯลฯ ผู้ใช้จะรู้สึกว่าสิ่งที่เคยใช้อยู่ดีขึ้น
-
-**ตัวอย่างที่ดี:**
-```markdown
-- **การค้นหาเร็วขึ้น 40%**
-  ตอนนี้พิมพ์คำค้นหาแล้วผลลัพธ์ขึ้นเร็วกว่าเดิมเกือบครึ่ง โดยเฉพาะเมื่อค้นหาคำยาว ๆ
-```
-
-**ตัวอย่างที่ไม่ดี (ไม่บอกผลกระทบ):**
-```markdown
-- **Optimized search indexing**
-  Switched from linear scan to inverted index with TF-IDF scoring
-```
-
-### 6.3 Fixed — ปัญหาที่แก้แล้ว
-
-ใช้สำหรับ bug fix ต้องอธิบายก่อนว่าปัญหาคืออะไร (เห็นได้ยังไง) แล้วค่อยบอกว่าแก้ยังไง (ในระดับที่ผู้ใช้เข้าใจ)
-
-**ตัวอย่างที่ดี:**
-```markdown
-- **หน้าโหลดค้างเมื่อกดปุ่มรัว ๆ**
-  ถ้ากดปุ่มหมวดหมู่หลายครั้งเร็ว ๆ หน้าโหลดอาจค้างไม่หายไป ตอนนี้ระบบจะสนใจเฉพาะการกดครั้งล่าสุด ส่วนการกดเก่า ๆ จะถูกข้ามไปโดยอัตโนมัติ
-```
-
-**ตัวอย่างที่ไม่ดี (ไม่บอกอาการ):**
-```markdown
-- **Fixed race condition in navigation**
-  Implemented generation counter to invalidate stale navigation requests
-```
-
-### 6.4 Removed — สิ่งที่เอาออกไป
-
-ใช้สำหรับฟีเจอร์ที่ถูกลบออก ต้องบอกด้วยว่าทำไมถึงเอาออก และมีทางเลือกแทนไหม (ถ้ามี)
-
-**ตัวอย่างที่ดี:**
-```markdown
-- **ลบ animation เข้าหาของเนื้อหา**
-  เดิมเนื้อหาจะค่อย ๆ ชัดขึ้นเมื่อโหลดเสร็จ (stagger effect) แต่เนื่องจากตอนนี้มีหน้าโหลดคลุมอยู่แล้ว จึงไม่จำเป็นต้องมี animation ซ้ำซ้อน — ลบออกเพื่อให้เนื้อหาแสดงทันทีเมื่อหน้าโหลดหายไป
-```
+Keep item entries between 2 and 4 sentences. Avoid using internal acronyms (`FVL`, `URE`, `SSOT`) inside item title headers—place acronyms in the context section instead.
 
 ---
 
-## 7. วิธีเขียนคำอธิบายในแต่ละไอเทม
-
-แต่ละ bullet ในหมวด New/Improved/Fixed/Removed ต้องมีโครงสร้าง 3 ส่วน:
-
-1. **ชื่อเด่น** (bold) — สรุปสั้น ๆ ว่าอัปเดตอะไร
-2. **อะไร** — อธิบายสิ่งที่เปลี่ยน ในมุมผู้ใช้
-3. **ทำไม / ผลกระทบ** — บอกเหตุผลหรือผลที่ผู้ใช้จะรู้สึก
-
-ความยาวรวม 3-5 ประโยค ไม่สั้นเกินไป (แค่ชื่อไม่มีคำอธิบาย = ไม่ผ่าน) ไม่ยาวเกินไป (เกิน 1 ย่อหน้า = แบ่งเป็น 2 ไอเทม)
-
-### 7.1 โครงสร้างมาตรฐาน
-
-```markdown
-- **ชื่อเด่นสั้น ๆ**
-  อธิบาย "อะไร" ในประโยคแรก — สิ่งที่เปลี่ยนไปในมุมผู้ใช้ ประโยคที่สองอธิบาย "ทำไม" หรือ "ผลกระทบ" — ทำไมถึงเปลี่ยน หรือผู้ใช้จะรู้สึกยังไง ถ้าจำเป็นให้ประโยคที่สามอธิบายรายละเอียดเพิ่มเติม
-```
-
-### 7.2 ตัวอย่าง Before/After
-
-**Before (ไม่ผ่านมาตรฐาน):**
-```markdown
-- **FVL instant option**
-  Added `instant: true` option to FVL framework for skip enter animation, prevent race condition with content paint
-```
-
-**After (ผ่านมาตรฐาน):**
-```markdown
-- **หน้าโหลดแสดงทันทีโดยไม่มี animation เข้าหา**
-  ตอนนี้หน้าโหลดจะปรากฏทันทีทันใด ไม่ค่อย ๆ ชัดขึ้นเหมือนเดิม — เพื่อให้ครอบคลุมการเปลี่ยนแปลงของเนื้อหาได้ทันที ไม่ทำให้ผู้ใช้เห็นเนื้อหาขยับหรือกระพริบเบื้องหลัง
-```
-
-### 7.3 กฎเสริม
-
-- ใช้คำกระตุ้นการกระทำได้ เช่น "ตอนนี้คุณสามารถ..." "ลองกด..."
-- หลีกเลี่ยงคำว่า "should" "may" "might" ใช้ "จะ" "สามารถ" แทน
-- ถ้าเป็น bug ให้บอกอาการก่อน แล้วค่อยบอกวิธีแก้
-- ถ้าเป็นฟีเจอร์ใหม่ ให้บอก use case สั้น ๆ ว่าผู้ใช้จะใช้ตอนไหน
-- หลีกเลี่ยงตัวย่อภาษาอังกฤษ เช่น FVL, URE ในชื่อเด่น — เอาไปไว้ในบริบทแทน
-
----
-
-## 8. Template สำเร็จรูป (Copy & Fill)
-
-วิธีใช้: copy ทั้งบล็อกด้านล่างนี้ไปวางใน `assets/md/th/current.md` (และ `assets/md/en/current.md` แปลเป็นอังกฤษ) แล้วเติมเนื้อหาตามคำอธิบายในวงเล็บปีกกา `{...}`
+## 8. Copy & Paste Markdown Template
 
 ```markdown
 ---
-version: {เวอร์ชั่นใหม่ เช่น 1.9.0}
-date: {วันที่ ISO เช่น 2026-07-15T00:00:00.000Z}
-title: {หัวข้อสั้น ๆ สรุดประเด็นหลัก ไม่เกิน 60 ตัวอักษร}
-subtitle: {คำอธิบายขยาย 1-2 ประโยค ในมุมผู้ใช้ ไม่เกิน 200 ตัวอักษร}
-notify: {true หรือ false — true ถ้าผู้ใช้ควรเห็น popup แจ้งเตือน}
+version: {VERSION}
+date: {ISO_TIMESTAMP}
+title: {CONCISE_TITLE_MAX_60_CHARS}
+subtitle: {USER_FOCUSED_SUBTITLE_MAX_200_CHARS}
+notify: {true|false}
 ---
 
-**TL;DR** — {สรุปสั้น 1-3 บรรทัด ว่าอัปเดตนี้สรุปคืออะไร ผู้ใช้บางคนอ่านแค่นี้ก็พอ}
+**TL;DR** — {1-3 SENTENCE_EXECUTIVE_SUMMARY}
 
-## เกี่ยวกับระบบนี้
+## About This System
 
-{1 ย่อหน้าอธิบายระบบที่ถูกอัปเดต — ดึงจากส่วนที่ 5 ของ guide นี้ แล้วเพิ่มประโยคเชื่อมว่าการอัปเดตครั้งนี้กระทบระบบนี้ยังไง}
+{SUBSYSTEM_CONTEXT_PARAGRAPH}
 
 ### New
 
-- **{ชื่อฟีเจอร์ใหม่สั้น ๆ}**
-  {อะไร: อธิบายฟีเจอร์ในมุมผู้ใช้ 1 ประโยค} {ทำไม/ผลกระทบ: อธิบายเหตุผลหรือผลที่ผู้ใช้จะได้รับ 1-2 ประโยค}
+- **{FEATURE_NAME}**
+  {WHAT_CHANGED_DESCRIPTION}. {USER_BENEFIT_EXPLANATION}.
 
 ### Improved
 
-- **{สิ่งที่ปรับปรุงสั้น ๆ}**
-  {อะไร: อธิบายการเปลี่ยนแปลงในมุมผู้ใช้} {ผลกระทบ: ผู้ใช้จะรู้สึกยังไง เช่น เร็วขึ้น ลื่นขึ้น ใช้ง่ายขึ้น}
+- **{ENHANCEMENT_NAME}**
+  {WHAT_CHANGED_DESCRIPTION}. {PERCEIVED_IMPROVEMENT_EXPLANATION}.
 
 ### Fixed
 
-- **{อาการของปัญหาสั้น ๆ}**
-  {อาการ: อธิบายปัญหาที่ผู้ใช้เคยเจอ เห็นได้ยังไง} {วิธีแก้: อธิบายวิธีแก้ในระดับที่ผู้ใช้เข้าใจ}
+- **{BUG_NAME}**
+  {OBSERVED_ISSUE_DESCRIPTION}. {RESOLUTION_DESCRIPTION}.
 
 ### Removed
 
-- **{สิ่งที่เอาออกสั้น ๆ}**
-  {อะไร: บอกว่าเอาอะไรออก} {ทำไม: อธิบายเหตุผล และมีทางเลือกแทนไหม}
+- **{REMOVED_ITEM_NAME}**
+  {REMOVED_ITEM_DESCRIPTION}. {RATIONALE_AND_ALTERNATIVE}.
 
-### สิ่งที่คุณจะสัมผัสได้
+### What You Will Notice
 
-- {ผลกระทบที่ผู้ใช้จะรู้สึก/เห็น ข้อ 1}
-- {ผลกระทบที่ผู้ใช้จะรู้สึก/เห็น ข้อ 2}
-- {ผลกระทบที่ผู้ใช้จะรู้สึก/เห็น ข้อ 3}
+- {PERCEIVABLE_OUTCOME_1}
+- {PERCEIVABLE_OUTCOME_2}
+- {PERCEIVABLE_OUTCOME_3}
 ```
-
-**หมายเหตุ:** ใส่เฉพาะหมวด (New/Improved/Fixed/Removed) ที่มีเนื้อหา ถ้าเวอร์ชั่นไหนไม่มี Removed ให้ลบหมวดนั้นออกได้เลย ไม่ต้องใส่หมวดว่าง ๆ
 
 ---
 
-## 9. ตัวอย่างเต็มรูปแบบ
-
-นี่คือตัวอย่าง release note ที่เขียนตามมาตรฐานใหม่ทั้งหมด อิงจากการอัปเดตจริงของ v1.8.0 (ระบบหน้าโหลด) เพื่อให้เห็นภาพว่าเมื่อเขียนครบทุกส่วนแล้วจะออกมาหน้าตาแบบไหน
+## 9. Full Standard Example
 
 ```markdown
 ---
-version: 1.8.0
-date: 2026-06-20T00:00:00.000Z
-title: การโหลดเรียบเนียนกว่า + กันการกดซ้ำ
-subtitle: ระบบหน้าโหลดปรับปรุงให้เนียนเหมือนแอปขนาดใหญ่ — กดปุ่มซ้ำไม่ทำให้ระบบโหลดใหม่ บล็อกการเลื่อนระหว่างโหลด และกันเนื้อหากระตุกเบื้องหลังหน้าโหลด
+version: 3.0.0
+date: 2026-09-24T00:00:00.000Z
+title: Redesigned Interface & Faster Search Engine
+subtitle: Upgraded to FanHoard v3.0.0 with redesigned UI layout, sub-millisecond search query execution, and modernized update notification dialogs.
 notify: true
 ---
 
-**TL;DR** — หน้าโหลดตอนนี้เรียบเนียนขึ้น กดปุ่มรัว ๆ ไม่ทำให้ระบบสับสน และไม่มีเนื้อหากระพริบเบื้องหลังอีกแล้ว
+**TL;DR** — FanHoard v3.0.0 introduces a redesigned layout, faster search results with short query caching, and silent background updates for documentation releases.
 
-## เกี่ยวกับระบบนี้
+## About This System
 
-FVL (Fullscreen Visual Loading) คือหน้าจอโหลดเต็มหน้าจอที่คุณเห็นตอนกดเปลี่ยนหมวดอีโมจิหรือสัญลักษณ์ — มันคลุมหน้าจอชั่วคราวเพื่อให้ระบบมีเวลาเตรียมข้อมูลใหม่โดยที่คุณไม่เห็นเนื้อหาเปลี่ยนกระตุก ๆ อยู่เบื้องหลัง การอัปเดตครั้งนี้ปรับปรุงหน้าจอนี้ให้เรียบเนียนขึ้นและกันปัญหาที่เกิดจากการกดปุ่มเร็ว ๆ
-
-### Fixed
-
-- **หน้าโหลดค้างเมื่อกดปุ่มรัว ๆ**
-  ถ้ากดปุ่มหมวดหมู่หลายครั้งเร็ว ๆ หน้าโหลดอาจค้างไม่หายไป ตอนนี้ระบบจะสนใจเฉพาะการกดครั้งล่าสุด ส่วนการกดเก่า ๆ จะถูกข้ามไปโดยอัตโนมัติ ทำให้ไม่มีหน้าโหลดค้างค้างอยู่อีก
-
-- **เนื้อหากระตุกเบื้องหลังหน้าโหลดในช่วงโหลดเร็ว**
-  เมื่อข้อมูลโหลดเร็วมาก (เช่น เคยเปิดหน้านั้นแล้ว) หน้าโหลดอาจถูกลบก่อนเบราว์เซอร์จะทันแสดงผล ทำให้คุณเห็นเนื้อหาเปลี่ยนแปลงอยู่เบื้องหลัง ตอนนี้ระบบจะรอให้เบราว์เซอร์แสดงหน้าโหลดอย่างน้อย 1 ครั้งก่อนจะลบออก ทำให้การเปลี่ยนเนื้อหาเรียบเนียน
-
-- **Overlay ไม่ครอบคลุมพอเมื่อเนื้อหาเปลี่ยน**
-  บางครั้งคุณอาจเห็นเนื้อหาเปลี่ยนขยับอยู่เบื้องหลังหน้าโหลด เพราะหน้าโหลดค่อย ๆ ชัดขึ้น (fade-in) ทำให้ช่วงเปลี่ยนเนื้อหายังไม่โปร่งใสเต็มที่ ตอนนี้หน้าโหลดจะแสดงทันทีไม่มี fade-in ทำให้ครอบคลุมการเปลี่ยนแปลงได้ทันที
-
-### Improved
-
-- **กดปุ่มที่เลือกอยู่แล้วไม่ทำอะไร**
-  ถ้าคุณกดปุ่มหมวดหมู่ที่กำลังเปิดอยู่แล้ว ระบบจะข้ามทันที — ไม่โหลดข้อมูลซ้ำ ไม่แสดงหน้าโหลดซ้ำ ทำให้การใช้งานลื่นไหลขึ้น
-
-- **บล็อกการเลื่อนระหว่างหน้าโหลดแสดง**
-  ระหว่างที่หน้าโหลดแสดงอยู่ คุณจะไม่สามารถเลื่อนหน้าได้ ป้องกันปัญหาที่อาจเกิดจากการเลื่อนขณะที่เนื้อหายังไม่พร้อม
-
-- **หน้าโหลดแสดงทันทีโดยไม่มี fade-in**
-  หน้าโหลดปรากฏทันทีจากเฟรมแรก ไม่ค่อย ๆ ชัดขึ้นเหมือนเดิม เพื่อให้ครอบคลุมการเปลี่ยนแปลงของเนื้อหาได้ทันที ทำให้คุณไม่เห็นเนื้อหาขยับหรือกระพริบเบื้องหลัง
+FanHoard v3.0.0 unifies search, rendering, navigation, and popup notifications into a cohesive application. This update optimizes search result caching and brings a modernized UI layout across all supported devices.
 
 ### New
 
-- **ระบบหน้าโหลดรองรับการแสดงทันที (instant)**
-  เพิ่มตัวเลือกใหม่ในระบบหน้าโหลด สำหรับกรณีที่ต้องการให้หน้าโหลดแสดงทันทีโดยไม่มี animation เข้าหา ใช้ในจุดที่ต้องการครอบคลุมการเปลี่ยนแปลงของเนื้อหาในเฟรมเดียวกัน
+- **Redesigned Filter Control Bar**
+  Filter options now scroll naturally alongside category pills, maximizing visible screen space on mobile devices and desktop displays.
 
-- **ระบบหน้าโหลดรองรับการครอบเต็มจอ (coverAll)**
-  เพิ่มตัวเลือกใหม่สำหรับหน้าโหลดแบบเต็มหน้าจอ ครอบคลุมทั้ง viewport รวมถึงแถบหัว ใช้สำหรับหน้าโหลดครั้งแรกที่เข้าเว็บ โดยที่แถบนำทางด้านล่างยังคงเห็นและใช้งานได้
+### Improved
 
-### Removed
+- **Sub-Millisecond Short Query Search**
+  Queries with 3 or fewer characters now execute using character-bucket indexing, delivering search results instantly as you type.
 
-- **ลบ animation เข้าหาของเนื้อหา**
-  เดิมเนื้อหาจะค่อย ๆ ชัดขึ้นเมื่อโหลดเสร็จ (stagger effect) แต่เนื่องจากตอนนี้มีหน้าโหลดคลุมอยู่แล้ว จึงไม่จำเป็นต้องมี animation ซ้ำซ้อน — ลบออกเพื่อให้เนื้อหาแสดงทันทีเมื่อหน้าโหลดหายไป
+### Fixed
 
-### สิ่งที่คุณจะสัมผัสได้
+- **Eliminated Duplicate Update Notifications**
+  Resolved an issue where update dialogs resurfaced after being dismissed in the same browsing session. Dismissal states are now preserved across session windows.
 
-- กดเปลี่ยนหมวดซ้ำ ๆ รวดเดียว เว็บไม่ค้าง
-- ไม่เห็นเนื้อหากระพริบเบื้องหลังหน้าโหลดอีก
-- ระหว่างโหลด เลื่อนหน้าไม่ได้ (ป้องกันการเลื่อนผิดที่)
-- กดปุ่มที่เปิดอยู่แล้ว ไม่โหลดซ้ำ
+### What You Will Notice
+
+- Instant search candidate matching while typing short queries.
+- Expanded visible reading area on search results pages.
+- Persistent dismiss behavior for update notification popups.
 ```
-
----
-
-## 10. Checklist ก่อนตีพิมพ์
-
-ก่อนที่จะ commit `current.md` รันผ่าน checklist นี้ทั้งหมด ถ้าข้อไหนติ๊กไม่ได้ ให้กลับไปแก้
-
-### 10.1 โครงสร้าง
-
-- [ ] มี frontmatter ครบทุก field (version, date, title, subtitle)
-- [ ] title สั้น ๆ ไม่เกิน 60 ตัวอักษร สรุปประเด็นหลัก
-- [ ] subtitle 1-2 ประโยค อธิบายในมุมผู้ใช้ ไม่เกิน 200 ตัวอักษร
-- [ ] มี TL;DR 1-3 บรรทัด
-- [ ] มี section "เกี่ยวกับระบบนี้" อธิบายระบบที่ถูกอัปเดต
-- [ ] มีอย่างน้อย 1 หมวดจาก New/Improved/Fixed/Removed
-- [ ] มี section "สิ่งที่คุณจะสัมผัสได้" อย่างน้อย 2 ข้อ
-
-### 10.2 ภาษาและน้ำเสียง
-
-- [ ] ไม่มีคำเทคนิคที่ไม่ได้อธิบาย (เช่น race condition, virtual scrolling โดยไม่มีวงเล็บอธิบาย)
-- [ ] ใช้ภาษาที่เข้าใจได้โดยไม่ต้องรู้เรื่องเทคนิค
-- [ ] ไม่มีคำขายของ เช่น "ปฏิวัติ" "พลิกโฉม" "สุดยอด"
-- [ ] น้ำเสียงเป็นมิตร ตรงไปตรงมา ไม่ทางการเกินไป
-- [ ] ใช้ภาษาเดียวกันทั้งไฟล์ (ไทยล้วน หรืออังกฤษล้วน ตามไฟล์)
-
-### 10.3 เนื้อหา
-
-- [ ] ทุกไอเทมมีชื่อเด่น (bold) + คำอธิบาย 3-5 ประโยค
-- [ ] ทุกไอเทมตอบคำถาม "อะไร" และ "ทำไม/ผลกระทบ"
-- [ ] bug fix บอกอาการก่อน แล้วค่อยบอกวิธีแก้
-- [ ] ฟีเจอร์ใหม่บอก use case สั้น ๆ ว่าผู้ใช้จะใช้ตอนไหน
-- [ ] สิ่งที่ถูกลบออกบอกเหตุผล และมีทางเลือกแทน (ถ้ามี)
-
-### 10.4 ความซื่อสัตย์
-
-- [ ] ไม่พูดเกินจริง (เช่น บอกว่าเร็วขึ้น 1000% ทั้งที่จริง ๆ แค่ 50%)
-- [ ] ถ้ายังมีปัญหาเหลืออยู่บ้าง บอกตรง ๆ
-- [ ] ถ้าเป็นเวอร์ชั่นแรกของฟีเจอร์ บอกว่าอาจยังไม่สมบูรณ์ 100%
-
-### 10.5 ความสอดคล้องระหว่างภาษา
-
-- [ ] เนื้อหา `assets/md/en/current.md` และ `assets/md/th/current.md` ครอบคลุมไอเทมเดียวกัน
-- [ ] ตัวเลขเวอร์ชั่น วันที่ ตรงกันทั้งสองไฟล์
-- [ ] ไม่มีไอเทมที่มีในภาษาหนึ่งแต่หายไปในอีกภาษา (ยกเว้นกรณีพิเศษ เช่น การเปลี่ยนแปลงเฉพาะภาษานั้น)
-
----
-
-## 11. กระบวนการเผยแพร่
-
-เมื่อเขียน release note ใหม่เสร็จแล้ว ให้ทำตามขั้นตอนต่อไปนี้
-
-> ⚠️ **ห้าม copy `current.md` ไป `releases/` โฟลเดอร์เอง** — ตั้งแต่ v4.1 เป็นต้นไป build script สร้างไฟล์ `releases/v{version}.md` ให้อัตโนมัติเมื่อ bump version
->
-> ⚠️ **ไม่ต้องเขียน `date:` ใน `current.md` เอง** — ตั้งแต่ v4 เป็นต้นไป ระบบจะใช้เวลา ณ ตอน build ครั้งแรกของแต่ละ version เป็น release date และ sync กลับเป็นค่าจาก registry เสมอ
-
-### 11.1 เขียน release note ใหม่ใน current.md
-
-แก้ไฟล์ `assets/md/en/current.md` และ `assets/md/th/current.md` ตามมาตรฐานในเอกสารนี้ รันผ่าน checklist ทั้งหมดในส่วนที่ 10
-
-### 11.2 Commit และ deploy
-
-```bash
-git add assets/md/
-git commit -m "release v1.9.1"
-git push
-```
-
-Build script จะทำสิ่งต่อไปนี้อัตโนมัติ:
-
-- โหลด `assets/json/release-dates.json` (registry ของ "วันที่ build ครั้งแรกของแต่ละ version")
-- ถ้าเป็น version ใหม่ → บันทึก release date ใหม่เป็นเวลา ณ ตอน build (`NOW`) เข้า registry ถาวร
-- ถ้าเป็น version เดิม → คง release date เดิมจาก registry (ไม่เปลี่ยน แม้ `current.md` ถูกแก้)
-- sync `date:` ใน `current.md` ให้ตรงกับ registry เสมอ — ถ้าผู้ใช้เขียน `date:` มั่วๆ ระบบจะเขียนทับ
-- สร้าง `releases/v{version}.md` จาก `current.md` (เมื่อ version ใหม่) — commit ลง git
-- สร้าง `releases/index.json` (manifest สำหรับ client) — commit ลง git
-- อัปเดต `version.json` (พร้อม `date` จาก registry)
-- บังคับโหลด HTML เวอร์ชั่นใหม่ (cache-bust)
-
-> ดูรายละเอียดเพิ่มเติมใน [`11-Release-Notes-System.md`](./11-Release-Notes-System.md) section 2.3 (Stable Release Date) และ section 2.4 (Folder-Based History)
-
-### 11.3 ตรวจสอบหลัง deploy
-
-- เปิดหน้า What's New บนเว็บ ดูว่าแสดงผลถูกต้อง
-- ถ้าตั้ง `notify: true` ให้ทดสอบในหน้าต่างใหม่ (incognito) ว่า popup แสดง
-- ตรวจสอบว่าภาษาทั้งสองแสดงเนื้อหาเดียวกัน
-- ตรวจสอบว่า `releases/v{version}.md` และ `releases/index.json` ถูก commit ลง git
-
----
-
-## 12. คำถามที่พบบ่อย (FAQ)
-
-### Q1: ต้องเขียนทั้ง en และ th ทุกครั้งเลยไหม?
-
-ใช่ ทุก release note ต้องมีทั้งสองภาษา เพราะผู้ใช้ของเราทั้งสองภาษาต้องการรู้การอัปเดตเหมือนกัน เนื้อหาต้องครอบคลุมไอเทมเดียวกัน ตัวเลขเวอร์ชั่นและวันที่ต้องตรงกัน
-
-### Q2: ถ้าอัปเดตเล็กนิด (เช่น แก้ typo) ต้องมี TL;DR ไหม?
-
-TL;DR ยังต้องมี แต่สั้นได้ เช่น "แก้คำผิดในหน้าตั้งค่าภาษาไทย" ก็เพียงพอ ส่วน "เกี่ยวกับระบบนี้" อาจสั้นได้เช่นกัน แต่ต้องอธิบายบริบทไว้
-
-### Q3: ถ้าเป็น bug ที่ผู้ใช้ไม่เคยเห็น (เช่น security fix) จะเขียนยังไง?
-
-ให้อธิบายในระดับที่เหมาะสม — บอกว่าเป็นการแก้ปัญหาด้านความปลอดภัย ไม่ต้องละเอียดถึงรายละเอียดเทคนิค ตัวอย่าง: "เสริมความปลอดภัยในส่วนที่ผู้ใช้ไม่ได้สัมผัสโดยตรง — ป้องกันปัญหาที่อาจเกิดขึ้นในอนาคต"
-
-### Q4: ถ้าอัปเดตเยอะมาก จะเขียนทั้งหมดเลยไหม?
-
-ถ้ามีหลายสิบไอเทม ให้รวมกลุ่มที่เกี่ยวข้องกันเป็นไอเทมเดียว และอธิบายเป็นภาพรวม เช่น แทนที่จะมี 10 ไอเทมแยกกันสำหรับการ optimize performance ให้รวมเป็น 1 ไอเทม "ปรับปรุงความเร็วโดยรวม" แล้วอธิบายเป็นจุดสำคัญ
-
-### Q5: ถ้าเป็น refactor โค้ดล้วน ผู้ใช้ไม่กระทบเลย ต้องเขียนไหม?
-
-ถ้าผู้ใช้ไม่กระทบจริง ๆ อาจพิจารณาไม่เขียนใน release notes ผู้ใช้ แต่ถ้า refactor นั้นเป็นพื้นฐานสำหรับฟีเจอร์ในอนาคต หรือทำให้ maintenance ง่ายขึ้น (ส่งผลให้ ship ฟีเจอร์ใหม่ได้เร็วขึ้น) อาจเขียนสั้น ๆ ในหมวด Improved หรือข้ามไปได้ ใช้ดุลยพินิจ
-
-### Q6: ต้องใช้คำว่า "อัปเดต" หรือ "อัพเดท"?
-
-เพื่อความสม่ำเสมอ ให้ใช้ "อัปเดต" ตามหลักภาษาไทยที่ถูกต้อง (ไม่มี ฟ. หัน) ในเอกสารนี้และใน release notes ทุกไฟล์
-
-### Q7: ถ้าผู้ใช้รายงาน bug แล้วเราแก้ ต้องเครดิตผู้รายงานไหม?
-
-ไม่จำเป็นต้องเครดิตใน release notes สาธารณะ แต่ถ้าต้องการจะขอบคุณได้ใน section แยก เช่น "ขอขอบคุณผู้ใช้ที่รายงานปัญหานี้" — แต่หลีกเลี่ยงการเปิดเผยข้อมูลส่วนบุคคล
-
----
-
-> เอกสารฉบับนี้เป็นมาตรฐานที่ใช้กับทุก release note ของ FanHoard ตั้งแต่เวอร์ชั่น 1.8.0 เป็นต้นไป ถ้ามีข้อสงสัยหรือข้อเสนอแนะในการปรับปรุงมาตรฐานนี้ ให้เปิด issue ใน GitHub repository
-
