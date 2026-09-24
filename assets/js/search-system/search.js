@@ -300,11 +300,11 @@
           State.apiData = data;
           SearchEngine.init(data);
           // Pre-warm keywords cache so querySuggestions is fast from call #1
-          State.allKeywordsCache = SearchEngine.getKeywords();
+          State.allKeywordsCache = ((SearchEngine._internals && SearchEngine._internals.getKeywords) ? SearchEngine._internals.getKeywords() : SearchEngine.generateAllKeywords());
           _attachHandlers();
 
           // Restore state from URL if present, otherwise set up default view
-          const urlState = URLService.readState();
+          const urlState = URLService.readStateFromURL();
           if (urlState.q || urlState.type !== 'all' || urlState.category !== 'all') {
             _restoreUIState(urlState);
           } else {
@@ -370,14 +370,14 @@
     // ── Internal helpers ─────────────────────────────────────────────────────
 
     function _syncFromURL() {
-      const st = URLService.readState();
+      const st = URLService.readStateFromURL();
       State.lastCommittedSearchState = st;
       _restoreUIState(st);
     }
 
     function _syncFromHistoryAPI() {
       try {
-        const st = URLService.readState();
+        const st = URLService.readStateFromURL();
         if (JSON.stringify(st) === JSON.stringify(State.lastCommittedSearchState)) return;
         State.lastCommittedSearchState = st;
         _restoreUIState(st);
