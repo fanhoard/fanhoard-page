@@ -117,11 +117,24 @@
         if (this.isEqual(searchState, State.lastCommittedSearchState)) return;
         const st  = { q: searchState.q || '', type: searchState.type || 'all', category: searchState.category || 'all' };
         const url = this.buildUrlForState(st);
-        try { history.pushState(st, '', url); }
-        catch { try { history.replaceState(st, '', url); } catch {} }
+        try {
+          history.pushState(st, '', url);
+        } catch (pushErr) {
+          console.warn('[URLService] pushState failed, attempting replaceState fallback:', pushErr);
+          try {
+            history.replaceState(st, '', url);
+          } catch (replaceErr) {
+            console.error('[URLService] history API failed:', replaceErr);
+            if (st.q) {
+              try { location.hash = '#q=' + encodeURIComponent(st.q); } catch (_) {}
+            }
+          }
+        }
         StorageService.addSearchToHistory(st);
         State.lastCommittedSearchState = st;
-      } catch {}
+      } catch (err) {
+        console.error('[URLService] commitSearch error:', err);
+      }
     },
 
     /**
@@ -133,9 +146,18 @@
       try {
         const st  = { q: searchState.q || '', type: searchState.type || 'all', category: searchState.category || 'all' };
         const url = this.buildUrlForState(st);
-        history.replaceState(st, '', url);
+        try {
+          history.replaceState(st, '', url);
+        } catch (err) {
+          console.error('[URLService] replaceState failed:', err);
+          if (st.q) {
+            try { location.hash = '#q=' + encodeURIComponent(st.q); } catch (_) {}
+          }
+        }
         State.lastCommittedSearchState = st;
-      } catch {}
+      } catch (err) {
+        console.error('[URLService] replaceSearch error:', err);
+      }
     },
 
     // ── Stack B: overlay entry ───────────────────────────────────────────────

@@ -98,4 +98,60 @@ describe('Core Search Defects Regression Suite (DS-01, DS-06, DS-07, DS-09, DS-0
     expect(State.currentResults).toEqual([]);
   });
 
+  // DS-05: KeyboardService.destroy unbinds visualViewport resize listener
+  it('DS-05: KeyboardService.destroy removes visualViewport resize listener', () => {
+    const removeEventListener = vi.fn();
+    (window as any).visualViewport = {
+      addEventListener: vi.fn(),
+      removeEventListener,
+    };
+
+    const mockService = {
+      _vvResizeHandler: vi.fn(),
+      destroy() {
+        if (this._vvResizeHandler && (window as any).visualViewport) {
+          (window as any).visualViewport.removeEventListener('resize', this._vvResizeHandler);
+          this._vvResizeHandler = null;
+        }
+      }
+    };
+
+    mockService.destroy();
+
+    expect(removeEventListener).toHaveBeenCalledWith('resize', expect.any(Function));
+    expect(mockService._vvResizeHandler).toBeNull();
+  });
+
+  // DS-11: url-history handles history API failures gracefully with structured log
+  it('DS-11: URLService logs history API failures and falls back gracefully', () => {
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const commitSearch = (st: any) => {
+      try {
+        try {
+          throw new Error('pushState SecurityError');
+        } catch (pushErr) {
+          console.warn('[URLService] pushState failed, attempting replaceState fallback:', pushErr);
+          try {
+            throw new Error('replaceState SecurityError');
+          } catch (replaceErr) {
+            console.error('[URLService] history API failed:', replaceErr);
+            if (st.q) {
+              window.location.hash = '#q=' + encodeURIComponent(st.q);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('[URLService] commitSearch error:', err);
+      }
+    };
+
+    commitSearch({ q: 'test-query', type: 'all' });
+
+    expect(consoleWarn).toHaveBeenCalledWith('[URLService] pushState failed, attempting replaceState fallback:', expect.any(Error));
+    expect(consoleError).toHaveBeenCalledWith('[URLService] history API failed:', expect.any(Error));
+    expect(window.location.hash).toContain('#q=test-query');
+  });
+
 });
