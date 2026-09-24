@@ -109,11 +109,11 @@ describe('Core Search Defects Regression Suite (DS-01, DS-06, DS-07, DS-09, DS-0
     };
 
     const mockService = {
-      _vvResizeHandler: vi.fn(),
+      _vvResizeHandler: vi.fn() as any,
       destroy() {
         if (this._vvResizeHandler && (window as any).visualViewport) {
           (window as any).visualViewport.removeEventListener('resize', this._vvResizeHandler);
-          this._vvResizeHandler = null;
+          this._vvResizeHandler = null as any;
         }
       }
     };
