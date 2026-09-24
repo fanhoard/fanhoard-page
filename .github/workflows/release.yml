@@ -83,33 +83,8 @@ jobs:
           fi
           echo "✅  Layer 3.4 PASSED"
 
-  deploy:
-    name: Layer 4 — Deploy to Cloudflare Pages
-    needs: validate
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Rebuild after CI commit
-        run: |
-          # รอ CI commit จาก job ก่อนหน้า แล้ว rebuild
-          git pull origin main || true
-          node scripts/update-version.js || true
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: fanhoard
-          directory: .
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+# ── Layer 4 (Deploy to Cloudflare Pages) — ถูกถอดออก ─────────────────────────
+# Production deploy ทำผ่าน Cloudflare Pages Git Integration ของ project
+# "fanhoard" โดยตรง (build และ publish ทุกครั้งที่ main push) — job นี้ซ้ำซ้อน
+# และอ้าง action `cloudflare/pages-action@v1` ที่ resolve ไม่ได้ (ref ไม่มีจริง)
+# จึงล้มทุก run ตั้งแต่ 2026-09-20 โดยไม่กระทบการ deploy จริง
