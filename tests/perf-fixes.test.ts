@@ -125,10 +125,6 @@ describe('PF-02: SearchEngine Query Result Cache', () => {
     const SearchEngine = M.SearchEngine;
     await SearchEngine.init(mockData);
 
-    if (typeof SearchEngine._internals?.getResultCacheSize !== 'function') {
-      return;
-    }
-
     expect(SearchEngine._internals.getResultCacheSize()).toBe(0);
 
     const res1 = SearchEngine.search('smile', 'all');
@@ -148,14 +144,25 @@ describe('PF-02: SearchEngine Query Result Cache', () => {
     const SearchEngine = M.SearchEngine;
     await SearchEngine.init(mockData);
 
-    if (typeof SearchEngine._internals?.getResultCacheSize !== 'function') {
-      return;
-    }
-
     SearchEngine.search('smile', 'all');
     expect(SearchEngine._internals.getResultCacheSize()).toBe(1);
 
     await SearchEngine.init(mockData);
     expect(SearchEngine._internals.getResultCacheSize()).toBe(0);
+  });
+
+  it('bounds cache size to 50 entries with LRU eviction', async () => {
+    const M: any = { CONFIG: {} };
+    (window as any).SearchModules = M;
+    const engineCode = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/engine.js'), 'utf8');
+    eval(engineCode);
+
+    const SearchEngine = M.SearchEngine;
+    await SearchEngine.init(mockData);
+
+    for (let i = 0; i < 60; i++) {
+      SearchEngine.search('query_' + i, 'all');
+    }
+    expect(SearchEngine._internals.getResultCacheSize()).toBe(50);
   });
 });

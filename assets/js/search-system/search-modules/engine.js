@@ -827,7 +827,10 @@
     const cacheKey = q.toLowerCase() + '|' + filterKey + '|' + langKey;
 
     if (_resultCache.has(cacheKey)) {
-      return _resultCache.get(cacheKey);
+      const cached = _resultCache.get(cacheKey);
+      _resultCache.delete(cacheKey);
+      _resultCache.set(cacheKey, cached);
+      return cached;
     }
 
     let res;
