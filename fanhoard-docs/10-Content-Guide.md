@@ -103,7 +103,7 @@ assets/
   "text": "😀",
   "name": {
     "en": "Grinning Face",
-    "th": "หน้ายิ้ม"
+    "th": "Smiling Face"
   }
 }
 ```
@@ -120,11 +120,11 @@ assets/
   "text": "OpenAI",
   "name": {
     "en": "OpenAI",
-    "th": "โอเพ่นเอไอ"
+    "th": "OpenAI"
   },
   "description": {
     "en": "Creator of ChatGPT",
-    "th": "ผู้สร้าง ChatGPT"
+    "th": "Creator of ChatGPT"
   },
   "image": "/assets/images/cards/openai.png",
   "link": "https://openai.com",
