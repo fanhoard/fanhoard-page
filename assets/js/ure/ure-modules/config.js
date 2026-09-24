@@ -16,11 +16,11 @@
   'use strict';
 
   const RENDER = Object.freeze({
-    DEFAULT_BUFFER_PX          : 600,
+    DEFAULT_BUFFER_PX          : 300,
     DEFAULT_ITEM_HEIGHT        : 96,
     DEFAULT_POOL_CAP           : 60,
     IO_THRESHOLD               : 0,
-    SENTINEL_MARGIN            : '700px',
+    SENTINEL_MARGIN            : '300px',
     DEFAULT_OVERSCAN           : 0,
     INITIAL_MOUNT_MULTIPLIER   : 1,
   });

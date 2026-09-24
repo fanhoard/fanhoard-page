@@ -235,7 +235,7 @@
             data    : filtered,
             template: (item, l) => this.renderResultItem(item, l),
             lang,
-            buffer  : 700,
+            buffer  : 300,
             recycling: true,
             keyField: 'api',
           });

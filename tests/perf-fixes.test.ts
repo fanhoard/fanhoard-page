@@ -67,18 +67,30 @@ describe('PF-03: Unified Debounce Timers & Cancellation on Enter', () => {
     M.UIService.buildWrapper();
     M.UIService.setupAutoSearchInput();
 
-    // Trigger typing input event
     input.value = 'smile';
     M.Handlers.inputInput();
 
     expect(M.State.debounceTimeout).not.toBeNull();
 
-    // Trigger Enter keydown
     const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
     M.Handlers.inputKeydown(enterEvent);
 
-    // Verify pending debounce timer was cleared
     expect(M.State.debounceTimeout).toBeNull();
     expect(M.SearchService.doSearch).toHaveBeenCalled();
+  });
+});
+
+describe('PF-06: Virtual Scroll Buffer Reduction', () => {
+  it('uses ~300px buffer in rendering.js, discovery.js, virtual-scroll.js, and ure config', () => {
+    const renderingCode = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/rendering.js'), 'utf8');
+    const discoveryCode = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/discovery.js'), 'utf8');
+    const vsCode = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/virtual-scroll.js'), 'utf8');
+    const ureConfigCode = fs.readFileSync(path.join(__dirname, '../assets/js/ure/ure-modules/config.js'), 'utf8');
+
+    expect(renderingCode).toContain('buffer  : 300');
+    expect(discoveryCode).toContain('buffer    : 300');
+    expect(vsCode).toContain('OVERSCAN : 300');
+    expect(ureConfigCode).toContain('DEFAULT_BUFFER_PX          : 300');
+    expect(ureConfigCode).toContain("SENTINEL_MARGIN            : '300px'");
   });
 });

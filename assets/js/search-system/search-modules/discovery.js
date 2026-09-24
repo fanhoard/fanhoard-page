@@ -439,7 +439,7 @@
               return '<div class="result-card"><div class="result-card__glyph">-</div></div>';
             },
             lang,
-            buffer    : 700,
+            buffer    : 300,
             recycling : true,
             keyField  : 'api',
           });

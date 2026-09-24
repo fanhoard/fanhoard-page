@@ -38,7 +38,7 @@
   /** @callback RenderFn @param {SearchResult} item @param {string} lang @returns {string} */
 
   const VirtualScrollEngine = {
-    OVERSCAN : 600,
+    OVERSCAN : 300,
     POOL_MAX : CONFIG.RENDER.vsPoolMax,
     EST_H    : CONFIG.RENDER.vsEstimatedItemHeight,
 
