@@ -1,187 +1,130 @@
-# 📚 FanHoard Docs — สารบัญเอกสารทั้งหมด
+# FanHoard Documentation Master Index (INDEX)
 
-> ศูนย์กลางเอกสารของโปรเจกต์ **FanHoard** (หรือชื่อเต็มคือ **FanHoard Verse**) — แพลตฟอร์มคลังอีโมจิ สัญลักษณ์ ข้อความแฟนซี และคอลเลกชันอื่น ๆ ที่ทำงานเป็น static website บน Cloudflare Pages
-
-ทุกเอกสารที่เกี่ยวกับระบบ การพัฒนา และการดูแลโปรเจกต์อยู่ที่นี่ที่เดียว อ่านตามลำดับหมายเลขหรือเลือกเฉพาะที่ต้องการได้
-
----
-
-## 🎯 Priority ของโปรเจกต์
-
-งานทุกอย่างใน FanHoard มีความสำคัญอยู่แล้ว แต่มี priority ที่สูงเป็นพิเศษ 3 ด้านที่ต้องคำนึงถึงเสมอเมื่อตัดสินใจอะไรก็ตาม:
-
-| Priority | ระดับ | คำอธิบาย |
-|---|---|---|
-| 🥇 **Documentation** | #1 สูงสุด | เอกสารเป็นตัวอธิบายระบบ — ถ้าผิด ทุกอย่างตามผิด ทุกการเปลี่ยนแปลงระบบต้อง sync กับเอกสาร ดู [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) |
-| 🥈 **SEO** | สูงสุด (พิเศษ) | Search engine visibility เป็นหัวใจของการเติบโต — ทุกการเปลี่ยนแปลงต้องไม่ทำลาย SEO และควรเสริม SEO ถ้าเป็นไปได้ ดู [`12-SEO-Guide.md`](./12-SEO-Guide.md) |
-| 🥉 **Performance** | สูง | Core Web Vitals ส่งผลต่อทั้ง UX และ SEO — ดู [`08-Performance-Architecture.md`](./08-Performance-Architecture.md) |
-
-> **กฎเหล็ก:** เมื่อมี conflict ระหว่าง feature ใหม่กับ Documentation — **อัปเดตเอกสารก่อน** แล้วค่อย merge feature เมื่อมี conflict ระหว่าง feature ใหม่กับ SEO — **ให้ SEO ชนะเสมอ** เว้นแต่จะมีเหตุผลที่ชัดเจนมากเป็นพิเศษ และต้องบันทึกเหตุผลนั้นไว้ใน PR description
+- **System Described**: Master Index, System Priority Matrix, Role-Based Navigation, and Cross-Reference Map for `fanhoard-docs/`
+- **Entry File**: `fanhoard-docs/INDEX.md`
+- **Dependencies**: All `fanhoard-docs/` files (00-15, AI_*, RELEASE_NOTES_GUIDE)
+- **Verification**: `node scripts/validate-release.js --staged` | `npm run test`
 
 ---
 
-## 🚀 เริ่มอ่านที่ไหน?
-
-| คุณคือใคร | เริ่มที่ไหน |
-|---|---|
-| 🤖 **AI agent รับงาน** | [`AI_TASK_WORKFLOW.md`](./AI_TASK_WORKFLOW.md) → [`AI_FORBIDDEN.md`](./AI_FORBIDDEN.md) → [`00-System-Architecture.md`](./00-System-Architecture.md) |
-| 👨‍💻 **นักพัฒนาใหม่** | [`00-System-Architecture.md`](./00-System-Architecture.md) → เลือกระบบที่จะแก้ |
-| 📝 **เขียน release notes** | [`RELEASE_NOTES_GUIDE.md`](./RELEASE_NOTES_GUIDE.md) |
-| 🎨 **เพิ่มอีโมจิ/สัญลักษณ์** | [`10-Content-Guide.md`](./10-Content-Guide.md) |
-| 🚢 **deploy เว็บ** | [`09-Deployment-Guide.md`](./09-Deployment-Guide.md) |
-| ⚡ **ปรับประสิทธิภาพ** | [`08-Performance-Architecture.md`](./08-Performance-Architecture.md) |
-| 🔍 **ทำ SEO / เพิ่ม ranking** | [`12-SEO-Guide.md`](./12-SEO-Guide.md) ⭐ |
-| 📝 **เขียน/แก้เอกสาร** | [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) 🥇 (priority #1) |
-| 🎨 **ออกแบบหน้าเว็บ/UX** | [`14-System-Design-And-UX.md`](./14-System-Design-And-UX.md) 🎨 (training data for AI) |
+> Central documentation index for **FanHoard** (FanHoard Verse)—a static web platform for emojis, symbols, and text collections deployed on Cloudflare Pages.
 
 ---
 
-## 📖 เอกสารระบบ (00–14)
+## 🎯 System Priority Hierarchy
 
-เอกสารหมายเลขนี้อธิบายระบบทั้งหมดของ FanHoard ตั้งแต่ภาพรวมไปจนถึงรายละเอียด module และ function เขียนเป็นภาษาไทย เน้นความลึกเพื่อให้ AI และนักพัฒนาเข้าใจระบบได้ครบถ้วนโดยไม่ต้องอ่านโค้ดโดยตรง
+Every technical task in FanHoard must respect the project priority matrix:
 
-| # | เอกสาร | อธิบาย | ไฟล์หลักที่ครอบคลุม |
-|---|---|---|---|
-| 00 | [System Architecture](./00-System-Architecture.md) | ภาพรวมสถาปัตยกรรมทั้งโปรเจกต์ — 7 ระบบหลัก, การเชื่อมต่อ, โครงสร้างไฟล์, URL routing | ทั้งโปรเจกต์ |
-| 01 | [Virtual Scroll Rendering](./01-Virtual-Scroll-Rendering.md) | Virtual scroll engine สำหรับแสดงข้อมูลจำนวนมาก พร้อม memory management | `assets/js/ure/` |
-| 02 | [Search System](./02-Search-System.md) | ระบบค้นหา client-side แบบ two-tier (substring + Fuse.js fuzzy) | `assets/js/search-*` |
-| 03 | [Navigation & Content](./03-Navigation-And-Content.md) | Navigation & content management สำหรับหน้า Discover (SPA) | `assets/js/nav-core*` |
-| 04 | [Internationalization & Build](./04-Internationalization-And-Build.md) | ระบบแปลภาษา client-side พร้อม build-time static generation | `assets/js/lang*` |
-| 05 | [Content Data Service](./05-Content-Data-Service.md) | Data access layer สำหรับ content (emoji, symbol, fancy, cards) | `assets/js/con-data-service/` |
-| 06 | [Popup System](./06-Popup-System.md) | ระบบ popup ส่วนกลาง — 9 presets, fullscreen, zero coupling | `assets/js/popup.js` + modules |
-| 07 | [Loading System](./07-Loading-System.md) | Fullscreen Visual Loader — หน้าจอโหลดที่ครอบการเปลี่ยนเนื้อหา | `assets/js/loading-system/fvl.js` |
-| 08 | [Performance Architecture](./08-Performance-Architecture.md) | เทคนิค performance ทั้งโปรเจกต์ — virtual scroll, web worker, cache, memory + Core Web Vitals | cross-cutting |
-| 09 | [Deployment Guide](./09-Deployment-Guide.md) | วิธี deploy บน Cloudflare Pages, build script, environment variables | `scripts/`, `_redirects`, `_headers` |
-| 10 | [Content Guide](./10-Content-Guide.md) | วิธีเพิ่ม/แก้ content (emoji, symbol, fancy, cards) | `assets/db/con-data/` |
-| 11 | [Release Notes System](./11-Release-Notes-System.md) | ระบบหน้า "มีอะไรใหม่" — release notes ที่อ่านจาก markdown | `assets/md/`, `assets/js/new.js` |
-| 12 ⭐ | [SEO Guide](./12-SEO-Guide.md) | กลยุทธ์ SEO ระดับ platform — Technical SEO, structured data, Core Web Vitals, international SEO, E-E-A-T | cross-cutting (priority #2) |
-| 13 🥇 | [Documentation Standard](./13-Documentation-Standard.md) | มาตรฐานการเขียน/อัปเดตเอกสาร — โครงสร้าง, น้ำเสียง, cross-references, docs sync with code | cross-cutting (priority #1 สูงสุด) |
-| 14 🎨 | [System Design & UX](./14-System-Design-And-UX.md) | หลักการออกแบบระบบและ UX — design tokens, mobile-first, responsive, components, animation, a11y, performance-driven | cross-cutting (training data for AI) |
+| Priority Level | Domain | Impact & Governance |
+| :--- | :--- | :--- |
+| 🥇 **Priority #1** | **Documentation** | Documentation defines system contracts. Code changes and documentation updates MUST be committed atomically. See [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) and [`docs/engineering/ai-docs-guide.md`](../docs/engineering/ai-docs-guide.md). |
+| 🥈 **Priority #2** | **SEO & Discoverability** | Search visibility drives user discovery. All changes must preserve canonical URLs, structured data, and Core Web Vitals. See [`12-SEO-Guide.md`](./12-SEO-Guide.md). |
+| 🥉 **Priority #3** | **Performance & Web Vitals** | Sub-second initial renders and sub-50ms search query execution. See [`08-Performance-Architecture.md`](./08-Performance-Architecture.md). |
 
 ---
 
-## 🤖 เอกสารสำหรับ AI Agents
+## 🚀 Where to Start by Role
 
-เอกสารเหล่านี้กำหนดมาตรฐานการทำงานของ AI agent ที่พัฒนาโปรเจกต์ — ทุก AI ที่รับงานต้องอ่านและยึดตามเอกสารเหล่านี้
-
-| เอกสาร | วัตถุประสงค์ |
-|---|---|
-| [AI_CODING_GUIDE.md](./AI_CODING_GUIDE.md) | มาตรฐานการเขียนโค้ด — naming, pattern, structure, file organization, **SEO-friendly code** ที่ต้องยึดติด |
-| [AI_TASK_WORKFLOW.md](./AI_TASK_WORKFLOW.md) | วิธีทำงานแบบ task-based — อ่านระบบก่อน → วางแผน (รวม SEO impact) → ทำ → ตรวจ → สรุป |
-| [AI_COMMIT_GUIDE.md](./AI_COMMIT_GUIDE.md) | มาตรฐาน commit message, PR description, changelog |
-| [AI_REVIEW_CHECKLIST.md](./AI_REVIEW_CHECKLIST.md) | Checklist สำหรับ AI ตรวจงานตัวเองก่อนส่งมอบ — รวม **SEO checks** |
-| [AI_FORBIDDEN.md](./AI_FORBIDDEN.md) | สิ่งที่ห้ามทำ — pattern ที่ห้ามใช้, ไฟล์ที่ห้ามแก้, **SEO violations**, assumption ที่ผิดบ่อย |
-
----
-
-## 📝 เอกสารมาตรฐานการทำงาน
-
-| เอกสาร | วัตถุประสงค์ |
-|---|---|
-| [RELEASE_NOTES_GUIDE.md](./RELEASE_NOTES_GUIDE.md) | มาตรฐานการเขียน release notes ทุกเวอร์ชั่น — ทำให้ผู้ใช้ทั่วไปเข้าใจการอัปเดต |
+| User / Agent Role | Primary Starting Path |
+| :--- | :--- |
+| 🤖 **AI Execution Agent** | [`AI_TASK_WORKFLOW.md`](./AI_TASK_WORKFLOW.md) ──► [`AI_FORBIDDEN.md`](./AI_FORBIDDEN.md) ──► [`00-System-Architecture.md`](./00-System-Architecture.md) |
+| 👨‍💻 **New Core Developer** | [`00-System-Architecture.md`](./00-System-Architecture.md) ──► Target Subsystem Guide |
+| 📝 **Release Notes Author** | [`RELEASE_NOTES_GUIDE.md`](./RELEASE_NOTES_GUIDE.md) ──► `docs/engineering/release-policy.md` |
+| 🎨 **Content / Emoji Manager** | [`10-Content-Guide.md`](./10-Content-Guide.md) ──► `assets/db/con-data/` |
+| 🚢 **Deployment / CI Engineer** | [`09-Deployment-Guide.md`](./09-Deployment-Guide.md) ──► `scripts/validate-release.js` |
+| ⚡ **Performance Specialist** | [`08-Performance-Architecture.md`](./08-Performance-Architecture.md) ──► `assets/js/ure/` |
+| 🔍 **SEO / Organic Growth** | [`12-SEO-Guide.md`](./12-SEO-Guide.md) |
+| 📝 **Documentation Maintainer**| [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) ──► `docs/engineering/ai-docs-guide.md` |
+| 🎨 **UI/UX Designer** | [`14-System-Design-And-UX.md`](./14-System-Design-And-UX.md) |
 
 ---
 
-## 📋 เอกสารที่อยู่นอก fanhoard-docs/
+## 📖 Subsystem Specifications (00–15)
 
-เอกสารเหล่านี้อยู่นอก `fanhoard-docs/` เพราะเป็นมาตรฐานของ GitHub หรือ runtime ต้องการ path เฉพาะ
+System specifications describe FanHoard architecture, API contracts, state machines, and file structures in full detail.
 
-| เอกสาร | ตำแหน่ง | เหตุผล |
-|---|---|---|
-| `README.md` | root | GitHub standard — แสดงบนหน้า repo |
-| `LICENSE` | root | GitHub standard — ต้องอยู่ที่ root |
-| `NOTICE` | root | Apache 2.0 license requirement |
-| `CODE_OF_CONDUCT.md` | root | GitHub community standard — คาดหวังให้อยู่ที่ root |
-| Release notes | `assets/md/{en,th}/` | runtime อ่านจาก path นี้ (`new.js`, `version-core.js`) |
+| # | Subsystem Specification | Core Functional Scope | Primary Source Files |
+| :--- | :--- | :--- | :--- |
+| **00** | [System Architecture](./00-System-Architecture.md) | Whole-project architectural overview, 7 core subsystems, file maps, and routing. | Entire Repository |
+| **01** | [Virtual Scroll Rendering](./01-Virtual-Scroll-Rendering.md) | Universal Render Engine (URE) virtual scrolling and adaptive memory pool. | `assets/js/ure/` |
+| **02** | [Search System](./02-Search-System.md) | Two-tier client search engine (substring + Fuse.js fuzzy) with candidate caching. | `assets/js/search-system/` |
+| **03** | [Navigation & Content](./03-Navigation-And-Content.md) | SPA routing, early bootstrap layer, and Discover view navigation (`Nav-Core`). | `assets/js/nav-core/` |
+| **04** | [Internationalization & Build](./04-Internationalization-And-Build.md) | Dual-mode client runtime i18n (`en`, `th`) and pre-built static HTML generator. | `assets/js/lang/`, `src/build/` |
+| **05** | [Content Data Service](./05-Content-Data-Service.md) | Data access layer for emojis, symbols, fancy text, and card metadata (`ConData`). | `assets/js/con-data-service/` |
+| **06** | [Popup System](./06-Popup-System.md) | Modular modal, alert, toast, and update dialog engine (`PopupSystem`). | `assets/js/popup.js`, `popup-modules/` |
+| **07** | [Loading System](./07-Loading-System.md) | Fullscreen Visual Loading overlay (`FVL`) for transition state management. | `assets/js/loading-system/fvl.js` |
+| **08** | [Performance Architecture](./08-Performance-Architecture.md) | Core Web Vitals optimization, LRU caching, web workers, and memory budgets. | Cross-cutting |
+| **09** | [Deployment Guide](./09-Deployment-Guide.md) | Cloudflare Pages deployment, release bypass tokens, and CI validation gates. | `scripts/`, `_redirects`, `_headers` |
+| **10** | [Content Guide](./10-Content-Guide.md) | Adding, editing, and indexing emoji, symbol, and fancy text JSON files. | `assets/db/con-data/` |
+| **11** | [Release Notes System](./11-Release-Notes-System.md) | What's New view, version history, and release note markdown loading. | `assets/md/`, `assets/js/new.js` |
+| **12** | [SEO Guide](./12-SEO-Guide.md) | Technical SEO, JSON-LD structured data, canonical URLs, and mobile crawling. | Cross-cutting |
+| **13** | [Documentation Standard](./13-Documentation-Standard.md) | Documentation formatting rules, header standards, and code-doc sync. | Cross-cutting |
+| **14** | [System Design & UX](./14-System-Design-And-UX.md) | Design tokens, mobile-first layouts, component states, and accessibility. | `assets/css/` |
+| **15** | [Loading Contract & Test Plan](./15-Loading-Contract-And-Test-Plan.md) | System startup timing guarantees, loading sequence contracts, and test plans. | Cross-cutting |
 
 ---
 
-## 🗺️ แผนภาพความสัมพันธ์ระหว่างเอกสาร
+## 🤖 AI Agent Specifications
+
+Mandatory standards and operational workflows for AI agents working in this repository:
+
+| Document Path | Operational Focus |
+| :--- | :--- |
+| [AI_CODING_GUIDE.md](./AI_CODING_GUIDE.md) | Coding style, IIFE module patterns, DOM caching, and SEO code rules. |
+| [AI_TASK_WORKFLOW.md](./AI_TASK_WORKFLOW.md) | Structured 5-phase execution workflow: Comprehend ──► Plan ──► Execute ──► Verify ──► Deliver. |
+| [AI_COMMIT_GUIDE.md](./AI_COMMIT_GUIDE.md) | Commit message formatting, PR summary structure, and changelog rules. |
+| [AI_REVIEW_CHECKLIST.md](./AI_REVIEW_CHECKLIST.md) | Quality checklist required before completing tasks or submitting commits. |
+| [AI_FORBIDDEN.md](./AI_FORBIDDEN.md) | Highest-priority inviolable rules, prohibited code patterns, and protected files. |
+
+---
+
+## 📝 Operating & Policy Guides
+
+| Document Path | Operational Focus |
+| :--- | :--- |
+| [RELEASE_NOTES_GUIDE.md](./RELEASE_NOTES_GUIDE.md) | Standard for writing user-facing release notes entries in `current.md`. |
+| [docs/engineering/release-policy.md](../docs/engineering/release-policy.md) | Release accumulation policy, version bump decision matrix, and bypass counter. |
+| [docs/engineering/ai-docs-guide.md](../docs/engineering/ai-docs-guide.md) | AI-first documentation standards, context headers, and contracts. |
+
+---
+
+## 🗺️ Documentation Cross-Reference Map
 
 ```
-                   INDEX.md (คุณอยู่ที่นี่)
-                        │
-        ┌───────────────┼───────────────┐
-        ▼               ▼               ▼
-   📚 เอกสารระบบ    🤖 เอกสาร AI    📝 มาตรฐาน
-   (00-14)          (AI_*)           (RELEASE_NOTES_*)
-        │               │
-        ▼               │
-   00-System-Arch ───────┐ (จุดเริ่มต้น)
-        │               │
-        ├──── 13-Documentation-Standard 🥇 (priority #1 สูงสุด)
-        ├──── 14-System-Design-And-UX 🎨 (training data)
-        ├──── 12-SEO-Guide ⭐ (priority #2)
-        │               │
-        ▼               ▼
-   01-URE ◄──────── AI_TASK_WORKFLOW
-   02-Search        (บอกลำดับการอ่าน)
-   03-Nav-Core           │
-   04-Language           ▼
-   05-ConData       AI_FORBIDDEN
-   06-Popup         (กฎเหล็กก่อนแก้โค้ด — รวม SEO + Documentation violations)
-   07-Loading            │
-   08-Performance        ▼
-   09-Deployment    AI_REVIEW_CHECKLIST
-   10-Content       (ก่อนส่งมอบ — รวม SEO + Documentation Sync checks)
-   11-Whats-New
+                          INDEX.md (Master Index)
+                                    │
+           ┌────────────────────────┼────────────────────────┐
+           ▼                        ▼                        ▼
+  System Specs (00-15)       AI Specifications       Policy & Release
+  (00-System-Architecture)    (AI_TASK_WORKFLOW)      (RELEASE_NOTES_GUIDE)
+           │                        │                        │
+           ▼                        ▼                        ▼
+  00-System-Architecture ──► AI_FORBIDDEN         ──► release-policy.md
+  13-Doc-Standard        ──► AI_CODING_GUIDE       ──► ai-docs-guide.md
+  12-SEO-Guide           ──► AI_REVIEW_CHECKLIST
 ```
 
 ---
 
-## 📌 คำแนะนำการอ่านตามสถานการณ์
+## 📌 Common Task Scenarios
 
-### สถานการณ์ 1: AI รับ task แก้ bug ในระบบ search
+### Scenario 1: AI Agent Fixing a Search Bug
+1. Read [`AI_TASK_WORKFLOW.md`](./AI_TASK_WORKFLOW.md) to establish task phases.
+2. Read [`AI_FORBIDDEN.md`](./AI_FORBIDDEN.md) for system invariants.
+3. Read [`02-Search-System.md`](./02-Search-System.md) to understand engine candidate caching.
+4. Apply fix adhering to [`AI_CODING_GUIDE.md`](./AI_CODING_GUIDE.md).
+5. Verify locally using `node scripts/validate-release.js --staged` and `npm run test`.
+6. Run [`AI_REVIEW_CHECKLIST.md`](./AI_REVIEW_CHECKLIST.md) before final delivery.
 
-1. `AI_TASK_WORKFLOW.md` — เข้าใจวิธีทำงาน
-2. `AI_FORBIDDEN.md` — รู้สิ่งที่ห้ามทำ (รวม SEO violations)
-3. `00-System-Architecture.md` — เข้าใจภาพรวม
-4. `02-Search-System.md` — เข้าใจระบบที่จะแก้
-5. `12-SEO-Guide.md` — เช็คว่าการแก้นี้กระทบ SEO ไหม
-6. แก้โค้ด
-7. `AI_REVIEW_CHECKLIST.md` — ตรวจก่อนส่ง (รวม SEO checks)
-8. `AI_COMMIT_GUIDE.md` — เขียน commit message
-
-### สถานการณ์ 2: เพิ่มหมวดอีโมจิใหม่
-
-1. `10-Content-Guide.md` — รู้วิธีเพิ่ม content
-2. `05-Content-Data-Service.md` — เข้าใจโครงสร้างข้อมูล
-3. `12-SEO-Guide.md` — เช็ค SEO ของ content ใหม่ (heading hierarchy, image alt, structured data)
-4. เพิ่มไฟล์ JSON ใน `assets/db/con-data/`
-5. อัปเดต index.json + sitemap
-6. ทดสอบบนเว็บ
-
-### สถานการณ์ 3: เขียน release notes หลัง ship เวอร์ชั่นใหม่
-
-1. `RELEASE_NOTES_GUIDE.md` — มาตรฐานการเขียน
-2. เขียน `assets/md/th/current.md` และ `assets/md/en/current.md`
-3. รันผ่าน checklist ใน guide
-
-### สถานการณ์ 4: เพิ่มหน้าเว็บใหม่
-
-1. `09-Deployment-Guide.md` — เข้าใจ build & routing
-2. `12-SEO-Guide.md` — เข้าใจ SEO requirements สำหรับหน้าใหม่ (meta tags, hreflang, structured data, sitemap)
-3. `04-Internationalization-And-Build.md` — เพิ่ม translation
-4. สร้าง HTML + ทุกภาษา
-5. อัปเดต sitemap
-
-### สถานการณ์ 5: ปรับ Core Web Vitals
-
-1. `08-Performance-Architecture.md` — เข้าใจเทคนิค performance
-2. `12-SEO-Guide.md` — ดู Core Web Vitals thresholds และวิธีวัด
-3. ปรับโค้ด
-4. วัดด้วย Lighthouse / PageSpeed Insights
+### Scenario 2: Adding a New Release Entry
+1. Read [`RELEASE_NOTES_GUIDE.md`](./RELEASE_NOTES_GUIDE.md) for structure and technical translation rules.
+2. Edit `assets/md/en/current.md` and `assets/md/th/current.md` (SSOT files).
+3. Verify release gate using `node scripts/validate-release.js --staged`.
 
 ---
 
-## 📅 วิธีดูแลเอกสาร
+## 📅 Documentation Maintenance Procedure
 
-- เมื่อเพิ่มระบบใหม่ → สร้างเอกสารหมายเลขใหม่ (13, 14, ...) และอัปเดต INDEX.md
-- เมื่อเปลี่ยนแปลงระบบหลัก → อัปเดตเอกสารหมายเลขนั้น + อัปเดต `00-System-Architecture.md` ถ้าจำเป็น
-- เมื่อเปลี่ยนแปลงที่กระทบ SEO → อัปเดต `12-SEO-Guide.md` ด้วย
-- เมื่อเปลี่ยนมาตรฐานการทำงาน → อัปเดตเอกสาร `AI_*` หรือ `RELEASE_NOTES_GUIDE.md`
-- ทุกการแก้ไขเอกสาร → commit พร้อมข้อความ `docs: ...` ตามมาตรฐานใน `AI_COMMIT_GUIDE.md`
-
----
-
-> หากเอกสารไหนข้อมูลไม่ตรงกับโค้ดจริง ให้ถือว่าโค้ดเป็นความจริง แล้วเปิด issue เพื่อแก้เอกสาร
+- **New Subsystem**: Assign a new sequential number (e.g., `16-New-Subsystem.md`) and register it in `INDEX.md`.
+- **Architectural Update**: Update the target subsystem specification and update `00-System-Architecture.md` simultaneously.
+- **Code & Documentation Synchronization**: Stage and commit code modifications and corresponding documentation updates together in a single commit.

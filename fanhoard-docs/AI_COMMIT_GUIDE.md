@@ -1,410 +1,184 @@
-# AI_COMMIT_GUIDE — มาตรฐาน Commit Message, PR, และ Changelog
+# FanHoard AI Commit, PR, & Release Workflow Standard
 
-> เอกสารนี้กำหนดมาตรฐานการเขียน commit message, PR description, และ changelog สำหรับ AI agents ที่ทำงานกับ repo FanHoard
->
-> **สำหรับ:** AI agents ที่จะ commit หรือเปิด PR
->
-> **เป้าหมาย:** ทำให้ประวัติการเปลี่ยนแปลงของ repo อ่านง่าย ค้นหาง่าย และ generate changelog อัตโนมัติได้
-
----
-
-## สารบัญ
-
-1. [Commit Message Format](#1-commit-message-format)
-2. [Type และ Scope](#2-type-และ-scope)
-3. [Examples](#3-examples)
-4. [Pull Request Description](#4-pull-request-description)
-5. [Changelog](#5-changelog)
-6. [Branch Naming](#6-branch-naming)
-7. [Forbidden Patterns](#7-forbidden-patterns)
+- **System Described**: Git Commit Standards, Pull Request Format, & Release Workflows for AI Agents
+- **Entry File**: `fanhoard-docs/AI_COMMIT_GUIDE.md`
+- **Dependencies**: `scripts/validate-release.js`, `scripts/update-version.js`, `.release-bypass`, `.release-bypass-counter`
+- **Verification**: `node scripts/validate-release.js --staged`
 
 ---
 
-## 1. Commit Message Format
+## 1. Commit Message Specifications
 
-ใช้ **Conventional Commits** format ปรับปรุง:
+All commit messages created by AI agents or human developers in the FanHoard repository MUST adhere to the **Conventional Commits** specification (v1.0.0).
+
+### 1.1 Structural Envelope
 
 ```
 <type>(<scope>): <subject>
 
-<body>
+[optional body]
 
-<footer>
+[optional footer(s)]
 ```
 
-### 1.1 ส่วนหัว (header)
+### 1.2 Header Rules
+- **Length Constraint**: The entire header line MUST NOT exceed **72 characters**.
+- **Imperative Mood**: The `<subject>` MUST use imperative, present-tense verbs (e.g., "Add", "Fix", "Refactor", "Update", NOT "Added", "Fixed", "Updated").
+- **Case & Punctuation**: The subject MUST start with a lowercase letter (unless referencing a proper name) and MUST NOT end with a period.
 
-- บรรทัดเดียว ไม่เกิน **72 ตัวอักษร**
-- ขึ้นต้นด้วย `<type>` ตามด้วย `(<scope>)` แล้ว `: <subject>`
-- `subject` ใช้ imperative mood ("Add" ไม่ใช่ "Added")
-- ห้ามลงท้ายด้วยจุด
+### 1.3 Body Rules
+- Leave exactly one blank line between the header and body.
+- Wrap body lines at **100 characters**.
+- Focus the body on **why** the change was made rather than repeating **what** was changed.
+- Use bullet points (`- `) for itemized explanations.
 
-### 1.2 ส่วนเนื้อหา (body) — optional
-
-- ขึ้นบรรทัดใหม่ 1 ครั้งหลัง header
-- แต่ละบรรทัดไม่เกิน **100 ตัวอักษร**
-- อธิบาย "ทำไม" ไม่ใช่ "อะไร" (code บอก "อะไร" อยู่แล้ว)
-- ใช้ bullet point `-` สำหรับหลายรายการ
-
-### 1.3 ส่วนท้าย (footer) — optional
-
-- ขึ้นบรรทัดใหม่ 1 ครั้งหลัง body
-- ใช้สำหรับ:
-  - `BREAKING CHANGE:` ตามด้วยคำอธิบาย
-  - `Closes #123`, `Fixes #456`, `Refs #789`
-  - `Co-authored-by: Name <email>`
+### 1.4 Footer Rules
+- Leave exactly one blank line between the body and footer.
+- Breaking changes MUST begin with `BREAKING CHANGE: ` followed by a detailed migration description.
+- Issue references MUST use standard keywords (`Closes #123`, `Fixes #456`, `Refs #789`).
 
 ---
 
-## 2. Type และ Scope
+## 2. Type and Scope Matrices
 
-### 2.1 Type ที่อนุญาต
+### 2.1 Permitted Commit Types
 
-| Type | ใช้เมื่อ | ตัวอย่าง |
-|---|---|---|
-| `feat` | เพิ่มฟีเจอร์ใหม่ | `feat(search): add fuzzy matching` |
-| `fix` | แก้ bug | `fix(popup): close on ESC key` |
-| `docs` | เปลี่ยนเอกสาร | `docs(ure): update API reference` |
-| `style` | เปลี่ยน format ไม่กระทบ logic | `style(css): format indentation` |
-| `refactor` | ปรับโค้ด ไม่เพิ่ม/แก้ feature | `refactor(nav-core): extract router` |
-| `perf` | ปรับประสิทธิภาพ | `perf(ure): reduce GC pressure` |
-| `test` | เพิ่ม/แก้ test | `test(search): add unit tests` |
-| `build` | เปลี่ยน build system | `build: upgrade cheerio to 1.0.0` |
-| `ci` | เปลี่ยน CI/CD | `ci: add Cloudflare deployment` |
-| `chore` | งานบ้านทั่วไป | `chore: update .gitignore` |
-| `revert` | revert commit ก่อนหน้า | `revert: feat(search): add fuzzy` |
-| `release` | release เวอร์ชั่นใหม่ | `release: v1.8.0` |
+| Type | Purpose | Example |
+| :--- | :--- | :--- |
+| `feat` | New end-user or developer feature | `feat(search): add fuzzy matching tier` |
+| `fix` | Bug fix in code or stylesheet | `fix(popup): close topmost dialog on ESC key` |
+| `docs` | Documentation changes only | `docs(ure): update rendering API reference` |
+| `style` | Code formatting, missing semicolons, zero logic change | `style(css): align indentations in popup.css` |
+| `refactor` | Code restructuring without feature or bug change | `refactor(nav-core): extract router module` |
+| `perf` | Performance improvements | `perf(search): cache bucket index queries` |
+| `test` | Adding or updating tests | `test(popup): add unit test for dismissal token` |
+| `build` | Build system or external dependency changes | `build: update cheerio build script dependency` |
+| `ci` | CI/CD workflow script changes | `ci: add validate-release step to pipeline` |
+| `chore` | Maintenance tasks (e.g., updating .gitignore) | `chore: update repository ignore paths` |
+| `revert` | Reverting a previous commit | `revert: feat(search): add fuzzy matching tier` |
+| `release` | Formal version bump commit | `release: v3.0.0` |
 
-### 2.2 Scope ที่ใช้บ่อย
+### 2.2 Standard Repository Scopes
 
-| Scope | หมายถึง |
-|---|---|
-| `ure` | Universal Render Engine |
-| `search` | Search System |
-| `nav-core` | Nav-Core System |
-| `language` | Language/i18n System |
-| `con-data` | ConData Service |
-| `popup` | Popup System |
-| `fvl` | Loading System (FVL) |
-| `build` | Build System |
-| `home` | Home page |
-| `setting` | Settings page |
-| `whats-new` | What's New page |
-| `docs` | Documentation |
-| `content` | Content data |
-| `deps` | Dependencies |
-| (ไม่ระบุ) | Cross-cutting changes |
+| Scope | Subsystem Target | Key Source Paths |
+| :--- | :--- | :--- |
+| `ure` | Universal Render Engine | `assets/js/ure/` |
+| `search` | Search Engine & Modules | `assets/js/search-system/search-modules/` |
+| `nav-core` | Navigation Engine | `assets/js/nav-core.js`, `assets/js/nav-core-modules/` |
+| `language` | i18n & Language Management | `assets/js/language.js`, `assets/js/lang-core.js` |
+| `con-data` | Content Data Service | `assets/js/con-data-service/` |
+| `popup` | Popup Notification System | `assets/js/popup.js`, `assets/js/popup-modules/` |
+| `fvl` | Fullscreen Visual Loader | `assets/js/loading-system/fvl.js` |
+| `build` | Build & Version Scripts | `scripts/build.js`, `scripts/update-version.js` |
+| `docs` | Repository Documentation | `docs/`, `fanhoard-docs/` |
+| `content` | Database & Collection Items | `assets/db/con-data/` |
+| `deps` | Package Dependencies | `package.json`, `package-lock.json` |
 
 ---
 
-## 3. Examples
+## 3. Grounded Commit Examples
 
-### 3.1 Feature ใหม่
-
+### 3.1 Feature Commit
 ```
-feat(search): add fuzzy matching with Fuse.js
+feat(search): implement bucket index acceleration for short queries
 
-Implements two-tier search: exact substring first, then fuzzy fallback
-using Fuse.js loaded lazily from CDN. Improves search experience for
-typos and partial matches.
+Introduces _bucketIndex Map for queries <= 3 characters to bypass
+full array scan in engine.js. Decreases short query execution time
+from 12ms to <1ms.
 
 Closes #142
 ```
 
-### 3.2 Bug fix
-
+### 3.2 Bug Fix Commit
 ```
-fix(popup): close popup on ESC key
+fix(popup): handle ESC key press at document root
 
-Previously ESC only worked when focus was inside popup body. Now
-listens on document level and closes topmost popup, matching user
-expectation from native dialogs.
+Previously ESC key listeners were scoped strictly to active dialog body,
+failing when focus was outside popup elements. Attaches root listener to
+OverlayService to guarantee topmost popup dismissal.
 
 Fixes #98
 ```
 
-### 3.3 Breaking change
-
+### 3.3 Breaking Change Commit
 ```
-feat(language)!: replace languageChange with fv:langchange
+feat(language)!: migrate event listener from languageChange to fv:langchange
 
-BREAKING CHANGE: All systems listening to 'languageChange' event must
-migrate to 'fv:langchange'. The old event is removed in v5.0.
+BREAKING CHANGE: Custom event 'languageChange' has been removed in favor
+of namespaced 'fv:langchange' event payload.
 
 Migration:
-- window.addEventListener('languageChange', fn)
-+ window.addEventListener('fv:langchange', fn)
-
-Affected files:
-- home.js
-- new.js
-- version-core.js
-- modern-navigation.js
+- window.addEventListener('languageChange', handler);
++ window.addEventListener('fv:langchange', handler);
 ```
 
-### 3.4 Documentation
-
+### 3.4 Release Bypass Token Commit (Doc / Non-User Changes)
 ```
-docs(ure): add Adaptive Memory Management section
+docs: rewrite AI_COMMIT_GUIDE.md following AI-first standard
 
-Document v1.7.0 changes: MemoryManager singleton, pressure detection,
-budget clamping. Updates API reference for setMemoryBudget().
-```
-
-### 3.5 Performance improvement
-
-```
-perf(ure): reduce GC pressure with DOM node pooling
-
-Recycle DOM nodes in a pool instead of create/destroy on every scroll.
-Reduces GC pauses by 80-95% on long scroll sessions.
-
-Benchmark:
-- Before: 12ms GC pause every 2s (10k items)
-- After: <1ms GC pause every 30s
-```
-
-### 3.6 Refactor
-
-```
-refactor(nav-core): extract router into separate module
-
-Moves routing logic from init.js to router.js for better separation
-of concerns. No behavior change — all tests pass.
-```
-
-### 3.7 Release
-
-```
-release: v1.8.0
-
-- Smoother loading with FVL improvements
-- Prevent duplicate clicks causing stuck loading
-- Block scrolling during loading overlay
-
-See assets/md/en/current.md for full release notes.
-```
-
-### 3.8 Multi-line body
-
-```
-fix(home): prevent banner carousel from breaking on slow networks
-
-- Add timeout fallback when banner API doesn't respond in 3s
-- Show static banner image as fallback
-- Log timeout errors to console for debugging
-
-The banner API (fanhoard-banner.vercel.app) occasionally times out
-during peak hours, leaving the carousel in a loading state indefinitely.
-This commit adds graceful degradation.
+Updates commit standards to cover 4-layer release control, bypass counter
+staging rules, and active search module paths.
 ```
 
 ---
 
-## 4. Pull Request Description
+## 4. Release Control & Bypass Token Mechanics
 
-### 4.1 โครงสร้าง PR description
+FanHoard uses a 4-layer release validation pipeline enforced by `scripts/validate-release.js` and Git hooks (`scripts/hooks/pre-commit`, `pre-push`).
 
-```markdown
-## Summary
+### 4.1 Release Bypass Rules
+- Documentation-only or internal refactoring pushes MUST NOT bump semantic version numbers in `assets/md/{lang}/current.md`.
+- To bypass version bump checks on non-user-facing commits, developers MUST increment `.release-bypass`.
+- **CRITICAL INVARIANT**: `.release-bypass-counter` MUST NEVER BE STAGED FOR COMMIT. Staging `.release-bypass-counter` breaks CI validation.
 
-<1-2 ประโยคอธิบายว่า PR นี้ทำอะไร>
-
-## Changes
-
-- <change 1>
-- <change 2>
-- <change 3>
-
-## Files Modified
-
-- `path/to/file.js` — <what changed>
-- `path/to/other.js` — <what changed>
-
-## Testing
-
-- [x] Manual test on Chrome
-- [x] Manual test on Firefox
-- [x] Manual test on Safari
-- [x] Test with Thai language
-- [x] Test with English language
-- [x] No regression in existing features
-
-## Screenshots
-
-<if UI change, attach screenshots>
-
-## Related Issues
-
-Closes #<issue-number>
-Refs #<related-issue>
-
-## Checklist
-
-- [x] Code follows AI_CODING_GUIDE
-- [x] No AI_FORBIDDEN violations
-- [x] Documentation updated (if needed)
-- [x] Release notes updated (if user-facing)
-```
-
-### 4.2 ตัวอย่าง PR จริง
-
-```markdown
-## Summary
-
-Add fuzzy matching to search system using Fuse.js, with lazy loading
-to avoid impacting initial page load performance.
-
-## Changes
-
-- Add Fuse.js lazy loader (loads only when search is first used)
-- Implement two-tier search: substring first, fuzzy fallback
-- Add search highlight in results
-- Update search state to track search mode
-
-## Files Modified
-
-- `assets/js/search-modules/search.js` — add fuzzy search function
-- `assets/js/search-modules/state.js` — add isFuzzy flag
-- `assets/js/search-modules/rendering.js` — highlight matched text
-- `assets/css/search.css` — style for highlight
-- `fanhoard-docs/02-Search-System.md` — document new behavior
-
-## Testing
-
-- [x] Manual test on Chrome (Mac)
-- [x] Manual test on Firefox (Mac)
-- [x] Manual test on Safari (iOS)
-- [x] Test with Thai language
-- [x] Test with English language
-- [x] No regression in existing features
-
-## Related Issues
-
-Closes #142
-```
-
----
-
-## 5. Changelog
-
-### 5.1 ไม่มี CHANGELOG.md แยก
-
-FanHoard ไม่ใช้ `CHANGELOG.md` แยก — ใช้ release notes ใน `assets/md/{en,th}/current.md` แทน (ดู [`RELEASE_NOTES_GUIDE.md`](./RELEASE_NOTES_GUIDE.md))
-
-### 5.2 การ generate changelog อัตโนมัติ
-
-ใช้ `git log` กับ conventional commit format:
+### 4.2 Incremental Commit & Push Recipe
 
 ```bash
-# ดู changelog ระหว่าง 2 tags
-git log v1.7.0..v1.8.0 --oneline --no-merges
+# 1. Fetch and rebase against target branch
+git pull --rebase origin solas/docs-overhaul-20260924
 
-# ดูเฉพาะ features และ fixes
-git log v1.7.0..v1.8.0 --oneline --grep='^feat\|^fix'
+# 2. Read counter and set bypass token
+V=$(cat .release-bypass-counter)
+echo $((V+1)) > .release-bypass
+
+# 3. Stage changes and bypass token (EXCLUDE .release-bypass-counter)
+git add <files> .release-bypass
+
+# 4. Commit and push
+git commit -m "docs: description of changes"
+git push origin solas/docs-overhaul-20260924
 ```
-
-### 5.3 การเขียน release notes จาก commits
-
-เมื่อ release เวอร์ชั่นใหม่ ให้ดู commits ตั้งแต่ tag ล่าสุด แล้วเขียน release notes:
-
-1. รวบรวม `feat:` → หมวด **New** ใน release notes
-2. รวบรวม `fix:` → หมวด **Fixed**
-3. รวบรวม `perf:`, `refactor:` → หมวด **Improved**
-4. รวบรวม `revert:`, หรือที่ลบ feature → หมวด **Removed**
 
 ---
 
-## 6. Branch Naming
+## 5. Pull Request & Release Note Standards
 
-### 6. รูปแบบ
+### 5.1 Release Notes Architecture (No Standalone CHANGELOG.md)
+FanHoard does NOT maintain a manual `CHANGELOG.md`. Release notes live in `assets/md/{lang}/current.md` frontmatter and markdown body. Running `node scripts/update-version.js` automatically creates historical snapshots in `assets/md/{lang}/releases/v{version}.md` and updates `assets/md/{lang}/releases/index.json`.
 
+### 5.2 Pull Request Checklist
+Every Pull Request submitted by an AI agent MUST include the following verification details:
+
+```markdown
+## Summary
+Short summary of modifications and objective.
+
+## Changes
+- Detailed list of implementation steps.
+
+## Verification Checklist
+- [x] Executed `node scripts/validate-release.js --staged` locally.
+- [x] Verified code against `fanhoard-docs/AI_FORBIDDEN.md` invariants.
+- [x] Confirmed zero UI/behavioral regression.
+- [x] Verified all language translations in `assets/lang/{en,th}.json`.
 ```
-<type>/<short-description>
-```
-
-### 6.2 ตัวอย่าง
-
-```
-feat/search-fuzzy-matching
-fix/popup-esc-key
-docs/ure-update
-refactor/nav-core-router
-perf/ure-memory-pool
-release/v1.8.0
-```
-
-### 6.3 กฎ
-
-- ใช้ `kebab-case`
-- ไม่เกิน 50 ตัวอักษร
-- ใช้ type เดียวกับ commit message
-- ไม่ใส่ issue number ในชื่อ branch (ใส่ใน PR description)
 
 ---
 
-## 7. Forbidden Patterns
+## 6. Prohibited Commit Anti-Patterns
 
-### 7.1 ❌ Commit message ห้าม
-
-```
-# ❌ ไม่มี type
-updated search.js
-
-# ❌ ใช้ past tense
-added fuzzy matching
-
-# ❌ ลงท้ายด้วยจุด
-feat(search): add fuzzy matching.
-
-# ❌ ยาวเกินไป
-feat(search): add fuzzy matching with Fuse.js library that will improve user experience when searching for emojis and symbols by allowing partial matches and typo tolerance
-
-# ❌ ไม่จำเป็น
-WIP
-fix typo
-asdf
-update
-
-# ❌ มี emoji
-feat(search): add fuzzy matching 🎉
-```
-
-### 7.2 ❌ Commit เดียวหลายสิ่ง
-
-```
-# ❌ ผสมหลายอย่าง
-feat: add search fuzzy + fix popup bug + update docs + refactor utils
-
-# ✅ แยกเป็น 4 commits
-feat(search): add fuzzy matching
-fix(popup): close on ESC key
-docs(ure): update API reference
-refactor(utils): extract helper functions
-```
-
-### 7.3 ❌ Commit ขนาดใหญ่เกินไป
-
-- หนึ่ง commit ควรมี < 500 บรรทัดเปลี่ยนแปลง
-- ถ้าใหญ่กว่านี้ ให้แบ่งเป็นหลาย commit
-
-### 7.4 ❌ Commit message ไม่ตรงกับ code
-
-- อย่าเขียน "fix bug X" แต่จริง ๆ แก้ bug Y
-- อย่าเขียน "refactor" แต่จริง ๆ เพิ่มฟีเจอร์
-
----
-
-## 8. สรุป
-
-| สิ่งที่ต้องจำ | สรุป |
-|---|---|
-| Format | `<type>(<scope>): <subject>` |
-| Subject | imperative, ≤72 chars, no period |
-| Body | อธิบาย "ทำไม", ≤100 chars/line |
-| Type | feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, release |
-| Scope | ระบบที่กระทบ (ure, search, nav-core, ...) |
-| One commit = one thing | อย่าผสมหลายอย่าง |
-| PR description | มี Summary, Changes, Testing, Checklist |
-
-> Commit message ที่ดีทำให้ reviewer เข้าใจการเปลี่ยนแปลงได้โดยไม่ต้องอ่านทุกบรรทัดของ code
+1. ❌ **Vague Header Subjects**: `fix bug`, `update file`, `wip`, `asdf`.
+2. ❌ **Mixing Unrelated Changes**: Combining feature additions, formatting refactors, and bug fixes into a single commit.
+3. ❌ **Staging `.release-bypass-counter`**: Including `.release-bypass-counter` in `git add`.
+4. ❌ **Mismatched Commit Types**: Tagging a breaking architectural change as `style` or `chore`.
+5. ❌ **Past Tense Verbs in Subject**: `feat(search): added fuzzy search` (MUST be `add`).
