@@ -249,3 +249,28 @@ All goal acceptance criteria for `verify-evidence` in `discover-search-stability
 3. Defect-to-test matrix complete for all census defects (DS-01 through DS-20).
 4. Performance before/after measurements documented with commit references.
 5. All open findings honestly declared.
+
+---
+
+## 10. Final Head Verification Addendum
+
+This addendum documents the final verification refresh performed on head commit `d5f21a7` of branch `solas/discover-search-stability-20260923` following the landing of three accessibility and security commits after the initial verification evidence report (`818960b`) and final review gate.
+
+### 10.1 Post-Evidence A11y & Security Commits
+- **`dabd772`**: `fix(a11y): fix SearchEngine keywords and URLService state calls in search.js (goal: discover-search-stability)` — Fixed runtime initialization methods in search entry point. **Axe Scan Result**: 0 violations.
+- **`3fe5bf6`**: `fix(a11y): wrap top-level elements in header landmark for region rule in search and discover pages (goal: discover-search-stability)` — Enclosed top-level `.skip-link` and hidden `h1` elements inside `<header class="fv-header" role="banner">` landmark. **Axe Scan Result**: 0 violations.
+- **`d5f21a7`**: `fix(a11y): add combobox and listbox aria attributes and focus management to overlay.js (goal: discover-search-stability)` — Added `role="combobox"`, `aria-expanded`, `aria-haspopup="listbox"`, `aria-controls` on search input, `role="listbox"` on suggestions container, and focus restoration to input on overlay close. **Axe Scan Result**: 0 violations.
+
+### 10.2 Gate Results on Final Head
+
+| Gate | Command | Status | Real Numbers / Details |
+|---|---|---|---|
+| **Lint** | `npm run lint` | **PASS** | 0 errors, 9 non-fatal script warnings (`no-unused-vars` in `scripts/`) |
+| **Type Check** | `npm run type-check` | **PASS** | 0 errors across all TypeScript sources |
+| **Unit Tests** | `npm test` | **PASS** | 21 test files passed, 119/119 unit tests green (6.45s) |
+| **SSG Build** | `npm run build` | **PASS** | 32 SSG pages × 2 languages generated cleanly in `./dist/` |
+| **E2E Integration** | `npm run test:e2e` | **PASS** | 9/9 Playwright Chromium specs passed (8.9s) |
+
+### 10.3 Final Coverage & Review Gate Statement
+
+The prior review gate verdict (**approve-with-notes**) plus this Final Head Verification Addendum cover the complete final branch state on `solas/discover-search-stability-20260923`. All 5 verification gates are green on the final head, confirming that no regressions were introduced by post-review accessibility and security updates.
