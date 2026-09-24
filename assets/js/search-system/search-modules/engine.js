@@ -112,6 +112,8 @@
     idleTimeout: 4000,
   };
   let _fuseBuilding = false;
+  let _fuseBuildRetries = 0;
+  const MAX_FUSE_RETRIES = 3;
   /** Detected languages from data scan. */
   let _langs = ['en'];
 
@@ -1049,6 +1051,12 @@
    */
   function scheduleBuildFuse() {
     if (_fuseBuilding || !_data) return;
+    if (_fuseBuildRetries >= MAX_FUSE_RETRIES) {
+      console.warn('[SearchEngine] Max Fuse build retries reached, falling back to substring search');
+      _fuse = null;
+      _fuseBuilding = false;
+      return;
+    }
     _fuseBuilding = true;
 
     const build = async () => {
@@ -1087,8 +1095,8 @@
           _fuse = null;
         }
       } catch (e) {
-        // Graceful degradation: keep using immediate search
-        console.warn('[SearchEngine] Fuse unavailable, using immediate search only:',
+        _fuseBuildRetries++;
+        console.warn('[SearchEngine] Fuse unavailable, using immediate search only (retry ' + _fuseBuildRetries + '/' + MAX_FUSE_RETRIES + '):',
           e && e.message ? e.message : e);
         _fuse = null;
       } finally {
