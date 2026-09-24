@@ -11,18 +11,7 @@
  * └─────────────────────────────────────────────────────────────┘
  *
  * IconSlotService   — swaps 🔍 ↔ ← inside .search-pill__icon.
- *   Icon modes:
- *     A) Overlay open           → ← → history.back()
- *        (popstate fires → OverlayService.close('popstate'))
- *     B) Main page + has query  → ← → history.back() (Stack A)
- *     C) Main page, no query    → 🔍 (non-interactive)
- *   Why history.back() and NOT OverlayService.close() directly?
- *     close() uses replaceState — leaves the entry in the stack.
- *     history.back() POPs the entry natively, then popstate fires,
- *     then OverlayService.close('popstate') cleans up correctly.
- *
  * ClearBtnService   — shows/hides the ✕ button based on input value.
- *
  * UIService         — attaches input/filter listeners; buildWrapper()
  *                     ensures correct DOM order on init.
  *
@@ -64,8 +53,6 @@
         slot.setAttribute('aria-label', LanguageService.t('back'));
         slot.style.cssText = 'cursor:pointer;color:var(--tx-mid,#2b4539);pointer-events:auto;';
 
-        // history.back() in ALL cases — browser pops the entry.
-        // Popstate handler calls OverlayService.close('popstate') if overlay was open.
         this._clickHandler = (e) => { e.preventDefault(); e.stopPropagation(); history.back(); };
         this._keyHandler   = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); history.back(); } };
 
@@ -116,13 +103,16 @@
           padding               : '0',
           WebkitTapHighlightColor: 'transparent',
         });
-
       }
 
       if (!btn._clearListenerAttached) {
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
+          if (State.debounceTimeout) {
+            clearTimeout(State.debounceTimeout);
+            State.debounceTimeout = null;
+          }
           const inp = DOMService.get(CONFIG.DOM.searchInputId);
           if (inp) { inp.value = ''; inp.focus(); }
           this.sync();
@@ -152,9 +142,6 @@
     /**
      * Ensure .search-pill contains elements in correct flex order:
      *   [.search-pill__icon] [#searchInput] [#search-clear-btn]
-     *
-     * Must be called once after data loads.
-     * Idempotent — safe to call again (guarded by _wrapperBuilt).
      */
     buildWrapper() {
       if (this._wrapperBuilt) return;
@@ -162,7 +149,6 @@
       const inp     = DOMService.get(CONFIG.DOM.searchInputId);
       if (!wrapper || !inp) return;
 
-      // 1. Ensure icon slot is the first child
       let slot = wrapper.querySelector('.search-pill__icon');
       if (!slot) {
         slot = DOMService.create('span', null, 'search-pill__icon');
@@ -170,10 +156,8 @@
       }
       slot.innerHTML = M.CONFIG.Icons.search;
 
-      // 2. Input comes right after the icon slot
       if (slot.nextSibling !== inp) wrapper.insertBefore(inp, slot.nextSibling);
 
-      // 3. Clear button is the last child
       const clearBtn = ClearBtnService.build();
       if (!wrapper.contains(clearBtn)) wrapper.appendChild(clearBtn);
 
@@ -181,8 +165,7 @@
     },
 
     /**
-     * Attach all event listeners to #searchInput.
-     * Must be called after buildWrapper().
+     * Attach input listeners with unified debounce timer handling.
      */
     setupAutoSearchInput() {
       try {
@@ -190,12 +173,15 @@
         if (!inp) return;
         DOMService.setAttr(inp, 'enterkeyhint', 'search');
 
-        // Debounced: update suggestions, clear-btn, icon slot on every keystroke
+        // Unified debounced input handler for typing, deletion, paste, and backspace
         Handlers.inputInput = () => {
           if (State.overlayTransitioning) return;
           ClearBtnService.sync();
           IconSlotService.update();
-          clearTimeout(State.debounceTimeout);
+          if (State.debounceTimeout) {
+            clearTimeout(State.debounceTimeout);
+            State.debounceTimeout = null;
+          }
           State.debounceTimeout = setTimeout(
             () => M.SuggestionService.renderQuerySuggestions(inp.value),
             CONFIG.TIMING.debounceMs
@@ -203,51 +189,36 @@
         };
         inp.addEventListener('input', Handlers.inputInput);
 
-        // Enter → run search; ArrowDown → focus first suggestion; Backspace → debounce
+        // Enter → run search & cancel pending suggestion timers immediately
         Handlers.inputKeydown = (e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
+            if (State.debounceTimeout) {
+              clearTimeout(State.debounceTimeout);
+              State.debounceTimeout = null;
+            }
             M.SearchService.doSearch();
             this.closeKB();
           } else if (e.key === 'ArrowDown') {
             DOMService.get(CONFIG.DOM.suggestionContainerId)?.querySelector('.search-suggestion-item')?.focus?.();
-          } else if (e.key === 'Backspace') {
-            clearTimeout(State.debounceTimeout);
-            State.debounceTimeout = setTimeout(() => {
-              ClearBtnService.sync();
-              M.SuggestionService.renderQuerySuggestions(inp.value);
-              IconSlotService.update();
-            }, CONFIG.TIMING.debounceMs / 2);
           }
         };
         inp.addEventListener('keydown', Handlers.inputKeydown);
 
-        // Focus or click → open overlay
         Handlers.inputFocus = () => { if (!State.overlayTransitioning) M.OverlayService.open(); };
         Handlers.inputClick = () => { if (!State.overlayTransitioning) M.OverlayService.open(); };
         inp.addEventListener('focus', Handlers.inputFocus);
         inp.addEventListener('click', Handlers.inputClick);
 
-        // Initial icon state
         IconSlotService.update();
         ClearBtnService.sync();
       } catch {}
     },
 
-    /**
-     * Filter events are now handled by pill-button click delegates
-     * inside FilterService.setupTypeFilter() and setupCategoryFilter().
-     * This method is kept as a safe no-op for call-site compatibility.
-     */
     setupFilters() {},
-
-    /** @deprecated — pill click handler inside FilterService handles this */
     onTypeChange() {},
-
-    /** @deprecated — pill click handler inside FilterService handles this */
     onCatChange() {},
 
-    /** Blur the input to dismiss the soft keyboard. */
     closeKB() {
       try {
         const inp = DOMService.get(CONFIG.DOM.searchInputId);
@@ -255,21 +226,12 @@
       } catch {}
     },
 
-    /**
-     * Sync placeholder text to the active language.
-     * Filter pills are rebuilt by FilterService on language change.
-     * Safe to call at any time.
-     */
-    updateUILanguage() {
-      try {
-        const inp = DOMService.get(CONFIG.DOM.searchInputId);
-        const ph  = LanguageService.t('search_placeholder');
-        if (inp && inp.placeholder !== ph) inp.placeholder = ph;
-      } catch {}
+    syncPlaceholder() {
+      const inp = DOMService.get(CONFIG.DOM.searchInputId);
+      if (inp) DOMService.setAttr(inp, 'placeholder', LanguageService.t('placeholder'));
     },
   };
 
-  // ── Exports ─────────────────────────────────────────────────────────────
   M.IconSlotService = IconSlotService;
   M.ClearBtnService = ClearBtnService;
   M.UIService       = UIService;

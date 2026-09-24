@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 
@@ -21,5 +21,64 @@ describe('PF-05: Dead Asset References & Boot 404 Elimination', () => {
 
     expect(homeHtml).toContain('src="/assets/js/lang-proxy.js');
     expect(homeHtml).not.toContain('src="assets/js/lang-proxy.js');
+  });
+});
+
+describe('PF-03: Unified Debounce Timers & Cancellation on Enter', () => {
+  beforeEach(() => {
+    document.body.innerHTML = `
+      <div class="search-pill">
+        <input id="searchInput" type="text" />
+      </div>
+      <div id="search-suggestion-container"></div>
+    `;
+  });
+
+  it('cancels pending suggestion debounce timer on Enter keydown', () => {
+    const M: any = {
+      CONFIG: {
+        DOM: { searchInputId: 'searchInput', clearBtnId: 'search-clear-btn', suggestionContainerId: 'search-suggestion-container' },
+        TIMING: { debounceMs: 120 },
+        Icons: { search: '', clear: '', back: '' }
+      },
+      State: { overlayTransitioning: false, debounceTimeout: null },
+      Handlers: {},
+      DOMService: {
+        get: (id: string) => document.getElementById(id),
+        query: (sel: string) => document.querySelector(sel),
+        create: (tag: string, attrs: any, cls: string) => {
+          const el = document.createElement(tag);
+          if (cls) el.className = cls;
+          return el;
+        },
+        setAttr: (el: any, k: string, v: string) => el?.setAttribute(k, v)
+      },
+      LanguageService: { t: (k: string) => k },
+      OverlayService: { open: vi.fn() },
+      SuggestionService: { renderQuerySuggestions: vi.fn() },
+      SearchService: { doSearch: vi.fn() }
+    };
+
+    (window as any).SearchModules = M;
+    const code = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/input-bar.js'), 'utf8');
+    eval(code);
+
+    const input = document.getElementById('searchInput') as HTMLInputElement;
+    M.UIService.buildWrapper();
+    M.UIService.setupAutoSearchInput();
+
+    // Trigger typing input event
+    input.value = 'smile';
+    M.Handlers.inputInput();
+
+    expect(M.State.debounceTimeout).not.toBeNull();
+
+    // Trigger Enter keydown
+    const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
+    M.Handlers.inputKeydown(enterEvent);
+
+    // Verify pending debounce timer was cleared
+    expect(M.State.debounceTimeout).toBeNull();
+    expect(M.SearchService.doSearch).toHaveBeenCalled();
   });
 });
