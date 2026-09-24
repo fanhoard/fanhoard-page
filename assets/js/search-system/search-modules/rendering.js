@@ -251,7 +251,7 @@
         // Reads the query from the input so we don't need an extra param.
         this._triggerDiscovery(this._currentQuery());
 
-        M.UIService.updateUILanguage();
+        if (typeof M.UIService.updateUILanguage === 'function') M.UIService.updateUILanguage();
       } catch (e) {
         console.error('[RenderingService] renderResults failed', e);
       }
@@ -320,7 +320,7 @@
       DOMService.setHTML(container, html);
       const cfEl = DOMService.get(CONFIG.DOM.categoryFilterId);
       if (cfEl) cfEl.style.display = '';
-      M.UIService.updateUILanguage();
+      if (typeof M.UIService.updateUILanguage === 'function') M.UIService.updateUILanguage();
     },
 
     /**

@@ -288,7 +288,7 @@
       }
       // VirtualScrollEngine.destroy() removed — rendering uses URE, not the old VSE
       FilterService.setupCategoryFilter([], 'all');
-      UIService.updateUILanguage();
+      if (typeof UIService.updateUILanguage === 'function') UIService.updateUILanguage();
       if (!window.__renderIsRestore) {
         window.scrollTo({ top: 0, behavior: 'instant' });
         if (window._showStickyHeader) window._showStickyHeader();
