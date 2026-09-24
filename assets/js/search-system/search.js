@@ -517,6 +517,7 @@
         State.lastCommittedSearchState  = null;
         State._handlersAttached         = false;
         State.keyboardAutoToggleEnabled = false;
+        try { KeyboardService?.destroy?.(); } catch (_) {}
         UIService._wrapperBuilt         = false;
         window._copyResultTextHandlerSet  = false;
 
