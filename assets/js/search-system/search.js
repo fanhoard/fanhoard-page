@@ -348,7 +348,10 @@
               URLService.replaceSearch({ q: '', type: 'all', category: 'all' });
             }
           })
-          .catch(e => console.error('[Search] Initialisation failed', e));
+          .catch(e => {
+            console.error('[Search] Initialisation failed:', e);
+            if (window.__searchUI) window.__searchUI._initialized = false;
+          });
 
         // Form/Enter handlers — attached synchronously so they work immediately.
         // doSearch() defers via __pendingSearch when docs aren't ready yet.

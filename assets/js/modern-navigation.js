@@ -6,17 +6,7 @@
  *
  * Replacement for previous modern-navigation.js. Place in assets/js/.
  */
- /* --- [BEGIN: Wave Effect Loader] --- */
-(function() {
-  var waveScriptSrc = "https://marcumat-js.pages.dev/dist/wave-effect.js";
-  if (!document.querySelector('script[src="' + waveScriptSrc + '"]')) {
-    var script = document.createElement('script');
-    script.src = waveScriptSrc;
-    script.async = true;
-    document.head.appendChild(script);
-  }
-})();
-/* --- [END: Wave Effect Loader] --- */
+ 
 
 (function () {
   // --- Feature detection / helpers ---

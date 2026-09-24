@@ -1,24 +1,11 @@
 /**
- * @file version-core.js — FanHoard Verse
- * @version 5.1
+ * version-core.js — FanHoard Verse
+ * @version 5.2
  * @description ระบบแจ้งเตือนอัพเดทเวอร์ชันใหม่
  *
  * อ่าน `/assets/md/{lang}/current.md` เพื่อตรวจสอบเวอร์ชันล่าสุด,
  * เปรียบเทียบกับเวอร์ชันที่ผู้ใช้ dismiss แล้ว,
  * และแสดง popup แจ้งอัพเดทผ่าน `PopupSystem.open()` หากมีเวอร์ชันใหม่
- *
- * **Fallback chain:** per-language MD → legacy MD → whats-new.json
- *
- * @requires PopupSystem (window.PopupSystem) — สำหรับแสดง popup
- * @requires FvLang (window.FvLang) — สำหรับตรวจภาษาปัจจุบัน (optional, fallback to localStorage)
- *
- * @example
- * // ระบบทำงานอัตโนมัติเมื่อโหลด — ไม่ต้องเรียก manual
- * // แต่สามารถตรวจสอบสถานะได้:
- * localStorage.getItem('fv_dismissed_v1.6.1') // '1' = ผู้ใช้ dismiss แล้ว
- * localStorage.getItem('fv_noupdate')          // '1' = ปิดการแจ้งเตือน
- *
- * @used-by home/index.html, setting/index.html และหน้าอื่นๆ ที่มี `<script>` tag
  */
 
 (function () {
@@ -26,8 +13,6 @@
 
   var CFG = {
     CURRENT_MD_PERLANG: '/assets/md/{lang}/current.md',
-    CURRENT_MD_LEGACY:  '/assets/md/current.md',
-    LEGACY_JSON_URL:    '/assets/json/whats-new.json',
     WHATS_NEW_PAGE:     '/platform/whats_new/',
     KEY_SHOWN_BUILD:    'fv_shown_build',
     KEY_DISMISSED:      'fv_dismissed_v',
@@ -55,7 +40,6 @@
   function markSession(b)    { ssSet(CFG.SS_SHOWN+b, '1'); ssSet(CFG.SS_LAST_ACTIVE, String(Date.now())); }
   function updateLastActive(){ ssSet(CFG.SS_LAST_ACTIVE, String(Date.now())); }
 
-  // v5.0: ใช้ FvLang.lang เป็น primary, fallback to localStorage
   function getLang() {
     try { 
       if (window.FvLang && FvLang.lang) return FvLang.lang;
@@ -64,9 +48,6 @@
   }
 
   function fetchText(url) { return fetch(url + '?_=' + Date.now(), { cache: 'no-store' }).then(function(r) { return r.ok ? r.text() : null; }).catch(function() { return null; }); }
-  function fetchJSON(url) { return fetch(url + '?_=' + Date.now(), { cache: 'no-store' }).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; }); }
-
-  // ── MD Parser (per-language mode) ────────────────────────────────────────────
 
   function parseMD(mdText, lang) {
     var result = { version: '', date: null, title: null, subtitle: null, notify: true, sections: [] };
@@ -79,11 +60,9 @@
         var vM = fm.match(/^version:\s*(.+)$/m); if (vM) result.version = String(vM[1]).trim();
         var dM = fm.match(/^date:\s*(.+)$/m); if (dM) { var p = Date.parse(String(dM[1]).trim()); if (!isNaN(p)) result.date = new Date(p).toISOString(); }
         var nM = fm.match(/^notify:\s*(false|true)$/m); if (nM) result.notify = nM[1] !== 'false';
-        // title
         var tB = fm.match(/^(title:)\s*\n((?:  \w+:\s*.+\n?)+)/m);
         if (tB) result.title = _parseI18n(tB[2]);
         else { var tL = fm.match(/^title:\s*(.+)$/m); if (tL) { var tv = String(tL[1]).trim(); result.title = lang ? _w(tv,lang) : {en:tv}; } }
-        // subtitle
         var sB = fm.match(/^(subtitle:)\s*\n((?:  \w+:\s*.+\n?)+)/m);
         if (sB) result.subtitle = _parseI18n(sB[2]);
         else { var sL = fm.match(/^subtitle:\s*(.+)$/m); if (sL) { var sv = String(sL[1]).trim(); result.subtitle = lang ? _w(sv,lang) : {en:sv}; } }
@@ -117,8 +96,6 @@
 
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function t(obj) { if(!obj) return ''; if(typeof obj==='string') return obj; var lang=getLang(); return esc(obj[lang]||obj['en']||''); }
-
-  // ── Build popup content ─────────────────────────────────────────────────────
 
   function buildContent(wn) {
     var isTh = getLang() === 'th', ver = esc(wn.version||'');
@@ -188,15 +165,8 @@
     var lang = getLang();
     var perLangUrl = CFG.CURRENT_MD_PERLANG.replace('{lang}', lang);
 
-    // ลอง per-language MD → legacy MD → JSON
     fetchText(perLangUrl).then(function(mdText) {
-      if(mdText && mdText.trim()) { var p=parseMD(mdText,lang); if(p.version){initWithRelease(p);return;} }
-      return fetchText(CFG.CURRENT_MD_LEGACY);
-    }).then(function(mdText) {
-      if(mdText && !document.querySelector('[data-fp-popup]')) { var p=parseMD(mdText,null); if(p.version){initWithRelease(p);return;} }
-      return fetchJSON(CFG.LEGACY_JSON_URL);
-    }).then(function(json) {
-      if(json && json.version && !document.querySelector('[data-fp-popup]')) initWithRelease(json);
+      if(mdText && mdText.trim()) { var p=parseMD(mdText,lang); if(p.version){initWithRelease(p);} }
     });
   }
 
