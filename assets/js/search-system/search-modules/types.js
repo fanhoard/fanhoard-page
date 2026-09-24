@@ -1,13 +1,8 @@
 // @ts-check
 /**
  * @file types.js
- * Central typedef file — shared types for all modules.
+ * Central typedef file — shared types for all search modules.
  * No runtime code. Load this first.
- *
- * v4.0 — Added DiscoveryConfig, LangWeightConfig, DiscoveryItem,
- *        QueryLanguageInfo, and extended SearchState with discovery
- *        fields. These support the new Discovery system and the
- *        smart query-language detection in SuggestionService.
  *
  * @module types
  */
@@ -48,8 +43,7 @@
  * Discovery item (v4.0).
  *
  * A related item surfaced in the discovery section after primary
- * search results. Carries a score that reflects how strongly the
- * item relates to the original query (higher = stronger).
+ * search results.
  *
  * @typedef {Object} DiscoveryItem
  * @property {any}        item         The raw copyable item
@@ -60,16 +54,12 @@
  * @property {string}     itemName     Item display name
  * @property {number}     score        Relatedness score (0..N)
  * @property {string}     reason       Why this item was selected
- *                                     ('same-category' | 'same-type' | 'token-overlap')
  */
 
 /**
  * Query language detection result (v4.0).
  *
- * Returned by SuggestionService.detectQueryLanguage(). Describes
- * which language the query is "mostly" in, plus the character
- * counts used to make that determination. Exposed for transparency
- * and for unit testing.
+ * Returned by SuggestionService.detectQueryLanguage().
  *
  * @typedef {Object} QueryLanguageInfo
  * @property {string}   language     'th' | 'en' — the detected language
@@ -83,27 +73,26 @@
 
 /**
  * Shared mutable application state.
- * Owner service is noted in brackets [ServiceName].
  *
  * @typedef {Object} SearchState
  *
- * Data — owned by search-ui.js (loaded from ConDataService)
+ * Data
  * @property {any|null}   apiData
  * @property {any[]}      allKeywordsCache
  * @property {SearchResult[]}  currentResults
  * @property {SearchResult[]}  currentFilteredResults
  *
- * Filter state — owned by [UIService / SearchService]
+ * Filter state
  * @property {string}     selectedType
  * @property {string}     selectedCategory
  * @property {SearchHistoryEntry|null} lastCommittedSearchState
  *
- * Discovery state — owned by [DiscoveryService] (v4.0)
- * @property {DiscoveryItem[]}  currentDiscovery    Currently rendered discovery items
- * @property {boolean}          discoveryActive     True if discovery section is shown
- * @property {Object|null}      discoveryHandle     URE handle for the discovery list (internal)
+ * Discovery state
+ * @property {DiscoveryItem[]}  currentDiscovery
+ * @property {boolean}          discoveryActive
+ * @property {Object|null}      discoveryHandle
  *
- * Overlay state — owned by [OverlayService]
+ * Overlay state
  * @property {boolean}    overlayOpen
  * @property {boolean}    overlayTransitioning
  * @property {boolean}    overlayHistoryPushed
@@ -113,10 +102,10 @@
  * @property {Element|null} _wrapperParent
  * @property {Node|null}  _wrapperNext
  *
- * History — owned by [URLService / SearchService]
+ * History
  * @property {boolean}    suppressHistoryPush
  *
- * Keyboard — owned by [KeyboardService / KeyboardAutoToggleService]
+ * Keyboard
  * @property {boolean}    keyboardOpen
  * @property {number}     lastWindowInnerHeight
  * @property {number|null} keyboardDetectionTimeout
@@ -127,11 +116,11 @@
  * @property {boolean}    isScrollingActive
  * @property {number|null} scrollIdleTimer
  *
- * Input — owned by [UIService / ClearBtnService]
+ * Input
  * @property {number|null} debounceTimeout
  * @property {boolean}    suggestionsLocked
  *
- * Nav — owned by [OverlayService]
+ * Nav
  * @property {boolean}    navHiddenBySearch
  *
  * Internals
@@ -141,7 +130,7 @@
  */
 
 /**
- * Removable DOM event handler references (for clean destroy).
+ * Removable DOM event handler references.
  * @typedef {Object} SearchHandlers
  * @property {Function|null} resize
  * @property {Function|null} inputFocus
@@ -154,7 +143,7 @@
  * @property {Function|null} documentKeydownOverlay
  * @property {Function|null} popstate
  * @property {Function|null} copyClick
- * @property {Function|null} discoveryScroll  v4.0 — discovery infinite-scroll handler
+ * @property {Function|null} discoveryScroll
  */
 
 // ── Config types ──────────────────────────────────────────────────────────────
@@ -177,21 +166,21 @@
  */
 
 /**
- * Discovery system configuration (v4.0).
+ * Discovery system configuration.
  * @typedef {Object} DiscoveryConfig
- * @property {number} maxRelatedItems      Max related items to compute per search
- * @property {number} sampleTopN           Top-N primary results to sample for signal
- * @property {number} minResultsForDiscovery  Min primary results before discovery runs
- * @property {number} emptyStateMaxItems   Max items in empty-state discovery block
+ * @property {number} maxRelatedItems
+ * @property {number} sampleTopN
+ * @property {number} minResultsForDiscovery
+ * @property {number} emptyStateMaxItems
  * @property {Readonly<{sameType:number, sameCategory:number, tokenOverlap:number}>} weights
  */
 
 /**
- * Language-detection configuration (v4.0).
+ * Language-detection configuration.
  * @typedef {Object} LangWeightConfig
- * @property {number} dominanceRatio       Min ratio of (dominant/other) chars
- * @property {number} minCharsForDominance Min absolute chars before a language can dominate
- * @property {string} fallback             Fallback language ('auto' = UI lang)
+ * @property {number} dominanceRatio
+ * @property {number} minCharsForDominance
+ * @property {string} fallback
  */
 
 /**
@@ -204,8 +193,8 @@
  * @property {Readonly<{path:string}>}                    DB
  * @property {Readonly<Record<string,Record<string,string>>>} TEXTS
  * @property {Readonly<Record<string,string>>}            Icons
- * @property {Readonly<DiscoveryConfig>}                  DISCOVERY    v4.0
- * @property {Readonly<LangWeightConfig>}                 LANG_WEIGHT  v4.0
+ * @property {Readonly<DiscoveryConfig>}                  DISCOVERY
+ * @property {Readonly<LangWeightConfig>}                 LANG_WEIGHT
  */
 
 window.SearchModules = window.SearchModules || {};
