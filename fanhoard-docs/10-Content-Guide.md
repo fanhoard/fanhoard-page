@@ -1,409 +1,204 @@
-# 10 — คู่มือระบบ Content (Content Guide)
+# FanHoard Content System Guide
 
-> เอกสารนี้อธิบายวิธีเพิ่ม/แก้ content ของ **FanHoard** — อีโมจิ, สัญลักษณ์, ข้อความแฟนซี, และคอลเลกชันอื่น ๆ
->
-> **สำหรับ:** ผู้พัฒนา, AI ที่รับงานต่อ, หรือตัวเองในอนาคต
->
-> **กฎข้อเดียวที่ต้องจำ:** ห้ามเขียนข้อมูลดิบใน `content/*.json` — ข้อมูลดิบทั้งหมดอยู่ใน `con-data/` เท่านั้น
-
----
-
-## สารบัญ
-
-1. [ภาพรวมระบบ Content](#1-ภาพรวมระบบ-content)
-2. [ข้อมูล 2 ระบบ — สำคัญมาก](#2-ข้อมูล-2-ระบบ--สำคัญมาก)
-3. [โครงสร้างไฟล์](#3-โครงสร้างไฟล์)
-4. [Schema ข้อมูลใน con-data](#4-schema-ข้อมูลใน-con-data)
-5. [Content JSON — ใบสั่งงาน](#5-content-json--ใบสั่งงาน)
-6. [How-to: เพิ่มข้อมูลใหม่](#6-how-to-เพิ่มข้อมูลใหม่)
-7. [กฎที่ห้ามทำ](#7-กฎที่ห้ามทำ)
-8. [ตัวอย่างสำเร็จรูป](#8-ตัวอย่างสำเร็จรูป)
-9. [Decision tree](#9-decision-tree)
-10. [อ้างอิงข้ามเอกสาร](#10-อ้างอิงข้ามเอกสาร)
+- **System Described**: Content System, Raw Data Architecture (`con-data/`), and Content Descriptor Pipeline (`content/*.json`)
+- **Entry File**: `assets/js/con-data-service/con-data-service.js`
+- **Dependencies**: `assets/js/con-data-service/con-data-registry.js`, `assets/js/nav-core-modules/content.js`, `assets/js/nav-core-modules/data.js`
+- **Verification**: `npm run test`
 
 ---
 
-## 1. ภาพรวมระบบ Content
+## 1. System Overview
 
-ระบบ content ของ FanHoard แยกข้อมูลออกเป็น 2 ชั้น: **ข้อมูลดิบ** (raw data) กับ **ใบสั่งงาน** (descriptor) การแยกแบบนี้ทำให้เราสามารถเปลี่ยนว่า "ปุ่มนี้จะแสดงอะไร" โดยไม่ต้องแตะข้อมูลดิบ และกลับกัน — เพิ่มข้อมูลดิบได้โดยไม่ต้องแตะใบสั่งงาน
+FanHoard separates content into two distinct layers:
+1. **Raw Database Layer (`assets/db/con-data/`)**: Canonical JSON data files containing emojis, symbols, fancy text, and collections.
+2. **Content Descriptor Layer (`assets/json/content/*.json`)**: Lightweight descriptor files defining which categories to fetch and how to render them.
 
-### 1.1 แผนภาพระดับสูง
+This separation allows UI layouts to change without mutating raw dataset items and allows dataset expansions without breaking page layouts.
+
+### 1.1 Content Pipeline Flow
 
 ```
-con-data/          ← ฐานข้อมูลดิบทั้งหมด
-    ↓
-ConDataService     ← อ่าน + index ไว้ใน memory (assembled DB)
-    ↓
-content/*.json     ← ใบสั่งงาน: "ดึงอะไร + แสดงผลแบบไหน" เท่านั้น
-    ↓
-ContentService     ← แปล descriptor → ดึงข้อมูล → render
-    ↓
-URE                ← virtual scroll + DOM
+assets/db/con-data/              # Raw data layer
+    │
+    ▼
+ConDataService                   # Reads & indexes into assembled memory DB
+    │
+    ▼
+assets/json/content/*.json       # Content Descriptors ("What to fetch & how to render")
+    │
+    ▼
+ContentService                   # Translates descriptor -> fetches data -> renders
+    │
+    ▼
+URE (Unified Render Engine)      # Virtual scrolling DOM rendering
 ```
 
-### 1.2 ทำไมต้องแยก?
+---
 
-ถ้ารวมข้อมูลดิบกับ descriptor ในไฟล์เดียวกันจะเกิดปัญหา:
+## 2. Two Content Architectures: Copyable vs Collection
 
-- **ข้อมูลซ้ำ** — ถ้า emoji `😀` ใช้ใน 3 หน้า ต้องเก็บ 3 ชุด
-- **แก้ยาก** — แก้ชื่อ emoji ต้องไปแก้ในทุกไฟล์ที่ใช้
-- **Cache ไม่ได้** — แต่ละไฟล์ใหญ่เกินไป โหลดช้า
-- **Search ไม่ได้** — search engine ไม่รู้ว่าข้อมูลอยู่ไหน
+FanHoard partitions data into two strict categories:
 
-การแยกชั้นทำให้:
-- **ข้อมูลดิบอยู่ที่เดียว** — แก้ที่เดียว ใช้ได้ทุกที่
-- **ใบสั่งงานเล็ก** — 1-2 KB ต่อไฟล์ โหลดเร็ว
-- **Cache ได้** — con-data/*.json cache ได้นาน, content/*.json cache สั้น
+| Category Type | Examples | Storage Path | Fetch Mechanism | UI Render Target |
+| :--- | :--- | :--- | :--- | :--- |
+| **Copyable** | Emoji, Symbol, Fancy Text | Listed in `assets/db/con-data/index.json` | `ConDataService.getAssembled()` | Interactive Copy Buttons |
+| **Collection** | Cards, Packages | `assets/db/con-data/cards/*.json` | `fetchCategoryDirect(type, id)` | Rich Cards with Image/Link |
+
+> ⚠️ **CRITICAL INVARIANT:** Never register Collection types (such as `cards`) inside `assets/db/con-data/index.json`. The assembled database feeds search, home carousel, and copy notification pipelines which assume all items are copyable text items.
+
+### 2.1 Feature Comparison Matrix
+
+| Property | Copyable Data | Collection Data |
+| :--- | :--- | :--- |
+| **UI Component** | Interactive Button | Rich Card (Image, Description, External Link) |
+| **Click Action** | Copies text to Clipboard | Opens URL link in new tab |
+| **Index Registration** | Required in `index.json` | **Prohibited** in `index.json` |
+| **Search Engine Coverage** | Included in Search Index | Excluded from Search Index |
+| **Home Carousel** | Supported | Not Supported |
 
 ---
 
-## 2. ข้อมูล 2 ระบบ — สำคัญมาก
-
-ระบบแยก data เป็น 2 ประเภทที่ **ต้องไม่ปนกัน**:
-
-| ประเภท | ตัวอย่าง | เก็บใน | fetch โดย |
-|---|---|---|---|
-| **Copyable** | emoji, symbol | `index.json` → assembled DB | `ConDataService.getAssembled()` |
-| **Collection** | cards, packages | `con-data/` โดยตรง | `fetchCategoryDirect(type, id)` |
-
-> ⚠️ **ห้ามเพิ่ม collection types ลงใน `index.json`**
-> เพราะระบบอื่น (home, search, copy) ดึงข้อมูลจาก assembled DB และ render ทุกอย่างเป็นปุ่ม
-> ถ้า cards เข้าไปอยู่ใน assembled DB จะทำให้หัวหมวดหมู่ขึ้น แต่เนื้อหาไม่ขึ้น
-
-### 2.1 ความแตกต่างสำคัญ
-
-| ด้าน | Copyable | Collection |
-|---|---|---|
-| การ render | เป็นปุ่มกดได้ (button) | เป็นการ์ด (card) มีรูป, คำอธิบาย, ลิงก์ |
-| พฤติกรรมเมื่อกด | copy ข้อความไปที่ clipboard | เปิดลิงก์ในแท็บใหม่ |
-| ตำแหน่งใน index.json | ✅ ต้องลงทะเบียน | ❌ ห้ามลงทะเบียน |
-| ใช้ใน search | ✅ search ได้ | ❌ search ไม่เจอ |
-| ใช้ใน home carousel | ✅ ได้ | ❌ ไม่ได้ |
-
----
-
-## 3. โครงสร้างไฟล์
+## 3. Directory File Map
 
 ```
 assets/
-├── db/con-data/
-│   ├── index.json              ← ONLY copyable types (emoji, symbol) — ห้ามเพิ่ม cards
-│   ├── emoji.json
-│   ├── symbol.json
-│   ├── fancy.json
-│   ├── emoji/
-│   │   └── *.json              ← [{api, text, name}]
-│   ├── symbol/
-│   │   └── *.json
-│   ├── fancy/
-│   │   └── *.json
-│   └── cards/                  ← collection data — ไม่ต้องอยู่ใน index.json
-│       ├── ai_tools.json
-│       └── *.json
-│
+├── db/
+│   └── con-data/
+│       ├── index.json             # Registry for Copyable types ONLY
+│       ├── emoji.json             # Subcategory registry for Emoji
+│       ├── symbol.json            # Subcategory registry for Symbol
+│       ├── fancy.json             # Subcategory registry for Fancy
+│       ├── emoji/                 # Raw item JSON files
+│       │   └── *.json             # Items array [{ api, text, name }]
+│       ├── symbol/
+│       │   └── *.json
+│       ├── fancy/
+│       │   └── *.json
+│       └── cards/                 # Collection raw data (Direct fetch, NOT in index.json)
+│           └── *.json             # Card items [{ api, text, name, description, image, link }]
 ├── json/
-│   ├── buttons.json            ← กำหนดปุ่มนำทาง
-│   └── content/                ← ใบสั่งงาน เท่านั้น
+│   ├── buttons.json               # Navigation bar button definitions
+│   └── content/                   # Content Descriptors ONLY
 │       ├── emojis-page1.json
 │       ├── symbols.json
 │       └── packages.json
-│
 └── js/
     ├── con-data-service/
     │   ├── con-data-registry.js
     │   └── con-data-service.js
     └── nav-core-modules/
-        ├── content.js          ← render (ContentService)
-        └── data.js             ← fetch + cache (DataService)
+        ├── content.js             # ContentService (Descriptor processor)
+        └── data.js                # DataService (Fetch & cache manager)
 ```
-
-### 3.1 ไฟล์สำคัญ
-
-| ไฟล์ | บทบาท | ผู้ใช้ |
-|---|---|---|
-| `index.json` | Registry ของ copyable types | ConDataService ตอน init |
-| `emoji.json`, `symbol.json`, `fancy.json` | Subcategory registry | ConDataService ตอน fetch type |
-| `emoji/*.json`, `symbol/*.json` | ข้อมูลดิบ items | ConDataService ตอน fetch category |
-| `cards/*.json` | ข้อมูลดิบ collection | ContentService (direct fetch) |
-| `buttons.json` | ปุ่มนำทาง | Nav-Core ตอน render nav bar |
-| `content/*.json` | ใบสั่งงาน | ContentService ตอน render หน้า |
 
 ---
 
-## 4. Schema ข้อมูลใน con-data
+## 4. Raw Data Schemas (`con-data/`)
 
-### 4.1 Copyable item (emoji / symbol / fancy) — ใน assembled DB
+### 4.1 Copyable Item Schema (`emoji`, `symbol`, `fancy`)
 
 ```json
 {
-  "api":  "U+1F600",
+  "api": "U+1F600",
   "text": "😀",
-  "name": { "th": "หน้ายิ้ม", "en": "Grinning Face" }
-}
-```
-
-| field | required | ความหมาย |
-|---|---|---|
-| `api` | ✅ | Unicode code point หรือ unique ID — ใช้สำหรับ search/index |
-| `text` | ✅ | ตัวอักษรจริงที่จะ copy ไป clipboard |
-| `name` | ✅ | ชื่อแสดงผล (`name.en` ต้องมีเสมอ, `name.th` optional แต่แนะนำ) |
-
-### 4.2 Collection item (cards) — direct fetch เท่านั้น
-
-โครงสร้างเหมือนเดิม บวก optional card fields:
-
-```json
-{
-  "api":         "card-openai",
-  "text":        "OpenAI",
-  "name":        { "th": "โอเพ่นเอไอ", "en": "OpenAI" },
-  "description": { "th": "ผู้สร้าง ChatGPT", "en": "Creator of ChatGPT" },
-  "image":       "/assets/images/cards/openai.png",
-  "link":        "https://openai.com"
-}
-```
-
-| field | required | ความหมาย |
-|---|---|---|
-| `api` | ✅ | unique ID — ตั้งเองได้ เช่น `"card-openai"` |
-| `text` | ✅ | ชื่อสั้น |
-| `name` | ✅ | ชื่อแสดงผล (`name.en` ต้องมีเสมอ) |
-| `description` | ☐ | คำอธิบาย (string หรือ multilingual object) |
-| `image` | ☐ | URL รูปภาพ |
-| `link` | ☐ | URL ที่เปิดเมื่อกดการ์ด |
-| `className` | ☐ | CSS class พิเศษ |
-
-### 4.3 Subcategory file structure
-
-แต่ละ subcategory file มีโครงสร้าง:
-
-```json
-{
-  "id": "smileys_emotion",
-  "name": { "th": "หน้ายิ้มและอารมณ์", "en": "Smileys & Emotion" },
-  "data": [
-    { "api": "U+1F600", "text": "😀", "name": { "th": "หน้ายิ้ม", "en": "Grinning Face" } },
-    { "api": "U+1F603", "text": "😃", "name": { "th": "หน้ายิ้มตาใหญ่", "en": "Grinning Face with Big Eyes" } }
-  ]
-}
-```
-
----
-
-## 5. Content JSON — ใบสั่งงาน
-
-ไฟล์ใน `assets/json/content/` เป็น "ใบสั่งงาน" ที่บอก ContentService ว่าจะดึงอะไร + แสดงผลแบบไหน
-
-### 5.1 `source` — ดึงทั้ง type (copyable เท่านั้น)
-
-```json
-[{ "source": "emoji" }]
-[{ "source": "symbol" }]
-[{ "source": "emoji", "only": ["smileys_emotion", "activities"] }]
-[{ "source": "emoji", "as": "cards" }]
-```
-
-| field | default | ความหมาย |
-|---|---|---|
-| `source` | — | ชื่อ type ใน assembled DB |
-| `as` | `"buttons"` | รูปแบบ: `"buttons"` หรือ `"cards"` |
-| `only` | null | เลือกเฉพาะบาง subcategory |
-
-> ⚠️ `source` ใช้ได้กับ type ที่อยู่ใน `index.json` เท่านั้น (emoji, symbol, fancy)
-
-### 5.2 `category` — ดึง subcategory เดียว
-
-**Copyable subcategory** (ไม่ต้องระบุ `type`):
-
-```json
-[{ "category": "arrows" }]
-[{ "category": "smileys_emotion", "as": "cards" }]
-```
-
-**Collection subcategory** (ต้องระบุ `type` เสมอ):
-
-> ⚠️ หมายเหตุ: `ai_tools` เป็นข้อมูลตัวอย่าง/ทดสอบ ไม่ใช่เนื้อหาจริงของเว็บ — ใช้สำหรับอธิบาย syntax เท่านั้น
-
-```json
-[{ "category": "ai_tools", "type": "cards", "as": "cards" }]
-[{ "category": "ai_tools", "type": "cards", "as": "cards", "horizontal": true }]
-```
-
-| field | default | ความหมาย |
-|---|---|---|
-| `category` | — | ชื่อ subcategory |
-| `type` | null | **required สำหรับ collection** — บอกว่าอยู่ใน folder ไหน |
-| `as` | `"buttons"` | รูปแบบ: `"buttons"` หรือ `"cards"` |
-| `horizontal` | false | scroll แนวนอน (card เท่านั้น) |
-
-> `type` ที่ระบุ → ContentService ใช้ `fetchCategoryDirect(type, category)` fetch โดยตรง ไม่ผ่าน assembled DB
-
-### 5.3 ผสมหลาย descriptor ในไฟล์เดียว
-
-```json
-[
-  { "source": "emoji" },
-  { "category": "ai_tools", "type": "cards", "as": "cards" }
-]
-```
-
----
-
-## 6. How-to: เพิ่มข้อมูลใหม่
-
-### 6.1 เพิ่ม item ใน copyable subcategory
-
-เปิด `assets/db/con-data/emoji/activities.json` → เพิ่มใน `data[]`:
-
-```json
-{ "api": "U+XXXXX", "text": "🆕", "name": { "th": "ชื่อไทย", "en": "English Name" } }
-```
-
-ไม่ต้องแก้ที่อื่น — ConDataService จะ index ใหม่อัตโนมัติเมื่อ reload
-
-### 6.2 เพิ่ม card collection ใหม่
-
-**ขั้นที่ 1** — สร้าง `assets/db/con-data/cards/my_collection.json`:
-
-```json
-{
-  "id": "my_collection",
-  "name": { "th": "คอลเลกชันของฉัน", "en": "My Collection" },
-  "data": [
-    {
-      "api": "card-example",
-      "text": "Example",
-      "name":        { "th": "ตัวอย่าง", "en": "Example" },
-      "description": { "th": "คำอธิบาย", "en": "Description" },
-      "image":       "/assets/images/cards/example.png",
-      "link":        "https://example.com"
-    }
-  ]
-}
-```
-
-> ❌ **ห้ามเพิ่มใน `index.json`** — cards fetch แบบ direct path เสมอ
-
-**ขั้นที่ 2** — ใช้ใน content JSON:
-
-```json
-[{ "category": "my_collection", "type": "cards", "as": "cards" }]
-```
-
-จบ — ไม่ต้องแตะ index.json เลย
-
-### 6.3 เพิ่ม copyable type ใหม่ (เช่น kaomoji)
-
-1. สร้าง `assets/db/con-data/kaomoji/` + subcategory files (เหมือน emoji)
-2. สร้าง `assets/db/con-data/kaomoji.json` (subcategory registry)
-3. เพิ่ม entry ใน `assets/db/con-data/index.json` ← อนุญาตสำหรับ copyable types เท่านั้น
-
-```json
-{
-  "kaomoji": {
-    "name": { "th": "เคาโอะโมจิ", "en": "Kaomoji" },
-    "file": "/assets/db/con-data/kaomoji.json"
+  "name": {
+    "en": "Grinning Face",
+    "th": "หน้ายิ้ม"
   }
 }
 ```
 
-4. ใช้งาน: `[{ "source": "kaomoji" }]`
+- `api` (string, required): Unicode codepoint or unique string identifier.
+- `text` (string, required): Character string copied to clipboard upon click.
+- `name` (object, required): Multilingual name map (`name.en` required, `name.th` optional).
 
-### 6.4 เพิ่มหน้า content ใหม่ใน nav
-
-1. สร้างไฟล์ใบสั่งงานใน `assets/json/content/my_page.json`
-2. เพิ่มปุ่มใน `assets/json/buttons.json`:
+### 4.2 Collection Item Schema (`cards`)
 
 ```json
 {
-  "id": "my_page",
-  "label": { "th": "หน้าของฉัน", "en": "My Page" },
-  "url": "my_page",
-  "content": "/assets/json/content/my_page.json"
+  "api": "card-openai",
+  "text": "OpenAI",
+  "name": {
+    "en": "OpenAI",
+    "th": "โอเพ่นเอไอ"
+  },
+  "description": {
+    "en": "Creator of ChatGPT",
+    "th": "ผู้สร้าง ChatGPT"
+  },
+  "image": "/assets/images/cards/openai.png",
+  "link": "https://openai.com",
+  "className": "custom-card-style"
 }
 ```
 
-3. ทดสอบบนเว็บ — ควรเห็นปุ่มใหม่ใน nav bar
+- `description` (object/string, optional): Card summary.
+- `image` (string, optional): Image thumbnail URL.
+- `link` (string, optional): Target URL opened on card click.
 
 ---
 
-## 7. กฎที่ห้ามทำ
+## 5. Content Descriptors (`assets/json/content/*.json`)
 
-| ❌ ห้ามทำ | เหตุผล |
-|---|---|
-| เขียนข้อมูลดิบใน `content/*.json` | content = ใบสั่งงานเท่านั้น |
-| เพิ่ม cards หรือ collection types ลงใน `index.json` | ระบบอื่นจะดึงไปแสดงเป็นปุ่มโดยไม่ตั้งใจ |
-| ใช้ `{ "category": "...", "type": "cards" }` โดยไม่มี `"as": "cards"` | จะ render เป็น button group แทน card group |
-| ลบ `api`, `text`, `name` จาก item เดิม | ระบบ index โดย field เหล่านี้ — แตกแน่ |
-| ตั้ง `url` ซ้ำกันใน `buttons.json` | routing พัง |
-| เปลี่ยน `api` ของ item เดิม | search index พัง, saved favorites หาย |
-| ใช้ emoji เดียวกันใน 2 subcategory | duplicates ใน assembled DB, search แสดงซ้ำ |
+Descriptor JSON files instruct `ContentService` how to fetch and render content for a specific view.
 
----
+### 5.1 Type Source Descriptor (`source`)
 
-## 8. ตัวอย่างสำเร็จรูป
-
-```json
-[{ "source": "emoji" }]
-```
-
-```json
-[{ "source": "symbol" }]
-```
-
-```json
-[{ "source": "emoji", "only": ["smileys_emotion"] }]
-```
-
-```json
-[{ "category": "ai_tools", "type": "cards", "as": "cards" }]
-```
+Fetches all categories belonging to a registered copyable type:
 
 ```json
 [
-  { "source": "emoji" },
-  { "category": "ai_tools", "type": "cards", "as": "cards" }
+  {
+    "source": "emoji",
+    "as": "buttons",
+    "only": ["smileys_emotion", "activities"]
+  }
 ]
 ```
 
+### 5.2 Subcategory Descriptor (`category`)
+
+**Copyable Subcategory Descriptor**:
 ```json
-[{ "category": "math_bold", "source": "fancy", "as": "buttons" }]
+[
+  {
+    "category": "arrows",
+    "as": "buttons"
+  }
+]
 ```
+
+**Collection Subcategory Descriptor**:
+```json
+[
+  {
+    "category": "ai_tools",
+    "type": "cards",
+    "as": "cards",
+    "horizontal": true
+  }
+]
+```
+
+- `type` (string): Required for collection categories to specify source directory (`assets/db/con-data/{type}/`).
+- `as` (string): Render target (`"buttons"` or `"cards"`).
+- `horizontal` (boolean): Enables horizontal scrolling layout for card groups.
 
 ---
 
-## 9. Decision tree
+## 6. Prohibited Practices
 
-```
-ต้องการทำอะไร?
-│
-├─ เพิ่ม/แก้ emoji หรือ symbol?
-│     └─ แก้ไฟล์ใน con-data/emoji/ หรือ con-data/symbol/
-│
-├─ เพิ่ม card collection ใหม่?
-│     └─ สร้างไฟล์ใน con-data/cards/  (ไม่ต้องแตะ index.json)
-│        ใช้งาน: { "category": "...", "type": "cards", "as": "cards" }
-│
-├─ เพิ่มปุ่มนำทางใหม่?
-│     └─ แก้ buttons.json + สร้าง content JSON (1 บรรทัด)
-│
-├─ เปลี่ยนว่าปุ่มนี้แสดงอะไร?
-│     └─ แก้ไฟล์ใน content/ เท่านั้น
-│
-├─ เพิ่ม copyable type ใหม่ (เช่น kaomoji)?
-│     └─ สร้างไฟล์ + เพิ่มใน index.json (copyable types อนุญาต)
-│
-└─ เพิ่มภาษาใหม่ (เช่น ja)?
-      └─ อ่าน 04-Internationalization-And-Build.md ส่วนการเพิ่มภาษา
-```
+| Prohibited Action | System Impact |
+| :--- | :--- |
+| Writing raw item data inside `assets/json/content/*.json` | Breaks descriptor architecture and cache layer. |
+| Registering collection types (`cards`) in `assets/db/con-data/index.json` | Breaks search engine, home carousel, and copy notifications. |
+| Modifying existing item `api` or `text` values | Corrupts saved user favorites and search index references. |
+| Omitting `"as": "cards"` when declaring a collection descriptor | Causes cards to render improperly as button elements. |
 
 ---
 
-## 10. อ้างอิงข้ามเอกสาร
+## 7. Cross-References
 
-- [`05-Content-Data-Service.md`](./05-Content-Data-Service.md) — รายละเอียด ConDataService internals (registry, assembled DB, fetch strategies)
-- [`03-Navigation-And-Content.md`](./03-Navigation-And-Content.md) — ContentService ที่ใช้ content JSON (อยู่ใน nav-core-modules/content.js)
-- [`01-Virtual-Scroll-Rendering.md`](./01-Virtual-Scroll-Rendering.md) — ระบบที่ render items สุดท้าย
-- [`02-Search-System.md`](./02-Search-System.md) — Search อ่าน assembled DB ของ ConDataService
-- [`12-SEO-Guide.md`](./12-SEO-Guide.md) — ⭐ Content SEO: ใช้ keyword ที่ผู้ใช้ค้นหาจริงใน `name.en`/`name.th`, content freshness ส่งผลต่อ ranking
-- [`AI_FORBIDDEN.md`](./AI_FORBIDDEN.md) — กฎเหล็กที่ AI ต้องรู้ก่อนแก้ content
+- [`00-System-Architecture.md`](./00-System-Architecture.md) — Platform architectural overview
+- [`05-Content-Data-Service.md`](./05-Content-Data-Service.md) — ConDataService neutral API contract
+- [`docs/engineering/ai-docs-guide.md`](../docs/engineering/ai-docs-guide.md) — AI-first documentation standards
