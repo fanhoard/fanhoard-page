@@ -1,71 +1,107 @@
-# Search Page — Naming Convention (v3.1)
+# Search Page — Class Naming Conventions & Dictionary (v3.0.0)
 
-> เอกสารนี้อ้างอิงชื่อ class ปัจจุบันหลัง refactor ครั้งใหญ่
-> วัตถุประสงค์: กันความเข้าใจผิดระหว่างคุยงาน — เรียกชื่อเดียวกันเสมอ
+- **System Described**: CSS Class and DOM Element Naming Standard for FanHoard Search System v3.0.0
+- **Entry File**: `assets/js/search-system/search-system.css`
+- **Dependencies**: `assets/js/search-system/search-modules/input-bar.js`, `overlay.js`, `rendering.js`, `suggestions.js`
+- **Verification**: `npm test`
 
-## หลักการตั้งชื่อ
+---
 
-- 1 class = 1 ความหมาย ไม่ใช้ตัวย่อลึกลับ (`sc`/`scc`/`vs-*` ถูกแทนที่หมดแล้ว)
-- ส่วนประกอบย่อยใช้ BEM: `block__element`
-- ตัวแปร (variant) ใช้ BEM: `block--modifier`
-- ทุก class ของหน้า search ขึ้นต้นด้วย `search-` หรืออยู่ในครอบครัว `result-card`
+## 1. Naming Governance & BEM Principles
 
-## ผังชื่อ class หลัก
+To maintain strict specificity control, consistency, and clarity across FanHoard search components, all CSS classes and DOM element attributes must conform to the following rules:
 
-### Search bar (แถบค้นหาด้านบน)
+1. **Explicity Over Abbreviation**: Every class name must clearly communicate its purpose. Unclear historical abbreviations (e.g., `.sc`, `.scc`, `.sv`, `.vs-*`) are strictly prohibited and replaced.
+2. **BEM Methodology**:
+   - **Block**: Represents a standalone component (e.g., `.result-card`, `.search-pill`).
+   - **Element**: Represents a child component tied to its parent block, delimited by double underscores `__` (e.g., `.search-pill__icon`, `.result-card__title`).
+   - **Modifier**: Represents a state or variant, delimited by double hyphens `--` (e.g., `.result-card--vertical`, `.search-suggestion-badge--type`).
+3. **Prefix Discipline**: All search-specific classes must begin with either `search-` or belong to the `result-card` block family.
 
-| Class ปัจจุบัน | คืออะไร | ชื่อเดิม (เลิกใช้) |
-|---|---|---|
-| `.search-pill` | หุ้มด้านนอก รูปแคปซูล ครอบ icon + input | `.search-input-wrapper` |
-| `.search-pill__icon` | ไอคอนแว่นขยาย/ลูกศร ใน pill | `.search-input-icon` |
-| `#searchInput` | ช่องพิมพ์จริง (id คงเดิม — JS API) | — |
+---
 
-⚠️ จุดที่เข้าใจผิดกันบ่อยที่สุด:
-- "pill" = กรอบแคปซูลทั้งอัน (border เทาปกติ + เปลี่ยนเขียวตอนโฟกัส)
-- "input" = ช่องพิมพ์ข้างใน (โปร่งใส ไม่มีกรอบของตัวเอง เห็นแค่เคอร์เซอร์)
-- จะคุยเรื่อง "กรอบตอนแตะ" ต้องระบุให้ชัด: ของ **pill** หรือ **input**
+## 2. Search System Class Dictionary
 
-### Result card (การ์ดผลลัพธ์)
+### 2.1 Search Bar Component (`.search-pill`)
 
-| Class | คืออะไร | ชื่อเดิม |
-|---|---|---|
-| `.result-card` | การ์ด 1 ผลลัพธ์ (คลิกคัดลอกได้) | `.sc` |
-| `.result-card--vertical` | variant ข้อความยาว/หลายบรรทัด | `.sv` |
-| `.result-card__glyph` | ตัวอักษร/อีโมจิใหญ่ด้านซ้าย | `.scc` |
-| `.result-card__body` | คอลัมน์ข้อความด้านขวา | `.scb` |
-| `.result-card__title` | ชื่อ/หัวเรื่อง | `.sct` |
-| `.result-card__subtitle` | คำอธิบายรอง | `.scs` |
-| `.result-card__tags` | แถว tag ประเภท/หมวด | `.scg` |
-| `.result-card__tag` | tag 1 ชิ้น | `.tag` |
+The search bar widget consists of a pill-shaped capsule container wrapping an icon slot, an input field, and a clear button.
 
-### Suggestions (คำแนะนำตอนพิมพ์)
+| Active Class / ID | Description / Semantic Purpose | Legacy Name (Deprecated) |
+| :--- | :--- | :--- |
+| `.search-pill` | Capsule container wrapping icon, input, and clear button | `.search-input-wrapper` |
+| `.search-pill__icon` | Icon slot toggling between magnifier (🔍) and back arrow (←) | `.search-input-icon` |
+| `#searchInput` | HTML `<input>` field for query entry (ID preserved for JS API) | N/A |
+| `#search-clear-btn` | Dynamic ✕ clear button appended by `ClearBtnService` | N/A |
 
-| Class | คืออะไร | ชื่อเดิม |
-|---|---|---|
-| `.search-suggestions-fullscreen` | ถาดคำแนะนำเต็มจอ (overlay) | คงเดิม |
-| `.search-suggestions-title` | หัวข้อ ("กำลังเทรนด์" / "คำแนะนำ") | `.suggestions-head` |
-| `.search-suggestion-item` | รายการคำแนะนำ 1 แถว | `.suggestion-item` |
-| `.search-suggestion-body` | ข้อความของรายการ | `.suggestion-body` |
-| `.search-suggestion-badge` | ป้ายกำกับประเภท | `.suggestion-badge` |
-| `.search-suggestion-badge--type` / `--category` | ป้ายประเภท / หมวด | เดิม (เติม prefix) |
+> **Disambiguation Note**:
+> - **Pill (`.search-pill`)**: Refers to the entire capsule frame (border, focus state, background).
+> - **Input (`#searchInput`)**: Refers strictly to the inner transparent `<input>` element.
 
-### Virtual scroll (สำรอง — prod ใช้ URE)
+---
 
-| Class | คืออะไร | ชื่อเดิม |
-|---|---|---|
-| `.vscroll-container` | กล่องเลื่อนเสมือน | `.vs-container` |
-| `.vscroll-item` | ช่อง 1 แถวใน vscroll | `.vs-item` |
+### 2.2 Result Card Component (`.result-card`)
 
-### อื่น ๆ (ชื่อชัดอยู่แล้ว ไม่แก้)
+Result cards render individual search matches for items, types, or categories.
 
-- `.search-header`, `.search-filters-panel`, `.filter-pills-row`, `.filter-pill(--cat)`
-- `.search-main-layout`, `.no-result(--compact/__title/__hint)`
-- `.discovery-header/-hint/-list/-section/-title`, `.copy-hint`
-- `.search-result-placeholder` = ข้อความ "ผลลัพธ์จะแสดงที่นี่" (เดิม `.search-result-here`)
+| Active Class | Description / Semantic Purpose | Legacy Name (Deprecated) |
+| :--- | :--- | :--- |
+| `.result-card` | Base container for a single search result item | `.sc` |
+| `.result-card--vertical` | Variant layout for multi-line or long description items | `.sv` |
+| `.result-card__glyph` | Primary emoji, symbol, or glyph icon on the left | `.scc` |
+| `.result-card__body` | Content container holding title, subtitle, and tag rows | `.scb` |
+| `.result-card__title` | Primary title/label text | `.sct` |
+| `.result-card__subtitle` | Secondary description or API payload preview | `.scs` |
+| `.result-card__tags` | Flex row wrapping item metadata tags | `.scg` |
+| `.result-card__tag` | Individual metadata badge or category tag | `.tag` |
 
-## กติกาเพิ่ม class ใหม่
+---
 
-1. อ่านผังข้างบนก่อน ห้ามตั้งชื่อซ้ำความหมายกับของเดิม
-2. ใช้ BEM และ prefix `search-`/`result-card` ตามหลักการ
-3. เพิ่มแถวในตารางของไฟล์นี้ทุกครั้งที่เพิ่ม class ใหม่
-4. ห้ามใช้ตัวย่อที่คนนอกทีมเดาไม่ได้
+### 2.3 Search Suggestions Component (`.search-suggestion-*`)
+
+Suggestions display real-time autocomplete candidates and source origin badges.
+
+| Active Class | Description / Semantic Purpose | Legacy Name (Deprecated) |
+| :--- | :--- | :--- |
+| `.search-suggestions-fullscreen` | Fullscreen overlay drawer displaying live suggestions | `.search-suggestions-fullscreen` |
+| `.search-suggestions-title` | Section heading (e.g., "Trending Searches", "Suggestions") | `.suggestions-head` |
+| `.search-suggestion-item` | Single clickable suggestion row | `.suggestion-item` |
+| `.search-suggestion-body` | Text content of a suggestion item | `.suggestion-body` |
+| `.search-suggestion-badge` | Base badge element indicating suggestion origin source | `.suggestion-badge` |
+| `.search-suggestion-badge--type` | Origin badge modifier for Type matches (e.g., `[TYPE]`) | `.suggestion-badge-type` |
+| `.search-suggestion-badge--category` | Origin badge modifier for Category matches (e.g., `[CAT]`) | `.suggestion-badge-category` |
+
+---
+
+### 2.4 Virtual Scroll Engine Component (`.vscroll-*`)
+
+Fallback virtual scrolling container used when URE is unmounted.
+
+| Active Class | Description / Semantic Purpose | Legacy Name (Deprecated) |
+| :--- | :--- | :--- |
+| `.vscroll-container` | Virtual scroll viewport container | `.vs-container` |
+| `.vscroll-item` | Absolute positioned virtual row item | `.vs-item` |
+
+---
+
+### 2.5 Layout & Empty State Controls
+
+| Active Class | Description / Semantic Purpose | Legacy Name (Deprecated) |
+| :--- | :--- | :--- |
+| `.search-header` | Top navigation header containing `.search-pill` | N/A |
+| `.search-filters-panel` | Filter pills drawer for Type and Category filtering | N/A |
+| `.filter-pills-row` | Horizontal scrollable row for filter buttons | N/A |
+| `.filter-pill` | Individual filter pill button | N/A |
+| `.filter-pill--cat` | Active filter pill modifier | N/A |
+| `.search-main-layout` | Main grid container holding search results | N/A |
+| `.no-result` | Empty state container displayed when zero matches return | N/A |
+| `.no-result__title` | Primary heading for empty search state | N/A |
+| `.no-result__hint` | Helpful suggestions for refining query terms | N/A |
+| `.search-result-placeholder` | Initial empty state message ("Results will appear here") | `.search-result-here` |
+
+---
+
+## 3. Rules for Adding New Classes
+
+1. **Verify Existing Inventory**: Consult Section 2 above to avoid creating near-duplicate class names.
+2. **Apply BEM & Prefix Constraints**: Always prefix new search classes with `search-` or `result-card__`.
+3. **Register New Classes**: Update this document immediately whenever new CSS class names are added to `search-system.css` or module templates.
