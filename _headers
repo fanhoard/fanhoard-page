@@ -49,7 +49,7 @@
   Pragma: no-cache
   Expires: 0
   Surrogate-Control: no-store
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://consent.cookiebot.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://community-fanhoard.pages.dev https://*.cloudflare.com https://www.google-analytics.com https://region1.google-analytics.com https://pagead2.googlesyndication.com; frame-src https://challenges.cloudflare.com https://consent.cookiebot.com https://googleads.g.doubleclick.net;
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://consent.cookiebot.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://community.nontakorn2600.workers.dev https://*.cloudflare.com https://www.google-analytics.com https://region1.google-analytics.com https://pagead2.googlesyndication.com; frame-src https://challenges.cloudflare.com https://consent.cookiebot.com https://googleads.g.doubleclick.net;
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin

@@ -1,17 +1,14 @@
 ---
-version: 3.0.2
-date: 2026-09-25T04:42:57.021Z
-title: Report form now speaks the backend's language
-subtitle: The report form was sending fields the server could not read, so every submission bounced. Field names now match, and errors tell you what actually happened.
+version: 3.0.3
+date: 2026-09-25T12:20:00.000Z
+title: Report form was blocked by its own security policy
+subtitle: The site's content security policy only allowed the report server's old address, so browsers silently blocked every submission. The policy now points at the live report server.
 notify: true
 ---
 
-**TL;DR** — The report form was filling in details under different field names than the server expects, so reports were rejected even when everything looked fine. The form now uses the correct fields, and failure messages explain the real cause instead of always blaming your internet connection.
+**TL;DR** — The site's security header still whitelisted the report server's old address, so real browsers quietly blocked the report form from sending anything. The header now matches the report server actually in use, and submissions go through.
 
 ### Fixed
 
-- **Report submissions no longer rejected for mismatched field names**
-  The form labeled its data differently than the backend reads it (details vs. message, app_version vs. version, lang vs. language), so valid reports were turned away. All fields now use the names the server expects, and extra device info (screen size, viewport) is included where the server can use it.
-
-- **Honest error messages instead of "check your connection"**
-  Every failure, including server-side problems, used to show the same "please check your network connection" message. Now the form reports what actually happened: server not ready, sending too quickly, or invalid form details.
+- **Security policy now allows the report server**
+  The Content-Security-Policy header whitelisted a retired report-server domain, so browsers blocked the form's request to the current server before it was ever sent. The whitelisted address now matches the report server the site actually uses, and report submissions complete successfully.
