@@ -317,19 +317,19 @@
 
       var finalPage = pageVal === 'custom' ? customPage : pageVal;
 
+      var categorySelect = document.getElementById('report-category');
+      var categoryLabel = categorySelect.options[categorySelect.selectedIndex] ? categorySelect.options[categorySelect.selectedIndex].text : category;
+
       var payload = {
-        category: category,
-        details: details,
+        category: categoryLabel,
+        message: details,
         expected: expected || null,
         page: finalPage,
         browser: browser || detectUserAgent(),
         email: email || null,
-        app_version: getAppVersion(),
-        screen_resolution: window.screen.width + 'x' + window.screen.height,
-        viewport: window.innerWidth + 'x' + window.innerHeight,
-        timestamp: new Date().toISOString(),
-        referrer: document.referrer || null,
-        lang: lang
+        language: lang,
+        version: getAppVersion(),
+        device: window.screen.width + 'x' + window.screen.height + ' (' + window.innerWidth + 'x' + window.innerHeight + ')'
       };
 
       fetch(API_ENDPOINT, {
@@ -338,15 +338,21 @@
         body: JSON.stringify(payload)
       })
       .then(function(res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
+        return res.json().catch(function() { return {}; }).then(function(data) {
+          if (!res.ok) {
+            var err = new Error((data && data.error) ? data.error : 'HTTP ' + res.status);
+            err.status = res.status;
+            throw err;
+          }
+          return data;
+        });
       })
       .then(function() {
         showSuccessModal();
         document.getElementById('report-form').reset();
       })
-      .catch(function() {
-        showErrorModal();
+      .catch(function(err) {
+        showErrorModal(err && err.message ? err.message : null, err && err.status);
       })
       .finally(function() {
         submitBtn.disabled = false;
@@ -368,12 +374,27 @@
       }
     }
 
-    function showErrorModal() {
+    function showErrorModal(serverError, status) {
       var lang = getLang();
-      var title = lang === 'th' ? '\u0E40\u0E01\u0E34\u0E14\u0E02\u0E49\u0E2D\u0E1C\u0E34\u0E14\u0E1E\u0E25\u0E32\u0E14' : 'Submission Failed';
-      var body  = lang === 'th'
-        ? '\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E2A\u0E48\u0E07\u0E23\u0E32\u0E22\u0E07\u0E32\u0E19\u0E44\u0E14\u0E49 \u0E01\u0E23\u0E38\u0E13\u0E32\u0E25\u0E2D\u0E07\u0E43\u0E2B\u0E21\u0E48\u0E2D\u0E35\u0E01\u0E04\u0E23\u0E31\u0E4B\u0E07'
-        : 'Could not send report. Please check your network connection and try again.';
+      var title = lang === 'th' ? 'เกิดข้อผิดพลาด' : 'Submission Failed';
+      var body;
+      if (serverError === 'Report service is not configured') {
+        body = lang === 'th'
+          ? 'ระบบรายงานยังปรับปรุงอยู่ ทีมงานรู้อยู่แล้ว โปรดลองอีกครั้งภายหลัง'
+          : 'The report service is temporarily not ready. Our team already knows about it — please try again later.';
+      } else if (status === 429) {
+        body = lang === 'th'
+          ? 'ส่งซ้ำชิ้นเกินไป โปรดรอสักครู่แล้วลองอีกครั้ง'
+          : 'You are sending reports too quickly. Please wait a moment and try again.';
+      } else if (status === 400) {
+        body = lang === 'th'
+          ? 'ข้อมูลในฟอร์มไม่ถูกต้อง โปรดตรวจสอบและกรอกอีกครั้ง'
+          : 'Some details in the form are not valid. Please check them and try again.';
+      } else {
+        body = lang === 'th'
+          ? 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง'
+          : 'Could not reach the report server. Please check your connection and try again.';
+      }
 
       if (window.showPopup) {
         window.showPopup({ title: title, message: body });
