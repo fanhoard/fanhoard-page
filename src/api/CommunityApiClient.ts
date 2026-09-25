@@ -54,7 +54,7 @@ export class CommunityApiClient {
   private maxRetries: number;
 
   constructor(options: CommunityApiClientOptions = {}) {
-    this.baseUrl = (options.baseUrl || 'https://community-fanhoard.pages.dev').replace(/\/+$/, '');
+    this.baseUrl = (options.baseUrl || 'https://community.nontakorn2600.workers.dev').replace(/\/+$/, '');
     this.timeoutMs = options.timeoutMs ?? 10000; // 10 seconds
     this.maxRetries = options.maxRetries ?? 2; // up to 2 retries
   }

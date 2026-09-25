@@ -12,7 +12,7 @@ describe('CommunityApiClient', () => {
 
   beforeEach(() => {
     client = new CommunityApiClient({
-      baseUrl: 'https://community-fanhoard.pages.dev',
+      baseUrl: 'https://community.nontakorn2600.workers.dev',
       timeoutMs: 100, // Short timeout for unit tests
       maxRetries: 2
     });
@@ -42,7 +42,7 @@ describe('CommunityApiClient', () => {
     expect(result).toEqual(mockResponse);
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      'https://community-fanhoard.pages.dev/report',
+      'https://community.nontakorn2600.workers.dev/report',
       expect.objectContaining({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
