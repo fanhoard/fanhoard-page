@@ -187,8 +187,12 @@ test.describe('Discover Main & Sub Action Scoped Loading & Hit-Testing', () => {
     // Ensure fv_noupdate is cleared so release modal opens legitimately.
     // Dismiss token key is version-scoped (fv_dismissed_v<version>) — read the
     // served version so this test survives future releases.
-    const versionRes = await page.request.get('/assets/json/version.json');
-    const currentVersion: string = (await versionRes.json()).version;
+    // Read the version from current.md — the same source the release modal
+    // itself parses — so this stays correct even on bump commits where the
+    // generated assets/json/version.json still lags one version behind.
+    const currentMdRes = await page.request.get('/assets/md/en/current.md');
+    const currentMd: string = await currentMdRes.text();
+    const currentVersion: string = (currentMd.match(/^version:\s*(.+)$/m) || [])[1]?.trim() || '';
     await page.addInitScript((version: string) => {
       localStorage.removeItem('fv_noupdate');
       localStorage.removeItem('fv_dismissed_v' + version);
