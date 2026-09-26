@@ -104,13 +104,19 @@
 
     getCached(key) {
       const cached = this.cache.get(key);
-      if (!cached) return null;
-      if (Date.now() > cached.expiry) { this.cache.delete(key); return null; }
-      return cached.data;
+      if (cached && Date.now() <= cached.expiry) return cached.data;
+      if (typeof window !== 'undefined' && window.PLSys && window.PLSys.SWRCache && key) {
+        const swrData = window.PLSys.SWRCache.get(key);
+        if (swrData) return swrData;
+      }
+      return null;
     },
 
     setCache(key, data, ttl = CONFIG.FETCH.CACHE_DURATION) {
       this.cache.set(key, { data, expiry: Date.now() + ttl });
+      if (typeof window !== 'undefined' && window.PLSys && window.PLSys.SWRCache && key) {
+        try { window.PLSys.SWRCache.set(key, data); } catch (_) {}
+      }
     },
 
     clearCache() {
@@ -262,12 +268,10 @@
     async _buildSharedIndex(db) {
       if (this._sharedIndex) return this._sharedIndex;
 
-      // ถ้ามี pending promise และยัง running อยู่ → await มัน
       if (this._sharedIndexPromise) {
         try {
           return await this._sharedIndexPromise;
         } catch (_) {
-          // rejected promise เดิม → clear แล้วสร้างใหม่
           this._sharedIndexPromise = null;
         }
       }
@@ -284,223 +288,123 @@
           if (!typeObj || typeof typeObj !== 'object') continue;
           if (typeObj.id) idMap.set(typeObj.id, typeObj);
 
-          // WHY: ข้าม type ที่เป็น collection (เช่น cards) — items ของมันไม่ใช่ตัวอักขระ copy ได้
-          //      การนำเข้า apiMap/textMap จะทำให้ระบบ copy และ search ทำงานผิดพลาด
-          if (typeObj.kind && typeObj.kind !== 'copyable') continue;
+          if (typeObj.as === 'cards' || typeObj.as === 'card') continue;
 
-          for (const cat of (typeObj.category || [])) {
-            if (!cat || typeof cat !== 'object') continue;
-            if (cat.id) {
-              idMap.set(cat.id, cat);
-              catToTypeMap.set(cat.id, typeObj);
-            }
+          for (const catObj of (typeObj.category || [])) {
+            if (!catObj || typeof catObj !== 'object') continue;
+            if (catObj.id && typeObj.id) catToTypeMap.set(catObj.id, typeObj.id);
 
-            for (const item of (cat.data || [])) {
+            for (const item of (catObj.items || [])) {
               if (!item || typeof item !== 'object') continue;
-              if (item.api)  apiMap.set(item.api,  item);
+              if (item.api)  apiMap.set(item.api, item);
+              if (item.id)   idMap.set(item.id, item);
               if (item.text) textMap.set(item.text, item);
-
-              if (++count % CONFIG.CONTENT.INDEX_YIELD_N === 0) {
-                await new Promise(r => {
-                  if (typeof scheduler !== 'undefined' && scheduler.yield)
-                    scheduler.yield().then(r);
-                  else
-                    setTimeout(r, 0);
-                });
-              }
+              count++;
             }
           }
         }
 
-        return { apiMap, idMap, textMap, catToTypeMap };
+        const indexObj = { apiMap, idMap, textMap, catToTypeMap, count };
+        this._sharedIndex = indexObj;
+        return indexObj;
       })();
 
       this._sharedIndexPromise = buildPromise;
 
       try {
-        const idx = await buildPromise;
-        this._sharedIndex        = idx;
-        this._jsonDbIndex        = idx;
-        this._jsonDbIndexReady   = true;
-        this._sharedIndexPromise = null; // ✅ clear เสมอ ไม่ว่าจะ success
-        return idx;
+        return await buildPromise;
       } catch (err) {
-        this._sharedIndexPromise = null; // ✅ clear เมื่อ fail เพื่อให้ retry ได้
+        this._sharedIndexPromise = null;
         throw err;
       }
     },
 
-    // ── Public lookup helpers ───────────────────────────────────────────────────
-
-    async fetchApiContent(apiCode) {
-      if (this._sharedIndex?.apiMap) {
-        const item = this._sharedIndex.apiMap.get(apiCode);
-        if (item) return item.text || apiCode;
-      }
-      const svc  = await _requireConDataService();
-      const item = await svc.findByApi(apiCode);
-      if (item)  return item.text || apiCode;
-      throw new Error(`API code not found: ${apiCode}`);
+    async lookupByApi(api) {
+      const idx = await this._getOrBuildIndex();
+      return idx.apiMap.get(api) || null;
     },
 
-    async fetchCategoryGroup(categoryId) {
-      const idRaw = categoryId.replace(/_category$/, '');
-      const svc   = await _requireConDataService();
-      const db    = await svc.getAssembled();
-      const lang  = localStorage.getItem('selectedLang') || 'en';
-
-      let foundCat = null;
-      let typeObj  = null;
-
-      for (const t of (db.type || [])) {
-        const cat = (t.category || []).find(c => c.id === idRaw);
-        if (cat) { foundCat = cat; typeObj = t; break; }
-      }
-
-      if (!foundCat) throw new Error(`Category not found: ${categoryId}`);
-
-      const registry = svc.registry || null;
-      const getName  = (nameObj) => {
-        if (registry?.getName) return registry.getName(nameObj, lang);
-        if (!nameObj || typeof nameObj !== 'object') return String(nameObj || '');
-        return nameObj[lang] || nameObj.en || nameObj.th || Object.values(nameObj)[0] || '';
-      };
-
-      const header = {
-        title:       getName(foundCat.name) || foundCat.id,
-        description: getName(typeObj.name)  || '',
-        typeId:      typeObj.id,
-        categoryId:  foundCat.id,
-        className:   'auto-category-header',
-      };
-
-      return { id: foundCat.id, name: foundCat.name, data: foundCat.data || [], header };
+    async lookupById(id) {
+      const idx = await this._getOrBuildIndex();
+      return idx.idMap.get(id) || null;
     },
 
-    // ── fetchCategoryDirect ─────────────────────────────────────────────────────
-    //
-    // WHY แยกจาก fetchCategoryGroup:
-    //   fetchCategoryGroup ค้นหาผ่าน assembled DB — ใช้กับ emoji/symbol ที่อยู่ใน index.json
-    //   fetchCategoryDirect fetch จาก file path โดยตรง — ใช้กับ collection types (cards)
-    //   ที่ไม่ควรอยู่ใน index.json เพราะจะทำให้ระบบอื่นดึงไปประมวลผลเป็นปุ่มโดยไม่ตั้งใจ
-    //
-    // @param {string} typeId     — เช่น 'cards'
-    // @param {string} categoryId — เช่น 'ai_tools'
-    // @returns {Promise<{id, name, data, header}>}
-
-    async fetchCategoryDirect(typeId, categoryId) {
-      const cacheKey = `direct:${typeId}:${categoryId}`;
-      const cached   = this.getCached(cacheKey);
-      if (cached) return cached;
-
-      const svc  = await _requireConDataService();
-      const lang = localStorage.getItem('selectedLang') || 'en';
-      const url  = svc.registry.paths.subcategoryData(typeId, categoryId);
-      const raw  = await this._performFetch(url);
-
-      if (!raw || !Array.isArray(raw.data)) {
-        throw new Error(`fetchCategoryDirect: invalid data at ${url}`);
-      }
-
-      const getName = (nameObj) => {
-        if (!nameObj || typeof nameObj !== 'object') return String(nameObj || '');
-        return nameObj[lang] || nameObj.en || nameObj.th || Object.values(nameObj)[0] || '';
-      };
-
-      const header = {
-        title:      getName(raw.name) || categoryId,
-        description: '',
-        typeId,
-        categoryId,
-        className:  'auto-category-header',
-      };
-
-      const result = { id: raw.id || categoryId, name: raw.name || {}, data: raw.data, header };
-      this.setCache(cacheKey, result);
-      return result;
+    async lookupByText(text) {
+      const idx = await this._getOrBuildIndex();
+      return idx.textMap.get(text) || null;
     },
 
-    // ── getTypeCategories ───────────────────────────────────────────────────────
-    //
-    // WHY public: ContentService._resolveSource() ต้องการรายการ categories
-    //             โดยไม่ต้อง fetch item data — เบากว่า fetchCategoryGroup (ไม่ดึง data[])
-    //
-    // @param {string} typeId  — เช่น 'emoji', 'symbol'
-    // @returns {Promise<Array<{id:string,name:object}>|null>}
+    async getTypeForCategory(catId) {
+      const idx = await this._getOrBuildIndex();
+      return idx.catToTypeMap.get(catId) || null;
+    },
+
+    async _getOrBuildIndex() {
+      if (this._sharedIndex) return this._sharedIndex;
+      const db = await this.loadApiDatabase();
+      return this._buildSharedIndex(db);
+    },
+
+    // ── Category index loading (con-data index.json) ─────────────────────────
+
+    async _loadCategoryIndex(typeId) {
+      if (this._categoryIndexes.has(typeId))
+        return this._categoryIndexes.get(typeId);
+
+      try {
+        // Real schema (validated by scripts/validate-data.ts, MasterIndexSchema):
+        //   index.json    = { categories: [{ id, name, file }] }   ← type list
+        //   {type}.json   = { id, name, categories: [{ id, name, file }] } ← categories in type
+        const index = await this._performFetch('/assets/db/con-data/index.json', { cache: 'force-cache' });
+        if (!index || !Array.isArray(index.categories)) return null;
+
+        const typeEntry = index.categories.find(t => t && t.id === typeId);
+        if (!typeEntry || !typeEntry.file) return null;
+
+        const typeFile = await this._performFetch(`/assets/db/con-data/${typeEntry.file}`, { cache: 'force-cache' });
+        if (!typeFile || !Array.isArray(typeFile.categories)) return null;
+
+        this._categoryIndexes.set(typeId, typeFile.categories);
+        return this._categoryIndexes.get(typeId) || null;
+      } catch (e) {
+        console.warn('[NavCore/Data] _loadCategoryIndex failed:', e);
+        return null;
+      }
+    },
 
     async getTypeCategories(typeId) {
-      if (!typeId) return null;
-      const idx = await this._loadCategoryIndex(typeId);
-      return idx ? idx.categories : null;
+      const cats = await this._loadCategoryIndex(typeId);
+      if (!cats || !cats.length) return [];
+
+      return cats.map(c => ({
+        id:          c.id || '',
+        name:        c.name || { en: c.id || '', th: c.id || '' },
+        description: c.description || null,
+        itemCount:   c.itemCount || 0,
+        file:        c.file || null,
+      }));
     },
 
-    prefetchTopCategories() {
-      _getConDataService()?.preload?.().catch(() => {});
-    },
+    async _loadSubcategoryData(typeId, catId) {
+      const cacheKey = `${typeId}/${catId}`;
+      if (this._subcategoryCache.has(cacheKey)) return this._subcategoryCache.get(cacheKey);
 
-    async _loadTopLevelIndex() {
-      if (this._topLevelIndex)        return this._topLevelIndex;
-      if (this._topLevelIndexPromise) return this._topLevelIndexPromise;
-
-      this._topLevelIndexPromise = (async () => {
-        try {
-          const svc = await _requireConDataService();
-          const db  = await svc.getAssembled();
-          const idx = {
-            categories: (db.type || []).map(t => ({
-              id:   t.id,
-              name: t.name,
-              file: `${t.id}.json`,
-            })),
-          };
-          this._topLevelIndex = idx;
-          return idx;
-        } catch (_) {
-          return null;
-        } finally {
-          this._topLevelIndexPromise = null;
-        }
-      })();
-
-      return this._topLevelIndexPromise;
-    },
-
-    async _loadCategoryIndex(type) {
-      if (this._categoryIndexes.has(type)) return this._categoryIndexes.get(type);
-
-      try {
-        const svc     = await _requireConDataService();
-        const db      = await svc.getAssembled();
-        const typeObj = (db.type || []).find(t => t.id === type);
-
-        if (!typeObj) { this._categoryIndexes.set(type, null); return null; }
-
-        const idx = {
-          id:         typeObj.id,
-          name:       typeObj.name,
-          categories: (typeObj.category || []).map(c => ({ id: c.id, name: c.name })),
-        };
-        this._categoryIndexes.set(type, idx);
-        return idx;
-      } catch (_) {
-        this._categoryIndexes.set(type, null);
-        return null;
+      const url = `/assets/db/con-data/${typeId}/${catId}.json`;
+      const cached = this.getCached(cacheKey);
+      if (cached) {
+        this._subcategoryCache.set(cacheKey, cached);
+        return cached;
       }
-    },
-
-    async _loadSubcategoryFile(type, subcat) {
-      const key = `${type}-${subcat}`;
-      if (this._subcategoryCache.has(key)) return this._subcategoryCache.get(key);
 
       try {
-        const svc   = await _requireConDataService();
-        const items = await svc.getItems(type, subcat);
-        const data  = { id: subcat, data: Array.isArray(items) ? items : [] };
-        this._subcategoryCache.set(key, data);
-        return data;
-      } catch (_) {
-        this._subcategoryCache.set(key, null);
-        return null;
+        const data = await this._performFetch(url);
+        const result = (data && Array.isArray(data.items)) ? data.items : [];
+        this.setCache(cacheKey, result);
+        this._subcategoryCache.set(cacheKey, result);
+        return result;
+      } catch (e) {
+        console.warn(`[NavCore/Data] Failed to load subcategory data for ${cacheKey}:`, e);
+        return [];
       }
     },
   };

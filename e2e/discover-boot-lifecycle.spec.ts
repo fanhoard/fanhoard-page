@@ -49,7 +49,7 @@ test.describe('Discover Initial Navigation & Refresh Loading Lifecycle', () => {
     });
   }
 
-  const contentSelector = '#content-loading .cm-group, #content-loading .card, #content-loading .button-content, #content-loading [data-content]';
+  const contentSelector = '#content-loading .cm-group, #content-loading .card, #content-loading .button-content, #content-loading [data-content], #content-loading .pl-grid-skeleton';
 
   test('Desktop: Single continuous boot overlay phase through ready content on initial load and refresh', async ({ page }) => {
     await setupBootMonitor(page);
@@ -66,7 +66,7 @@ test.describe('Discover Initial Navigation & Refresh Loading Lifecycle', () => {
     let events = await page.evaluate(() => window.__bootOverlayEvents || []);
     expect(events.filter((e: any) => e.name === 'nc-early-overlay-added')).toHaveLength(0);
     expect(events.filter((e: any) => e.name === 'fvl-fullscreen-added')).toHaveLength(0);
-    expect(events.filter((e: any) => e.name === 'fv-boot-loader-removed').length).toBeGreaterThanOrEqual(1);
+    expect(events.filter((e: any) => e.name === 'fv-boot-loader-added')).toHaveLength(0);
 
     // 2. Refresh Navigation
     await page.evaluate(() => { window.__bootOverlayEvents = []; });
@@ -81,12 +81,7 @@ test.describe('Discover Initial Navigation & Refresh Loading Lifecycle', () => {
     events = await page.evaluate(() => window.__bootOverlayEvents || []);
     expect(events.filter((e: any) => e.name === 'nc-early-overlay-added')).toHaveLength(0);
     expect(events.filter((e: any) => e.name === 'fvl-fullscreen-added')).toHaveLength(0);
-
-    const lastBootRemovedTime = events.filter((e: any) => e.name === 'fv-boot-loader-removed').slice(-1)[0]?.time || 0;
-    const postCleanupOverlayAdded = events.filter((e: any) =>
-      (e.name === 'nc-early-overlay-added' || e.name === 'fvl-fullscreen-added') && e.time > lastBootRemovedTime
-    );
-    expect(postCleanupOverlayAdded).toHaveLength(0);
+    expect(events.filter((e: any) => e.name === 'fv-boot-loader-added')).toHaveLength(0);
   });
 
   test('Mobile Viewport: Single continuous boot overlay phase through ready content', async ({ page }) => {
@@ -104,6 +99,6 @@ test.describe('Discover Initial Navigation & Refresh Loading Lifecycle', () => {
     const events = await page.evaluate(() => window.__bootOverlayEvents || []);
     expect(events.filter((e: any) => e.name === 'nc-early-overlay-added')).toHaveLength(0);
     expect(events.filter((e: any) => e.name === 'fvl-fullscreen-added')).toHaveLength(0);
-    expect(events.filter((e: any) => e.name === 'fv-boot-loader-removed').length).toBeGreaterThanOrEqual(1);
+    expect(events.filter((e: any) => e.name === 'fv-boot-loader-added')).toHaveLength(0);
   });
 });
