@@ -1,9 +1,9 @@
-# 07 — Loading System (FVL — FanHoardVerse Loader)
+# 07 — Loading System (FVL — FanHoardVerse Loader v2)
 
-- **System Described**: FVL (FanHoardVerse Loader) In-Flow Contextual Loading Architecture, Boundary Modes, Lifecycle, and API
-- **Entry File**: `assets/js/loading-system/fvl.js`
-- **Dependencies**: `assets/css/loading-system.css`, `assets/css/loading.css`, `assets/js/nav-core-modules/loading.js`
-- **Verification**: `npm run test` (runs Vitest loading contract suite) | `npm run test:e2e` (runs Playwright contextual E2E suite)
+- **System Described**: FVL (FanHoardVerse Loader) Typed v2 Architecture, In-Flow Boot Loading, Display Types, Scroll Preservation, and Public API
+- **Entry File**: `assets/js/loading-system/fvl.js` (VERSION = '2.0.0')
+- **Dependencies**: `assets/css/loading-system.css`, `assets/css/loading.css`, `assets/js/nav-core-modules/loading.js`, `data/verse/discover/index.html`
+- **Verification**: `npx vitest run tests/loading-contract.test.ts` (unit contract) | `npx playwright test --workers=1` (E2E suite)
 
 ---
 
@@ -11,36 +11,40 @@
 
 1. [System Overview & Architecture Principles](#1-system-overview--architecture-principles)
 2. [File and Directory Structure](#2-file-and-directory-structure)
-3. [Display Modes & Boundary Hierarchy](#3-display-modes--boundary-hierarchy)
-4. [Rendering, Scroll Behavior & Layout Reservation](#4-rendering-scroll-behavior--layout-reservation)
-5. [Visual Specification & Timing Guarantees](#5-visual-specification--timing-guarantees)
-6. [Public API & Usage Examples](#6-public-api--usage-examples)
-7. [Concurrency, Lifecycle & Race Prevention](#7-concurrency-lifecycle--race-prevention)
-8. [Migration Notes & Legacy Compatibility](#8-migration-notes--legacy-compatibility)
-9. [Prohibited Anti-Patterns](#9-prohibited-anti-patterns)
-10. [Doc-vs-Code Conflict Resolutions](#10-doc-vs-code-conflict-resolutions)
-11. [Cross-References](#11-cross-references)
+3. [Typed v2 Display Modes & Boundary Hierarchy](#3-typed-v2-display-modes--boundary-hierarchy)
+4. [In-Flow Boot Loading Design](#4-in-flow-boot-loading-design)
+5. [Rendering, Scroll Semantics & Mobile Viewport Behavior](#5-rendering-scroll-semantics--mobile-viewport-behavior)
+6. [Visual Specification & Timing Guarantees](#6-visual-specification--timing-guarantees)
+7. [Public API & Developer Usage Examples](#7-public-api--developer-usage-examples)
+8. [Concurrency, Ref Counting & Race Prevention](#8-concurrency-ref-counting--race-prevention)
+9. [Migration Notes & Legacy Compatibility](#9-migration-notes--legacy-compatibility)
+10. [Prohibited Anti-Patterns & Round-1 Feedback Case Study](#10-prohibited-anti-patterns--round-1-feedback-case-study)
+11. [Doc-vs-Code Conflict Resolutions](#11-doc-vs-code-conflict-resolutions)
+12. [Cross-References](#12-cross-references)
 
 ---
 
 ## 1. System Overview & Architecture Principles
 
-FVL (FanHoardVerse Loader) is FanHoard's central loading system (`assets/js/loading-system/fvl.js`). The system implements a **contextual in-flow loading architecture** that renders loading indicators inside target content containers in normal document flow rather than obscuring the entire viewport with global fixed overlays.
+FVL (FanHoardVerse Loader) v2 is FanHoard's central loading system (`assets/js/loading-system/fvl.js`). Upgraded in Round 2 from legacy overlay modes to a **typed in-flow loading architecture**, FVL v2 allows callers to explicitly declare the loading scope (`type: 'page' | 'content' | 'component' | 'global'`).
+
+Instead of obscuring the screen with viewport cover overlays, FVL v2 renders loading indicators in normal document flow directly inside the content boundary. Application headers, navigation menus, and category controls remain unblocked and instantly interactive.
 
 ```
 +-----------------------------------------------------------------------+
-|  HEADER / NAVIGATION BAR (Always visible & interactive)               |
+|  HEADER / NAVIGATION BAR (Unblocked, always 100% interactive)          |
 +-----------------------------------------------------------------------+
 |  MAIN PAGE CONTAINER (<main> / #content-container)                    |
 |                                                                       |
 |  +-----------------------------------------------------------------+  |
-|  |  IN-FLOW LOADING BOUNDARY (#content-loading)                    |  |
+|  |  TYPED PAGE-LEVEL IN-FLOW SLOT (#content-loading)              |  |
+|  |  - data-fvl-type="page"                                         |  |
 |  |  - Position: static/relative (In Normal Document Flow)         |  |
-|  |  - Z-Index: 0 (No Viewport Stacking or Backdrop Overlay)        |  |
-|  |  - Scroll: lockScroll = false (Page scrolls freely with document)|  |
-|  |  - CLS Protection: min-height: 180px layout reservation        |  |
+|  |  - Z-Index: 0 (No Viewport Overlay or Stacking)                  |  |
+|  |  - Scroll: lockScroll = false (Page scrolls freely)             |  |
+|  |  - Min-Height: calc(100dvh - 120px) (CLS Protection < 0.1)     |  |
 |  |                                                                 |  |
-|  |               ( ( SVG Ring Spinner ) )                          |  |
+|  |               ( ( SVG Ring Spinner in Brand Teal ) )            |  |
 |  |                   Loading content...                            |  |
 |  +-----------------------------------------------------------------+  |
 |                                                                       |
@@ -52,10 +56,11 @@ FVL (FanHoardVerse Loader) is FanHoard's central loading system (`assets/js/load
 
 ### Core Architecture Principles
 
-1. **Boundary DOM Ownership**: The loading indicator mounts directly inside the target boundary container (e.g. `#content-loading`) in normal DOM flow rather than at the application root (`body`).
-2. **Decoupled Viewport & Free Scrolling**: Contextual loading does not use `position: fixed`, backdrop overlays, or high `z-index` stacking layers. Page scrolling is never locked (`lockScroll: false`), allowing users to scroll freely while content loads.
-3. **Cumulative Layout Shift (CLS) Prevention**: Target containers maintain CSS layout reservation (`min-height: var(--fvl-boundary-min-height, 180px)`), keeping CLS < 0.1 during transitions.
-4. **Visual Language Preservation**: In-flow boundaries retain FanHoard's signature SVG ring spinner (static track + animated arc) and theme-aware styling.
+1. **Explicit Typed Scope**: Callers declare intent explicitly (`FVL.page()`, `FVL.content()`, `FVL.component()`, `FVL.global()`). Global viewport overlays are strictly exceptional and never a default fallback.
+2. **In-Flow DOM Mounting**: Page, content, and component loaders mount directly inside target containers in normal document flow (`position: static` or `relative`, `z-index: 0`).
+3. **Unblocked Application Shell**: System chrome (`<header>`, `<nav>`, category controls) renders in unblocked SSG HTML and remains clickable while data fetches execute inside the content slot.
+4. **Scroll Preservation Rule**: Same-route data refreshes preserve the user's vertical scroll position (`window.scrollY`). Contextual loading teardown NEVER snaps the page scroll to top. Cross-route navigation explicitly resets scroll to top.
+5. **Dynamic Mobile Viewport Compliance**: Contextual loaders sit in document flow, eliminating viewport gaps when browser URL bars hide or show on mobile devices. Exceptional `global` overlays use dynamic viewport units (`100dvh` with `100vh` fallback).
 
 ---
 
@@ -65,64 +70,82 @@ FVL (FanHoardVerse Loader) is FanHoard's central loading system (`assets/js/load
 assets/
 ├── js/
 │   └── loading-system/
-│       └── fvl.js                          ← Entry + internal modules (single-file hybrid, VERSION = '1.0.0')
+│       └── fvl.js                          ← FVL v2 central loader engine (VERSION = '2.0.0')
 ├── css/
-│   ├── loading-system.css                  ← Auto-injected stylesheet (.fvl-boundary & spinner keyframes)
-│   └── loading.css                         ← Content container layout & min-height reservation
+│   ├── loading-system.css                  ← Typed styles (.fvl-page, .fvl-content, .fvl-component, .fvl-global)
+│   └── loading.css                         ← Container layout reservation rules (min-height calc(100dvh - 120px))
 └── js/nav-core-modules/
-    └── loading.js                          ← LoadingService proxy mapping route requests to boundary mode
+    ├── loading.js                          ← LoadingService proxy mapping requests to typed v2 API
+    ├── router.js                           ← SPA router triggering type: 'page' on route transitions
+    ├── content.js                          ← Content renderer preserving scrollY via skipScroll
+    └── utils.js                            ← Fatal error overlay explicitly typed as 'global'
+
+data/verse/discover/
+└── index.html                              ← SSG pre-placed in-flow boot loading slot inside #content-loading
 
 tests/
-└── loading-contract.test.ts                ← Vitest unit & contract test suite for boundary loading
+└── loading-contract.test.ts                ← Vitest unit & contract suite for typed v2 API and scroll preservation
 
 e2e/
-└── loading-contextual.spec.ts              ← Playwright E2E browser test suite for in-flow behavior
+└── loading-contextual.spec.ts              ← Playwright E2E browser suite for mobile viewport & scroll behavior
 ```
 
 ---
 
-## 3. Display Modes & Boundary Hierarchy
+## 3. Typed v2 Display Modes & Boundary Hierarchy
 
-FVL supports 5 operational display modes. Contextual in-flow `boundary` mode is the primary default for route transitions and content fetching.
+FVL v2 introduces 4 core typed loading categories alongside legacy progress support.
 
-### 3.1 Display Modes Overview
+### 3.1 Typed Display Modes Overview
 
-| Mode | Target Element | Position Strategy | Z-Index | Scroll Lock | Primary Usage |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **`boundary`** (Default) | Container selector (`#content-loading`) | In-Flow (`static` / `relative`) | `0` (Normal Flow) | **No** (`false`) | SPA route changes, feed loading, category switching |
-| **`scoped`** | Target card/section | Overlay (`absolute`) | `1600` | **No** (`false`) | Isolated card/widget updates |
-| **`inline`** | Button or inline element | In-Flow (`inline-flex`) | `0` | **No** (`false`) | Button spinner states |
-| **`topbar`** | Top viewport edge | Fixed (`fixed` top) | `17500` | **No** (`false`) | Background fetch indicator |
-| **`fullscreen`** | App root (`body`) | Overlay (`fixed` inset 0) | `17000` | Optional (`true` / `false`) | Cold boot & fatal error boundaries |
+| Type | Target Element | Position Strategy | Z-Index | Min-Height Reservation | Scroll Lock | Primary Usage |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **`page`** | Container (`#content-loading`) | In-Flow (`static` / `relative`) | `0` | `calc(100dvh - 120px)` | **No** (`false`) | Full SPA route changes, primary view loading |
+| **`content`** | Section container | In-Flow (`relative`) | `0` | `180px` | **No** (`false`) | Feed section updates, category switching |
+| **`component`** | Element / Button | Inline (`inline-flex` / `static`) | `0` | Natural element size | **No** (`false`) | In-place button spinners, micro widgets |
+| **`global`** | App root (`body`) | Viewport Overlay (`fixed` inset 0) | `17000` | `100dvh` (fallback `100vh`) | Optional (`true`/`false`) | Cold app boot & fatal error boundaries |
+| **`topbar`** | Viewport top edge | Fixed top bar (`fixed` top:0) | `17500` | `3px` height | **No** (`false`) | Background fetch indicator |
 
-### 3.2 Four Boundary Hierarchy Levels
+### 3.2 Legacy Mode Mapping
 
-1. **Page-Level Boundary**: Encloses main view containers (`<main>` or `#content-container`). Used during full SPA route transitions to render a page-level loading state inside the content slot.
-2. **Content-Level Boundary**: Wraps discrete functional sections (e.g. `#content-loading`, feed cards, search results). Allows adjacent UI elements (header navigation, filter pills) to remain fully interactive.
-3. **Component-Level Boundary**: Micro-boundaries attached to isolated UI components (e.g., button handles, autocomplete dropdowns, individual card widgets).
-4. **Nested Boundaries**: Hierarchical structure where component/content boundaries operate inside parent page boundaries.
-   - **Nearest Boundary Interception Rule**: Async requests bubble up to the nearest registered target container. Only that boundary renders placeholder UI.
-   - **Anti-Stacking Rule**: Active child boundaries do NOT trigger parent or global viewport overlays. Parent containers retain resolved interactive states.
+For complete backward compatibility, legacy v1.0 mode options automatically normalize to typed v2 categories in `fvl.js` (`_normalizeOptions`):
 
-### 3.3 Strict Exceptions for Global Fullscreen Overlays
+```javascript
+// Legacy mode string -> Typed v2 category mapping
+'fullscreen'  ──>  'global'
+'scoped'      ──>  'content'
+'boundary'    ──>  'page'
+'inline'      ──>  'component'
+```
 
-Global viewport blocking overlays (`mode: 'fullscreen'` with `position: fixed` and `z-index: 17000`) are strictly restricted to three exceptional system states:
+### 3.3 Four Boundary Hierarchy Levels
 
-1. **Initial Application Boot**: Initial static HTML boot loader (`#fv-boot-loader` in `data/verse/discover/index.html`) prior to JS module initialization.
-2. **Unrecoverable Fatal Error**: Application crash or fatal boot failure rendering `Utils.showErrorFullscreen()`.
-3. **Destructive Modal Workflow**: Critical confirmation dialogs where user interaction with background UI risks data corruption.
+1. **Page-Level Boundary (`type: 'page'`)**: Replaces the main route content slot (`#content-loading`) in-flow. The header navigation and page footer remain interactive.
+2. **Content-Level Boundary (`type: 'content'`)**: Operates inside discrete functional sub-sections (e.g. comment lists, search result panels). Adjacent content sections remain interactive.
+3. **Component-Level Boundary (`type: 'component'`)**: Micro-boundaries attached directly to isolated UI controls (e.g. submit buttons, autocomplete inputs).
+4. **Nested Boundaries**: When child component loaders activate inside an active page or content boundary, each boundary manages its own ref count independently. Child loaders never escalate to stack parent or global overlays.
+
+### 3.4 Strict Exceptions for Global Overlays (`type: 'global'`)
+
+Global blocking viewport overlays (`type: 'global'`) are restricted to three exceptional system states:
+
+1. **Cold Application Bootstrap**: Fallback static HTML overlay before JS initialization.
+2. **Fatal Application Error**: Unrecoverable system crash or boot failure (`Utils.showErrorFullscreen()`).
+3. **Destructive Workflows**: Critical confirmation dialogs where interacting with background controls risks state corruption.
 
 ---
 
-## 4. Rendering, Scroll Behavior & Layout Reservation
+## 4. In-Flow Boot Loading Design
 
-### 4.1 In-Flow Rendering Specification
+In Round 2, initial application boot loading was redesigned from a global viewport overlay (`position: fixed; inset: 0; z-index: 500`) into an **SSG pre-placed in-flow slot**.
 
-When `FVL.show({ mode: 'boundary', target: '#content-loading' })` is invoked, `fvl.js` builds and appends `.fvl-boundary` inside the target container:
+### 4.1 SSG HTML Structure
+
+In `data/verse/discover/index.html`, `#fv-boot-loader` is pre-rendered inside `<div id="content-loading">`:
 
 ```html
-<!-- Mounted inside #content-loading in normal document flow -->
-<div class="fvl-boundary fvl-theme-light" role="status" aria-live="polite">
+<!-- Inside <div id="content-loading"> in SSG pre-rendered HTML -->
+<div id="fv-boot-loader" class="fvl-root fvl-page" data-fvl-type="page" role="status" aria-live="polite">
   <div class="fvl-boundary-inner">
     <div class="fvl-spinner fvl-spinner-md" aria-hidden="true">
       <svg viewBox="0 0 52 52">
@@ -130,187 +153,182 @@ When `FVL.show({ mode: 'boundary', target: '#content-loading' })` is invoked, `f
         <circle class="fvl-arc" cx="26" cy="26" r="22"/>
       </svg>
     </div>
-    <div class="fvl-message">Loading content...</div>
+    <div class="fvl-message">Loading FanHoard...</div>
   </div>
 </div>
 ```
 
-### 4.2 Scroll Behavior
+### 4.2 Application Shell Unblocked
 
-- `lockScroll` defaults to `false` for boundary mode.
-- Document body styles (`position: fixed`, `overflow: hidden`) are NEVER applied during contextual loads.
-- The loading boundary moves naturally with document scrolling.
-- Header navigation and page footer remain reachable at all times.
+Because `#fv-boot-loader` sits inside `#content-loading` in document flow:
+- Header branding, logo, search input, and navigation tabs render unblocked on first paint.
+- Users can click navigation items or type in search immediately while initial feed data fetches in the background.
 
-### 4.3 CLS Prevention & Layout Reservation
+### 4.3 Handshake & Unmount Lifecycle
 
-To eliminate Cumulative Layout Shift (CLS) when content finishes loading, target containers specify CSS min-height reservation:
-
-```css
-/* File: assets/css/loading.css:12 */
-#content-loading {
-  min-height: var(--fvl-boundary-min-height, 180px);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-```
+When JavaScript initializes (`InitService.start()`), `FVL.readinessHandshake()` or `LoadingService.showInContent()` smoothly replaces or fades out `#fv-boot-loader` in-flow without layout jumps or screen flashing.
 
 ---
 
-## 5. Visual Specification & Timing Guarantees
+## 5. Rendering, Scroll Semantics & Mobile Viewport Behavior
 
-### 5.1 SVG Ring Spinner
+### 5.1 In-Flow DOM & Attribute Contract
 
-Boundary loaders utilize FanHoard's signature SVG ring spinner with theme-aware tokens:
+When `FVL.show({ type: 'page', target: '#content-loading' })` or `FVL.page('#content-loading')` executes:
+- Root element receives class `.fvl-page` and attribute `data-fvl-type="page"`.
+- Target element (`#content-loading`) receives attribute `aria-busy="true"`.
+- Position strategy is `static` or `relative`, with `z-index: 0`.
+
+```html
+<div id="content-loading" aria-busy="true">
+  <div class="fvl-root fvl-page fvl-theme-light" data-fvl-type="page" role="status" aria-live="polite">
+    <div class="fvl-boundary-inner">
+      <div class="fvl-spinner fvl-spinner-md" aria-hidden="true">...</div>
+      <div class="fvl-message">Loading...</div>
+    </div>
+  </div>
+</div>
+```
+
+### 5.2 Scroll Preservation Rule
+
+- **Same-Route Data Refresh**: When refreshing or switching category filters on the same route, the user's vertical scroll position (`window.scrollY`) is preserved. `content.js` passes `skipScroll: true` during re-renders, and `fvl.js` `_cleanup` of contextual page/content/component loaders never calls `window.scrollTo`.
+- **Cross-Route Navigation**: When explicitly navigating to a new route (e.g. `/` to `/search`), `router.js` invokes `window.scrollTo({ top: 0, behavior: 'smooth' })`.
+- **No Snap-to-Top Defect**: Completing a contextual load NEVER resets or snaps page scroll to top.
+
+### 5.3 Mobile Viewport Behavior (100dvh)
+
+- **In-Flow Loaders (`page`, `content`, `component`)**: Sit directly in document flow with layout reservation (`min-height: calc(100dvh - 120px)`). Because they are in-flow, mobile URL bar toggles (showing/hiding address bar) do NOT create background gaps or expose hidden scrolling content.
+- **Global Viewport Overlays (`global`)**: Styled using CSS dynamic viewport units:
+  ```css
+  .fvl-global {
+    position: fixed;
+    inset: 0;
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height adaptation */
+    z-index: 17000;
+  }
+  ```
+
+---
+
+## 6. Visual Specification & Timing Guarantees
+
+### 6.1 SVG Ring Spinner
+
+FVL v2 uses FanHoard's signature SVG ring spinner with CSS custom properties:
 
 ```css
-/* File: assets/css/loading-system.css:42 */
 .fvl-track {
   stroke: var(--fvl-spinner-track, rgba(0, 0, 0, 0.1));
 }
 .fvl-arc {
-  stroke: var(--fvl-spinner-arc, var(--fv-color-primary, #6366f1));
+  stroke: var(--fvl-spinner-arc, var(--fv-color-primary, #0d9488)); /* Teal */
   stroke-dasharray: 88 132;
   animation: _fvl_spin 0.8s linear infinite;
 }
 ```
 
-### 5.2 Timing Guarantees & Flicker Prevention
+### 6.2 Timing Guarantees & Flicker Prevention
 
-- **Minimum Display Duration (`MIN_VISIBLE_MS = 300ms`)**: Managed by `LoadingService` in `assets/js/nav-core-modules/loading.js`. Active loading indicators remain visible for at least 300ms to eliminate visual flickering on high-speed network connections.
-- **Enter Transition (`140ms`)**: `.fvl-entering` applies double `requestAnimationFrame` opacity fade-in.
-- **Leave Transition (`180ms`)**: `.fvl-leaving` applies `180ms` opacity fade-out before DOM unmounting.
+- **Minimum Visible Duration (`MIN_VISIBLE_MS = 300ms`)**: Managed by `LoadingService`. Active loaders remain visible for at least 300ms to eliminate visual flickering on fast networks.
+- **Enter Phase (`140ms`)**: Opacity transition from `0` to `1` via `.fvl-entering`.
+- **Leave Phase (`180ms`)**: Opacity transition from `1` to `0` via `.fvl-leaving` prior to DOM unmounting.
 
 ---
 
-## 6. Public API & Usage Examples
+## 7. Public API & Developer Usage Examples
 
-### 6.1 `FVL.show(opts)` Boundary Form
+FVL v2 exports a frozen global window object (`window.FVL` and alias `window.FLV`).
+
+### 7.1 Primary Typed API
 
 ```javascript
-// File: assets/js/loading-system/fvl.js:840
-const handle = FVL.show({
-  mode: 'boundary',
-  target: '#content-loading',
-  message: 'Loading discover feed...',
-  theme: 'auto'
-});
+// 1. Explicit Typed FVL.show()
+FVL.show({ type: 'page', target: '#content-loading', message: 'Loading page...' });
+FVL.show({ type: 'content', target: '#comments-container', message: 'Fetching comments...' });
+FVL.show({ type: 'component', target: '#save-btn' });
+FVL.show({ type: 'global', message: 'Authenticating...' });
 
-// Hide loader when async operation completes
-handle.hide();
+// 2. Typed API Shortcuts
+FVL.page('#content-loading', { message: 'Loading items...' });
+FVL.content('#feed-section', { message: 'Updating feed...' });
+FVL.component('#submit-button');
+FVL.global('System updating...');
+
+// 3. Teardown Methods
+FVL.hide();                   // Hides default global/page instance
+FVL.hide('custom-id');        // Hides specific instance by ID
+FVL.hideInstant('custom-id'); // Teardown without leave animation
+FVL.hideAll();                // Teardown all active loaders
 ```
 
-### 6.2 `FVL.boundary(target, opts)` Shortcut
+### 7.2 LoadingService Proxy API
 
 ```javascript
-// File: assets/js/loading-system/fvl.js:1395
-const handle = FVL.boundary('#content-loading', {
-  message: 'Updating collection...'
-});
-```
-
-### 6.3 `LoadingService` Integration
-
-```javascript
-// File: assets/js/nav-core-modules/loading.js:184
-// Invoked by router.js during SPA route transitions
-LoadingService.showInContent('Loading items...');
-
-// Invoked when view rendering completes
-LoadingService.hideFromContent();
+// NavCore LoadingService Proxy
+LoadingService.showInContent('Loading discover feed...'); // Maps to type: 'page', target: '#content-loading'
+LoadingService.hideFromContent();                        // Teardown page loader inside #content-loading
 ```
 
 ---
 
-## 7. Concurrency, Lifecycle & Race Prevention
+## 8. Concurrency, Ref Counting & Race Prevention
 
-### 7.1 Per-Boundary Reference Counting
+1. **Per-Boundary Reference Counting**: Concurrent requests targeting the same boundary increment `_boundaryRefs[targetSelector]`. The loader unmounts only when all pending requests settle (`_boundaryRefs === 0`).
+2. **Monotonic Request Tokens**: Every `FVL.show()` generates a unique integer `requestId`. Out-of-order async responses compare their token against the current active token and drop stale teardown attempts.
+3. **Route-Change Teardown**: SPA route navigation triggers `LoadingService._forceReset()`, calling `FVL.clearAllBoundaryRefs()` to purge boundary instances and clear `aria-busy="false"`.
 
-To handle concurrent asynchronous requests targeting the same DOM container, `fvl.js` maintains a boundary reference count map (`_boundaryRefs`):
+---
 
-```javascript
-// File: assets/js/loading-system/fvl.js:382
-// Increment active ref count on show
-var currentCount = (_boundaryRefs.get(targetEl) || 0) + 1;
-_boundaryRefs.set(targetEl, currentCount);
+## 9. Migration Notes & Legacy Compatibility
 
-// Decrement on hide; unmount DOM only when count reaches 0
-var remaining = (_boundaryRefs.get(targetEl) || 1) - 1;
-if (remaining <= 0) {
-  _boundaryRefs.delete(targetEl);
-  _cleanup(inst);
-} else {
-  _boundaryRefs.set(targetEl, remaining);
-}
-```
+### 9.1 Upgrading from Legacy v1.0 / v3.0.3
 
-### 7.2 Monotonic Request Tokens (Stale-Request Guards)
-
-Every `FVL.show()` invocation generates a monotonic integer request token (`requestId`). If a superseded async request attempts to complete after a newer request has started on the same boundary, the stale completion is safely ignored.
-
-### 7.3 Route-Change Cleanup (`clearAllBoundaryRefs`)
-
-During SPA route transitions, `LoadingService._forceReset()` calls `FVL.clearAllBoundaryRefs()` to purge active timers, clear reference counters, and restore target `aria-busy="false"` states:
+No code changes are required for existing callers. Legacy calls automatically map to typed v2 semantics:
 
 ```javascript
-// File: assets/js/loading-system/fvl.js:442
-function clearAllBoundaryRefs() {
-  _boundaryRefs.clear();
-  _instances.forEach(function(inst) {
-    if (inst.mode === 'boundary') {
-      _cleanup(inst);
-    }
-  });
-}
+// Legacy v1.0 Call                       ──> Mapped v2 Typed Result
+FVL.fullscreen({ message: '...' })         ──> FVL.show({ type: 'global', message: '...' })
+FVL.scoped({ target: '#card' })            ──> FVL.show({ type: 'content', target: '#card' })
+FVL.boundary({ target: '#content-load' })  ──> FVL.show({ type: 'page', target: '#content-load' })
+FVL.inline({ target: '#btn' })             ──> FVL.show({ type: 'component', target: '#btn' })
 ```
 
 ---
 
-## 8. Migration Notes & Legacy Compatibility
+## 10. Prohibited Anti-Patterns & Round-1 Feedback Case Study
 
-### 8.1 100% Backward Compatibility
+### 10.1 Case Study: Round-1 Owner Feedback Analysis
 
-All legacy FVL and `LoadingService` API signatures remain fully supported:
+In Round 1, the loading system was converted to `boundary` mode but retained `#fv-boot-loader` as a `position: fixed` viewport overlay. This led to four distinct user-perceived defects:
 
-- `FVL.show('Message')` (defaults to boundary mode when target exists, or fullscreen fallback)
-- `FVL.fullscreen()`, `FVL.scoped()`, `FVL.inline()`, `FVL.topbar()`
-- `LoadingService.show()`, `LoadingService.hide()`, `LoadingService.showInContent()`, `LoadingService.hideFromContent()`
-- `window.showInstantLoadingOverlay()` / `window.removeInstantLoadingOverlay()`
+1. **"Loading feels like a plain cover overlay"**: Boot loader used `position: fixed; inset: 0`, covering header navigation and making the app feel frozen.
+2. **"Mobile URL-bar gaps expose scrolling background"**: On iOS Safari and Android Chrome, fixed cover overlays without dynamic viewport units (`100dvh`) or body scroll lock left gaps when the URL bar toggled, exposing moving background content.
+3. **"Page snaps back to top after load"**: Calling `window.scrollTo(0, 0)` inside render teardown caused jarring scroll jumps after asynchronous fetch completions.
+4. **"Page-level loading covers unneeded areas"**: Blocking the whole page prevented users from using navigation menus while waiting for data.
 
-### 8.2 Developer Migration Checklist
+### 10.2 Prohibited Anti-Patterns Table
 
-When updating legacy code to use in-flow boundary loading:
-
-1. Ensure the target container element (e.g. `#content-loading`) exists in the target view HTML.
-2. Verify target CSS specifies layout reservation (`min-height: 180px`).
-3. Replace `FVL.show({ mode: 'fullscreen' })` with `LoadingService.showInContent()` or `FVL.boundary('#content-loading')`.
-4. Do NOT set `lockScroll: true` on content/route loaders.
-
----
-
-## 9. Prohibited Anti-Patterns
-
-| Prohibited Practice | System Impact | Correct Alternative |
+| Prohibited Anti-Pattern | Why It Fails | Required Typed v2 Pattern |
 | :--- | :--- | :--- |
-| **Using `fullscreen` overlay for routine SPA routes** | Obscures navigation bar and locks user scroll | Use `LoadingService.showInContent()` or `FVL.boundary('#content-loading')` |
-| **Applying `position: fixed` to boundary targets** | Causes loading UI to break out of document flow | Keep boundary target in normal DOM flow (`position: static` / `relative`) |
-| **Setting `lockScroll: true` on contextual loaders** | Prevents users from scrolling while content loads | Keep `lockScroll: false` (default for boundary mode) |
-| **Omitting `min-height` on boundary containers** | Causes Cumulative Layout Shift (CLS > 0.1) when loader unmounts | Define `min-height: 180px` or `var(--fvl-boundary-min-height)` on target |
-| **Bypassing `_forceReset()` during route changes** | Leaves orphaned loading DOM nodes or stale `aria-busy` attributes | Call `LoadingService._forceReset()` on navigation events |
+| **Fixed Cover Viewport Loader for Data Fetching** | Creates overlay gaps on mobile URL bar toggle; blocks header interaction. | Use `type: 'page'` mounted in-flow inside `#content-loading`. |
+| **`window.scrollTo(0,0)` on Load Completion** | Resets user scroll position on same-route data refresh. | Use `skipScroll: true` and preserve `window.scrollY`. |
+| **Root `<body>` Boot Overlay** | Obscures header and navigation chrome during cold boot. | Use SSG pre-placed in-flow boot slot inside `#content-loading`. |
+| **Default `position: fixed` Overlay** | Causes z-index conflicts and backdrop scroll leaks. | Restrict `type: 'global'` strictly to auth/fatal exceptions. |
 
 ---
 
-## 10. Doc-vs-Code Conflict Resolutions
+## 11. Doc-vs-Code Conflict Resolutions
 
-1. **Version Header Mismatch Resolution**: `assets/css/loading-system.css` header states `v1.0.0` to match `assets/js/loading-system/fvl.js` (`VERSION = '1.0.0'`).
-2. **Navigation Isolation Resolution**: Legacy `body.fvl-nav-mode.nav-loading` dimming rules have been completely removed. `assets/js/nav-core-modules/router.js` ensures header navigation links remain `opacity: 1.0` and fully interactive (`pointer-events: auto`) during content loading.
+1. **Version Alignment**: Header version in `assets/css/loading-system.css` updated to `v2.0.0`, matching `assets/js/loading-system/fvl.js` (`VERSION = '2.0.0'`).
+2. **Interactive Navigation**: Header navigation (`.fv-nav a`) maintains `opacity: 1.0` and `pointer-events: auto` during loading.
+3. **Scroll Reset Resolution**: Disambiguated cross-route navigation (resets scroll) vs same-route refresh (preserves scroll).
 
 ---
 
-## 11. Cross-References
+## 12. Cross-References
 
-- [`docs/engineering/release-policy.md`](../docs/engineering/release-policy.md) — FanHoard Release & Update Policy
-- [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) — Documentation formatting rules
-- [`15-Loading-Contract-And-Test-Plan.md`](./15-Loading-Contract-And-Test-Plan.md) — Loading Contract & Test Plan
+- **`fanhoard-docs/15-Loading-Contract-And-Test-Plan.md`**: Detailed contract specifications and test plan.
+- **`fanhoard-docs/03-Navigation-And-Content.md`**: SPA Router integration and content rendering rules.
+- **`CHANGES.md` & `PATCH_NOTES.md`**: Release notes and patch summary.

@@ -1,32 +1,34 @@
-# FanHoard Contextual Loading System — v1.0 Patch (In-Flow Loading Architecture)
+# FanHoard Typed Loading System — v2.0 Patch (Typed In-Flow Architecture)
 
 วางไฟล์ทั้งหมดใน patch นี้ทับลงบน repo ตามโครงสร้างเดิม — แตก ZIP แล้ว copy ทับได้เลย
 
-## สรุปการเปลี่ยนแปลง
+## สรุปการเปลี่ยนแปลง (Summary of Changes)
 
 | ไฟล์ | การเปลี่ยนแปลง |
 |------|----------------|
-| `assets/js/loading-system/fvl.js` | เพิ่ม `mode: 'boundary'`, per-boundary reference counting (`_boundaryRefs`), monotonic request tokens (`requestId`), และ `clearAllBoundaryRefs()` สำหรับ route change cleanup |
-| `assets/css/loading-system.css` | เพิ่ม CSS `.fvl-boundary` สำหรับการแสดงผลแบบ in-flow ใน document flow ปกติ ไม่ใช้ `position: fixed` หรือ `z-index` ซ้อนทับ ปรับเวอร์ชันใน header เป็น `v1.0.0` ตรงกับ fvl.js |
-| `assets/css/loading.css` | เพิ่มกฎ CSS `min-height: 180px` สำหรับ `#content-loading` เพื่อป้องกัน Layout Shift (CLS) |
-| `assets/js/nav-core-modules/loading.js` | ปรับ `LoadingService.showInContent()` ให้เรียกใช้ `boundary` mode ใน `#content-loading` และอัปเดต `_forceReset()` ให้ล้าง boundary instances |
-| `assets/js/nav-core-modules/router.js` & `init.js` | อัปเดต route transitions และ early loading ให้โหลดแบบ in-flow ในพื้นที่เนื้อหา |
-| `fanhoard-docs/07-Loading-System.md` | อัปเดตเอกสารหลักสถาปัตยกรรม Contextual In-Flow Loading, Display Modes, Boundary Levels, API, และแนวปฏิบัติ |
-| `fanhoard-docs/15-Loading-Contract-And-Test-Plan.md` | อัปเดต Contract, Test Plan, และแก้ข้อขัดแย้งเรื่อง Nav Dimming |
+| `assets/js/loading-system/fvl.js` | ปรับโครงสร้างเป็น Typed v2 Engine รองรับ `FVL.show({ type })` และ API shortcuts (`FVL.page`, `FVL.content`, `FVL.component`, `FVL.global`), กำหนด `data-fvl-type` และรักษาระดับ scroll (`window.scrollY`) บน contextual teardown |
+| `assets/css/loading-system.css` | เพิ่ม CSS `.fvl-page`, `.fvl-content`, `.fvl-component`, `.fvl-global`, จองพื้นที่ min-height, ใช้ `100dvh` สำหรับ global overlays, และปรับเวอร์ชันใน header เป็น `v2.0.0` |
+| `assets/css/loading.css` | เพิ่มกฎ CSS `min-height: calc(100dvh - 120px)` สำหรับ `#content-loading` เพื่อป้องกัน Layout Shift (CLS < 0.1) |
+| `assets/js/nav-core-modules/loading.js` | ปรับ `LoadingService.showInContent()` ให้ใช้ `type: 'page'` ใน `#content-loading` |
+| `assets/js/nav-core-modules/content.js` | เพิ่ม `skipScroll: true` บนการโหลดข้อมูลในหน้าเดิม เพื่อรักษาระแหน่ง scroll ของผู้ใช้ ไม่กระโดดกลับขึ้นบนสุด |
+| `data/verse/discover/index.html` | ย้าย `#fv-boot-loader` จาก root body เข้ามาเป็น SSG in-flow slot ภายใน `#content-loading` |
+| `fanhoard-docs/07-Loading-System.md` | อัปเดตเอกสารหลักสถาปัตยกรรม Typed Loading v2, In-Flow Boot, Scroll Preservation, และบทเรียน Anti-Patterns |
+| `fanhoard-docs/15-Loading-Contract-And-Test-Plan.md` | อัปเดต Contract Specification, Display Modes Table, Test Seams, และ Implementation Plan |
 
-## พฤติกรรมใหม่
+## พฤติกรรมใหม่ (New Behavior Comparison)
 
-### ก่อนหน้า
-- การเปลี่ยนหน้า/หมวดหมู่แสดง Fullscreen หรือ Scoped Overlay ทับหน้าจอ
-- บังแถบ Nav ด้านบน และอาจล็อคการ Scroll ของผู้ใช้
-- Header Nav ถูกจางแสง (`opacity: 0.4`) และกดไม่ได้ระหว่างโหลด
+### ก่อนหน้า (Round 1 / Legacy Overlay)
+- Boot loader เป็น Viewport Cover Overlay (`position: fixed; inset: 0`) บดบัง Header Navigation
+- บนมือถือเมื่อ browser URL bar ซ่อน/แสดง เกิดช่องว่างเห็นเนื้อหาข้างหลังเลื่อน
+- เมื่อโหลดข้อมูลเสร็จ หน้าจอจะกระโดดกลับขึ้นบนสุด (`window.scrollTo(0, 0)`)
+- ไม่มี API ระบุประเภท/ขอบเขตการโหลดที่ชัดเจน
 
-### ตอนนี้ (In-Flow Contextual Loading)
-- แสดง Spinner ภายในพื้นที่เนื้อหา (`#content-loading`) ใน document flow ปกติ
-- ไม่ใช้ `position: fixed` หรือ `z-index` ซ้อนทับหน้าจอ
-- ผู้ใช้สามารถ Scroll หน้าจอได้อย่างอิสระ Loading area เลื่อนตามเอกสารตามธรรมชาติ
-- แถบ Header Nav และ Footer ทำงานได้ตลอดเวลา สามารถกดเปลี่ยนหมวดหมู่หรือเมนูอื่นได้ทันที
-- มีการจองพื้นที่ `min-height: 180px` เพื่อป้องกันหน้าจอกระตุก (CLS < 0.1)
+### ตอนนี้ (Typed Loading v2 Architecture)
+- ระบุขอบเขตการโหลดชัดเจนผ่าน Typed API (`page`, `content`, `component`, `global`)
+- Boot loader แสดงผลแบบ In-Flow Slot อยู่ภายในพื้นที่เนื้อหา (`#content-loading`)
+- แถบ Header Navigation และเมนูต่างๆ แสดงผล Unblocked สามารถกดได้ทันทีตั้งแต่วินาทีแรก
+- รักษาระดับ Scroll เดิมของผู้ใช้ (`window.scrollY`) เมื่อโหลดข้อมูลในหน้าเดิม ไม่กระโดดกลับขึ้นบนสุด
+- ใช้ dynamic viewport (`100dvh`) และ in-flow layout ป้องกันปัญหา URL-bar ช่องว่างบนมือถือ
 
 ---
 
