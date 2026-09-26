@@ -1,6 +1,6 @@
 ---
 version: 3.0.3
-date: 2026-09-25T05:13:54.496Z
+date: 2026-09-26T07:09:20.531Z
 title: Report form was blocked by its own security policy
 subtitle: The site's content security policy only allowed the report server's old address, so browsers silently blocked every submission. The policy now points at the live report server.
 notify: true
