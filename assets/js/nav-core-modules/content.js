@@ -276,7 +276,7 @@
      * @param {string} lang
      * @param {string} [routeKey]  key สำหรับ RouteCache (default '_all')
      */
-    async renderFeed(lang, routeKey = '_all') {
+    async renderFeed(lang, routeKey = '_all', options = {}) {
       _ensureCss();
       _ensureFeedCss();
 
@@ -344,7 +344,7 @@
       if (M.FeedCache) M.FeedCache.clearFeedState();
       M.FeedService.reset();
 
-      await this.clearContent();
+      await this.clearContent({ skipScroll: !!(options && options.skipScroll) });
       const sess = _sess;
 
       try {
@@ -416,7 +416,7 @@
     // @param {Array}  data      array of source descriptors: [{ source, as, only }]
     // @param {string} lang
     // @param {string} routeKey  key สำหรับ RouteCache
-    async renderContentLazy(data, lang, routeKey) {
+    async renderContentLazy(data, lang, routeKey, options = {}) {
       _ensureCss();
       _ensureFeedCss();
 
@@ -486,7 +486,7 @@
 
       if (M.RouteCache) M.RouteCache.invalidate(routeKey);
 
-      await this.clearContent();
+      await this.clearContent({ skipScroll: !!(options && options.skipScroll) });
       const sess = _sess;
 
       try {
