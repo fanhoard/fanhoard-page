@@ -43,6 +43,15 @@ describe('html-transformer', () => {
     expect(output).not.toContain('data-translate=');
   });
 
+  it("injects pre-baked skeleton markup into empty #content-loading containers", () => {
+    const inputHtml = "<html><head></head><body><div id=\"content-loading\"></div></body></html>";
+    const output = transformHtml(inputHtml, "en", {}, "data/verse/discover/index.html");
+
+    expect(output).toContain("pl-grid-skeleton");
+    expect(output).toContain("pl-card-skeleton");
+    expect(output).toContain("aria-hidden=\"true\"");
+  });
+
   it('injects footer template if present in config', () => {
     const inputHtml = '<html><head></head><body><div id="footer-placeholder"></div></body></html>';
     const output = transformHtml(inputHtml, 'en', {}, 'home/index.html');
