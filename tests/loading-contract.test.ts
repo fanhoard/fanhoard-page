@@ -224,4 +224,66 @@ describe('Central Loader Architecture & Loading Contract (FVL)', () => {
       expect(subNav.style.pointerEvents).not.toBe('none');
     });
   });
+
+  describe('In-Flow Contextual Boundary Mode', () => {
+    it('mounts inside target container in document flow without fixed/absolute positioning', async () => {
+      const container = document.createElement('div');
+      container.id = 'content-loading';
+      document.body.appendChild(container);
+
+      const FVL = (window as any).FVL;
+      const handle = FVL.boundary('#content-loading', { message: 'Loading content…' });
+
+      expect(handle).not.toBeNull();
+      expect(container.getAttribute('aria-busy')).toBe('true');
+
+      const boundaryEl = container.querySelector('.fvl-boundary');
+      expect(boundaryEl).not.toBeNull();
+      expect(boundaryEl?.getAttribute('data-fvl-mode')).toBe('boundary');
+      expect(boundaryEl?.style.position).not.toBe('fixed');
+      expect(boundaryEl?.style.position).not.toBe('absolute');
+      expect(document.body.style.position).not.toBe('fixed');
+
+      await handle.hide();
+      expect(container.getAttribute('aria-busy')).toBe('false');
+      expect(container.querySelector('.fvl-boundary')).toBeNull();
+    });
+
+    it('handles per-boundary ref counting for concurrent requests on same target', async () => {
+      const container = document.createElement('div');
+      container.id = 'content-loading';
+      document.body.appendChild(container);
+
+      const FVL = (window as any).FVL;
+      const h1 = FVL.boundary('#content-loading', { message: 'Request 1' });
+      const h2 = FVL.boundary('#content-loading', { message: 'Request 2' });
+
+      expect(container.getAttribute('aria-busy')).toBe('true');
+      expect(container.querySelector('.fvl-boundary')).not.toBeNull();
+
+      // First hide should decrement ref count but leave boundary visible
+      await h1.hide();
+      expect(container.getAttribute('aria-busy')).toBe('true');
+      expect(container.querySelector('.fvl-boundary')).not.toBeNull();
+
+      // Second hide unmounts boundary and resets aria-busy
+      await h2.hide();
+      expect(container.getAttribute('aria-busy')).toBe('false');
+      expect(container.querySelector('.fvl-boundary')).toBeNull();
+    });
+
+    it('cleans up boundary instances on hideAll', async () => {
+      const container = document.createElement('div');
+      container.id = 'content-loading';
+      document.body.appendChild(container);
+
+      const FVL = (window as any).FVL;
+      FVL.boundary('#content-loading', { message: 'Loading…' });
+      expect(container.getAttribute('aria-busy')).toBe('true');
+
+      await FVL.hideAll();
+      expect(container.getAttribute('aria-busy')).toBe('false');
+      expect(container.querySelector('.fvl-boundary')).toBeNull();
+    });
+  });
 });
