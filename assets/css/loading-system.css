@@ -187,6 +187,48 @@
     color: var(--fvl-text);
   }
 
+  /* ── In-Flow Contextual Boundary Loader ── */
+  .fvl-boundary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: var(--fvl-boundary-min-height, 180px);
+    padding: var(--fv-spacing-6, 1.5rem);
+    box-sizing: border-box;
+    background: transparent;
+    color: var(--fvl-text);
+    margin: 0 auto;
+    contain: layout style;
+  }
+  .fvl-boundary .fvl-boundary-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+  }
+  .fvl-boundary .fvl-spinner {
+    width: 48px;
+    height: 48px;
+  }
+  .fvl-boundary .fvl-msg {
+    font-size: var(--step-0, 0.95rem);
+    font-weight: var(--font-medium, 500);
+    color: var(--fvl-text);
+    text-align: center;
+    line-height: 1.4;
+  }
+  .fvl-boundary .fvl-sub {
+    font-size: var(--step--1, 0.85rem);
+    color: var(--fvl-text-sub);
+    text-align: center;
+    line-height: 1.4;
+  }
+  .fvl-boundary .fvl-sub:empty { display: none; }
+
   /* ── Topbar Progress Indicator ── */
   .fvl-topbar {
     position: fixed;

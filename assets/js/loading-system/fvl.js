@@ -171,6 +171,7 @@
       topbar:     17500,
       fullscreen: 17000, // matches --fv-z-fullscreen-overlay (17000)
       scoped:     1600,  // matches --fv-z-scoped-overlay (1600)
+      boundary:   0,     // contextual in-flow boundary (normal flow)
       inline:     0,     // inline participates in normal flow
     }),
 
@@ -186,6 +187,7 @@
     SIZES: Object.freeze({
       fullscreen: 68,
       scoped: 40,
+      boundary: 48,
       inline: 18,
       topbar: 0, // N/A
     }),
@@ -221,6 +223,12 @@
       }),
       scoped: Object.freeze({
         overlay: true,
+        theme: 'auto',
+        visual: 'ring',
+      }),
+      boundary: Object.freeze({
+        overlay: false,
+        lockScroll: false,
         theme: 'auto',
         visual: 'ring',
       }),
@@ -380,6 +388,21 @@
   var State = (function() {
     /** @type {Map<string, FVLInstance>} */
     var _instances = new Map();
+    /** @type {Map<HTMLElement|string, { refCount: number, activeId: string, latestRequestId: number }>} */
+    var _boundaryRefs = new Map();
+
+    function getBoundaryRef(target) {
+      return _boundaryRefs.get(target) || null;
+    }
+    function setBoundaryRef(target, data) {
+      _boundaryRefs.set(target, data);
+    }
+    function deleteBoundaryRef(target) {
+      _boundaryRefs.delete(target);
+    }
+    function clearAllBoundaryRefs() {
+      _boundaryRefs.clear();
+    }
     /** @type {Map<string, string>} group → instanceId */
     var _groups = new Map();
     /** @type {Map<string, Set<Function>>} event → listeners */
@@ -441,6 +464,7 @@
     }
 
     function destroyAll() {
+      clearAllBoundaryRefs();
       _instances.forEach(function(inst) { _emit('destroy', { id: inst.id }); });
       _instances.clear();
       _groups.clear();
@@ -458,6 +482,10 @@
       on: on,
       off: off,
       emit: _emit,
+      getBoundaryRef: getBoundaryRef,
+      setBoundaryRef: setBoundaryRef,
+      deleteBoundaryRef: deleteBoundaryRef,
+      clearAllBoundaryRefs: clearAllBoundaryRefs,
       destroyAll: destroyAll,
     });
   })();
@@ -599,10 +627,52 @@
     }
 
     // ── Build entry point ──
+    function buildBoundary(inst) {
+      var root = Utils.DOM.create('div', 'fvl fvl-boundary', {
+        'role': 'status',
+        'aria-live': 'polite',
+      });
+      root.setAttribute(CONFIG.DOM.DATA_MODE, 'boundary');
+
+      var inner = Utils.DOM.create('div', 'fvl-boundary-inner');
+      var size = inst.options.size || CONFIG.SIZES.boundary;
+
+      var spinner = Utils.DOM.create('div', 'fvl-spinner', { 'aria-hidden': 'true' });
+      spinner.style.width = size + 'px';
+      spinner.style.height = size + 'px';
+      spinner.innerHTML = spinnerSVG();
+      inst.spinnerEl = spinner;
+      inner.appendChild(spinner);
+
+      if (inst.options.message) {
+        var msg = Utils.DOM.create('div', 'fvl-msg');
+        msg.textContent = inst.options.message;
+        inst.msgEl = msg;
+        inner.appendChild(msg);
+      }
+
+      if (inst.options.subMessage) {
+        var sub = Utils.DOM.create('div', 'fvl-sub');
+        sub.textContent = inst.options.subMessage;
+        inst.subEl = sub;
+        inner.appendChild(sub);
+      }
+
+      root.appendChild(inner);
+
+      if (inst.options.className) {
+        root.className += ' ' + inst.options.className;
+      }
+
+      applyTheme(root, inst.options.theme, inst.targetEl);
+      return root;
+    }
+
     function build(inst) {
       var root;
       switch (inst.mode) {
         case 'scoped':    root = buildScoped(inst);    break;
+        case 'boundary':  root = buildBoundary(inst);  break;
         case 'inline':    root = buildInline(inst);    break;
         case 'topbar':    root = buildTopbar(inst);    break;
         case 'fullscreen':
@@ -695,6 +765,8 @@
 
   var Engine = (function() {
 
+    var _globalRequestId = 0;
+
     // ── i18n text resolver for fullscreen mode ──
     function _setTexts(inst) {
       if (!inst.msgEl) return;
@@ -771,6 +843,21 @@
     }
 
     // ── Position scoped loader inside target ──
+    function _attachBoundary(inst) {
+      var target = inst.targetEl;
+      if (!target) return false;
+
+      target.setAttribute('aria-busy', 'true');
+
+      if (inst.options.replaceContent) {
+        inst.origTargetHTML = target.innerHTML;
+        target.innerHTML = '';
+      }
+
+      target.appendChild(inst.rootEl);
+      return true;
+    }
+
     function _attachScoped(inst) {
       var target = inst.targetEl;
       if (!target) {
@@ -837,13 +924,34 @@
       }
       opts.id = id;
 
-      // Resolve target for scoped/inline
+      // Resolve target for scoped/inline/boundary
       var targetEl = null;
-      if (mode === 'scoped' || mode === 'inline') {
+      if (mode === 'scoped' || mode === 'inline' || mode === 'boundary') {
         targetEl = Utils.DOM.resolveTarget(opts.target);
+        if (!targetEl && mode === 'boundary') {
+          targetEl = Utils.DOM.resolveTarget('#content-loading') || document.querySelector('main') || document.body;
+        }
         if (!targetEl) {
           console.error('[FVL] ' + mode + ' mode requires valid target');
           return null;
+        }
+      }
+
+      var reqId = ++_globalRequestId;
+      if (mode === 'boundary') {
+        var refData = State.getBoundaryRef(targetEl);
+        if (refData && refData.activeId) {
+          var existingInst = State.getInstance(refData.activeId);
+          if (existingInst && (existingInst.state === 'showing' || existingInst.state === 'shown')) {
+            refData.refCount++;
+            refData.latestRequestId = reqId;
+            existingInst.requestId = reqId;
+            if (opts.message && opts.message !== existingInst.options.message) {
+              existingInst.options.message = opts.message;
+              _setTexts(existingInst);
+            }
+            return _makeHandle(existingInst);
+          }
         }
       }
 
@@ -893,6 +1001,7 @@
         subEl: null,
         barEl: null,
         targetEl: targetEl,
+        requestId: reqId,
         state: 'showing',
         shownAt: Date.now(),
         autoHideTimer: null,
@@ -907,8 +1016,8 @@
       inst.rootEl = Renderer.build(inst);
       if (!inst.rootEl) return null;
 
-      // Set z-index (except inline which participates in normal flow)
-      if (mode !== 'inline') {
+      // Set z-index (except inline and boundary which participate in normal flow)
+      if (mode !== 'inline' && mode !== 'boundary') {
         inst.rootEl.style.zIndex = zBase;
       }
 
@@ -932,6 +1041,9 @@
         case 'scoped':
           if (!_attachScoped(inst)) return null;
           break;
+        case 'boundary':
+          if (!_attachBoundary(inst)) return null;
+          break;
         case 'inline':
           if (!_attachInline(inst)) return null;
           break;
@@ -945,6 +1057,9 @@
       }
 
       // Register in state
+      if (mode === 'boundary' && targetEl) {
+        State.setBoundaryRef(targetEl, { refCount: 1, activeId: id, latestRequestId: reqId });
+      }
       State.addInstance(inst);
       State.emit('showing', { id: id, mode: mode });
 
@@ -1003,6 +1118,14 @@
       var inst = State.getInstance(id);
       if (!inst || inst.state === 'hidden' || inst.state === 'destroyed') return Promise.resolve();
       if (inst.state === 'hiding') return Promise.resolve();
+
+      if (inst.mode === 'boundary' && inst.targetEl) {
+        var refData = State.getBoundaryRef(inst.targetEl);
+        if (refData && refData.refCount > 1) {
+          refData.refCount--;
+          return Promise.resolve();
+        }
+      }
 
       inst.state = 'hiding';
       if (inst.autoHideTimer) { clearTimeout(inst.autoHideTimer); inst.autoHideTimer = null; }
@@ -1071,6 +1194,13 @@
         inst.targetEl.innerHTML = inst.origTargetHTML;
         inst.origTargetHTML = '';
       }
+      if (inst.mode === 'boundary' && inst.targetEl) {
+        if (inst.options.replaceContent && inst.origTargetHTML != null) {
+          inst.targetEl.innerHTML = inst.origTargetHTML;
+          inst.origTargetHTML = '';
+        }
+        State.deleteBoundaryRef(inst.targetEl);
+      }
       // Remove root element
       if (inst.rootEl && inst.rootEl.parentNode) {
         inst.rootEl.parentNode.removeChild(inst.rootEl);
@@ -1109,10 +1239,11 @@
 
     // ── Hide all active instances ──
     function hideAll() {
+      State.clearAllBoundaryRefs();
       var all = State.getAllInstances().filter(function(i) {
         return i.state === 'showing' || i.state === 'shown';
       });
-      return Promise.all(all.map(function(i) { return hide(i.id); }));
+      return Promise.all(all.map(function(i) { return hideInstant(i.id); }));
     }
 
     // ── Hide by group ──
@@ -1393,6 +1524,17 @@
         opts = Object.assign({}, opts);
       }
       opts.mode = 'scoped';
+      return Engine.show(opts);
+    },
+    boundary: function(target, opts) {
+      if (typeof target === 'object' && !(target instanceof HTMLElement) && target !== null) {
+        opts = target;
+        target = opts.target;
+      } else {
+        opts = opts || {};
+      }
+      opts.mode = 'boundary';
+      if (target) opts.target = target;
       return Engine.show(opts);
     },
     inline: function(opts) {
