@@ -114,15 +114,6 @@ export function transformHtml(
     });
   }
 
-  // 5.8 Inject pre-baked skeleton markup into empty #content-loading containers
-  $("#content-loading:empty").each((_, el) => {
-    $(el).html(
-      `<div class="pl-grid-skeleton" aria-hidden="true" role="presentation">` +
-        `<div class="pl-card-skeleton" aria-hidden="true" role="presentation"></div>`.repeat(8) +
-      `</div>`
-    );
-  });
-
   // 6. Remove body opacity:0
   const $body = $('body');
   const newStyle = ($body.attr('style') || '')

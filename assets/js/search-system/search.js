@@ -289,12 +289,7 @@
       try {
         KeyboardService.initKeyboardDetection();
 
-        const srEl = DOMService.get(CONFIG.DOM.searchResultsId);
-        const dataPromise = (window.PLSys && srEl)
-          ? window.PLSys.load(srEl, function() { return loadData(); }, null, { key: "search:data" })
-          : loadData();
-
-        dataPromise
+        loadData()
           .then(function (data) {
             State.apiData = data || {};
             if (!Array.isArray(State.apiData.type))

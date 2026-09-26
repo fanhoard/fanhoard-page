@@ -1,32 +1,14 @@
 ---
-version: 3.1.0
-date: 2026-09-26T06:49:42.662Z
-title: Progressive loading replaces blocking overlay screens across the site
-subtitle: Pages now paint skeleton layouts and stream content in progressively instead of hiding everything behind a fullscreen loading screen, with reduced-motion support and stricter accessibility state reporting.
+version: 3.0.3
+date: 2026-09-25T05:13:54.496Z
+title: Report form was blocked by its own security policy
+subtitle: The site's content security policy only allowed the report server's old address, so browsers silently blocked every submission. The policy now points at the live report server.
 notify: true
 ---
 
-**TL;DR** — Loading no longer hides the page. Every screen that used to blank out behind a fullscreen overlay now renders a layout-matching skeleton immediately and commits real content progressively, keeps navigation clickable during fetches, and reports loading state to screen readers correctly.
-
-### New
-
-- **Progressive Loading System (PLSys)**
-  A site-wide progressive loading layer: deterministic load-lifecycle state machine, stale-while-revalidate caching, bounded timeouts with retry UI, skeleton layouts that match final geometry (zero layout shift), static skeleton variants under reduced-motion, and telemetry via performance marks.
-- **Pre-baked skeleton grid on Discover**
-  The Discover page serves a server-generated card-grid skeleton in the HTML itself, so the layout paints instantly before any dataset downloads.
-
-### Improved
-
-- **No more blocking overlays**
-  The boot overlay screens on Discover are gone; content-scoped skeletons and a slim top progress bar give feedback without covering the page or freezing interaction.
-- **Search, Settings, Roadmap, and What's New load progressively**
-  Each dynamic page renders inline skeletons around its own container while data fetches, keeping inputs and focus intact, with local retry controls on fetch errors.
-- **Accessibility during loading**
-  Loading containers now report `aria-busy` accurately during fetches and clear it reliably once content commits; skeletons are hidden from assistive tech and switch to static fills when the visitor prefers reduced motion.
+**TL;DR** — The site's security header still whitelisted the report server's old address, so real browsers quietly blocked the report form from sending anything. The header now matches the report server actually in use, and submissions go through.
 
 ### Fixed
 
-- **Category content failed to render on Discover**
-  The symbol/emoji/fancy category pipelines read a data index schema that did not exist and called a resolver method that was never defined, leaving the content area empty after navigation. Both now read the real dataset format.
-- **Loading state could get stuck after content appeared**
-  A loader id collision made scoped loaders no-ops after boot, and the pre-baked skeleton's busy flag was never cleared once real content committed. Loading indicators now always start and finish correctly.
+- **Security policy now allows the report server**
+  The Content-Security-Policy header whitelisted a retired report-server domain, so browsers blocked the form's request to the current server before it was ever sent. The whitelisted address now matches the report server the site actually uses, and report submissions complete successfully.

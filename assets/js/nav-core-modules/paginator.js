@@ -207,16 +207,12 @@
         //   - fetchCategoryGroup ค้นหาผ่าน assembled DB — ใช้กับ copyable types (emoji/symbol/fancy)
         //   - fetchCategoryDirect fetch จาก file — ใช้กับ collection types (cards)
         //   ปัจจุบัน paginator ใช้กับ copyable เป็นหลัก แต่รองรับ card ได้ผ่าน layout param
-        // Real schema: category entry carries `file` → /assets/db/con-data/{type}/{cat}.json
-        //   payload = { id, name: { th, en }, data: [ { api, text, name: { th, en } } ] }
-        if (!cat.file) return null;
-        const payload = await M.DataService.fetchWithRetry(cat.file, {}, 3);
-        // fetchWithRetry may return the item array directly or the raw { id, name, data } file object
-        const data = Array.isArray(payload) ? payload : (payload && Array.isArray(payload.data) ? payload.data : null);
+        const fetchFn = isCard
+          ? () => this._fetchCardCategory(cat.id, lang)
+          : () => M.DataService.fetchCategoryGroup(cat.id);
+
+        const { data, header } = await fetchFn();
         if (!data || !data.length) return null;
-        const header = (payload && payload.name && (payload.name[lang] || payload.name.en))
-                    || (cat.name && (cat.name[lang] || cat.name.en))
-                    || cat.id;
 
         // resolve items เป็น render-ready format (เหมือน _resolveItem ของ content.js)
         const items = (await Promise.all(

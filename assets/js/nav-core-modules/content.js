@@ -46,17 +46,11 @@
     return LAYOUT.BUTTON;
   }
 
-  function _applyViewTransition(updateFn) {
-    const prefersReducedMotion = typeof window !== 'undefined' &&
-      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!prefersReducedMotion && typeof document !== 'undefined' && typeof document.startViewTransition === 'function') {
-      return document.startViewTransition(updateFn);
-    }
-    updateFn();
-  }
-
   // ── Feed constants ─────────────────────────────────────────────────────────────
   const FEED_SENTINEL_ID     = 'nc-feed-sentinel';
+  // WHY 10/12: FeedService ส่ง segment ละ 20 items
+  //   10 segments × 20 = 200 items on first paint  → ผู้ใช้เห็น content เยอะตั้งแต่ load แรก
+  //   12 segments × 20 = 240 items ต่อ scroll load → scroll ได้ smooth ไม่ต้องรอบ่อย
   const FEED_FIRST_PAGE_SIZE = 10;
   const FEED_PAGE_SIZE       = 12;
 
@@ -108,6 +102,28 @@
     if (document.getElementById(_FEED_CSS_ID)) return;
     const s = document.createElement('style');
     s.id = _FEED_CSS_ID;
+    // WHY content-visibility:auto:
+    //   browser discard rendering + layout ของ .feed-page ที่อยู่นอก viewport
+    //   ทำให้มี DOM 400+ pages โดยไม่กินแรง GPU/memory มากเกินไป
+    //
+    // v2.2 — Height caching ที่แม่นยำขึ้น:
+    //   ก่อนหน้านี้: contain-intrinsic-block-size: 800px (ค่าคงที่)
+    //     → แต่ละ .feed-page จอง 800px เสมอ แม้เนื้อหาจริงจะต่ำกว่า (เช่น 300px)
+    //     → เกิด "ช่องว่าง" ระหว่างกลุ่มเนื้อหาที่ user เห็นชัด (ปัญหาเรื้อรัง)
+    //     → ยิ่งหมวดเล็ก (20 items) ยิ่งเห็นช่องว่างมาก เพราะจอง 800px แต่ใช้จริง ~210px
+    //
+    //   ตอนนี้: contain-intrinsic-block-size: auto 300px
+    //     → `auto` = browser จำความสูงจริงหลัง render ครั้งแรก แล้วใช้ค่านั้นเป็น placeholder
+    //        ทำให้ scrollbar height ใกล้เคียงความจริง ลด layout shift ขณะ scroll
+    //     → `300px` = fallback สำหรับ render ครั้งแรก (ก่อน browser จำค่าจริงได้)
+    //        300px สมเหตุสมผลสำหรับ category เล็ก (header 50px + 2 rows × ~125px)
+    //     → รองรับ browser สมัยใหม่ (Chrome 95+, Firefox 101+, Safari 17+)
+    //
+    //   ผลกระทบต่อ SPA:
+    //     การ navigation ระหว่าง route → clearContent() ล้าง .feed-page เดิม
+    //     → new route สร้าง .feed-page ใหม่ → เริ่มจาก fallback 300px
+    //     → หลัง render แรก browser จำความสูงจริง → scroll ถัดไปใช้ค่าจริง
+    //     → ลด "jumping scrollbar" ที่เคยเกิดจาก 800px → actual size
     s.textContent = `
 .feed-page{
   content-visibility: auto;
@@ -142,6 +158,9 @@
   let _feedObserver = null;
   let _sess         = 0;
 
+  // ── Active route tracking (for state preservation) ────────────────────────────
+  // WHY: เก็บ routeKey ปัจจุบันเพื่อให้ router.js สามารถ trigger save ก่อน navigate-away
+  //   และเรียก restore เมื่อกลับมา route เดิม
   let _activeRouteKey   = null;
   let _activeRouteKind  = null; // 'feed' | 'lazy' | 'ure'
 
@@ -160,10 +179,7 @@
         window.scrollTo(0, 0);
       }
 
-      if (typeof window !== 'undefined' && window.DiscoverFeed && typeof window.DiscoverFeed.clearFeed === 'function') {
-        try { window.DiscoverFeed.clearFeed(); } catch (_) {}
-      }
-
+      // WHY disconnect ก่อน destroy: ป้องกัน observer fire ระหว่าง DOM clear
       if (_feedObserver) {
         _feedObserver.disconnect();
         _feedObserver = null;
@@ -202,29 +218,64 @@
         const items = await this._resolveAll(data, lang);
         if (sess !== _sess) return;
 
-        _applyViewTransition(() => {
-          _ureHandle = window.URE.mount({
-            container          : ctr,
-            data               : items,
-            keyField           : '_ureKey',
-            estimatedItemHeight: 130,
-            buffer             : 700,
-            recycling          : true,
-            template           : (item, l) => this._tpl(item, l),
-            onItemClick        : (e)        => this._onClick(e),
-          });
+        // v4: Render content ก่อน แล้วค่อยซ่อน loading
+        // WHY: ถ้าซ่อน loading ก่อน → ผู้ใช้เห็นหน้าว่างช่วงระหว่าง fade-out กับ render
+        //   เหมือน Google/Microsoft — content พร้อมก่อน ถึงจะซ่อน overlay
+        //   v4: This is the "render behind overlay" pattern (Netflix/Spotify).
+        //     Content is mounted under the overlay, then hideInstant()
+        //     waits 1 rAF for paint before removing the overlay.
+        _ureHandle = window.URE.mount({
+          container          : ctr,
+          data               : items,
+          keyField           : '_ureKey',
+          estimatedItemHeight: 130,
+          buffer             : 700,
+          recycling          : true,
+          template           : (item, l) => this._tpl(item, l),
+          onItemClick        : (e)        => this._onClick(e),
         });
 
       } catch (e) {
-        console.error('[NavCore/Content] renderContent error:', e, e && e.stack);
+        console.error('[NavCore/Content] renderContent error:', e);
         try { M.LoadingService?.hide(); } catch (err) { console.warn('[Content] LoadingService.hide failed in catch:', err); }
       } finally {
+        // v4: hideInstant — overlay will be removed after 1 rAF so the
+        //   just-mounted content paints underneath first.
+        //   This is the "render behind overlay" pattern.
         try { M.LoadingService?.hideInstant(); } catch (_) {}
       }
     },
 
     // ── renderFeed (All button — infinite scroll, native DOM) ────────────────────
 
+    /**
+     * Render smart infinite feed สำหรับ "All" button.
+     *
+     * v2 — state preservation (X-style):
+     *   • ถ้ามี cache ของ route นี้ใน RouteCache → restore DOM + FeedService state
+     *     + scroll position + re-attach observer (skip first page fetch)
+     *   • ถ้าไม่มี cache → render ใหม่จากศูนย์ (เหมือน v1)
+     *   • router.js จะเรียก saveActiveRoute() ก่อน navigate ออก → state ถูกเก็บใน RouteCache
+     *
+     * v2.1 — per-user persistent feed (discovery focus):
+     *   • ก่อนเริ่ม reset → ลอง restore จาก FeedCache (localStorage) ก่อน
+     *   • ถ้า hit → ใช้ seed + state เดิม → feed "จัดส่ง" ครั้งก่อนยังอยู่, resume ที่เดิม
+     *   • ถ้า miss → reset → FeedCache.getOrCreateSeed() ให้ seed (อาจเป็น seed เดิมถ้ายังใน TTL)
+     *   • หลัง loadNextPage แต่ละครั้ง → บันทึก state ลง FeedCache เพื่อใช้ครั้งถัดไป
+     *
+     * ทำไมไม่ใช้ URE:
+     *   URE mount ครั้งเดียว ถ้าจะ append ต้องรู้ internal API
+     *   feed ใช้ IntersectionObserver + DOM append แทน
+     *   ทำให้ append ได้ไม่จำกัดโดยไม่ต้อง re-mount (ไม่มี scroll jump)
+     *
+     * Memory safety:
+     *   .feed-page ใช้ content-visibility:auto → off-screen pages ไม่ render
+     *   MAX_ROUNDS ใน FeedService จำกัด total emit
+     *   clearContent() disconnect observer ก่อน clear DOM เสมอ
+     *
+     * @param {string} lang
+     * @param {string} [routeKey]  key สำหรับ RouteCache (default '_all')
+     */
     async renderFeed(lang, routeKey = '_all') {
       _ensureCss();
       _ensureFeedCss();
@@ -234,6 +285,8 @@
 
       _activeRouteKey  = routeKey;
       _activeRouteKind = 'feed';
+
+      this._ensureScrollPersist();
 
       const cached = M.RouteCache ? M.RouteCache.get(routeKey) : null;
 
@@ -315,35 +368,54 @@
 
         if (sess !== _sess) return;
 
+        // ── Cross-document back/forward restore (v6.1) ──────────────────────
+        // กลับเข้าหน้า feed แบบ full page load (discover -> หน้าอื่น -> back)
+        // RouteCache ใน memory ไม่เหลือ → ใช้ตำแหน่งที่ persist ไว้ใน
+        // sessionStorage แทน แล้ว append จนเนื้อหาครอบเป้าก่อน scroll ตรงเป้า
         try {
           const navType = (typeof performance !== 'undefined' && performance.getEntriesByType)
             ? performance.getEntriesByType('navigation')[0]?.type
             : null;
           if (navType === 'back_forward' && sess === _sess) {
             const saved = this._readPersistedScroll(10 * 60 * 1000);
-            if (saved && saved.scrollPosition > 0) {
-              const chunkTarget = Math.max(1, Math.min(10, Math.ceil(saved.scrollPosition / 800)));
-              await this._restoreScrollPosition(ctr, saved.scrollPosition, chunkTarget, async () => {
+            if (saved && saved.y > 0) {
+              await this._restoreScrollPosition(ctr, saved.y, 1, async () => {
                 return await M.FeedService.loadNextPage(lang, FEED_PAGE_SIZE);
               }, lang, sess);
+              // บอก navigateTo ว่า restore เสร็จแล้ว — อย่า smooth-scroll ขึ้นบนสุดทับ
+              this._didRestoreScroll = true;
             }
           }
-        } catch (_) {}
+        } catch (persistErr) {
+          console.warn('[NavCore/Content] back_forward persisted restore failed:', persistErr);
+        }
 
-        if (hasMore && sess === _sess) {
+        if (sess !== _sess) return;
+
+        if (hasMore) {
           this._attachFeedSentinel(ctr, lang, sess);
         }
 
       } catch (e) {
         console.error('[NavCore/Content] renderFeed error:', e);
         try { M.LoadingService?.hide(); } catch (_) {}
-      } finally {
-        try { M.LoadingService?.hideInstant(); } catch (_) {}
       }
     },
 
     // ── renderContentLazy (source-based routes — lazy paginated) ───────────────
-
+    //
+    // ใช้สำหรับ route ที่ระบุ source เช่น Symbols/Emojis/Fancy
+    //   แทนที่ renderContent() สำหรับกรณี data = [{ source: 'symbol' }, ...]
+    //   ทำงานเหมือน renderFeed แต่ใช้ SourcePaginator แทน FeedService
+    //
+    // WHY แยกจาก renderContent:
+    //   renderContent ต้อง resolve ทุก categories ทีเดียวก่อน mount URE → ไม่ lazy
+    //   renderContentLazy ทยอย fetch category ทีละหน้าผ่าน paginator
+    //   ใช้ IntersectionObserver เหมือน feed → scroll เพิ่ม → load category ถัดไป
+    //
+    // @param {Array}  data      array of source descriptors: [{ source, as, only }]
+    // @param {string} lang
+    // @param {string} routeKey  key สำหรับ RouteCache
     async renderContentLazy(data, lang, routeKey) {
       _ensureCss();
       _ensureFeedCss();
@@ -403,7 +475,7 @@
           }, lang, sess);
 
           if (hasMore !== false && sess === _sess) {
-            this._attachLazySentinel(ctr, data, lang, sess);
+            this._attachLazySentinel(ctr, lang, sess);
           }
 
           return;
@@ -413,7 +485,6 @@
       }
 
       if (M.RouteCache) M.RouteCache.invalidate(routeKey);
-      if (M.SourcePaginator) M.SourcePaginator.reset();
 
       await this.clearContent();
       const sess = _sess;
@@ -427,11 +498,16 @@
         this._ensureFeedClickDelegate(ctr);
 
         const sourceDesc = data.find(d => d && d.source);
-        if (!sourceDesc) return;
+        if (!sourceDesc) {
+          await this.renderContent(data);
+          return;
+        }
 
-        const layout = sourceDesc.as === 'cards' || sourceDesc.as === 'card' ? 'card' : 'button';
+        const layout = sourceDesc.as === 'cards' || sourceDesc.as === 'card'
+          ? 'card' : 'button';
         const filter = Array.isArray(sourceDesc.only) ? sourceDesc.only : null;
 
+        M.SourcePaginator?.reset?.();
         await M.SourcePaginator.init(sourceDesc.source, layout, filter);
         if (sess !== _sess) return;
 
@@ -440,61 +516,85 @@
         if (sess !== _sess) return;
 
         if (firstGroups.length) {
-          _applyViewTransition(() => {
-            this._appendFeedGroups(ctr, firstGroups, lang, null);
-          });
+          await this._appendFeedGroups(ctr, firstGroups, lang, null);
         }
 
         try { M.LoadingService?.hideInstant(); } catch (_) {}
 
         if (sess !== _sess) return;
 
-        if (hasMore && sess === _sess) {
-          this._attachLazySentinel(ctr, data, lang, sess);
+        if (hasMore) {
+          this._attachLazySentinel(ctr, lang, sess);
         }
 
       } catch (e) {
         console.error('[NavCore/Content] renderContentLazy error:', e);
         try { M.LoadingService?.hide(); } catch (_) {}
-      } finally {
-        try { M.LoadingService?.hideInstant(); } catch (_) {}
       }
     },
 
-    // ── Helper methods ─────────────────────────────────────────────────────────
+    /**
+     * Sentinel สำหรับ lazy paginator — คล้าย _attachFeedSentinel แต่เรียก
+     * SourcePaginator.loadNextPage แทน FeedService.loadNextPage
+     */
+    _attachLazySentinel(ctr, lang, sess) {
+      if (_feedObserver) { _feedObserver.disconnect(); _feedObserver = null; }
 
-    _ensureFeedClickDelegate(ctr) {
-      if (!ctr || ctr.dataset.feedClickBound === 'true') return;
-      ctr.dataset.feedClickBound = 'true';
+      const sentinel = document.createElement('div');
+      sentinel.id    = FEED_SENTINEL_ID;
+      sentinel.setAttribute('aria-hidden', 'true');
+      ctr.appendChild(sentinel);
 
-      ctr.addEventListener('click', async (ev) => {
-        const target = /** @type {HTMLElement|null} */ (ev.target);
-        if (!target) return;
+      let _loading = false;
 
-        const btn = target.closest('button.button-content');
-        if (btn) {
-          ev.preventDefault();
-          const api  = btn.getAttribute('data-api')  || '';
-          const text = btn.getAttribute('data-text') || btn.textContent || '';
-          if (M.CopyService) {
-            try { await M.CopyService.copyCharacter(api, text, btn); } catch (e) {
-              console.warn('[Content] Feed copy failed:', e);
-            }
-          }
+      _feedObserver = new IntersectionObserver(async entries => {
+        if (!entries[0].isIntersecting || _loading) return;
+
+        if (sess !== _sess) {
+          _feedObserver?.disconnect();
+          _feedObserver = null;
           return;
         }
 
-        const card = target.closest('.card');
-        if (card) {
-          const link = card.getAttribute('data-link');
-          if (link && M.RouterService) {
-            ev.preventDefault();
-            M.RouterService.navigateTo(link);
+        _loading = true;
+        try {
+          const { groups, hasMore } =
+            await M.SourcePaginator.loadNextPage(lang, M.SourcePaginator.PAGE_SIZE);
+
+          if (sess !== _sess) return;
+
+          if (groups.length) {
+            await this._appendFeedGroups(ctr, groups, lang, sentinel);
           }
+
+          if (!hasMore) {
+            _feedObserver?.disconnect();
+            _feedObserver = null;
+            sentinel.remove();
+          }
+        } catch (e) {
+          console.error('[NavCore/Content] lazy loadMore error:', e);
+        } finally {
+          _loading = false;
         }
+      }, {
+        rootMargin: '600px',
+        threshold:  0,
       });
+
+      _feedObserver.observe(sentinel);
     },
 
+    /**
+     * Resolve groups → render HTML → append เป็น .feed-page div.
+     * ใช้ _resolveAll + _tpl เหมือน URE path → HTML classes เหมือนกันทุกอย่าง
+     * รองรับทั้ง button group และ card group จาก FeedService
+     *
+     * @param {HTMLElement}      ctr
+     * @param {Array}            groups    group descriptors จาก FeedService
+     * @param {string}           lang
+     * @param {HTMLElement|null} sentinel  insertBefore ถ้ามี, append ถ้าไม่มี
+     */
     async _appendFeedGroups(ctr, groups, lang, sentinel) {
       if (!groups.length) return;
 
@@ -513,6 +613,8 @@
       for (const item of resolvedItems) html += this._tpl(item, lang);
       page.innerHTML = html;
 
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
       if (sentinel && sentinel.parentNode === ctr) {
         ctr.insertBefore(page, sentinel);
       } else {
@@ -520,123 +622,463 @@
       }
     },
 
+    /**
+     * Attach sentinel div + IntersectionObserver สำหรับ infinite scroll.
+     * rootMargin 600px: preload content ก่อน scroll ถึง bottom 600px
+     * → ไม่มี "หยุดรอ" แม้ scroll เร็วบน mobile
+     *
+     * @param {HTMLElement} ctr
+     * @param {string}      lang
+     * @param {number}      sess  session snapshot — ยกเลิกถ้า navigate ออก
+     */
     _attachFeedSentinel(ctr, lang, sess) {
-      this._removeSentinel();
+      if (_feedObserver) { _feedObserver.disconnect(); _feedObserver = null; }
 
-      const sentinel           = document.createElement('div');
-      sentinel.id              = FEED_SENTINEL_ID;
-      sentinel.style.height    = '1px';
-      sentinel.style.width     = '100%';
-      sentinel.style.marginTop = '40px';
+      const sentinel = document.createElement('div');
+      sentinel.id    = FEED_SENTINEL_ID;
+      sentinel.setAttribute('aria-hidden', 'true');
       ctr.appendChild(sentinel);
 
-      let isLoading = false;
+      // WHY _loading flag: ป้องกัน double-trigger ถ้า observer fires ซ้อนกัน
+      //   (เช่น scroll เร็วมาก ทำให้ sentinel อยู่ใน viewport นานพอให้ fire ซ้ำ)
+      let _loading = false;
 
-      _feedObserver = new IntersectionObserver(async (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          if (isLoading || sess !== _sess) return;
+      _feedObserver = new IntersectionObserver(async entries => {
+        if (!entries[0].isIntersecting || _loading) return;
 
-          isLoading = true;
-          try {
-            const { groups, hasMore } =
-              await M.FeedService.loadNextPage(lang, FEED_PAGE_SIZE);
-
-            if (sess !== _sess) return;
-
-            if (groups.length) {
-              await this._appendFeedGroups(ctr, groups, lang, sentinel);
-              try { M.FeedService?.saveToCache?.(); } catch (_) {}
-            }
-
-            if (!hasMore) {
-              this._removeSentinel();
-            }
-          } catch (e) {
-            console.warn('[NavCore/Content] Feed pagination error:', e);
-          } finally {
-            isLoading = false;
-          }
+        // ตรวจ session ก่อน — ถ้า navigate ออกแล้ว ไม่ต้องทำอะไร
+        if (sess !== _sess) {
+          _feedObserver?.disconnect();
+          _feedObserver = null;
+          return;
         }
-      }, { rootMargin: '600px 0px' });
 
-      _feedObserver.observe(sentinel);
-    },
+        _loading = true;
+        try {
+          const { groups, hasMore } = await M.FeedService.loadNextPage(lang, FEED_PAGE_SIZE);
 
-    _attachLazySentinel(ctr, data, lang, sess) {
-      this._removeSentinel();
+          if (sess !== _sess) return; // ตรวจซ้ำหลัง async
 
-      const sentinel           = document.createElement('div');
-      sentinel.id              = FEED_SENTINEL_ID;
-      sentinel.style.height    = '1px';
-      sentinel.style.width     = '100%';
-      sentinel.style.marginTop = '40px';
-      ctr.appendChild(sentinel);
-
-      let isLoading = false;
-
-      _feedObserver = new IntersectionObserver(async (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          if (isLoading || sess !== _sess) return;
-
-          isLoading = true;
-          try {
-            const { groups, hasMore } =
-              await M.SourcePaginator.loadNextPage(lang, M.SourcePaginator.PAGE_SIZE);
-
-            if (sess !== _sess) return;
-
-            if (groups.length) {
-              await this._appendFeedGroups(ctr, groups, lang, sentinel);
-            }
-
-            if (!hasMore) {
-              this._removeSentinel();
-            }
-          } catch (e) {
-            console.warn('[NavCore/Content] Lazy pagination error:', e);
-          } finally {
-            isLoading = false;
+          if (groups.length) {
+            await this._appendFeedGroups(ctr, groups, lang, sentinel);
           }
+
+          // v2.1: บันทึก state ลง FeedCache หลังแต่ละ page load
+          //   → resume ได้จากจุดล่าสุดแม้ปิดแท็บแล้วกลับมา
+          try { M.FeedService?.saveToCache?.(); } catch (_) {}
+
+          if (!hasMore) {
+            // ครบ MAX_ROUNDS แล้ว — หยุด observe, ลบ sentinel
+            _feedObserver?.disconnect();
+            _feedObserver = null;
+            sentinel.remove();
+          }
+          // ถ้ายัง hasMore: sentinel ยังอยู่ที่เดิม (ท้ายสุดของ ctr)
+          // observer จะ fire อีกครั้งเมื่อ scroll ถึง
+
+        } catch (e) {
+          console.error('[NavCore/Content] feed loadMore error:', e);
+        } finally {
+          _loading = false;
         }
-      }, { rootMargin: '600px 0px' });
-
-      _feedObserver.observe(sentinel);
-    },
-
-    _removeSentinel() {
-      if (_feedObserver) {
-        _feedObserver.disconnect();
-        _feedObserver = null;
-      }
-      const el = document.getElementById(FEED_SENTINEL_ID);
-      if (el) try { el.parentNode?.removeChild(el); } catch (_) {}
-    },
-
-    saveActiveRoute() {
-      if (!_activeRouteKey || !M.RouteCache) return;
-
-      const ctr = document.getElementById(CONFIG.DOM.CONTENT_LOADING_ID);
-      if (!ctr) return;
-
-      const pages = ctr.querySelectorAll('.feed-page');
-      const count = pages.length || 1;
-
-      let feedState = null;
-      if (_activeRouteKind === 'feed' && M.FeedService) {
-        feedState = M.FeedService.snapshot();
-      }
-
-      M.RouteCache.save(_activeRouteKey, {
-        scrollPosition: window.pageYOffset || 0,
-        domContainer  : ctr,
-        chunkCount    : count,
-        feedState     : feedState,
-        paginatorState: _activeRouteKind === 'lazy' && M.SourcePaginator ? M.SourcePaginator.snapshot() : null,
+      }, {
+        rootMargin: '600px',
+        threshold:  0,
       });
 
-      this._persistScroll(_activeRouteKey, window.pageYOffset || 0);
+      _feedObserver.observe(sentinel);
+    },
+
+    /**
+     * Attach delegated click handler บน ctr ครั้งเดียวตลอดอายุ element.
+     * WHY: feed groups เป็น plain HTML นอก URE
+     *   click bubble ขึ้น ctr → _onClick จัดการ copy + card open
+     *   ไม่ re-attach หลัง clearContent เพราะ ctr element ยังเป็นตัวเดิม
+     *   listener ยังคงอยู่บน element เดิม ไม่หาย
+     */
+    _ensureFeedClickDelegate(ctr) {
+      if (ctr._feedClickDelegated) return;
+      ctr.addEventListener('click', e => this._onClick(e));
+      ctr._feedClickDelegated = true;
+    },
+
+    // ── Resolution ──────────────────────────────────────────────────────────────
+
+    async _resolveAll(data, lang) {
+      const out = [];
+      const k   = { v: 0 };
+
+      for (const item of data) {
+        if (!item) continue;
+
+        if (item.jsonFile && !item._fetched) {
+          try {
+            const res = await M.DataService.fetchWithRetry(item.jsonFile, {}, 3);
+            const arr = Array.isArray(res) ? res : [res];
+            const sub = await this._resolveAll(arr.map(r => ({ ...r, _fetched: true })), lang);
+            for (const g of sub) { g._ureKey = `k${k.v++}`; out.push(g); }
+          } catch (e) { console.error('[Content] jsonFile:', e); }
+          continue;
+        }
+
+        if (item.source) {
+          const descriptor = item.as ? { ...item, layout: _toLayout(item.as) } : item;
+          const groups = await this._resolveSource(descriptor, lang);
+          groups.forEach(g => this._emit(g, k, out));
+          continue;
+        }
+
+        if (item.category) {
+          const asLayout = _toLayout(item.as || item.layout);
+          const cfg = {
+            categoryId: item.category,
+            typeId:     item.type || null,
+            type:       asLayout === LAYOUT.CARD ? 'card' : 'button',
+            layout:     item.horizontal ? 'horizontal' : undefined,
+          };
+          const resolved = await this._resolveGroup(cfg, lang);
+          if (resolved) this._emit(resolved, k, out);
+          continue;
+        }
+
+        if (item.group || item.categoryId) {
+          const cfg      = item.group || { categoryId: item.categoryId, type: item.type || 'button' };
+          const resolved = await this._resolveGroup(cfg, lang);
+          if (resolved) this._emit(resolved, k, out);
+          continue;
+        }
+
+        const isCard = this._isCard(item);
+        const ri     = await this._resolveItem(item, lang, isCard);
+        if (ri) {
+          out.push({
+            _ureKey : `k${k.v++}`,
+            _ureType: isCard ? 'card-group' : 'btn-row',
+            header  : null,
+            items   : [ri],
+            _rowPos : 'only',
+          });
+        }
+      }
+      return out;
+    },
+
+    async _resolveSource(item, lang) {
+      const { source, layout = LAYOUT.BUTTON, only: filter = null } = item;
+      if (!source) return [];
+
+      const cats = await M.DataService.getTypeCategories(source);
+      if (!cats || !cats.length) return [];
+
+      const filtered = filter
+        ? cats.filter(c => filter.includes(c.id))
+        : cats;
+
+      const groups = await Promise.all(
+        filtered.map(cat => this._fetchSourceGroup(cat, layout, lang))
+      );
+      return groups.filter(Boolean);
+    },
+
+    async _fetchSourceGroup(cat, layout, lang) {
+      try {
+        const { data, header } = await M.DataService.fetchCategoryGroup(cat.id);
+        const isCard  = layout === LAYOUT.CARD;
+        const items   = (await Promise.all(
+          data.map(d => this._resolveItem(d, lang, isCard))
+        )).filter(Boolean);
+        return { _ureType: isCard ? 'card-group' : 'btn-group', header, items };
+      } catch (err) {
+        console.warn('[Content] _fetchSourceGroup failed:', cat.id, err.message);
+        return null;
+      }
+    },
+
+    async _resolveGroup(cfg, lang) {
+      const isCard  = cfg.type === 'card';
+      const isHoriz = isCard && cfg.layout === 'horizontal';
+
+      const _fetchItems = async (data) =>
+        (await Promise.all(data.map(d => this._resolveItem(d, lang, isCard)))).filter(Boolean);
+
+      if (cfg.categoryId) {
+        try {
+          const fetchFn = cfg.typeId
+            ? () => M.DataService.fetchCategoryDirect(cfg.typeId, cfg.categoryId)
+            : () => M.DataService.fetchCategoryGroup(cfg.categoryId);
+          const { data, header } = await fetchFn();
+          const items = await _fetchItems(data);
+          const type  = isHoriz ? 'card-group-h' : isCard ? 'card-group' : 'btn-group';
+          return { _ureType: type, header: header || null, items };
+        } catch (e) { console.error('[Content] categoryId:', e); return null; }
+      }
+
+      if (Array.isArray(cfg.items)) {
+        const items = await _fetchItems(cfg.items);
+        const type  = isHoriz ? 'card-group-h' : isCard ? 'card-group' : 'btn-group';
+        return { _ureType: type, header: cfg.header || null, items };
+      }
+      return null;
+    },
+
+    async _resolveItem(item, lang, forceCard = false) {
+      if (forceCard || this._isCard(item)) {
+        return {
+          _type      : 'card',
+          image      : item.image      || null,
+          imageAlt   : item.imageAlt,
+          title      : item.title      || item.name,
+          description: item.description,
+          link       : item.link       || null,
+          className  : item.className  || null,
+        };
+      }
+      const api  = item.api || null;
+      let text = '';
+      try {
+        text = api
+          ? (M.DataService._sharedIndex?.apiMap?.get(api)?.text || api)
+          : (item.content || item.text || '');
+      } catch (_) { text = item.text || api || '?'; }
+      if (!text) return null;
+      return { _type: 'button', text, api, name: item.name || api || '' };
+    },
+
+    // WHY: card item จาก collection มี api field (เช่น 'card-openai')
+    //   แต่ก็มี image field ด้วย — ตรวจ group type ก่อน (forceCard จาก caller)
+    //   ตรงนี้ใช้เป็น fallback สำหรับ item เดี่ยวที่ไม่มี group context
+    _isCard: item =>
+      item.type === 'card' || item.group?.type === 'card' || (!!item.image && !item.api),
+
+    // ── Emit ──────────────────────────────────────────────────────────────────────
+
+    _emit(group, k, out) {
+      if (group._ureType === 'card-group' || group._ureType === 'card-group-h') {
+        out.push({ ...group, _ureKey: `k${k.v++}` });
+        return;
+      }
+      out.push({
+        _ureKey : `k${k.v++}`,
+        _ureType: 'btn-row',
+        header  : group.header || null,
+        items   : group.items || [],
+        _rowPos : 'only',
+      });
+    },
+
+    // ── Templates ──────────────────────────────────────────────────────────────────
+
+    _tpl(item, lang) {
+      switch (item._ureType) {
+        case 'card-group':   return this._tplCardGroup(item, lang);
+        case 'card-group-h': return this._tplCardGroupH(item, lang);
+        default:             return this._tplBtnRow(item, lang);
+      }
+    },
+
+    _tplBtnRow(item, lang) {
+      const pos = item._rowPos || 'only';
+      let html = `<div class="cm-group"><div class="ure-btn-row ure-btn-row--${pos}">`;
+      if (item.header) html += this._tplHeader(item.header, lang);
+      for (const b of item.items) html += this._tplBtn(b);
+      return html + '</div></div>';
+    },
+
+    _tplCardGroup(item, lang) {
+      let html = `<div class="cm-group"><div class="card-content-container">`;
+      if (item.header) html += this._tplHeader(item.header, lang);
+      for (const c of item.items) html += this._tplCard(c, lang);
+      return html + '</div></div>';
+    },
+
+    _tplCardGroupH(item, lang) {
+      let html = `<div class="cm-group"><div class="card-content-container card-content-container--h">`;
+      if (item.header) html += this._tplHeader(item.header, lang);
+      for (const c of item.items) html += this._tplCard(c, lang);
+      return html + '</div></div>';
+    },
+
+    _tplHeader(cfg, lang) {
+      if (typeof cfg === 'string')
+        return `<div class="group-header"><h2 class="group-header-text">${_esc(cfg)}</h2></div>`;
+      const cls  = cfg.className ? ` ${_esc(cfg.className)}` : '';
+      const desc = cfg.description
+        ? `<p class="group-header-description">${_esc(_txt(cfg.description, lang))}</p>` : '';
+      return `<div class="group-header${cls}"><h2 class="group-header-text">${_esc(_txt(cfg.title, lang))}</h2>${desc}</div>`;
+    },
+
+    _tplBtn(item) {
+      return `<button class="button-content" data-text="${_esc(item.text)}" data-api="${_esc(item.api||'')}">${_esc(item.text)}</button>`;
+    },
+
+    _tplCard(item, lang) {
+      const cls  = item.className ? ` ${_esc(item.className)}` : '';
+      const link = item.link ? ` data-link="${_esc(item.link)}"` : '';
+      const img  = item.image
+        ? `<img class="card-image" src="${_esc(item.image)}" loading="lazy" decoding="async" fetchpriority="low" alt="${_esc(_txt(item.imageAlt, lang))}">`
+        : '';
+      return (
+        `<div class="card${cls}"${link}>${img}` +
+        `<div class="card-content">` +
+          `<div class="card-title">${_esc(_txt(item.title, lang))}</div>` +
+          `<div class="card-description">${_esc(_txt(item.description, lang))}</div>` +
+        `</div></div>`
+      );
+    },
+
+    // ── Click delegation ────────────────────────────────────────────────────────────
+
+    _onClick(e) {
+      const btn = e.target.closest('.button-content');
+      if (btn) {
+        try {
+          window.unifiedCopyToClipboard?.({
+            text: btn.dataset.text,
+            api:  btn.dataset.api || null,
+            type: 'button',
+            name: btn.dataset.api || '',
+          })?.catch?.(() => M.Utils?.showNotification('Copy failed', 'error'));
+        } catch (err) { console.warn('[Content] copy failed:', err); }
+        return;
+      }
+      const card = e.target.closest('.card[data-link]');
+      if (card) window.open(card.dataset.link, '_blank', 'noopener,noreferrer');
+    },
+
+    updateCardsLanguage(lang) {
+      if (_ureHandle) try { _ureHandle.setLang(lang); } catch (err) { console.warn('[Content] setLang failed:', err); }
+    },
+
+    // ── State preservation (called by router.js before navigate-away) ──────────
+    //
+    // saveActiveRoute: snapshot DOM + scroll + service state ลง RouteCache
+    //   ต้องเรียกก่อน clearContent() — ไม่งั้น DOM หาย
+    //
+    // @returns {boolean} true ถ้า save สำเร็จ
+    saveActiveRoute() {
+      if (!_activeRouteKey || !M.RouteCache) return false;
+      if (!['feed', 'lazy', 'ure'].includes(_activeRouteKind)) return false;
+
+      const ctr = document.getElementById(CONFIG.DOM.CONTENT_LOADING_ID);
+      if (!ctr || !ctr.childNodes.length) return false;
+
+      const domSnapshot = M.RouteCache.snapshotDom(ctr);
+      if (!domSnapshot) return false;
+
+      const scrollPosition = window.pageYOffset || document.documentElement.scrollTop || 0;
+      const chunkCount = ctr.querySelectorAll('.feed-page').length || 1;
+
+      /** @type {any} */
+      const partial = {
+        domSnapshot,
+        scrollPosition,
+        chunkCount,
+        routeKind: _activeRouteKind || 'ure',
+        feedState: _activeRouteKind === 'feed' && M.FeedService ? M.FeedService.snapshot() : null,
+        paginatorState: _activeRouteKind === 'lazy' && M.SourcePaginator ? M.SourcePaginator.snapshot() : null,
+        hasMore: true,
+      };
+
+      M.RouteCache.save(_activeRouteKey, partial);
+      return true;
+    },
+
+    /**
+     * Clear active route tracking — เรียกเมื่อต้องการ reset (เช่น language change)
+     */
+
+    _stabilizeRestoredRange(ctr, targetY) {
+      if (!ctr) return;
+      const cutoff = targetY + (typeof window !== 'undefined' ? window.innerHeight : 800);
+      const chunks = ctr.querySelectorAll('.feed-page');
+      chunks.forEach(chunk => {
+        const rect = chunk.getBoundingClientRect();
+        const chunkTop = rect.top + (typeof window !== 'undefined' ? (window.pageYOffset || document.documentElement.scrollTop || 0) : 0);
+        if (chunkTop <= cutoff) {
+          /** @type {HTMLElement} */ (chunk).style.contentVisibility = 'visible';
+          const lazyImgs = chunk.querySelectorAll('img[loading=lazy]');
+          lazyImgs.forEach(img => {
+            img.setAttribute('loading', 'eager');
+          });
+        }
+      });
+    },
+
+    // ── Cross-document scroll persistence (v6.1) ─────────────────────────────
+    // RouteCache เป็น in-memory → ตายพร้อม document เมื่อออกจากหน้าแบบ
+    // full page load (เช่น discover -> setting -> back) ต้อง persist ผ่าน
+    // sessionStorage เพื่อ restore จุดเดิมได้แม้ข้ามหน้า
+    _persistScrollKey() {
+      return 'fv_spos:' + window.location.pathname + (window.location.search || '');
+    },
+
+    _ensureScrollPersist() {
+      if (this._scrollPersistBound) return;
+      this._scrollPersistBound = true;
+      let deb = null;
+      const write = () => {
+        try {
+          const y = window.pageYOffset || document.documentElement.scrollTop || 0;
+          if (y <= 0) return;
+          window.sessionStorage.setItem(this._persistScrollKey(), JSON.stringify({ y, ts: Date.now() }));
+        } catch (_) {}
+      };
+      window.addEventListener('scroll', () => {
+        if (deb) clearTimeout(deb);
+        deb = setTimeout(write, 250);
+      }, { passive: true });
+      window.addEventListener('pagehide', write);
+    },
+
+    _readPersistedScroll(maxAgeMs) {
+      try {
+        const raw = window.sessionStorage.getItem(this._persistScrollKey());
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed.y !== 'number' || parsed.y <= 0) return null;
+        if (maxAgeMs && Date.now() - parsed.ts > maxAgeMs) return null;
+        return parsed;
+      } catch (_) { return null; }
+    },
+
+    async _restoreScrollPosition(ctr, targetY, targetChunks, loadNextPageFn, lang, sess) {
+      if (!targetY || targetY <= 0) return;
+
+      let hasMore = true;
+      while (
+        Math.max(document.documentElement.scrollHeight, document.body ? document.body.scrollHeight : 0) < targetY + (typeof window !== 'undefined' ? window.innerHeight : 800) &&
+        hasMore
+      ) {
+        if (sess !== _sess) return;
+        const res = await loadNextPageFn();
+        if (sess !== _sess) return;
+        if (!res || !res.groups || res.groups.length === 0) break;
+
+        const sentinel = ctr.querySelector('#' + FEED_SENTINEL_ID);
+        await this._appendFeedGroups(ctr, res.groups, lang, sentinel);
+        hasMore = res.hasMore !== false;
+        await new Promise(r => requestAnimationFrame(r));
+      }
+
+      if (sess !== _sess) return;
+
+      this._stabilizeRestoredRange(ctr, targetY);
+
+      if (typeof window !== 'undefined') {
+        // Re-assert จนกว่าจะนิ่ง: overlay ของ LoadingService (FVL) ปลดล็อค
+        // ด้วย scrollTo(0, lockedY) ของตัวเอง ซึ่งอาจยิงหลังจุดนี้แล้วทับเป้า
+        // (double-lock จับ lockedY=0) → ต้องยืนยันตำแหน่งซ้ำจนกว่าจะ settle
+        const maxScroll = () => Math.max(0, (document.documentElement.scrollHeight || 0) - window.innerHeight);
+        for (let i = 0; i < 30 && sess === _sess; i++) {
+          window.scrollTo(0, targetY);
+          await new Promise(r => requestAnimationFrame(r));
+          const actualY = window.pageYOffset || document.documentElement.scrollTop || 0;
+          const atTarget = Math.abs(actualY - targetY) <= 5;
+          const clampedBottom = targetY >= maxScroll() && Math.abs(actualY - maxScroll()) <= 5;
+          if (atTarget || clampedBottom) break;
+          await new Promise(r => setTimeout(r, 100));
+        }
+      }
     },
 
     clearActiveRoute() {
@@ -644,260 +1086,21 @@
       _activeRouteKind = null;
     },
 
+    /**
+     * Invalidate route cache — เรียกเมื่อ language change หรือ cache reset
+     * @param {string} [routeKey]  เฉพาะ route นี้ ถ้าไม่ระบุ = ทั้งหมด
+     */
     invalidateRouteCache(routeKey) {
-      if (M.RouteCache) {
-        if (routeKey) M.RouteCache.invalidate(routeKey);
-        else          M.RouteCache.clear();
-      }
+      if (!M.RouteCache) return;
+      if (routeKey) M.RouteCache.invalidate(routeKey);
+      else M.RouteCache.invalidate();
     },
 
-    _persistScroll(key, y) {
-      try {
-        sessionStorage.setItem(`nc_scroll_${key}`, JSON.stringify({
-          y         : Math.max(0, y),
-          timestamp : Date.now(),
-        }));
-      } catch (_) {}
-    },
-
-    _readPersistedScroll(ttl = 600000) {
-      if (!_activeRouteKey) return null;
-      try {
-        const raw = sessionStorage.getItem(`nc_scroll_${_activeRouteKey}`);
-        if (!raw) return null;
-        const obj = JSON.parse(raw);
-        if (Date.now() - obj.timestamp > ttl) return null;
-        return { scrollPosition: obj.y || 0 };
-      } catch (_) { return null; }
-    },
-
-    async _restoreScrollPosition(ctr, targetY, targetChunks, loadMoreFn, lang, sess) {
-      if (!targetY || targetY <= 0) return;
-
-      const currentH = document.documentElement.scrollHeight;
-      const viewH    = window.innerHeight;
-
-      if (currentH >= targetY + viewH / 2) {
-        window.scrollTo(0, targetY);
-        return;
-      }
-
-      const sentinel = document.getElementById(FEED_SENTINEL_ID);
-      let chunksLoaded = 1;
-
-      while (chunksLoaded < targetChunks) {
-        if (sess !== _sess) return;
-        const res = await loadMoreFn();
-        if (!res.groups?.length) break;
-
-        await this._appendFeedGroups(ctr, res.groups, lang, sentinel);
-        chunksLoaded++;
-
-        const newH = document.documentElement.scrollHeight;
-        if (newH >= targetY + viewH / 2) break;
-      }
-
-      if (sess === _sess) {
-        window.scrollTo(0, targetY);
-      }
-    },
-
-    async updateCardsLanguage(lang) {
-      const ctr = document.getElementById(CONFIG.DOM.CONTENT_LOADING_ID);
-      if (!ctr) return;
-
-      const titles = ctr.querySelectorAll('.card-title');
-      for (const t of titles) {
-        const api = t.closest('.card')?.getAttribute('data-api');
-        if (!api) continue;
-        const item = await M.DataService.lookupByApi(api);
-        if (item?.title) t.textContent = _txt(item.title, lang);
-      }
-    },
-
-    async _resolveAll(descriptors, lang) {
-      const results = [];
-
-      for (let desc of descriptors) {
-        if (!desc || typeof desc !== 'object') continue;
-        if (desc.group) desc = desc.group;
-        if (!desc || typeof desc !== 'object') continue;
-
-        if (desc._ureType) {
-          results.push(desc);
-          continue;
-        }
-
-        if (desc.type === 'card-group' || desc.type === 'button-row' || desc.items) {
-          results.push(this._formatGroupDescriptor(desc, lang));
-          continue;
-        }
-
-        if (desc.source) {
-          const resolved = await this._resolveSource(desc, lang);
-          results.push(...resolved);
-          continue;
-        }
-
-        if (desc.jsonFile) {
-          try {
-            const raw = await M.DataService.fetchWithRetry(desc.jsonFile, {}, 3);
-            const arr = Array.isArray(raw) ? raw : (raw ? [raw] : []);
-            for (const item of arr) {
-              if (item.source) {
-                const resolved = await this._resolveSource(item, lang);
-                results.push(...resolved);
-              } else if (item.type === 'card-group' || item.type === 'button-row' || item.items) {
-                results.push(this._formatGroupDescriptor(item, lang));
-              } else {
-                results.push(item);
-              }
-            }
-          } catch (e) {
-            console.warn('[Content] Failed to fetch jsonFile descriptor:', desc.jsonFile, e);
-          }
-          continue;
-        }
-      }
-
-      return results;
-    },
-
-    _formatGroupDescriptor(desc, lang) {
-      const layout = _toLayout(desc.as || desc.layout || (desc.type === 'card-group' ? 'card' : 'button'));
-      const isCard = layout === LAYOUT.CARD;
-
-      const header = desc.header
-        ? (typeof desc.header === 'string'
-            ? desc.header
-            : { title: _txt(desc.header.title || desc.header.name, lang), description: _txt(desc.header.description, lang) })
-        : null;
-
-      const items = (desc.items || []).map(it => {
-        if (isCard) {
-          return {
-            title:       _txt(it.title || it.name, lang),
-            description: _txt(it.description, lang),
-            link:        it.link || it.url || null,
-            image:       it.image || null,
-            imageAlt:    _txt(it.imageAlt || it.title || it.name, lang),
-          };
-        } else {
-          return {
-            text: it.text || it.content || it.api || it.name || '…',
-            api:  it.api  || it.id      || null,
-          };
-        }
-      });
-
-      return {
-        _ureType: isCard ? 'card-group' : 'button-row',
-        _rowPos:  desc._rowPos || 'only',
-        header,
-        items,
-      };
-    },
-
-    async _resolveSource(desc, lang) {
-      const sourceId = desc.source;
-      const layout   = _toLayout(desc.as);
-      const isCard   = layout === LAYOUT.CARD;
-      const filter   = Array.isArray(desc.only) ? desc.only : null;
-
-      const categories = await M.DataService.getTypeCategories(sourceId);
-      if (!categories.length) return [];
-
-      const targetCats = filter
-        ? categories.filter(c => filter.includes(c.id))
-        : categories;
-
-      const groupJobs = targetCats.map(async (cat) => {
-        const catData = await M.DataService._loadSubcategoryData(sourceId, cat.id);
-        if (!catData?.length) return null;
-
-        const header = {
-          title:       _txt(cat.name, lang),
-          description: _txt(cat.description, lang),
-        };
-
-        const items = catData.map(it => {
-          if (isCard) {
-            return {
-              title:       _txt(it.title || it.name, lang),
-              description: _txt(it.description, lang),
-              link:        it.link || it.url || null,
-              image:       it.image || null,
-              imageAlt:    _txt(it.imageAlt || it.title || it.name, lang),
-            };
-          } else {
-            return {
-              text: it.text || it.content || it.api || it.name || '…',
-              api:  it.api  || it.id      || null,
-            };
-          }
-        });
-
-        return {
-          _ureType: isCard ? 'card-group' : 'button-row',
-          _rowPos:  'only',
-          header,
-          items,
-        };
-      });
-
-      const resolvedGroups = await Promise.all(groupJobs);
-      return resolvedGroups.filter(Boolean);
-    },
-
-    _tpl(item, lang) {
-      if (!item) return '';
-
-      if (item._ureType === 'card-group') {
-        const hdr   = item.header ? `<div class="group-header"><h2 class="group-header-text">${_esc(typeof item.header === 'string' ? item.header : item.header.title)}</h2>${item.header.description ? `<p class="group-header-description">${_esc(item.header.description)}</p>` : ''}</div>` : '';
-        let cards   = '';
-        for (const c of item.items) {
-          const img = c.image ? `<img class="card-image" src="${_esc(c.image)}" loading="lazy" decoding="async" fetchpriority="low" alt="${_esc(c.imageAlt)}">` : '';
-          cards += `<div class="card"${c.link ? ` data-link="${_esc(c.link)}"` : ''}>${img}<div class="card-content"><div class="card-title">${_esc(c.title)}</div><div class="card-description">${_esc(c.description)}</div></div></div>`;
-        }
-        return `<div class="cm-group"><div class="card-content-container">${hdr}${cards}</div></div>`;
-      }
-
-      if (item._ureType === 'button-row') {
-        const hdr  = item.header ? `<div class="group-header"><h2 class="group-header-text">${_esc(typeof item.header === 'string' ? item.header : item.header.title)}</h2>${item.header.description ? `<p class="group-header-description">${_esc(item.header.description)}</p>` : ''}</div>` : '';
-        let btns   = '';
-        for (const b of item.items) {
-          btns += `<button class="button-content" data-text="${_esc(b.text)}"${b.api ? ` data-api="${_esc(b.api)}"` : ''}>${_esc(b.text)}</button>`;
-        }
-        return `<div class="cm-group"><div class="ure-btn-row ure-btn-row--${item._rowPos || 'only'}">${hdr}${btns}</div></div>`;
-      }
-
-      return '';
-    },
-
-    _onClick(e) {
-      const target = e.target;
-      if (!target) return;
-
-      const btn = target.closest('button.button-content');
-      if (btn) {
-        const api  = btn.getAttribute('data-api')  || '';
-        const text = btn.getAttribute('data-text') || btn.textContent || '';
-        if (M.CopyService) {
-          try { M.CopyService.copyCharacter(api, text, btn); } catch (err) {
-            console.warn('[Content] Copy failed:', err);
-          }
-        }
-        return;
-      }
-
-      const card = target.closest('.card');
-      if (card) {
-        const link = card.getAttribute('data-link');
-        if (link && M.RouterService) {
-          M.RouterService.navigateTo(link);
-        }
-      }
-    },
+    createContainer()        { return (Utils?.createElement || M.createElement)('div'); },
+    async createButton()     { return (Utils?.createElement || M.createElement)('button'); },
+    async createCard()       { return (Utils?.createElement || M.createElement)('div'); },
+    async renderGroupItems() {},
+    async renderSingleItem() {},
   };
 
   M.ContentService = ContentService;

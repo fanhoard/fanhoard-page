@@ -225,11 +225,11 @@
   //  FETCH HELPERS
   // ══════════════════════════════════════════════════════════════════════════════
 
-  function fetchText(url, signal) {
+  function fetchText(url) {
     if (window.ReleaseCacheService && window.ReleaseCacheService.has(url)) {
       return Promise.resolve(window.ReleaseCacheService.get(url));
     }
-    return fetch(url + '?_=' + Date.now(), { cache: 'no-store', signal: signal })
+    return fetch(url + '?_=' + Date.now(), { cache: 'no-store' })
       .then(function(r) { return r.ok ? r.text() : null; })
       .then(function(text) {
         if (text && window.ReleaseCacheService) {
@@ -240,12 +240,12 @@
       .catch(function() { return null; });
   }
 
-  function fetchJSON(url, signal) {
+  function fetchJSON(url) {
     if (window.ReleaseCacheService && window.ReleaseCacheService.has(url)) {
       var cached = window.ReleaseCacheService.get(url);
       if (cached) return Promise.resolve(cached);
     }
-    return fetch(url + '?_=' + Date.now(), { cache: 'no-store', signal: signal })
+    return fetch(url + '?_=' + Date.now(), { cache: 'no-store' })
       .then(function(r) { return r.ok ? r.json() : null; })
       .then(function(json) {
         if (json && window.ReleaseCacheService) {
@@ -265,39 +265,36 @@
   //  3. render
 
   function loadContent() {
-    var container = document.getElementById("whats-new-container");
-    var fetcher = function(signal) {
-      var lang = getLang();
-      var perLangUrl = CURRENT_MD_BASE.replace("{lang}", lang);
-      return fetchText(perLangUrl, signal).then(function(mdText) {
-        var currentRelease = null;
-        if (mdText && mdText.trim()) {
-          var parsed = parseMD(mdText, lang);
-          if (parsed.version) currentRelease = parsed;
-        }
-        return loadHistoryFromIndex(lang, signal).then(function(history) {
-          var historyData = history && history.releases ? history : { releases: [] };
-          var pastReleases = historyData.releases.filter(function(r) {
-            return currentRelease ? r.version !== currentRelease.version : true;
-          });
-          return { currentRelease: currentRelease, pastReleases: pastReleases };
-        });
-      });
-    };
+    var lang = getLang();
+    var currentRelease = null;
+    var historyData    = { releases: [] };
 
-    var renderer = function(data) {
-      render(data.currentRelease, { releases: data.pastReleases });
-    };
+    // Step 1: โหลด current release — เฉพาะ per-language MD (closed system)
+    var perLangUrl = CURRENT_MD_BASE.replace('{lang}', lang);
 
-    if (window.PLSys && container) {
-      window.PLSys.load(container, fetcher, renderer, { key: "whats_new:content:" + getLang() }).catch(function(err) {
-        console.warn("[new.js] PLSys load error:", err);
+    fetchText(perLangUrl).then(function(mdText) {
+      if (mdText && mdText.trim()) {
+        var parsed = parseMD(mdText, lang);
+        if (parsed.version) currentRelease = parsed;
+      }
+      // v3.0: ไม่มี legacy fallback แล้ว — ถ้าไม่มี current.md จะ currentRelease = null
+      // และ render จะแสดง "ไม่พบข้อมูลอัปเดต" แทน
+
+      // Step 2: โหลดประวัติจาก releases/index.json
+      return loadHistoryFromIndex(lang);
+    }).then(function(history) {
+      if (history && history.releases && history.releases.length) {
+        historyData = history;
+      }
+
+      // Step 3: Render
+      var pastReleases = historyData.releases.filter(function(r) {
+        return currentRelease ? r.version !== currentRelease.version : true;
       });
-    } else {
-      fetcher(null).then(renderer).catch(function(err) {
-        console.warn("[new.js] Load error:", err);
-      });
-    }
+      render(currentRelease, { releases: pastReleases });
+    }).catch(function(err) {
+      console.warn('[new.js] Load error:', err);
+    });
   }
 
   // v4.0: โหลดประวัติจาก per-language index.json + ไฟล์ markdown แต่ละ version
@@ -305,16 +302,16 @@
   //  2. สำหรับแต่ละ version ที่ hasDetails: true → fetch /assets/md/{lang}/v{version}.md → parse
   //  3. สำหรับ version ที่ hasDetails: false → ใช้แค่ version + date (basic record)
   //  4. กรอง version ปัจจุบันออก (currentRelease แสดงแยก)
-  function loadHistoryFromIndex(lang, signal) {
+  function loadHistoryFromIndex(lang) {
     var indexUrl = RELEASES_INDEX_URL.replace('{lang}', lang);
-    return fetchJSON(indexUrl, signal).then(function(index) {
+    return fetchJSON(indexUrl).then(function(index) {
       if (!index || !index.versions || !index.versions.length) return { releases: [] };
 
       var promises = index.versions.map(function(entry) {
         if (entry.hasDetails) {
           // มีไฟล์ markdown → fetch + parse
           var url = RELEASES_MD_BASE.replace('{lang}', lang).replace('{version}', entry.version);
-          return fetchText(url, signal).then(function(text) {
+          return fetchText(url).then(function(text) {
             if (text && text.trim()) {
               var parsed = parseMD(text, lang);
               // ใช้ date จาก index.json (source of truth) แทน date ใน markdown

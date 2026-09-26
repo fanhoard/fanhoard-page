@@ -145,8 +145,7 @@
       this._sessionCount++;
 
       var o = (typeof opts === 'string') ? { message: opts } : (opts || {});
-      o.mode = o.mode || (o.target ? 'scoped' : 'topbar');
-      if (o.mode === 'fullscreen') o.mode = 'topbar';
+      o.mode = o.mode || (o.target ? 'scoped' : 'fullscreen');
 
       // If an inline boot loader (#fv-boot-loader) or early overlay (#nc-early-overlay) is currently visible,
       // adopt it ONLY when requested mode is 'fullscreen'. Scoped/inline actions must render content-scoped.
@@ -179,13 +178,6 @@
         o.id = o.id || DEFAULT_ID;
         if (o.zIndex == null) o.zIndex = NAV_BEHIND_Z;
         o.lockScroll = o.lockScroll !== false; // default true
-      } else if (o.mode === 'topbar') {
-        // BUGFIX: topbar used to inherit the scoped id 'fvl-scoped-content',
-        // so the first topbar show registered itself under the scoped key and
-        // every later scoped show became an idempotent no-op against it
-        // (never attaching, never setting aria-busy). Give topbar the stable
-        // DEFAULT_ID singleton instead — hideInstant(DEFAULT_ID) tears it down.
-        o.id = o.id || DEFAULT_ID;
       } else {
         if (!o.id) {
           if (o.target === '#content-loading' || !o.target) {
@@ -402,18 +394,6 @@
       if (targetId === DEFAULT_ID) {
         this._hideScopedInstancesInstant(fvl);
       }
-      // ── Stale aria-busy contract ────────────────────────────────────────────
-      // WHY: SSG boot HTML bakes aria-busy="true" on #content-loading for the
-      //   pre-baked skeleton, and scoped FVL teardown only flips the attribute
-      //   on live instances. On pages where PLSys is not loaded (discover), no
-      //   owner flips it back once real content commits. hideInstant IS the
-      //   content-ready teardown call for every render path, so clear it here.
-      try {
-        var cc = document.getElementById('content-loading');
-        if (cc && cc.getAttribute('aria-busy') === 'true') {
-          cc.setAttribute('aria-busy', 'false');
-        }
-      } catch (_) {}
       return Promise.resolve();
     },
 

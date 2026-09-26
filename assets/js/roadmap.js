@@ -148,39 +148,27 @@
   }
   // Main logic: run instantly
   (async function boot() {
+    // 1. Paint from cache instantly, before anything else
+    getFeatureDataCache().then(cached => {
+      if (cached) displayFeatures(cached.current_stage, cached.stages);
+    });
+    // 2. Fire async network update, update if different
+    let controller = new AbortController();
+    let fetchPromise = fetch("/assets/json/current-stage.json", {signal: controller.signal})
+      .then(r => r.ok ? r.json() : Promise.reject(r.statusText));
     let cached = await getFeatureDataCache();
-    if (cached) displayFeatures(cached.current_stage, cached.stages);
-
-    const targetEl = document.getElementById("feature-list") || document.getElementById("features");
-    const fetcher = function(signal) {
-      return fetch("/assets/json/current-stage.json", { signal: signal })
-        .then(function(r) {
-          if (!r.ok) throw new Error("HTTP " + r.status);
-          return r.json();
-        });
-    };
-
-    const renderer = function(freshData) {
-      if (freshData) {
+    let freshData = null;
+    try {
+      freshData = await Promise.race([
+        fetchPromise,
+        new Promise(res => setTimeout(() => res(null), cached ? 16 : 900))
+      ]);
+      if (freshData && isDataDifferent(freshData, cached)) {
         saveFeatureDataCache(freshData);
         displayFeatures(freshData.current_stage, freshData.stages);
       }
-    };
-
-    if (window.PLSys && targetEl) {
-      try {
-        await window.PLSys.load(targetEl, fetcher, renderer, { key: "roadmap:current-stage" });
-      } catch (e) {
-        console.error("[Roadmap] PLSys load failed:", e);
-      }
-    } else {
-      try {
-        const freshData = await fetcher(null);
-        renderer(freshData);
-      } catch (e) {
-        console.error("[Roadmap] Fetch failed:", e);
-      }
-    }
+    } catch (e) {}
+    if (freshData) try { controller.abort(); } catch{}
   })();
 
   // Language change: repaint instantly from memory cache

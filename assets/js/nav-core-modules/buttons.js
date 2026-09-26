@@ -97,43 +97,33 @@
 
     /**
      * Load buttons.json, inject "All" system button, then render main nav.
-     * Idempotent — uses DataService cache / PLSys SWR cache on repeat calls.
+     * Idempotent — uses DataService cache on repeat calls.
      * @returns {Promise<void>}
      */
     async loadConfig() {
       if (State.buttons.config) { await this.renderMainButtons(); return; }
 
-      let cached = M.DataService.getCached('buttonConfig')
-                || M.DataService.getCached(CONFIG.PATHS.BUTTONS_CONFIG)
-                || (typeof window !== 'undefined' && window.PLSys && window.PLSys.SWRCache && window.PLSys.SWRCache.get(CONFIG.PATHS.BUTTONS_CONFIG));
-
+      const cached = M.DataService.getCached('buttonConfig');
       if (cached) {
         State.buttons.config = cached;
-        const mbs = State.buttons.config.mainButtons;
-        if (mbs && !mbs.some(b => b.url === CONFIG.ALL_BUTTON.URL)) {
-          mbs.unshift(_ALL_BTN_CFG);
-        }
-        await this.renderMainButtons();
-      }
-
-      try {
+      } else {
         const res = await M.DataService.fetchWithRetry(
           CONFIG.PATHS.BUTTONS_CONFIG, {}, 2
         );
         State.buttons.config = res;
         M.DataService.setCache('buttonConfig', res);
-        M.DataService.setCache(CONFIG.PATHS.BUTTONS_CONFIG, res);
-
-        const mbs = State.buttons.config.mainButtons;
-        if (mbs && !mbs.some(b => b.url === CONFIG.ALL_BUTTON.URL)) {
-          mbs.unshift(_ALL_BTN_CFG);
-        }
-
-        await this.renderMainButtons();
-        try { M.RouterService?.updateButtonStates?.(); } catch (_) {}
-      } catch (err) {
-        if (!cached) throw err;
       }
+
+      // ── Inject "All" system button at index 0 ──────────────────────────────
+      // WHY: ตรวจสอบก่อน inject เพื่อป้องกัน duplicate ถ้า loadConfig ถูกเรียกซ้ำ
+      //      (เช่น กรณี network reconnect trigger loadConfig อีกครั้ง)
+      const mbs = State.buttons.config.mainButtons;
+      if (!mbs.some(b => b.url === CONFIG.ALL_BUTTON.URL)) {
+        mbs.unshift(_ALL_BTN_CFG);
+      }
+
+      await this.renderMainButtons();
+      try { M.RouterService?.updateButtonStates?.(); } catch (_) {}
     },
 
     // ── Main button rendering ──────────────────────────────────────────────────
@@ -164,10 +154,13 @@
         btn.setAttribute('data-url', url);
         if (cfg.className) btn.classList.add(cfg.className);
 
+        // WHY: isDefault tracking ถูกลบออก
+        //      All button ที่ index 0 เป็น default เสมอ — ดึงจาก buttonMap ด้านล่าง
         State.buttons.buttonMap.set(url, { button: btn, config: cfg });
 
         btn.addEventListener('click', async ev => {
           ev.preventDefault();
+          // v4: ข้ามเมื่อคลิกปุ่มที่ active อยู่แล้ว — ไม่ต้อง re-fetch/re-render ซ้ำ
           if (btn.classList.contains('active')) return;
           navList.querySelectorAll('button').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
@@ -184,6 +177,7 @@
 
       navList.appendChild(frag);
 
+      // "All" system button เป็น default เสมอ
       const allEntry = State.buttons.buttonMap.get(CONFIG.ALL_BUTTON.URL) || null;
 
       if (!State.isBootstrapping) {
@@ -197,6 +191,7 @@
 
     // ── Initial URL handling ───────────────────────────────────────────────────
 
+    // def คือ All button entry เสมอ (ไม่ใช่ isDefault จาก config อีกต่อไป)
     async _handleInitialUrl(url, def) {
       try {
         if (!url || url === '?') {
@@ -269,117 +264,175 @@
           await M.ContentService.clearContent();
           await M.ContentService.renderContent([{ jsonFile: scf.jsonFile }]);
         }
-      } else {
-        await this._handleDefaultSub(cfg, main);
+        this._scrollSub(el);
       }
     },
 
     async _handleDefaultSub(cfg, main) {
-      if (!cfg.subButtons?.length) return;
-
-      const lang = localStorage.getItem('selectedLang') || 'en';
-      await this.renderSubButtons(cfg.subButtons, main, lang);
-
-      const defSub = cfg.subButtons.find(sb => sb.isDefault) || cfg.subButtons[0];
-      if (!defSub) return;
-
-      const subKey  = defSub.url || defSub.jsonFile;
-      const fullUrl = `${main}-${subKey}`;
-      const el      = State.elements.subButtonsContainer?.querySelector(`button[data-url="${fullUrl}"]`);
-
-      if (el) {
-        State.elements.subButtonsContainer?.querySelectorAll('.button-sub')
-          .forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-        State.buttons.currentSubButton = el;
-      }
-
-      if (defSub.jsonFile) {
-        await M.ContentService.clearContent();
-        await M.ContentService.renderContent([{ jsonFile: defSub.jsonFile }]);
+      if (!cfg.subButtons?.length) { SubNavService.hideSubNav(); return; }
+      SubNavService.showSubNav();
+      const d = cfg.subButtons.find(b => b.isDefault);
+      if (d) {
+        await M.RouterService.navigateTo(
+          `${main}-${d.url || d.jsonFile}`,
+          { skipUrlUpdate: !!State.isBootstrapping }
+        );
       }
     },
 
-    // ── Sub button rendering ───────────────────────────────────────────────────
-
-    async renderSubButtons(subButtons, mainRoute, lang = 'en') {
-      const sbc = SubNavService.ensureSubNavContainer();
-      sbc.innerHTML = '';
-      if (!subButtons?.length) return;
-
-      const frag = document.createDocumentFragment();
-      const defSub = subButtons.find(sb => sb.isDefault) || subButtons[0];
-
-      for (const sb of subButtons) {
-        const label = sb[`${lang}_label`];
-        if (!label) continue;
-
-        const btn     = document.createElement('button');
-        btn.className = 'button-sub';
-        btn.textContent = label;
-        const subKey  = sb.url || sb.jsonFile;
-        const fullUrl = `${mainRoute}-${subKey}`;
-
-        btn.setAttribute('data-url', fullUrl);
-        btn.setAttribute('data-sub-url', subKey);
-        btn.setAttribute('data-main-url', mainRoute);
-
-        if (sb === defSub) {
-          btn.classList.add('active');
-          State.buttons.currentSubButton = btn;
-        }
-
-        btn.addEventListener('click', async ev => {
-          ev.preventDefault();
-          if (btn.classList.contains('active')) return;
-          sbc.querySelectorAll('.button-sub').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          State.buttons.currentSubButton = btn;
-
-          await M.RouterService.navigateTo(`${mainRoute}-${subKey}`, {
-            skipUrlUpdate: !!State.isBootstrapping,
-          });
-        });
-
-        frag.appendChild(btn);
-      }
-
-      sbc.appendChild(frag);
-    },
-
-    updateButtonsLanguage(lang) {
-      try {
-        const btnCfg = State.buttons.config;
-        if (!btnCfg) return;
-
-        (btnCfg.mainButtons || []).forEach(cfg => {
-          const url   = cfg.url || cfg.jsonFile;
-          const label = cfg[`${lang}_label`];
-          if (!url || !label) return;
-          const entry = State.buttons.buttonMap?.get(url);
-          if (entry?.button) entry.button.textContent = label;
-        });
-
-        const curMainUrl = State.buttons.currentMainButtonUrl;
-        const mainCfg    = (btnCfg.mainButtons || []).find(b => (b.url || b.jsonFile) === curMainUrl);
-        if (mainCfg?.subButtons?.length && State.elements.subButtonsContainer) {
-          mainCfg.subButtons.forEach(sb => {
-            const subKey  = sb.url || sb.jsonFile;
-            const fullUrl = `${curMainUrl}-${subKey}`;
-            const label   = sb[`${lang}_label`];
-            if (!subKey || !label) return;
-            const btn = State.elements.subButtonsContainer.querySelector(`button[data-url="${fullUrl}"]`);
-            if (btn) btn.textContent = label;
-          });
-        }
-      } catch (err) { console.error('[NavCore/Button] updateButtonsLanguage error:', err); }
-    },
+    // ── Click triggers ─────────────────────────────────────────────────────────
 
     async triggerMainButtonClick(btn) {
       if (!btn) return;
-      btn.click();
+      const url = btn.getAttribute('data-url');
+      State.elements.navList.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      State.buttons.currentMainButton    = btn;
+      State.buttons.currentMainButtonUrl = url;
+      try {
+        await M.RouterService.navigateTo(url, { skipUrlUpdate: !!State.isBootstrapping });
+      } catch (e) { console.error('[NavCore/Buttons] triggerMainButtonClick', e); }
     },
+
+    async triggerSubButtonClick(btn) {
+      if (!btn) return;
+      State.elements.subButtonsContainer?.querySelectorAll('button')
+        .forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      State.buttons.currentSubButton = btn;
+      const url = btn.getAttribute('data-url');
+      try {
+        await M.RouterService.navigateTo(url, { skipUrlUpdate: !!State.isBootstrapping });
+      } catch (e) { console.error('[NavCore/Buttons] triggerSubButtonClick', e); }
+    },
+
+    // ── Sub-button rendering ───────────────────────────────────────────────────
+
+    /**
+     * Render sub-navigation buttons into #sub-buttons-container.
+     * Uses DocumentFragment — single DOM write.
+     * isDefault ยังคงทำงานสำหรับ sub buttons เหมือนเดิม
+     * @param {SubButtonConfig[]} subBtns
+     * @param {string}            mainUrl
+     * @param {string}            lang
+     */
+    async renderSubButtons(subBtns, mainUrl, lang) {
+      if (!subBtns?.length) { SubNavService.hideSubNav(); return; }
+      SubNavService.showSubNav();
+
+      const ctr = SubNavService.ensureSubNavContainer();
+      ctr.innerHTML = '';
+
+      const p = new URLSearchParams(
+        window.location.search.startsWith('?') ? window.location.search : `?${window.location.search}`
+      );
+      const curMain   = (p.get('type') || '').replace(/__$/, '');
+      const curSub    = p.get('page') || '';
+      const activeUrl = curMain && curSub ? `${curMain}-${curSub}` : '';
+
+      let defBtn = null;
+      const frag = document.createDocumentFragment();
+
+      subBtns.forEach((cfg, idx) => {
+        const label = cfg[`${lang}_label`];
+        if (!label) return;
+
+        const btn     = document.createElement('button');
+        btn.className = 'button-sub sub-button';
+        if (cfg.className) btn.classList.add(cfg.className);
+        btn.textContent = label;
+
+        const fullUrl = `${mainUrl}-${cfg.url || cfg.jsonFile}`;
+        btn.setAttribute('data-url', fullUrl);
+        if (cfg.isDefault || (!defBtn && idx === 0)) defBtn = btn;
+        if (fullUrl === activeUrl) btn.classList.add('active');
+
+        btn.addEventListener('click', async () => {
+          // v4: ข้ามเมื่อคลิกปุ่มที่ active อยู่แล้ว — ไม่ต้อง re-fetch/re-render ซ้ำ
+          if (btn.classList.contains('active')) return;
+          ctr.querySelectorAll('.button-sub').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          State.buttons.currentSubButton = btn;
+          await M.RouterService.navigateTo(fullUrl, {
+            skipUrlUpdate: !!State.isBootstrapping,
+          });
+        }, { passive: true });
+
+        frag.appendChild(btn);
+      });
+
+      ctr.appendChild(frag);
+
+      const needDef = !activeUrl || !ctr.querySelector('.button-sub.active');
+      if (needDef && defBtn) {
+        defBtn.classList.add('active');
+        State.buttons.currentSubButton = defBtn;
+      }
+    },
+
+    // ── Utilities ──────────────────────────────────────────────────────────────
+
+    /** @param {string} url @returns {MainButtonConfig|undefined} */
+    findMainButtonConfig(url) {
+      return State.buttons.config?.mainButtons?.find(b => b.url === url || b.jsonFile === url);
+    },
+
+    /** @param {HTMLElement} btn */
+    _scrollSub(btn) {
+      const ctr = State.elements?.subButtonsContainer;
+      if (!ctr || !btn) return;
+      requestAnimationFrame(() => {
+        try {
+          const cl = ctr.getBoundingClientRect().left;
+          const bl = btn.getBoundingClientRect().left;
+          const t  = ctr.scrollLeft + (bl - cl) - 20;
+          if (Math.abs(ctr.scrollLeft - t) > 1) ctr.scrollTo({ left: t, behavior: 'smooth' });
+        } catch (_) {}
+      });
+    },
+
+    /** Update button text labels after language change. */
+    updateButtonsLanguage(lang) {
+      try {
+        const { mainButtons } = State.buttons.config;
+        State.elements.navList.querySelectorAll('button').forEach((b, i) => {
+          const l = mainButtons[i]?.[`${lang}_label`];
+          if (l) b.textContent = l;
+        });
+        if (State.buttons.currentMainButton) {
+          const cfg = this.findMainButtonConfig(State.buttons.currentMainButton.getAttribute('data-url'));
+          if (cfg?.subButtons?.length) {
+            SubNavService.showSubNav();
+            this.renderSubButtons(cfg.subButtons, cfg.url || cfg.jsonFile, lang);
+          } else {
+            SubNavService.hideSubNav();
+          }
+        } else {
+          SubNavService.hideSubNav();
+        }
+      } catch (_) {}
+    },
+
+    /** @param {HTMLElement} btn @param {boolean} isSub */
+    updateButtonState(btn, isSub) {
+      const g = isSub
+        ? State.elements.subButtonsContainer
+        : State.elements.navList;
+      g?.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (isSub) { State.buttons.currentSubButton = btn; this._scrollSub(btn); }
+      else         State.buttons.currentMainButton = btn;
+    },
+
+    // Backward-compat aliases
+    activateMainButton(btn, cfg)        { return this._activateMain(btn, cfg); },
+    handleInitialUrl(url, map, def)     { return this._handleInitialUrl(url, def); },
+    handleInitialSubRoute(cfg, m, s)    { return this._handleInitialSub(cfg, m, s); },
+    handleDefaultSubButton(cfg, m)      { return this._handleDefaultSub(cfg, m); },
+    scrollActiveSubButtonIntoView(btn)  { return this._scrollSub(btn); },
   };
+
+  // ── Export ─────────────────────────────────────────────────────────────────────
 
   M.SubNavService = SubNavService;
   M.ButtonService = ButtonService;
