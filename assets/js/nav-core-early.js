@@ -53,29 +53,29 @@
     }
   }
 
-  // Lightweight inline overlay so user sees "loading" quickly.
+  // In-flow early loading slot (typed page) inside #content-loading
   function showEarlyOverlay() {
-    // If inline boot loader (#fv-boot-loader) or FVL fullscreen overlay is present, do NOT inject redundant nc-early-overlay
-    if (q('#nc-early-overlay') || q('#fv-boot-loader') || q('.fvl-fullscreen') || q('.fvl-boundary')) return;
-    const ov = ce('div', { id: 'nc-early-overlay', role: 'status', 'aria-live': 'polite' });
-    ov.style.position = 'fixed';
-    ov.style.left = '0';
-    ov.style.top = '0';
-    ov.style.right = '0';
-    ov.style.zIndex = '99999';
-    ov.style.padding = '12px';
-    ov.style.background = 'rgba(255,255,255,0.95)';
+    // If boot loader (#fv-boot-loader) or active FVL page/boundary loader is present, do NOT inject redundant nc-early-overlay
+    if (q('#nc-early-overlay') || q('#fv-boot-loader') || q('.fvl-page') || q('.fvl-boundary') || q('.fvl-fullscreen')) return;
+    const ctr = q('#content-loading');
+    if (!ctr) return;
+    const ov = ce('div', { id: 'nc-early-overlay', role: 'status', 'aria-live': 'polite', 'data-fvl-type': 'page' });
+    ov.className = 'fvl-root fvl-page';
     ov.style.display = 'flex';
+    ov.style.flexDirection = 'column';
     ov.style.alignItems = 'center';
-    ov.style.gap = '10px';
-    ov.style.fontFamily = 'system-ui, Roboto, "Helvetica Neue", Arial';
-    ov.innerHTML = `<svg width="18" height="18" viewBox="0 0 52 52" aria-hidden="true">
+    ov.style.justifyContent = 'center';
+    ov.style.width = '100%';
+    ov.style.minHeight = 'var(--fvl-page-min-height, calc(100dvh - 120px))';
+    ov.style.padding = '2rem 1rem';
+    ov.style.boxSizing = 'border-box';
+    ov.innerHTML = `<svg width="40" height="40" viewBox="0 0 52 52" aria-hidden="true">
       <circle cx="26" cy="26" r="22" stroke="#e6e6e6" stroke-width="3" fill="none"></circle>
       <circle cx="26" cy="26" r="22" stroke="#13b47f" stroke-width="3" stroke-dasharray="34 164" transform="rotate(-90 26 26)">
         <animateTransform attributeName="transform" type="rotate" from="0 26 26" to="360 26 26" dur="1s" repeatCount="indefinite"/>
       </circle>
-    </svg><div id="nc-early-msg">Loading…</div>`;
-    document.documentElement.appendChild(ov);
+    </svg><div id="nc-early-msg" style="margin-top: 1rem; color: #555; font-family: system-ui, sans-serif;">Loading…</div>`;
+    ctr.appendChild(ov);
     // auto-hide after 2s if nothing else happens (safety)
     setTimeout(() => { try { if (!q('#fv-boot-loader')) hideEarlyOverlay(); } catch (_) {} }, 2000);
   }
