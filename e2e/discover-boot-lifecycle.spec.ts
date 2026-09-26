@@ -41,8 +41,14 @@ test.describe('Discover Initial Navigation & Refresh Loading Lifecycle', () => {
         }
       };
 
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', observeRoot, { once: true });
+      // Attach as early as possible: readystatechange ('interactive') fires
+      // before deferred app scripts and long before DOMContentLoaded, so
+      // boot-loader teardown (which can happen milliseconds after DCL) is
+      // never missed by the observer.
+      if (document.documentElement) {
+        observeRoot();
+      } else if (document.readyState === 'loading') {
+        document.addEventListener('readystatechange', observeRoot, { once: true });
       } else {
         observeRoot();
       }
