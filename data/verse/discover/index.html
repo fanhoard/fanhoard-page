@@ -207,7 +207,7 @@
           var fvlActive = false;
           try {
             if (window.FVL && typeof window.FVL.isActive === 'function') {
-              fvlActive = window.FVL.isActive('fvl-default-fullscreen');
+              fvlActive = window.FVL.isActive('fvl-default-fullscreen') || window.FVL.isActive('fvl-boundary-content') || window.FVL.isActive('fvl-scoped-content') || window.FVL.isActive();
             }
           } catch (_) {}
           // Only force-hide if NavCore has taken over OR if 12s truly elapsed
