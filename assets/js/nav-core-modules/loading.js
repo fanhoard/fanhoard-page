@@ -145,7 +145,10 @@
       this._sessionCount++;
 
       var o = (typeof opts === 'string') ? { message: opts } : (opts || {});
-      o.mode = o.mode || (o.target ? 'scoped' : 'fullscreen');
+      o.mode = o.mode || (o.fullscreen ? 'fullscreen' : 'boundary');
+      if (o.mode === 'boundary' && !o.target) {
+        o.target = '#content-loading';
+      }
 
       // If an inline boot loader (#fv-boot-loader) or early overlay (#nc-early-overlay) is currently visible,
       // adopt it ONLY when requested mode is 'fullscreen'. Scoped/inline actions must render content-scoped.
@@ -178,6 +181,17 @@
         o.id = o.id || DEFAULT_ID;
         if (o.zIndex == null) o.zIndex = NAV_BEHIND_Z;
         o.lockScroll = o.lockScroll !== false; // default true
+      } else if (o.mode === 'boundary') {
+        if (!o.id) {
+          if (o.target === '#content-loading' || !o.target) {
+            o.id = 'fvl-boundary-content';
+          } else if (typeof o.target === 'string') {
+            o.id = 'fvl-boundary-' + o.target.replace(/[^a-zA-Z0-9_-]/g, '');
+          } else {
+            o.id = 'fvl-boundary-content';
+          }
+        }
+        o.lockScroll = false;
       } else {
         if (!o.id) {
           if (o.target === '#content-loading' || !o.target) {
@@ -315,6 +329,12 @@
             if (inst && inst.id) fvl.hide(inst.id);
           });
         }
+        var boundaryInsts = typeof fvl.getByMode === 'function' ? fvl.getByMode('boundary') : [];
+        if (Array.isArray(boundaryInsts)) {
+          boundaryInsts.forEach(function(inst) {
+            if (inst && inst.id) fvl.hide(inst.id);
+          });
+        }
       } catch (_) {}
     },
 
@@ -325,6 +345,12 @@
         var scopedInsts = typeof fvl.getByMode === 'function' ? fvl.getByMode('scoped') : [];
         if (Array.isArray(scopedInsts)) {
           scopedInsts.forEach(function(inst) {
+            if (inst && inst.id) fvl.hideInstant(inst.id);
+          });
+        }
+        var boundaryInsts = typeof fvl.getByMode === 'function' ? fvl.getByMode('boundary') : [];
+        if (Array.isArray(boundaryInsts)) {
+          boundaryInsts.forEach(function(inst) {
             if (inst && inst.id) fvl.hideInstant(inst.id);
           });
         }
@@ -399,13 +425,13 @@
 
     showInContent: function (opts) {
       var o = (typeof opts === 'string') ? { message: opts } : (opts || {});
-      o.mode = o.mode || 'scoped';
+      o.mode = o.mode || 'boundary';
       o.target = o.target || '#content-loading';
       return this.show(o);
     },
 
     hideFromContent: function (id) {
-      return this.hide(id || 'fvl-scoped-content');
+      return this.hide(id || 'fvl-boundary-content');
     },
 
     // ── Emergency reset ───────────────────────────────────────────────────
@@ -426,6 +452,9 @@
       }
       var fvl = _fvl();
       if (fvl) {
+        if (typeof fvl.clearAllBoundaryRefs === 'function') {
+          fvl.clearAllBoundaryRefs();
+        }
         fvl.hideInstant(DEFAULT_ID);
         this._hideScopedInstancesInstant(fvl);
       }

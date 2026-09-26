@@ -56,7 +56,7 @@
   // Lightweight inline overlay so user sees "loading" quickly.
   function showEarlyOverlay() {
     // If inline boot loader (#fv-boot-loader) or FVL fullscreen overlay is present, do NOT inject redundant nc-early-overlay
-    if (q('#nc-early-overlay') || q('#fv-boot-loader') || q('.fvl-fullscreen')) return;
+    if (q('#nc-early-overlay') || q('#fv-boot-loader') || q('.fvl-fullscreen') || q('.fvl-boundary')) return;
     const ov = ce('div', { id: 'nc-early-overlay', role: 'status', 'aria-live': 'polite' });
     ov.style.position = 'fixed';
     ov.style.left = '0';

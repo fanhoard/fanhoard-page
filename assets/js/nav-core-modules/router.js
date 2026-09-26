@@ -215,7 +215,7 @@
         if (M.LoadingService?.showInContent) {
           M.LoadingService.showInContent();
         } else {
-          M.LoadingService?.show?.({ mode: 'scoped', target: '#content-loading' });
+          M.LoadingService?.show?.({ mode: 'boundary', target: '#content-loading' });
         }
       } catch (_) {}
 

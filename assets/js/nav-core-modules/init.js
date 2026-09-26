@@ -60,7 +60,7 @@
 
       // ── Phase 3: Show loading overlay early ────────────────────────────────
       // v4: show() จะแสดงข้อความ "Loading…" / "กำลังโหลด…" เท่านั้น
-      try { LoadingService.show(); } catch (_) {}
+      try { LoadingService.showInContent(); } catch (_) {}
 
       // ── Phase 4: Core service setup ────────────────────────────────────────
       try {
