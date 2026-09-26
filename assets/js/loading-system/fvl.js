@@ -984,15 +984,9 @@
         inst.autoHideTimer = setTimeout(function() { hide(id); }, opts.autoHideAfterMs);
       }
 
-      // Lock scroll (fullscreen only)
+      // PL-v2: Fullscreen requests route to non-blocking topbar behavior (never lock scroll)
       if (mode === 'fullscreen' && opts.lockScroll) {
-        try {
-          var prev = window.scrollY || 0;
-          document.body.style.position = 'fixed';
-          document.body.style.top = '-' + prev + 'px';
-          document.body.style.width = '100%';
-          inst._lockedScrollY = prev;
-        } catch (_) {}
+        // Non-blocking per PLSys spec
       }
 
       return _makeHandle(inst);
