@@ -57,6 +57,17 @@
     return null;
   };
 
+  SWRCacheStore.prototype.has = function(key) {
+    if (!key) return false;
+    if (this.memory.has(key)) return true;
+    try {
+      if (typeof localStorage !== 'undefined') {
+        return localStorage.getItem(this.prefix + key) !== null;
+      }
+    } catch (_) {}
+    return false;
+  };
+
   SWRCacheStore.prototype.set = function(key, data) {
     if (!key) return;
     this.memory.set(key, data);
@@ -288,99 +299,47 @@
   PLController.prototype.load = function(fetcher, renderer, options) {
     var self = this;
     var opts = Object.assign({}, this.options, options || {});
-    var key = opts.key || (this.container && this.container.id ? this.container.id : 'plsys-key');
-    opts.key = key;
-
-    var softTimeoutMs = typeof opts.softTimeoutMs === 'number' ? opts.softTimeoutMs : 3500;
-    var hardTimeoutMs = typeof opts.hardTimeoutMs === 'number' ? opts.hardTimeoutMs : 8000;
-    var useSWR = opts.useSWR !== false;
-    var useViewTransition = opts.useViewTransition !== false;
+    var key = opts.key || (this.container && this.container.id) || 'default';
 
     this.lastFetcher = fetcher;
     this.lastRenderer = renderer;
     this.lastLoadOptions = opts;
+    this.lastLoadStart = Date.now();
 
-    this._clearTimers();
-    if (this.activeAbortController) {
-      if (typeof this.activeAbortController.abort === 'function') {
-        this.activeAbortController.abort('Superceded by new load call');
-      }
+    // Abort active fetch if any
+    if (this.activeAbortController && typeof this.activeAbortController.abort === 'function') {
+      try { this.activeAbortController.abort('New fetch triggered'); } catch (_) {}
     }
+
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    this.activeAbortController = controller;
+    var signal = controller ? controller.signal : null;
 
     var currentToken = ++this.fetchToken;
-    var controller = typeof AbortController !== 'undefined' ? new AbortController() : { signal: {}, abort: function() {} };
-    this.activeAbortController = controller;
-    var signal = controller.signal;
-
-    // Check SWR Cache
-    var cachedData = useSWR ? swrCache.get(key) : null;
-
-    if (cachedData !== null && cachedData !== undefined) {
-      if (!this.transitionTo(FSM_STATES.PARTIAL_COMMIT, 'SWR cache hit')) {
-        this.state = FSM_STATES.PARTIAL_COMMIT;
-      }
-      if (typeof performance !== 'undefined' && performance.mark) {
-        try { performance.mark('plsys:start:' + key); } catch (_) {}
-      }
-      this.lastLoadStart = Date.now();
-
-      try { renderer(cachedData); } catch (e) { console.error('[PLSys] Renderer error on SWR hit:', e); }
-
-      this.softTimer = setTimeout(function() {
-        if (currentToken === self.fetchToken && self.state === FSM_STATES.PARTIAL_COMMIT) {
-          self.transitionTo(FSM_STATES.TIMEOUT_FALLBACK, 'Revalidation soft timeout');
-          showTopProgressBar();
-        }
-      }, softTimeoutMs);
-
-      this.hardTimer = setTimeout(function() {
-        if (currentToken === self.fetchToken) {
-          if (typeof controller.abort === 'function') controller.abort('Hard timeout cap reached');
-          self._clearTimers();
-          hideTopProgressBar();
-          self.transitionTo(FSM_STATES.CONTENT_READY, 'Revalidation hard timeout cap (cached kept)');
-        }
-      }, hardTimeoutMs);
-
-      return Promise.resolve().then(function() {
-        return fetcher(signal);
-      }).then(function(freshData) {
-        if (currentToken !== self.fetchToken) return freshData;
-        self._clearTimers();
-        hideTopProgressBar();
-        if (useSWR) swrCache.set(key, freshData);
-
-        var applyRender = function() { renderer(freshData); };
-        if (useViewTransition && typeof document !== 'undefined' && document.startViewTransition) {
-          document.startViewTransition(applyRender);
-        } else {
-          applyRender();
-        }
-
-        self.transitionTo(FSM_STATES.CONTENT_READY, 'Revalidation success');
-        self._markReady(key);
-        return freshData;
-      }).catch(function(err) {
-        if (currentToken !== self.fetchToken) throw err;
-        self._clearTimers();
-        hideTopProgressBar();
-        self.transitionTo(FSM_STATES.CONTENT_READY, 'Revalidation failed (cached kept)');
-        return cachedData;
-      });
-    }
-
-    // Cache miss path
-    if (!this.transitionTo(FSM_STATES.STAGED_SKELETON, 'Fetch started')) {
-      this.state = FSM_STATES.STAGED_SKELETON;
-    }
+    this._clearTimers();
 
     if (typeof performance !== 'undefined' && performance.mark) {
       try { performance.mark('plsys:start:' + key); } catch (_) {}
     }
-    this.lastLoadStart = Date.now();
 
-    this._mountSkeleton(opts.skeletonTemplate);
+    var useSWR = opts.useSWR !== false;
+    var cachedData = useSWR ? swrCache.get(key) : null;
 
+    if (cachedData) {
+      this.transitionTo(FSM_STATES.PARTIAL_COMMIT, 'SWR hit');
+      this._unmountSkeleton();
+      if (typeof renderer === 'function') {
+        try { renderer(cachedData); } catch (e) { console.error('[PLSys] SWR render error:', e); }
+      }
+    } else {
+      this.transitionTo(FSM_STATES.STAGED_SKELETON, 'Fetch trigger');
+      this._mountSkeleton(opts.skeletonTemplate);
+    }
+
+    var softTimeoutMs = typeof opts.softTimeoutMs === 'number' ? opts.softTimeoutMs : 3500;
+    var hardTimeoutMs = typeof opts.hardTimeoutMs === 'number' ? opts.hardTimeoutMs : 8000;
+
+    // 3.5s Soft Timeout fallback to top progress bar
     this.softTimer = setTimeout(function() {
       if (currentToken === self.fetchToken && (self.state === FSM_STATES.STAGED_SKELETON || self.state === FSM_STATES.PARTIAL_COMMIT)) {
         self.transitionTo(FSM_STATES.TIMEOUT_FALLBACK, 'Soft timeout 3.5s');
@@ -388,13 +347,15 @@
       }
     }, softTimeoutMs);
 
+    // 8.0s Hard Timeout cap to error retry UI
     this.hardTimer = setTimeout(function() {
-      if (currentToken === self.fetchToken) {
-        if (typeof controller.abort === 'function') controller.abort('Hard timeout 8.0s');
-        self._clearTimers();
+      if (currentToken === self.fetchToken && self.state !== FSM_STATES.CONTENT_READY) {
+        if (controller && typeof controller.abort === 'function') {
+          try { controller.abort('Hard timeout cap reached'); } catch (_) {}
+        }
+        self.transitionTo(FSM_STATES.ERROR_RETRYABLE, 'Hard timeout 8s');
         hideTopProgressBar();
         self._unmountSkeleton();
-        self.transitionTo(FSM_STATES.ERROR_RETRYABLE, 'Hard timeout 8.0s cap');
         self._renderErrorUI('Request timed out. Please try again.', fetcher, renderer, opts);
       }
     }, hardTimeoutMs);
@@ -403,13 +364,22 @@
       return fetcher(signal);
     }).then(function(freshData) {
       if (currentToken !== self.fetchToken) return freshData;
+
       self._clearTimers();
       hideTopProgressBar();
-      if (useSWR) swrCache.set(key, freshData);
       self._unmountSkeleton();
 
-      var applyRender = function() { renderer(freshData); };
-      if (useViewTransition && typeof document !== 'undefined' && document.startViewTransition) {
+      if (useSWR && key) {
+        swrCache.set(key, freshData);
+      }
+
+      var applyRender = function() {
+        if (typeof renderer === 'function') {
+          renderer(freshData);
+        }
+      };
+
+      if (opts.useViewTransition !== false && typeof document !== 'undefined' && document.startViewTransition) {
         document.startViewTransition(applyRender);
       } else {
         applyRender();
@@ -444,7 +414,7 @@
   PLController.prototype.abort = function(reason) {
     this._clearTimers();
     if (this.activeAbortController && typeof this.activeAbortController.abort === 'function') {
-      this.activeAbortController.abort(reason || 'Manual abort');
+      try { this.activeAbortController.abort(reason || 'Manual abort'); } catch (_) {}
     }
     this._unmountSkeleton();
     hideTopProgressBar();
