@@ -291,32 +291,23 @@
         performance.measure('plsys:duration:' + key, 'plsys:start:' + key, 'plsys:ready:' + key);
       } catch (_) {}
     }
-    if (this.lastLoadStart) {
-      this.lastDurationMs = Date.now() - this.lastLoadStart;
-    }
   };
 
-  PLController.prototype.load = function(fetcher, renderer, options) {
-    var self = this;
-    var opts = Object.assign({}, this.options, options || {});
-    var key = opts.key || (this.container && this.container.id) || 'default';
-
+  PLController.prototype.load = function(fetcher, renderer, opts) {
+    opts = opts || {};
     this.lastFetcher = fetcher;
     this.lastRenderer = renderer;
     this.lastLoadOptions = opts;
-    this.lastLoadStart = Date.now();
 
-    // Abort active fetch if any
-    if (this.activeAbortController && typeof this.activeAbortController.abort === 'function') {
-      try { this.activeAbortController.abort('New fetch triggered'); } catch (_) {}
-    }
+    this.fetchToken++;
+    var currentToken = this.fetchToken;
+    var key = opts.key || (this.container ? this.container.id : 'default');
 
-    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    this.activeAbortController = controller;
-    var signal = controller ? controller.signal : null;
-
-    var currentToken = ++this.fetchToken;
     this._clearTimers();
+
+    var controller = new AbortController();
+    this.activeAbortController = controller;
+    var signal = controller.signal;
 
     if (typeof performance !== 'undefined' && performance.mark) {
       try { performance.mark('plsys:start:' + key); } catch (_) {}
@@ -324,6 +315,8 @@
 
     var useSWR = opts.useSWR !== false;
     var cachedData = useSWR ? swrCache.get(key) : null;
+
+    var self = this;
 
     if (cachedData) {
       this.transitionTo(FSM_STATES.PARTIAL_COMMIT, 'SWR hit');
@@ -339,7 +332,6 @@
     var softTimeoutMs = typeof opts.softTimeoutMs === 'number' ? opts.softTimeoutMs : 3500;
     var hardTimeoutMs = typeof opts.hardTimeoutMs === 'number' ? opts.hardTimeoutMs : 8000;
 
-    // 3.5s Soft Timeout fallback to top progress bar
     this.softTimer = setTimeout(function() {
       if (currentToken === self.fetchToken && (self.state === FSM_STATES.STAGED_SKELETON || self.state === FSM_STATES.PARTIAL_COMMIT)) {
         self.transitionTo(FSM_STATES.TIMEOUT_FALLBACK, 'Soft timeout 3.5s');
@@ -347,7 +339,6 @@
       }
     }, softTimeoutMs);
 
-    // 8.0s Hard Timeout cap to error retry UI
     this.hardTimer = setTimeout(function() {
       if (currentToken === self.fetchToken && self.state !== FSM_STATES.CONTENT_READY) {
         if (controller && typeof controller.abort === 'function') {
@@ -379,7 +370,9 @@
         }
       };
 
-      if (opts.useViewTransition !== false && typeof document !== 'undefined' && document.startViewTransition) {
+      var prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (!prefersReducedMotion && opts.useViewTransition !== false && typeof document !== 'undefined' && document.startViewTransition) {
         document.startViewTransition(applyRender);
       } else {
         applyRender();
@@ -418,61 +411,48 @@
     }
     this._unmountSkeleton();
     hideTopProgressBar();
-    this.transitionTo(FSM_STATES.IDLE, 'Aborted: ' + (reason || 'manual'));
+    this.transitionTo(FSM_STATES.IDLE, 'Aborted');
   };
 
-  PLController.prototype.getStatus = function() {
-    return {
-      state: this.state,
-      lastDurationMs: this.lastDurationMs,
-      key: (this.lastLoadOptions && this.lastLoadOptions.key) || (this.container && this.container.id)
-    };
+  PLController.prototype.reset = function() {
+    this.abort('Controller reset');
+    this.transitionTo(FSM_STATES.IDLE, 'Reset');
   };
 
-  // Controller Registry
+  // ════════════════════════════════════════════════════════════════════════════
+  // 5. Public PLSys Global Interface
+  // ════════════════════════════════════════════════════════════════════════════
+
   var controllers = new Map();
 
-  function getOrCreateController(container, options) {
-    var el = typeof container === 'string' && typeof document !== 'undefined' ? document.querySelector(container) : container;
-    if (!el) return new PLController(null, options);
-
-    if (controllers.has(el)) {
-      var ctrl = controllers.get(el);
-      if (options) ctrl.options = Object.assign({}, ctrl.options, options);
-      return ctrl;
-    }
-
-    var newCtrl = new PLController(el, options);
-    controllers.set(el, newCtrl);
-    return newCtrl;
-  }
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // 5. Public PLSys API
-  // ════════════════════════════════════════════════════════════════════════════
-
-  var PLSys_API = Object.freeze({
+  var PLSys = {
     _initialized: true,
     FSM_STATES: FSM_STATES,
-    SWRCache: swrCache,
 
     attach: function(container, options) {
-      return getOrCreateController(container, options);
+      var el = typeof container === 'string' && typeof document !== 'undefined' ? document.querySelector(container) : container;
+      if (!el) return null;
+      if (controllers.has(el)) return controllers.get(el);
+      var ctrl = new PLController(el, options);
+      controllers.set(el, ctrl);
+      return ctrl;
     },
 
     load: function(container, fetcher, renderer, options) {
-      var ctrl = getOrCreateController(container, options);
+      var ctrl = this.attach(container, options);
+      if (!ctrl) {
+        return Promise.reject(new Error('[PLSys] Container target not found'));
+      }
       return ctrl.load(fetcher, renderer, options);
     },
 
     invalidate: function(keyOrContainer) {
       if (typeof keyOrContainer === 'string') {
-        swrCache.delete(keyOrContainer);
-        if (typeof document !== 'undefined') {
-          try {
-            var el = document.querySelector(keyOrContainer);
-            if (el && controllers.has(el)) controllers.get(el).invalidate();
-          } catch (_) {}
+        var el = typeof document !== 'undefined' ? document.querySelector(keyOrContainer) : null;
+        if (el && controllers.has(el)) {
+          controllers.get(el).invalidate();
+        } else {
+          swrCache.delete(keyOrContainer);
         }
       } else if (keyOrContainer && controllers.has(keyOrContainer)) {
         controllers.get(keyOrContainer).invalidate();
@@ -480,25 +460,25 @@
     },
 
     getStatus: function(container) {
-      var el = typeof container === 'string' && typeof document !== 'undefined' ? document.querySelector(container) : container;
-      if (el && controllers.has(el)) {
-        return controllers.get(el).getStatus();
-      }
-      return { state: FSM_STATES.IDLE };
+      var ctrl = this.attach(container);
+      if (!ctrl) return null;
+      return {
+        state: ctrl.getState(),
+        containerId: ctrl.getContainerId(),
+        lastDurationMs: ctrl.lastDurationMs
+      };
     },
 
-    reset: function() {
-      controllers.forEach(function(ctrl) {
-        ctrl.abort('Reset called');
-      });
-      controllers.clear();
-      hideTopProgressBar();
-    }
-  });
+    reset: function(container) {
+      var el = typeof container === 'string' && typeof document !== 'undefined' ? document.querySelector(container) : container;
+      if (el && controllers.has(el)) {
+        controllers.get(el).reset();
+      }
+    },
 
-  global.PLSys = PLSys_API;
+    SWRCache: swrCache
+  };
 
-  if (typeof module !== 'undefined' && module.exports) {
-    module.exports = PLSys_API;
-  }
-})(typeof window !== 'undefined' ? window : globalThis);
+  global.PLSys = PLSys;
+
+})(typeof window !== 'undefined' ? window : this);
