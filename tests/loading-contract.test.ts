@@ -237,7 +237,7 @@ describe('Central Loader Architecture & Loading Contract (FVL)', () => {
       expect(handle).not.toBeNull();
       expect(container.getAttribute('aria-busy')).toBe('true');
 
-      const boundaryEl = container.querySelector('.fvl-boundary');
+      const boundaryEl = container.querySelector<HTMLElement>('.fvl-boundary');
       expect(boundaryEl).not.toBeNull();
       expect(boundaryEl?.getAttribute('data-fvl-mode')).toBe('boundary');
       expect(boundaryEl?.style.position).not.toBe('fixed');
