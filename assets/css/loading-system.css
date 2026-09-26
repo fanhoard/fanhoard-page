@@ -105,12 +105,15 @@
     stroke-width: 5;
   }
 
+  .fvl-global,
   .fvl-fullscreen {
     position: fixed;
     top: var(--fvl-top);
     left: 0;
     right: 0;
     bottom: 0;
+    height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -121,6 +124,12 @@
     contain: layout style;
     transform: translateZ(0);
     z-index: var(--fv-z-fullscreen-overlay, 17000);
+  }
+  @supports (height: 100dvh) {
+    .fvl-global,
+    .fvl-fullscreen {
+      height: 100dvh;
+    }
   }
 
   .fvl-fullscreen .fvl-spinner {
@@ -187,14 +196,61 @@
     color: var(--fvl-text);
   }
 
-  /* ── In-Flow Contextual Boundary Loader ── */
+  /* ── Typed In-Flow Contextual Loaders (v2) ── */
+  .fvl-page,
+  .fvl-boundary.fvl-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: var(--fvl-page-min-height, calc(100dvh - 120px));
+    padding: var(--fv-spacing-6, 1.5rem);
+    box-sizing: border-box;
+    background: transparent;
+    color: var(--fvl-text);
+    margin: 0 auto;
+    contain: layout style;
+    position: static;
+    z-index: 0;
+  }
+
+  .fvl-content,
+  .fvl-boundary.fvl-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: var(--fvl-content-min-height, 180px);
+    padding: var(--fv-spacing-4, 1rem);
+    box-sizing: border-box;
+    background: transparent;
+    color: var(--fvl-text);
+    margin: 0 auto;
+    contain: layout style;
+    position: relative;
+    z-index: 0;
+  }
+
+  .fvl-component,
+  .fvl-inline.fvl-component {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-sizing: border-box;
+    color: var(--fvl-text);
+    position: relative;
+    z-index: 0;
+  }
+
   .fvl-boundary {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: var(--fvl-boundary-min-height, 180px);
+    min-height: var(--fvl-boundary-min-height, var(--fvl-content-min-height, 180px));
     padding: var(--fv-spacing-6, 1.5rem);
     box-sizing: border-box;
     background: transparent;

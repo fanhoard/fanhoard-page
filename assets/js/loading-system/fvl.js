@@ -161,7 +161,7 @@
   // SECTION 3: config.js — constants & presets
   // ════════════════════════════════════════════════════════════════════════════
 
-  var VERSION = '1.0.0';
+  var VERSION = '2.0.0';
 
   var CONFIG = Object.freeze({
     VERSION: VERSION,
@@ -169,10 +169,14 @@
     // ── Z-index layers (one per mode, separated by 100 for safety) ──
     Z_INDEX: Object.freeze({
       topbar:     17500,
+      global:     17000,
       fullscreen: 17000, // matches --fv-z-fullscreen-overlay (17000)
       scoped:     1600,  // matches --fv-z-scoped-overlay (1600)
-      boundary:   0,     // contextual in-flow boundary (normal flow)
-      inline:     0,     // inline participates in normal flow
+      page:       0,     // contextual in-flow page loader
+      content:    0,     // contextual in-flow section loader
+      component:  0,     // micro inline boundary
+      boundary:   0,     // contextual in-flow boundary (legacy)
+      inline:     0,     // inline participates in normal flow (legacy)
     }),
 
     // ── Animation timing (ms) ──
@@ -185,9 +189,13 @@
 
     // ── Default spinner sizes per mode (px) ──
     SIZES: Object.freeze({
+      global: 68,
       fullscreen: 68,
-      scoped: 40,
+      page: 48,
       boundary: 48,
+      content: 40,
+      scoped: 40,
+      component: 18,
       inline: 18,
       topbar: 0, // N/A
     }),
@@ -215,6 +223,31 @@
 
     // ── Mode presets — defaults applied per mode ──
     PRESETS: Object.freeze({
+      page: Object.freeze({
+        overlay: false,
+        lockScroll: false,
+        theme: 'auto',
+        visual: 'ring',
+      }),
+      content: Object.freeze({
+        overlay: false,
+        lockScroll: false,
+        theme: 'auto',
+        visual: 'ring',
+      }),
+      component: Object.freeze({
+        overlay: false,
+        lockScroll: false,
+        theme: 'auto',
+        visual: 'ring',
+        replaceContent: false,
+      }),
+      global: Object.freeze({
+        overlay: true,
+        lockScroll: true,
+        theme: 'light',
+        visual: 'ring',
+      }),
       fullscreen: Object.freeze({
         overlay: true,
         lockScroll: false,
@@ -241,7 +274,7 @@
       topbar: Object.freeze({
         overlay: false,
         theme: 'brand',
-        visual: 'ring', // unused but kept for consistency
+        visual: 'ring',
       }),
     }),
   });
@@ -282,20 +315,34 @@
 
     // ── Option merging ──
     function mergeOptions(userOpts, mode) {
-      // Accept string shorthand: FVL.show('Loading...') === FVL.show({ message: 'Loading...' })
       if (typeof userOpts === 'string') {
         userOpts = { message: userOpts };
       }
       userOpts = userOpts || {};
 
-      var resolvedMode = userOpts.mode || mode || 'fullscreen';
-      var preset = CONFIG.PRESETS[resolvedMode] || CONFIG.PRESETS.fullscreen;
+      var rawType = userOpts.type || userOpts.mode || mode || 'global';
+      var resolvedType = rawType;
+
+      if (rawType === 'fullscreen') resolvedType = 'global';
+      else if (rawType === 'scoped') resolvedType = 'content';
+      else if (rawType === 'boundary') resolvedType = 'page';
+      else if (rawType === 'inline') resolvedType = 'component';
+
+      var resolvedMode = resolvedType;
+      if (resolvedType === 'page' || resolvedType === 'content') resolvedMode = 'boundary';
+      else if (resolvedType === 'component') resolvedMode = 'inline';
+      else if (resolvedType === 'global') resolvedMode = 'fullscreen';
+      else if (resolvedType === 'topbar') resolvedMode = 'topbar';
+      else resolvedMode = 'boundary';
+
+      var preset = CONFIG.PRESETS[resolvedType] || CONFIG.PRESETS[resolvedMode] || CONFIG.PRESETS.page;
 
       var o = Object.assign({}, preset, userOpts);
+      o.type = resolvedType;
       o.mode = resolvedMode;
       o.visual = o.visual || preset.visual;
       o.theme = o.theme || preset.theme;
-      o.size = o.size != null ? o.size : CONFIG.SIZES[resolvedMode];
+      o.size = o.size != null ? o.size : (CONFIG.SIZES[resolvedType] || CONFIG.SIZES[resolvedMode] || 48);
 
       return o;
     }
@@ -628,11 +675,13 @@
 
     // ── Build entry point ──
     function buildBoundary(inst) {
-      var root = Utils.DOM.create('div', 'fvl fvl-boundary', {
+      var typeClass = 'fvl-' + (inst.options.type || 'page');
+      var root = Utils.DOM.create('div', 'fvl fvl-boundary ' + typeClass, {
         'role': 'status',
         'aria-live': 'polite',
       });
-      root.setAttribute(CONFIG.DOM.DATA_MODE, 'boundary');
+      root.setAttribute(CONFIG.DOM.DATA_MODE, inst.mode || 'boundary');
+      root.setAttribute('data-fvl-type', inst.options.type || 'page');
 
       var inner = Utils.DOM.create('div', 'fvl-boundary-inner');
       var size = inst.options.size || CONFIG.SIZES.boundary;
@@ -670,11 +719,16 @@
 
     function build(inst) {
       var root;
-      switch (inst.mode) {
+      var type = inst.options.type || inst.mode;
+      switch (type) {
         case 'scoped':    root = buildScoped(inst);    break;
+        case 'page':
+        case 'content':
         case 'boundary':  root = buildBoundary(inst);  break;
+        case 'component':
         case 'inline':    root = buildInline(inst);    break;
         case 'topbar':    root = buildTopbar(inst);    break;
+        case 'global':
         case 'fullscreen':
         default:          root = buildFullscreen(inst); break;
       }
@@ -1511,8 +1565,49 @@
     modules: function() { return M; },
     config: function() { return CONFIG; },
 
+    page: function(target, opts) {
+      if (typeof target === 'object' && !(target instanceof HTMLElement) && target !== null) {
+        opts = target;
+        target = opts.target;
+      } else {
+        opts = opts || {};
+      }
+      opts.type = 'page';
+      if (target) opts.target = target;
+      return Engine.show(opts);
+    },
+    content: function(target, opts) {
+      if (typeof target === 'object' && !(target instanceof HTMLElement) && target !== null) {
+        opts = target;
+        target = opts.target;
+      } else {
+        opts = opts || {};
+      }
+      opts.type = 'content';
+      if (target) opts.target = target;
+      return Engine.show(opts);
+    },
+    component: function(target, opts) {
+      if (typeof target === 'object' && !(target instanceof HTMLElement) && target !== null) {
+        opts = target;
+        target = opts.target;
+      } else if (typeof target === 'string' || (typeof HTMLElement !== 'undefined' && target instanceof HTMLElement)) {
+        opts = Object.assign({}, opts, { target: target });
+      } else {
+        opts = target || {};
+      }
+      opts.type = 'component';
+      return Engine.show(opts);
+    },
+    global: function(opts) {
+      opts = (typeof opts === 'string') ? { message: opts } : (opts || {});
+      opts.type = 'global';
+      opts.id = opts.id || CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
+      return Engine.show(opts);
+    },
     fullscreen: function(opts) {
       opts = (typeof opts === 'string') ? { message: opts } : (opts || {});
+      opts.type = 'global';
       opts.mode = 'fullscreen';
       opts.id = opts.id || CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
       return Engine.show(opts);
