@@ -352,20 +352,19 @@
         return this._categoryIndexes.get(typeId);
 
       try {
-        const raw = await this._performFetch('/assets/db/con-data/index.json', { cache: 'force-cache' });
-        if (!raw || !Array.isArray(raw.types)) return null;
+        // Real schema (validated by scripts/validate-data.ts, MasterIndexSchema):
+        //   index.json    = { categories: [{ id, name, file }] }   ← type list
+        //   {type}.json   = { id, name, categories: [{ id, name, file }] } ← categories in type
+        const index = await this._performFetch('/assets/db/con-data/index.json', { cache: 'force-cache' });
+        if (!index || !Array.isArray(index.categories)) return null;
 
-        const typeMap = new Map();
-        for (const t of raw.types) {
-          if (t && t.id && Array.isArray(t.categories)) {
-            typeMap.set(t.id, t.categories);
-          }
-        }
+        const typeEntry = index.categories.find(t => t && t.id === typeId);
+        if (!typeEntry || !typeEntry.file) return null;
 
-        for (const [id, cats] of typeMap.entries()) {
-          this._categoryIndexes.set(id, cats);
-        }
+        const typeFile = await this._performFetch(`/assets/db/con-data/${typeEntry.file}`, { cache: 'force-cache' });
+        if (!typeFile || !Array.isArray(typeFile.categories)) return null;
 
+        this._categoryIndexes.set(typeId, typeFile.categories);
         return this._categoryIndexes.get(typeId) || null;
       } catch (e) {
         console.warn('[NavCore/Data] _loadCategoryIndex failed:', e);
@@ -382,6 +381,7 @@
         name:        c.name || { en: c.id || '', th: c.id || '' },
         description: c.description || null,
         itemCount:   c.itemCount || 0,
+        file:        c.file || null,
       }));
     },
 

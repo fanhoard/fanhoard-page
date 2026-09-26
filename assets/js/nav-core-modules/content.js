@@ -216,7 +216,7 @@
         });
 
       } catch (e) {
-        console.error('[NavCore/Content] renderContent error:', e);
+        console.error('[NavCore/Content] renderContent error:', e, e && e.stack);
         try { M.LoadingService?.hide(); } catch (err) { console.warn('[Content] LoadingService.hide failed in catch:', err); }
       } finally {
         try { M.LoadingService?.hideInstant(); } catch (_) {}
@@ -718,7 +718,9 @@
     async _resolveAll(descriptors, lang) {
       const results = [];
 
-      for (const desc of descriptors) {
+      for (let desc of descriptors) {
+        if (!desc || typeof desc !== 'object') continue;
+        if (desc.group) desc = desc.group;
         if (!desc || typeof desc !== 'object') continue;
 
         if (desc._ureType) {
@@ -742,8 +744,13 @@
             const raw = await M.DataService.fetchWithRetry(desc.jsonFile, {}, 3);
             const arr = Array.isArray(raw) ? raw : (raw ? [raw] : []);
             for (const item of arr) {
-              if (item.type === 'card-group' || item.type === 'button-row' || item.items) {
+              if (item.source) {
+                const resolved = await this._resolveSource(item, lang);
+                results.push(...resolved);
+              } else if (item.type === 'card-group' || item.type === 'button-row' || item.items) {
                 results.push(this._formatGroupDescriptor(item, lang));
+              } else {
+                results.push(item);
               }
             }
           } catch (e) {
