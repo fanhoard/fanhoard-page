@@ -1,3 +1,35 @@
+# FanHoard Contextual Loading System — v1.0 Patch (In-Flow Loading Architecture)
+
+วางไฟล์ทั้งหมดใน patch นี้ทับลงบน repo ตามโครงสร้างเดิม — แตก ZIP แล้ว copy ทับได้เลย
+
+## สรุปการเปลี่ยนแปลง
+
+| ไฟล์ | การเปลี่ยนแปลง |
+|------|----------------|
+| `assets/js/loading-system/fvl.js` | เพิ่ม `mode: 'boundary'`, per-boundary reference counting (`_boundaryRefs`), monotonic request tokens (`requestId`), และ `clearAllBoundaryRefs()` สำหรับ route change cleanup |
+| `assets/css/loading-system.css` | เพิ่ม CSS `.fvl-boundary` สำหรับการแสดงผลแบบ in-flow ใน document flow ปกติ ไม่ใช้ `position: fixed` หรือ `z-index` ซ้อนทับ ปรับเวอร์ชันใน header เป็น `v1.0.0` ตรงกับ fvl.js |
+| `assets/css/loading.css` | เพิ่มกฎ CSS `min-height: 180px` สำหรับ `#content-loading` เพื่อป้องกัน Layout Shift (CLS) |
+| `assets/js/nav-core-modules/loading.js` | ปรับ `LoadingService.showInContent()` ให้เรียกใช้ `boundary` mode ใน `#content-loading` และอัปเดต `_forceReset()` ให้ล้าง boundary instances |
+| `assets/js/nav-core-modules/router.js` & `init.js` | อัปเดต route transitions และ early loading ให้โหลดแบบ in-flow ในพื้นที่เนื้อหา |
+| `fanhoard-docs/07-Loading-System.md` | อัปเดตเอกสารหลักสถาปัตยกรรม Contextual In-Flow Loading, Display Modes, Boundary Levels, API, และแนวปฏิบัติ |
+| `fanhoard-docs/15-Loading-Contract-And-Test-Plan.md` | อัปเดต Contract, Test Plan, และแก้ข้อขัดแย้งเรื่อง Nav Dimming |
+
+## พฤติกรรมใหม่
+
+### ก่อนหน้า
+- การเปลี่ยนหน้า/หมวดหมู่แสดง Fullscreen หรือ Scoped Overlay ทับหน้าจอ
+- บังแถบ Nav ด้านบน และอาจล็อคการ Scroll ของผู้ใช้
+- Header Nav ถูกจางแสง (`opacity: 0.4`) และกดไม่ได้ระหว่างโหลด
+
+### ตอนนี้ (In-Flow Contextual Loading)
+- แสดง Spinner ภายในพื้นที่เนื้อหา (`#content-loading`) ใน document flow ปกติ
+- ไม่ใช้ `position: fixed` หรือ `z-index` ซ้อนทับหน้าจอ
+- ผู้ใช้สามารถ Scroll หน้าจอได้อย่างอิสระ Loading area เลื่อนตามเอกสารตามธรรมชาติ
+- แถบ Header Nav และ Footer ทำงานได้ตลอดเวลา สามารถกดเปลี่ยนหมวดหมู่หรือเมนูอื่นได้ทันที
+- มีการจองพื้นที่ `min-height: 180px` เพื่อป้องกันหน้าจอกระตุก (CLS < 0.1)
+
+---
+
 # FanHoard Search — v6.1 Patch (Google-like non-sticky filters)
 
 วางไฟล์ทั้งหมดใน patch นี้ทับลงบน repo ตามโครงสร้างเดิม — แตก ZIP แล้ว copy ทับได้เลย
@@ -6,32 +38,4 @@
 
 | ไฟล์ | การเปลี่ยนแปลง |
 |------|----------------|
-| `search/index.html` | โครงสร้างใหม่ — ย้าย filter pills ออกจาก `#search-sticky` ไปเป็น sibling `.search-filters-panel`, ลบ `#filterCatToggle` (ลูกศร), ลบ `.filter-cat-wrap`, ลบ `#cat-spacer`, เขียน inline sticky script ใหม่แบบกระชับ |
-| `assets/css/search-compact-overrides.css` | ลบ style blocks ของ `.filter-cat-toggle`, `.filter-cat-wrap`, `.filter-row-end`, `.filter-row-wrapper` ออกทั้งหมด — เพิ่ม `:empty` auto-collapse สำหรับ category row — ปรับ `.search-header` padding ให้สมดุล (มี bottom padding บ้างเพราะ filter pills ไม่อยู่ใน header แล้ว) |
-| `assets/js/search-system/search-modules/rendering.js` | `setupCategoryFilter()` แบบใหม่ — ไม่อ้างถึง `filterCatToggle` / `filterCatWrap` / `_closeCatBar` / `_updateCatBarHeight` อีกต่อไป เมื่อไม่มี categories ก็แค่ clear innerHTML แล้ว CSS `:empty` จะ collapse row ให้เอง |
-| `fanhoard-docs/14-System-Design-And-UX.md` | เพิ่ม section 5.8.1 "Search Page Sticky Layout (Google-like, v6.1+)" อธิบายกฎการวาง structure ใหม่ + อัปเดต ARIA ตัวอย่างให้เป็น filter pills แทน toggle button |
-| `fanhoard-docs/02-Search-System.md` | อัปเดต section 12.4 setupCategoryFilter ให้สะท้อน behavior ใหม่ พร้อม callout box อธิบายการเปลี่ยนแปลง |
-
-## พฤติกรรมใหม่
-
-### ก่อนหน้า (v6.0)
-- `#search-sticky` บรรจุทั้ง search input, type filter pills, และ category filter wrap
-- ทั้งหมด stick อยู่กับหน้าจอเวลา scroll
-- มี toggle arrow สำหรับซ่อน/แสดง category bar
-- category bar เป็น absolute-positioned overlay ที่ dropdown ลงมาจาก header
-
-### ตอนนี้ (v6.1 — Google-like)
-- `#search-sticky` บรรจุ **เฉพาะ** search input + nav bar background
-- type filter + category filter อยู่ใน sibling `.search-filters-panel` ที่ scroll ตามเนื้อหาปกติ
-- ไม่มี toggle arrow — category pills แสดงทันทีที่มี categories ให้เลือก
-- เมื่อไม่มี categories (เช่น ผลลัพธ์ว่าง หรือทุก item อยู่ใน category เดียวกัน) CSS rule `.filter-pills-row--cat:empty { display:none }` จะ collapse row อัตโนมัติ
-- inline sticky script ยังคง show/hide บน scroll down/up ของ search bar เหมือนเดิม เพื่อประหยัดพื้นที่หน้าจอบนมือถือ
-
-## การทดสอบ
-
-ทดสอบว่า:
-1. ค้นหาแล้วเลื่อนหน้าจอ → search bar ยัง stick อยู่ แต่ filter pills เลื่อนหายไปใต้ sticky header
-2. พิมพ์คำค้นที่มีหลาย categories → category row แสดงอัตโนมัติ ไม่ต้องกด toggle
-3. พิมพ์คำค้นที่ผลลัพธ์ทั้งหมดอยู่ใน category เดียว → category row หายไปเอง
-4. ลอง responsive บนมือถือ → ทั้ง type และ category rows ยัง horizontal scroll ได้ปกติ
-5. ทดสอบ sticky show/hide บน scroll down/up → search bar ยังทำงานเหมือนเดิม
+| `search/index.html` | โครงสร้างใหม่ — ย้าย filter pills ออกจาก `#search-sticky` ไปเป็น sibling `.search-filters-panel` |

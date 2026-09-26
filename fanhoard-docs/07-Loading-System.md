@@ -1,560 +1,316 @@
 # 07 — Loading System (FVL — FanHoardVerse Loader)
 
-> เอกสารนี้อธิบายระบบ **FVL (FanHoardVerse Loader)** ของ FanHoard — ระบบ loading ส่วนกลางที่แยกออกมาจาก Nav-Core เดิม ออกแบบมาเพื่อให้ทุก loading indicator ทั่วทั้งเว็บมีคุณภาพระดับเดียวกันและยืดหยุ่นพอที่จะแสดงได้ในทุกบริบท — ตั้งแต่ overlay เต็มหน้าจอ ไปจนถึง spinner เล็ก ๆ ในปุ่ม
->
-> **สำหรับ:** AI และนักพัฒนาที่จะแก้ FVL หรือเรียกใช้ loading indicator ในโค้ดใหม่
->
-> **ไฟล์หลัก:** `assets/js/loading-system/fvl.js` (single-file: entry + 9 inline sections, 1 HTTP request) + `assets/css/loading-system.css` (auto-injected)
->
-> **Namespace:** `window.FVL` (public API, frozen) + `window.FVLModules` (internal, inline)
->
-> **เวอร์ชัน:** v1.0.0
+- **System Described**: FVL (FanHoardVerse Loader) In-Flow Contextual Loading Architecture, Boundary Modes, Lifecycle, and API
+- **Entry File**: `assets/js/loading-system/fvl.js`
+- **Dependencies**: `assets/css/loading-system.css`, `assets/css/loading.css`, `assets/js/nav-core-modules/loading.js`
+- **Verification**: `npm run test` (runs Vitest loading contract suite) | `npm run test:e2e` (runs Playwright contextual E2E suite)
 
 ---
 
-## สารบัญ
+## Table of Contents
 
-1. [Overview](#1-overview)
-2. [ไฟล์และโครงสร้าง](#2-ไฟล์และโครงสร้าง)
-3. [Public API](#3-public-api)
-4. [Display Modes (4 แบบ)](#4-display-modes-4-แบบ)
-5. [Z-index Layers](#5-z-index-layers)
-6. [Backward Compatibility](#6-backward-compatibility)
-7. [Events](#7-events)
-8. [Accessibility](#8-accessibility)
-9. [Performance](#9-performance)
-10. [Integration กับระบบอื่น](#10-integration-กับระบบอื่น)
-11. [อ้างอิงข้ามเอกสาร](#11-อ้างอิงข้ามเอกสาร)
-
----
-
-## 1. Overview
-
-FVL (FanHoardVerse Loader) คือระบบ loading ส่วนกลางของ FanHoard ที่แยกออกมาจาก Nav-Core เดิม ออกแบบมาเพื่อให้ **ทุก loading indicator ทั่วทั้งเว็บมีคุณภาพระดับเดียวกัน** และยืดหยุ่นพอที่จะแสดงได้ในทุกบริบท — ตั้งแต่ overlay เต็มหน้าจอ ไปจนถึง spinner เล็กๆ ในปุ่ม
-
-### หลักการออกแบบ
-
-- **Lightweight เป็นอันดับ 1**: ไฟล์ JS เดียว (~9KB unminified), ไฟล์ CSS เดียว (~4KB unminified), zero dependencies, ทำงานลื่นไหลบนอุปกรณ์สเปคต่ำ→สูง
-- **4 display modes**: `fullscreen` / `scoped` / `inline` / `topbar` — ใช้ API เดียว (`FVL.show()`)
-- **Zero coupling กับระบบอื่น**: ทำงานได้เลยโดยไม่ต้องมี URE, NavCore, Search หรือ Language System
-- **Full backward-compat**: API เดิมของ Nav-Core (`LoadingService.show/hide`, `window.showInstantLoadingOverlay`, `window._navCore_contentLoadingManager` ฯลฯ) ทำงานเหมือนเดิมผ่าน proxy อัตโนมัติ
-- **ใช้ FanHoard Design Tokens**: สี/เงา/รัศมี ดึงจาก `tokens.css` ทั้งหมด
-- **รองรับ i18n**: รับ `lang` option หรืออ่านจาก `localStorage.selectedLang` อัตโนมัติ
-- **Accessibility first**: `role="status"`, `aria-live="polite"`, `prefers-reduced-motion`
-- **Performance-focused**: CSS animations (ไม่ใช้ JS-driven), `contain: strict`, composite-only properties (transform/opacity), lazy DOM creation
+1. [System Overview & Architecture Principles](#1-system-overview--architecture-principles)
+2. [File and Directory Structure](#2-file-and-directory-structure)
+3. [Display Modes & Boundary Hierarchy](#3-display-modes--boundary-hierarchy)
+4. [Rendering, Scroll Behavior & Layout Reservation](#4-rendering-scroll-behavior--layout-reservation)
+5. [Visual Specification & Timing Guarantees](#5-visual-specification--timing-guarantees)
+6. [Public API & Usage Examples](#6-public-api--usage-examples)
+7. [Concurrency, Lifecycle & Race Prevention](#7-concurrency-lifecycle--race-prevention)
+8. [Migration Notes & Legacy Compatibility](#8-migration-notes--legacy-compatibility)
+9. [Prohibited Anti-Patterns](#9-prohibited-anti-patterns)
+10. [Doc-vs-Code Conflict Resolutions](#10-doc-vs-code-conflict-resolutions)
+11. [Cross-References](#11-cross-references)
 
 ---
 
-## 2. ไฟล์และโครงสร้าง
+## 1. System Overview & Architecture Principles
+
+FVL (FanHoardVerse Loader) is FanHoard's central loading system (`assets/js/loading-system/fvl.js`). The system implements a **contextual in-flow loading architecture** that renders loading indicators inside target content containers in normal document flow rather than obscuring the entire viewport with global fixed overlays.
+
+```
++-----------------------------------------------------------------------+
+|  HEADER / NAVIGATION BAR (Always visible & interactive)               |
++-----------------------------------------------------------------------+
+|  MAIN PAGE CONTAINER (<main> / #content-container)                    |
+|                                                                       |
+|  +-----------------------------------------------------------------+  |
+|  |  IN-FLOW LOADING BOUNDARY (#content-loading)                    |  |
+|  |  - Position: static/relative (In Normal Document Flow)         |  |
+|  |  - Z-Index: 0 (No Viewport Stacking or Backdrop Overlay)        |  |
+|  |  - Scroll: lockScroll = false (Page scrolls freely with document)|  |
+|  |  - CLS Protection: min-height: 180px layout reservation        |  |
+|  |                                                                 |  |
+|  |               ( ( SVG Ring Spinner ) )                          |  |
+|  |                   Loading content...                            |  |
+|  +-----------------------------------------------------------------+  |
+|                                                                       |
+|  Adjacent content and controls remain visible and scrollable          |
++-----------------------------------------------------------------------+
+|  FOOTER (Reachable while loading)                                     |
++-----------------------------------------------------------------------+
+```
+
+### Core Architecture Principles
+
+1. **Boundary DOM Ownership**: The loading indicator mounts directly inside the target boundary container (e.g. `#content-loading`) in normal DOM flow rather than at the application root (`body`).
+2. **Decoupled Viewport & Free Scrolling**: Contextual loading does not use `position: fixed`, backdrop overlays, or high `z-index` stacking layers. Page scrolling is never locked (`lockScroll: false`), allowing users to scroll freely while content loads.
+3. **Cumulative Layout Shift (CLS) Prevention**: Target containers maintain CSS layout reservation (`min-height: var(--fvl-boundary-min-height, 180px)`), keeping CLS < 0.1 during transitions.
+4. **Visual Language Preservation**: In-flow boundaries retain FanHoard's signature SVG ring spinner (static track + animated arc) and theme-aware styling.
+
+---
+
+## 2. File and Directory Structure
 
 ```
 assets/
 ├── js/
 │   └── loading-system/
-│       └── fvl.js                          ← Entry + internal modules (single file)
-└── css/
-    └── loading-system.css                  ← Auto-injected by fvl.js
+│       └── fvl.js                          ← Entry + internal modules (single-file hybrid, VERSION = '1.0.0')
+├── css/
+│   ├── loading-system.css                  ← Auto-injected stylesheet (.fvl-boundary & spinner keyframes)
+│   └── loading.css                         ← Content container layout & min-height reservation
+└── js/nav-core-modules/
+    └── loading.js                          ← LoadingService proxy mapping route requests to boundary mode
 
-loading-demo/
-└── index.html                              ← Demo page (all 4 modes + stats)
+tests/
+└── loading-contract.test.ts                ← Vitest unit & contract test suite for boundary loading
 
-assets/js/nav-core-modules/
-└── loading.js                              ← Thin proxy (delegates to FVL)
-
-fanhoard-docs/
-└── 07-Loading-System.md                ← This document
+e2e/
+└── loading-contextual.spec.ts              ← Playwright E2E browser test suite for in-flow behavior
 ```
 
 ---
 
-## 3. Architecture — Hybrid (single-file multi-module)
+## 3. Display Modes & Boundary Hierarchy
 
-FVL ใช้สถาปัตยกรรม **Hybrid** ที่ออกแบบมาเพื่อความเบาที่สุด: **ไฟล์ JS เดียว**ที่บรรจุ internal modules ทั้งหมด โดยใช้ IIFE pattern เดียวกับ URE/Popup แต่ไม่ต้องโหลด sub-modules แยกไฟล์ → HTTP request เดียว
+FVL supports 5 operational display modes. Contextual in-flow `boundary` mode is the primary default for route transitions and content fetching.
 
-### 3.1 Internal Module Sections (ในไฟล์เดียว)
+### 3.1 Display Modes Overview
 
-```
-fvl.js
-├── SECTION 1:  Namespace              (window.FVLModules)
-├── SECTION 2:  types                  (JSDoc typedefs — no runtime code)
-├── SECTION 3:  config                 (CONFIG: constants, presets, z-index, timing)
-├── SECTION 4:  utils                  (DOM helpers, option merging, lang, autoTheme)
-├── SECTION 5:  state                  (instance registry, group registry, events)
-├── SECTION 6:  renderer               (DOM builders for 4 modes)
-├── SECTION 7:  animator               (enter/exit animations — double-rAF)
-├── SECTION 8:  engine                 (orchestrator + lifecycle)
-├── SECTION 9:  compat                 (backward-compat proxy)
-└── SECTION 10: init                   (creates frozen window.FVL global)
-```
+| Mode | Target Element | Position Strategy | Z-Index | Scroll Lock | Primary Usage |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **`boundary`** (Default) | Container selector (`#content-loading`) | In-Flow (`static` / `relative`) | `0` (Normal Flow) | **No** (`false`) | SPA route changes, feed loading, category switching |
+| **`scoped`** | Target card/section | Overlay (`absolute`) | `1600` | **No** (`false`) | Isolated card/widget updates |
+| **`inline`** | Button or inline element | In-Flow (`inline-flex`) | `0` | **No** (`false`) | Button spinner states |
+| **`topbar`** | Top viewport edge | Fixed (`fixed` top) | `17500` | **No** (`false`) | Background fetch indicator |
+| **`fullscreen`** | App root (`body`) | Overlay (`fixed` inset 0) | `17000` | Optional (`true` / `false`) | Cold boot & fatal error boundaries |
 
-### 3.2 Pattern
+### 3.2 Four Boundary Hierarchy Levels
 
-```javascript
-(function() {
-  'use strict';
-  if (window.FVL && window.FVL._initialized) return;
+1. **Page-Level Boundary**: Encloses main view containers (`<main>` or `#content-container`). Used during full SPA route transitions to render a page-level loading state inside the content slot.
+2. **Content-Level Boundary**: Wraps discrete functional sections (e.g. `#content-loading`, feed cards, search results). Allows adjacent UI elements (header navigation, filter pills) to remain fully interactive.
+3. **Component-Level Boundary**: Micro-boundaries attached to isolated UI components (e.g., button handles, autocomplete dropdowns, individual card widgets).
+4. **Nested Boundaries**: Hierarchical structure where component/content boundaries operate inside parent page boundaries.
+   - **Nearest Boundary Interception Rule**: Async requests bubble up to the nearest registered target container. Only that boundary renders placeholder UI.
+   - **Anti-Stacking Rule**: Active child boundaries do NOT trigger parent or global viewport overlays. Parent containers retain resolved interactive states.
 
-  var M = window.FVLModules = window.FVLModules || {};
+### 3.3 Strict Exceptions for Global Fullscreen Overlays
 
-  // SECTION: config
-  var CONFIG = Object.freeze({ ... });
-  M.CONFIG = CONFIG;
+Global viewport blocking overlays (`mode: 'fullscreen'` with `position: fixed` and `z-index: 17000`) are strictly restricted to three exceptional system states:
 
-  // SECTION: utils
-  var Utils = (function() {
-    // ... helpers ...
-    return Object.freeze({ ... });
-  })();
-  M.Utils = Utils;
-
-  // ... etc ...
-
-  // SECTION: init — public API
-  window.FVL = Object.freeze({ ... });
-})();
-```
-
-### 3.3 Lightweight Techniques
-
-| เทคนิค | รายละเอียด |
-|--------|------------|
-| **Single HTTP request** | 1 JS file, 1 CSS file (auto-injected) |
-| **Lazy DOM creation** | DOM สร้างตอน `show()` ไม่ใช่ตอน init |
-| **CSS animations only** | ไม่ใช้ JS-driven animation → main thread ว่าง |
-| **Composite-only properties** | `transform` / `opacity` เท่านั้น → GPU accelerated |
-| **`contain: strict`** | บน overlay layers → isolation = better perf |
-| **`will-change` scoped** | ใส่เฉพาะตอน active transition |
-| **No Web Worker** | overkill สำหรับ loading indicator |
-| **No polyfills** | modern browsers only |
-| **ResizeObserver lazy** | สร้างต่อเมื่อมี fullscreen mode ใช้งาน |
-| **prefers-reduced-motion** | ปิด animation อัตโนมัติ |
+1. **Initial Application Boot**: Initial static HTML boot loader (`#fv-boot-loader` in `data/verse/discover/index.html`) prior to JS module initialization.
+2. **Unrecoverable Fatal Error**: Application crash or fatal boot failure rendering `Utils.showErrorFullscreen()`.
+3. **Destructive Modal Workflow**: Critical confirmation dialogs where user interaction with background UI risks data corruption.
 
 ---
 
-## 4. 4 Display Modes
+## 4. Rendering, Scroll Behavior & Layout Reservation
 
-### 4.1 Mode comparison
+### 4.1 In-Flow Rendering Specification
 
-| Mode | Use case | Size | Position | Overlay | Z-index |
-|------|----------|------|----------|---------|---------|
-| **fullscreen** | เปลี่ยนหน้า, โหลดข้อมูลใหญ่ | 68px spinner | Fixed below header | ทั้ง viewport | 17000 |
-| **scoped** | loading ใน card/section เฉพาะ | 40px spinner | Absolute in target | ครอบ target เท่านั้น | 1600 |
-| **inline** | spinner ในปุ่ม/element | 18px spinner | Inline (in flow) | ไม่มี | 0 |
-| **topbar** | navigation ระหว่างหน้า | 3px bar | Fixed at top | ไม่มี | 17500 |
-
-### 4.2 Visual: Ring spinner (shared)
-
-ทุก mode ใช้ SVG ring spinner ตัวเดียวกัน ปรับขนาดผ่าน CSS:
+When `FVL.show({ mode: 'boundary', target: '#content-loading' })` is invoked, `fvl.js` builds and appends `.fvl-boundary` inside the target container:
 
 ```html
-<svg viewBox="0 0 52 52">
-  <circle class="fvl-track" cx="26" cy="26" r="22"/>  <!-- static track -->
-  <circle class="fvl-arc"   cx="26" cy="26" r="22"/>  <!-- spinning arc -->
-</svg>
+<!-- Mounted inside #content-loading in normal document flow -->
+<div class="fvl-boundary fvl-theme-light" role="status" aria-live="polite">
+  <div class="fvl-boundary-inner">
+    <div class="fvl-spinner fvl-spinner-md" aria-hidden="true">
+      <svg viewBox="0 0 52 52">
+        <circle class="fvl-track" cx="26" cy="26" r="22"/>
+        <circle class="fvl-arc" cx="26" cy="26" r="22"/>
+      </svg>
+    </div>
+    <div class="fvl-message">Loading content...</div>
+  </div>
+</div>
 ```
 
-- `stroke-dasharray: 88 132` → ส่วนโค้ง 1/3 ของวงกลม
-- `animation: _fvl_spin 0.8s linear infinite`
-- สีดึงจาก `--fvl-spinner-track` และ `--fvl-spinner-arc` (theme-aware)
+### 4.2 Scroll Behavior
+
+- `lockScroll` defaults to `false` for boundary mode.
+- Document body styles (`position: fixed`, `overflow: hidden`) are NEVER applied during contextual loads.
+- The loading boundary moves naturally with document scrolling.
+- Header navigation and page footer remain reachable at all times.
+
+### 4.3 CLS Prevention & Layout Reservation
+
+To eliminate Cumulative Layout Shift (CLS) when content finishes loading, target containers specify CSS min-height reservation:
+
+```css
+/* File: assets/css/loading.css:12 */
+#content-loading {
+  min-height: var(--fvl-boundary-min-height, 180px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+```
 
 ---
 
-## 5. Public API — `window.FVL`
+## 5. Visual Specification & Timing Guarantees
 
-### 5.1 `FVL.show(opts)` → `FVLHandle | null`
+### 5.1 SVG Ring Spinner
 
-API หลัก — แสดง loader ตาม options ที่ส่งเข้ามา
+Boundary loaders utilize FanHoard's signature SVG ring spinner with theme-aware tokens:
+
+```css
+/* File: assets/css/loading-system.css:42 */
+.fvl-track {
+  stroke: var(--fvl-spinner-track, rgba(0, 0, 0, 0.1));
+}
+.fvl-arc {
+  stroke: var(--fvl-spinner-arc, var(--fv-color-primary, #6366f1));
+  stroke-dasharray: 88 132;
+  animation: _fvl_spin 0.8s linear infinite;
+}
+```
+
+### 5.2 Timing Guarantees & Flicker Prevention
+
+- **Minimum Display Duration (`MIN_VISIBLE_MS = 300ms`)**: Managed by `LoadingService` in `assets/js/nav-core-modules/loading.js`. Active loading indicators remain visible for at least 300ms to eliminate visual flickering on high-speed network connections.
+- **Enter Transition (`140ms`)**: `.fvl-entering` applies double `requestAnimationFrame` opacity fade-in.
+- **Leave Transition (`180ms`)**: `.fvl-leaving` applies `180ms` opacity fade-out before DOM unmounting.
+
+---
+
+## 6. Public API & Usage Examples
+
+### 6.1 `FVL.show(opts)` Boundary Form
 
 ```javascript
-// Shorthand string → fullscreen with message
-FVL.show('Loading...');
-
-// Object form
+// File: assets/js/loading-system/fvl.js:840
 const handle = FVL.show({
-  mode: 'fullscreen',           // 'fullscreen'|'scoped'|'inline'|'topbar'
-  message: 'กำลังโหลด...',
-  subMessage: '',               // fullscreen only — defaults to EN translation
-  lang: 'th',                   // auto-detected if omitted
-  visual: 'ring',               // currently only 'ring'
-  size: 68,                     // override spinner size (px)
-  theme: 'light',               // 'light'|'dark'|'brand'|'auto'
-  target: '#my-card',           // required for scoped/inline modes
-  progress: 0.5,                // topbar only — 0..1 (omit = indeterminate)
-  overlay: true,                // scoped — show backdrop
-  lockScroll: false,            // fullscreen — lock page scroll
-  zIndex: 17000,                // override z-index
-  autoHideAfterMs: 4000,        // auto-hide timer
-  replaceContent: false,        // inline — replace target's content entirely
-  persistent: false,            // cannot be dismissed via API shortcuts
-  group: 'my-group',            // only one loader per group at a time
-  id: 'my-id',                  // auto-generated if omitted
-  onMount: (rootEl, handle) => {},
-  onShow: (id, handle) => {},
-  onHide: (id) => {},
+  mode: 'boundary',
+  target: '#content-loading',
+  message: 'Loading discover feed...',
+  theme: 'auto'
+});
+
+// Hide loader when async operation completes
+handle.hide();
+```
+
+### 6.2 `FVL.boundary(target, opts)` Shortcut
+
+```javascript
+// File: assets/js/loading-system/fvl.js:1395
+const handle = FVL.boundary('#content-loading', {
+  message: 'Updating collection...'
 });
 ```
 
-### 5.2 Mode shortcuts
+### 6.3 `LoadingService` Integration
 
 ```javascript
-FVL.fullscreen('Loading...');                              // shorthand
-FVL.fullscreen({ message: '...', autoHideAfterMs: 5000 });
+// File: assets/js/nav-core-modules/loading.js:184
+// Invoked by router.js during SPA route transitions
+LoadingService.showInContent('Loading items...');
 
-FVL.scoped({ target: '#card', message: 'Fetching...' });
-
-FVL.inline({ target: '#btn' });
-FVL.inline({ target: '#btn', replaceContent: true, message: 'Working...' });
-
-FVL.topbar();                                               // indeterminate
-FVL.topbar({ progress: 0.5 });                              // determinate
+// Invoked when view rendering completes
+LoadingService.hideFromContent();
 ```
-
-### 5.3 FVLHandle methods
-
-```javascript
-const handle = FVL.show(...);
-
-handle.id              // string — unique ID
-handle.mode            // 'fullscreen'|'scoped'|'inline'|'topbar'
-handle.options         // resolved options object
-handle.element         // root HTMLElement
-
-handle.hide();                                        // returns Promise<void>
-handle.update({ message: 'Almost done' });            // merge options
-handle.setMessage('New message');                     // shortcut
-handle.setProgress(0.9);                              // topbar only
-handle.getState();                                    // 'showing'|'shown'|'hiding'|'hidden'
-handle.on('hidden', () => {});                        // instance events
-```
-
-### 5.4 Static methods
-
-```javascript
-FVL.hide(id?)                  // hide by ID (defaults to fullscreen singleton)
-FVL.hideAll()                  // hide all active loaders (Promise<void>)
-FVL.hideByGroup('my-group')    // hide loader in a group
-FVL.update(id, opts)           // update options on live loader
-FVL.get(id)                    // get handle for existing loader
-FVL.isActive(id)               // boolean — is loader currently shown?
-FVL.on('shown', (d) => {})     // system event subscription
-FVL.off('shown', fn)           // unsubscribe
-FVL.stats()                    // { active, modes: {...}, instances: [...] }
-FVL.modules()                  // internal FVLModules namespace
-FVL.config()                   // CONFIG object
-```
-
-### 5.5 System events
-
-```javascript
-FVL.on('showing', (d) => {});   // { id, mode }
-FVL.on('shown',   (d) => {});   // { id, mode }
-FVL.on('hiding',  (d) => {});   // { id, mode }
-FVL.on('hidden',  (d) => {});   // { id, mode }
-FVL.on('updated', (d) => {});   // { id, mode }
-FVL.on('destroy', (d) => {});   // { id }
-```
-
-Native DOM events ก็มี: `window.addEventListener('fvl:shown', ...)`
 
 ---
 
-## 6. Theme System
+## 7. Concurrency, Lifecycle & Race Prevention
 
-FVL รองรับ 4 themes ผ่าน `[data-fvl-theme]` attribute:
+### 7.1 Per-Boundary Reference Counting
 
-| Theme | พื้นหลัง | Spinner track | Spinner arc | Use case |
-|-------|---------|---------------|-------------|----------|
-| `light` (default) | ขาว | #e8f5ef | teal-light | พื้นหลังสว่าง |
-| `dark` | #1a1d23 | #2a2d33 | teal-light | พื้นหลังเข้ม |
-| `brand` | teal | rgba(white,.18) | ขาว | branded splash |
-| `auto` | (depends) | (depends) | (depends) | auto-detect จาก target bg luminance |
+To handle concurrent asynchronous requests targeting the same DOM container, `fvl.js` maintains a boundary reference count map (`_boundaryRefs`):
 
-### Theme tokens (CSS variables)
+```javascript
+// File: assets/js/loading-system/fvl.js:382
+// Increment active ref count on show
+var currentCount = (_boundaryRefs.get(targetEl) || 0) + 1;
+_boundaryRefs.set(targetEl, currentCount);
 
-```css
-.fvl[data-fvl-theme="..."] {
-  --fvl-bg:            ...;  /* overlay background */
-  --fvl-text:          ...;  /* primary text color */
-  --fvl-text-sub:      ...;  /* subtitle text */
-  --fvl-spinner-track: ...;  /* static ring */
-  --fvl-spinner-arc:   ...;  /* spinning arc */
-  --fvl-overlay-bg:    ...;  /* scoped overlay */
-  --fvl-topbar-bg:     ...;  /* topbar bar color */
+// Decrement on hide; unmount DOM only when count reaches 0
+var remaining = (_boundaryRefs.get(targetEl) || 1) - 1;
+if (remaining <= 0) {
+  _boundaryRefs.delete(targetEl);
+  _cleanup(inst);
+} else {
+  _boundaryRefs.set(targetEl, remaining);
 }
 ```
 
----
+### 7.2 Monotonic Request Tokens (Stale-Request Guards)
 
-## 7. Z-Index Stacking
+Every `FVL.show()` invocation generates a monotonic integer request token (`requestId`). If a superseded async request attempts to complete after a newer request has started on the same boundary, the stale completion is safely ignored.
 
-| Mode | Base Z | Notes |
-|------|--------|-------|
-| `inline` | 0 | participates in normal flow |
-| `scoped` | 1600 | absolute inside target container |
-| `fullscreen` | 17000 | matches `--fv-z-overlay` (back-compat with clp-overlay) |
-| `topbar` | 17500 | above fullscreen overlay |
+### 7.3 Route-Change Cleanup (`clearAllBoundaryRefs`)
 
-Override ได้ผ่าน `zIndex` option.
-
----
-
-## 8. i18n
-
-FVL มี built-in message map สำหรับ loading text:
+During SPA route transitions, `LoadingService._forceReset()` calls `FVL.clearAllBoundaryRefs()` to purge active timers, clear reference counters, and restore target `aria-busy="false"` states:
 
 ```javascript
-// config.js
-MESSAGES: Object.freeze({
-  en: { loading: 'Loading...' },
-  th: { loading: 'กำลังโหลด...' },
-  ja: { loading: '読み込み中...' },
-  zh: { loading: '加载中...' },
-})
-```
-
-**วิธีเพิ่มภาษา**: เพิ่ม key ใน `MESSAGES` — ไม่ต้องแก้ที่อื่น
-
-**Fallback chain**: `requested lang` → `en` → `first key in map` → `'Loading...'`
-
-### Dual-language display (fullscreen only)
-
-เมื่อ `lang !== 'en'`, FVL แสดง message หลักในภาษาที่เลือก และ subtitle เป็นภาษาอังกฤษ (ยกเว้นถ้า `subMessage` ถูก override)
-
-```
-┌─────────────────┐
-│                 │
-│      ◜          │  ← spinner
-│                 │
-│  กำลังโหลด...    │  ← .fvl-msg (active lang)
-│  Loading...     │  ← .fvl-sub (English, hidden if active lang = en)
-│                 │
-└─────────────────┘
-```
-
----
-
-## 9. Backward Compatibility (Full Proxy)
-
-FVL ติดตั้ง compat layer อัตโนมัติตอน `fvl:ready` — ทำให้ code เดิมของ Nav-Core ทำงานได้โดยไม่ต้องแก้:
-
-### 9.1 Global aliases (auto-installed)
-
-| Alias | Maps to |
-|-------|---------|
-| `window.showInstantLoadingOverlay(opts)` | `FVL.fullscreen(opts)` |
-| `window.removeInstantLoadingOverlay()` | `FVL.hide('fvl-default-fullscreen')` |
-| `window.__removeInstantLoadingOverlay()` | `FVL.hide('fvl-default-fullscreen')` |
-| `window._navCore_contentLoadingManager` | proxy object |
-| `window._headerV2_contentLoadingManager` | proxy object |
-| `window.NavCoreModules.LoadingService` | proxy object (if NavCoreModules exists) |
-
-### 9.2 Nav-Core LoadingService proxy
-
-`assets/js/nav-core-modules/loading.js` ถูกแปลงเป็น thin proxy ที่ forward ทุก call ไปยัง FVL fullscreen mode:
-
-```javascript
-// เหล่านี้ทำงานเหมือนเดิม:
-NavCoreModules.LoadingService.show();
-NavCoreModules.LoadingService.hide();
-NavCoreModules.LoadingService.updateMessage('...');
-NavCoreModules.LoadingService.isShown();
-NavCoreModules.LoadingService._updateTopVar();
-NavCoreModules.LoadingService._setTexts();
-NavCoreModules.LoadingService._getEl();
-NavCoreModules.LoadingService.showInContent(opts);
-NavCoreModules.LoadingService.hideFromContent();
-```
-
-### 9.3 Singleton ID strategy
-
-FVL ใช้ `fvl-default-fullscreen` เป็น stable singleton ID สำหรับ fullscreen mode ที่ไม่ระบุ ID → ทำให้ `FVL.show()` ซ้อนกันหลายครั้งไม่สร้าง instance ใหม่ แต่อัปเดตตัวเดิม (idempotent show)
-
----
-
-## 10. CSS Architecture
-
-`loading-system.css` ใช้:
-
-- **CSS `@layer fvl`** เพื่อ isolate styles จากระบบอื่น
-- **CSS custom properties** จาก `tokens.css` (`--fv-brand-*`, `--fv-radius-*`, `--fv-shadow-*`, `--fv-font-*`)
-- **Theme tokens** ของ FVL เอง (`--fvl-bg`, `--fvl-text`, `--fvl-spinner-*` ฯลฯ)
-- **`contain: strict`** บน overlay layers เพื่อ isolation
-- **`will-change`** ใส่เฉพาะตอน active transition
-- **`prefers-reduced-motion: reduce`** → disable all animations
-- **Responsive** — spinner sizes ปรับตาม mode ไม่ต้อง media query
-
-### 10.1 Animation states
-
-```css
-.fvl.fvl-entering { opacity: 0; will-change: opacity; }
-.fvl.fvl-shown    { opacity: 1; transition: opacity 140ms ease; }
-.fvl.fvl-leaving  { opacity: 0; transition: opacity 180ms ease; pointer-events: none; }
-```
-
-Topbar มี states เฉพาะ (slide vertical แทน fade):
-```css
-.fvl-topbar.fvl-entering { transform: translateY(-100%); }
-.fvl-topbar.fvl-shown    { transform: translateY(0); }
-.fvl-topbar.fvl-leaving  { transform: translateY(-100%); }
-```
-
----
-
-## 11. วิธีเพิ่มในหน้าเว็บ
-
-เพิ่ม `<script defer>` ใน `<body>` ของทุกหน้าที่ต้องการใช้ FVL:
-
-```html
-<script defer src="/assets/js/loading-system/fvl.js?v=1.0.0"></script>
-```
-
-ระบบจะ **auto-inject** `loading-system.css` เอง — ไม่ต้องเพิ่ม `<link>` แยก (แต่ถ้ามี `<link>` อยู่แล้ว FVL จะข้ามการ inject ไม่ซ้ำซ้อน)
-
-> หน้าที่ใช้ Nav-Core อยู่แล้วไม่ต้องเพิ่มอะไร — FVL จะถูก load อัตโนมัติเมื่อ `loading.js` proxy ถูกเรียกครั้งแรก (lazy load)
-
----
-
-## 12. ตัวอย่างการใช้งานจริง
-
-### 12.1 Fullscreen ตอนเปลี่ยนหน้า
-
-```javascript
-async function navigateToCategory(catId) {
-  FVL.fullscreen({ message: 'Loading category...' });
-  try {
-    const data = await fetchCategory(catId);
-    renderCategory(data);
-  } finally {
-    FVL.hide();
-  }
-}
-```
-
-### 12.2 Scoped ในการ์ดเฉพาะ
-
-```javascript
-async function loadCardContent(cardEl) {
-  const h = FVL.scoped({
-    target: cardEl,
-    message: 'Fetching...',
-  });
-  try {
-    const data = await fetchData(cardEl.dataset.id);
-    cardEl.innerHTML = renderContent(data);
-  } finally {
-    h.hide();
-  }
-}
-```
-
-### 12.3 Inline ในปุ่ม submit
-
-```javascript
-document.getElementById('submitBtn').addEventListener('click', async function() {
-  const h = FVL.inline({ target: this });
-  try {
-    await submitForm();
-    FVL.topbar({ progress: 1 });
-    setTimeout(() => FVL.hide(), 500);
-  } catch (err) {
-    h.hide();
-    showError(err);
-  }
-});
-```
-
-### 12.4 Topbar พร้อม progress
-
-```javascript
-async function uploadFile(file) {
-  const h = FVL.topbar({ progress: 0 });
-
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) {
-        h.setProgress(e.loaded / e.total);
-      }
-    };
-    xhr.onload = () => {
-      h.setProgress(1);
-      setTimeout(() => { h.hide(); resolve(xhr.response); }, 300);
-    };
-    xhr.onerror = () => { h.hide(); reject(new Error('Upload failed')); };
-    xhr.send(file);
+// File: assets/js/loading-system/fvl.js:442
+function clearAllBoundaryRefs() {
+  _boundaryRefs.clear();
+  _instances.forEach(function(inst) {
+    if (inst.mode === 'boundary') {
+      _cleanup(inst);
+    }
   });
 }
 ```
 
-### 12.5 Backward-compat (Nav-Core เดิม)
+---
 
-```javascript
-// code เดิมใน nav-core ยังทำงานได้ — FVL proxy รับไว้หมด
-window.showInstantLoadingOverlay('Loading...');   // → FVL.fullscreen()
-setTimeout(() => window.removeInstantLoadingOverlay(), 2000);
+## 8. Migration Notes & Legacy Compatibility
 
-// หรือเรียกผ่าน NavCoreModules ตามเดิม
-NavCoreModules.LoadingService.show();
-NavCoreModules.LoadingService.hide();
-```
+### 8.1 100% Backward Compatibility
+
+All legacy FVL and `LoadingService` API signatures remain fully supported:
+
+- `FVL.show('Message')` (defaults to boundary mode when target exists, or fullscreen fallback)
+- `FVL.fullscreen()`, `FVL.scoped()`, `FVL.inline()`, `FVL.topbar()`
+- `LoadingService.show()`, `LoadingService.hide()`, `LoadingService.showInContent()`, `LoadingService.hideFromContent()`
+- `window.showInstantLoadingOverlay()` / `window.removeInstantLoadingOverlay()`
+
+### 8.2 Developer Migration Checklist
+
+When updating legacy code to use in-flow boundary loading:
+
+1. Ensure the target container element (e.g. `#content-loading`) exists in the target view HTML.
+2. Verify target CSS specifies layout reservation (`min-height: 180px`).
+3. Replace `FVL.show({ mode: 'fullscreen' })` with `LoadingService.showInContent()` or `FVL.boundary('#content-loading')`.
+4. Do NOT set `lockScroll: true` on content/route loaders.
 
 ---
 
-## 13. Integration กับระบบอื่น
+## 9. Prohibited Anti-Patterns
 
-### 13.1 ปัจจุบัน (หลัง migrate)
-
-| ระบบ | วิธีใช้ FVL |
-|------|------------|
-| **Nav-Core** | ผ่าน `LoadingService` proxy (auto-forwarded ไป FVL fullscreen) |
-| **Discover page** | `LoadingService.show()` → `FVL.fullscreen()` (เหมือนเดิม) |
-| **Router transitions** | `LoadingService.show()` / `.hide()` (เหมือนเดิม) |
-
-### 13.2 แนะนำสำหรับระบบใหม่
-
-| ระบบ | วิธีใช้ |
-|------|--------|
-| **Search** | `FVL.scoped({ target: '#results' })` ขณะ filter |
-| **Popup** | `FVL.inline({ target: btn })` บนปุ่มใน popup ขณะ async action |
-| **Home** | `FVL.topbar()` ขณะโหลด carousel |
-| **Settings** | `FVL.scoped({ target: panel })` ขณะ save |
+| Prohibited Practice | System Impact | Correct Alternative |
+| :--- | :--- | :--- |
+| **Using `fullscreen` overlay for routine SPA routes** | Obscures navigation bar and locks user scroll | Use `LoadingService.showInContent()` or `FVL.boundary('#content-loading')` |
+| **Applying `position: fixed` to boundary targets** | Causes loading UI to break out of document flow | Keep boundary target in normal DOM flow (`position: static` / `relative`) |
+| **Setting `lockScroll: true` on contextual loaders** | Prevents users from scrolling while content loads | Keep `lockScroll: false` (default for boundary mode) |
+| **Omitting `min-height` on boundary containers** | Causes Cumulative Layout Shift (CLS > 0.1) when loader unmounts | Define `min-height: 180px` or `var(--fvl-boundary-min-height)` on target |
+| **Bypassing `_forceReset()` during route changes** | Leaves orphaned loading DOM nodes or stale `aria-busy` attributes | Call `LoadingService._forceReset()` on navigation events |
 
 ---
 
-## 14. Version History
+## 10. Doc-vs-Code Conflict Resolutions
 
-| เวอร์ชัน | การเปลี่ยนแปลง |
-|-----------|---------------|
-| **v1.0.0** | เปิดตัว — 4 modes (fullscreen/scoped/inline/topbar), full backward-compat กับ Nav-Core LoadingService, single-file hybrid architecture, 1 CSS file auto-inject |
-
----
-
-## 15. Performance Benchmarks
-
-| Metric | Value |
-|--------|-------|
-| Initial JS size (unminified) | ~9 KB |
-| Initial JS size (minified, est.) | ~4 KB |
-| Initial JS size (gzip, est.) | ~1.8 KB |
-| Initial CSS size (unminified) | ~4 KB |
-| Initial CSS size (minified, est.) | ~2.5 KB |
-| HTTP requests on first load | 2 (1 JS + 1 CSS) |
-| Dependencies | 0 |
-| Time to interactive (est. mobile 3G) | < 50ms |
-| Animation FPS (mid-range mobile) | 60 FPS (CSS-only) |
-| Memory per instance | ~2 KB |
+1. **Version Header Mismatch Resolution**: `assets/css/loading-system.css` header states `v1.0.0` to match `assets/js/loading-system/fvl.js` (`VERSION = '1.0.0'`).
+2. **Navigation Isolation Resolution**: Legacy `body.fvl-nav-mode.nav-loading` dimming rules have been completely removed. `assets/js/nav-core-modules/router.js` ensures header navigation links remain `opacity: 1.0` and fully interactive (`pointer-events: auto`) during content loading.
 
 ---
 
-> **เอกสารฉบับนี้สร้างขึ้นเพื่อให้ AI หรือนักพัฒนาสามารถเข้าใจระบบ FVL ทั้งหมดได้จากเอกสารฉบับเดียว — โดยไม่ต้องอ่าน source code โดยตรง**
+## 11. Cross-References
 
----
-
-## 11. อ้างอิงข้ามเอกสาร
-
-- [`00-System-Architecture.md`](./00-System-Architecture.md) — ภาพรวมสถาปัตยกรรมทั้งโปรเจกต์
-- [`03-Navigation-And-Content.md`](./03-Navigation-And-Content.md) — Nav-Core ที่ `loading.js` เป็น thin proxy ไปยัง FVL
-- [`08-Performance-Architecture.md`](./08-Performance-Architecture.md) — เทคนิค performance ที่ใช้ใน FVL (single-file, CSS animations, `contain: strict`)
-- [`AI_CODING_GUIDE.md`](./AI_CODING_GUIDE.md) — มาตรฐานโค้ดที่ต้องยึดเมื่อแก้ FVL
-- [`AI_FORBIDDEN.md`](./AI_FORBIDDEN.md) — กฎเหล็กก่อนแตะ FVL
-- [`12-SEO-Guide.md`](./12-SEO-Guide.md) — ⭐ SEO considerations (priority สูงสุด) ที่เกี่ยวข้องกับระบบนี้
+- [`docs/engineering/release-policy.md`](../docs/engineering/release-policy.md) — FanHoard Release & Update Policy
+- [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) — Documentation formatting rules
+- [`15-Loading-Contract-And-Test-Plan.md`](./15-Loading-Contract-And-Test-Plan.md) — Loading Contract & Test Plan

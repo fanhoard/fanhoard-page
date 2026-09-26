@@ -1,3 +1,59 @@
+# FanHoard Contextual Loading System (PLSys / FVL v1.0.0 — In-Flow Architecture)
+
+## What changed
+
+The central loading system (FVL / PLSys) has been refactored from a global viewport-overlay model into an **in-flow contextual loading architecture**. Route transitions, category switching, and content fetching now render inside the loading content area (`#content-loading`) in normal document flow and scroll naturally with the document.
+
+The page remains fully scrollable during contextual loading (`lockScroll: false`), header navigation remains fully interactive (`pointer-events: auto`), and layout min-height reservation (`min-height: 180px`) prevents layout shifts (CLS < 0.1). Global blocking overlays are retained strictly as exceptions for initial app boot (`#fv-boot-loader`) and unrecoverable fatal application errors.
+
+## Files in this package
+
+| File | Status | Purpose |
+|---|---|---|
+| `fvl.js` | MODIFIED | FVL central loader — added `mode: 'boundary'`, per-boundary ref counter (`_boundaryRefs`), monotonic request tokens (`requestId`), and `clearAllBoundaryRefs()` |
+| `loading-system.css` | MODIFIED | Added `.fvl-boundary` styles in normal document flow, min-height layout reservation, and aligned CSS version header to `v1.0.0` |
+| `loading.css` | MODIFIED | Layout min-height reservation rules for `#content-loading` container |
+| `loading.js` | MODIFIED | `LoadingService` proxy — mapped `show` / `showInContent` / `hideFromContent` to boundary mode and updated `_forceReset()` |
+| `router.js` | MODIFIED | SPA router — updated fallback route transitions to use boundary mode inside `#content-loading` |
+| `init.js` | MODIFIED | Early initialization — mapped early loading to `LoadingService.showInContent()` |
+| `nav-core-early.js` | MODIFIED | Boot guard — added `.fvl-boundary` detection to prevent duplicate early overlays |
+| `discover/index.html` | MODIFIED | Discover feed — updated `fvlActive` safety checks to recognize active boundary instances |
+| `loading-contract.test.ts` | MODIFIED | Added unit contract assertions for in-flow boundary mounting, zero scroll lock, ref counting, and route cleanup |
+| `loading-contextual.spec.ts` | **NEW** | Playwright E2E test suite verifying in-flow loading, scrollability, header clickability, and mobile/desktop behavior |
+| `07-Loading-System.md` | MODIFIED | Updated internal documentation for contextual in-flow loading architecture, boundary levels, API, and conflict resolutions |
+| `15-Loading-Contract-And-Test-Plan.md` | MODIFIED | Updated contract specification, display modes table, test seams, and nav dimming resolution |
+
+## Architectural summary
+
+### In-Flow Boundary vs Global Overlay Strategy
+
+```
+Old (Legacy Overlay):
+  - Viewport overlay with fixed positioning (position: fixed, inset: 0)
+  - High z-index (z-index: 17000 or 1600)
+  - Obscured header navigation and dimmed background UI
+  - Locked page scroll on full transitions
+
+New (In-Flow Contextual Boundary):
+  - Renders inside target DOM container (#content-loading) in normal document flow
+  - Position: static/relative, Z-index: 0
+  - Header navigation remains 100% interactive (pointer-events: auto, opacity: 1.0)
+  - lockScroll: false — document body scrolls freely, loading container moves with document
+  - Target container min-height reservation (min-height: 180px) prevents CLS (< 0.1)
+  - Concurrency safety via per-boundary ref counting and monotonic request tokens
+  - Route change cleanup via FVL.clearAllBoundaryRefs() and LoadingService._forceReset()
+```
+
+### Display Modes Supported
+
+1. `boundary`: Primary in-flow contextual loader for SPA route transitions and content updates.
+2. `scoped`: Isolated container overlay (`position: absolute`, z-index 1600).
+3. `inline`: Inline element/button spinner (`z-index: 0`).
+4. `topbar`: Fixed top progress bar (`z-index: 17500`).
+5. `fullscreen`: Global viewport overlay (`z-index: 17000`), reserved strictly for cold app boot and fatal errors.
+
+---
+
 # FanHoard Feed System v2.1 — Per-User Persistent Discovery Feed
 
 ## What changed
@@ -10,130 +66,3 @@ TTL expires, a fresh seed is generated → new feed rotation.
 
 The user also resumes scrolling exactly where they left off, even after closing
 the tab and coming back within the TTL window.
-
-## Files in this package
-
-| File | Status | Purpose |
-|---|---|---|
-| `feed-cache.js` | **NEW** | FeedCache module — localStorage-backed seed + state with TTL |
-| `feed.js` | MODIFIED | FeedService v2.1 — uses FeedCache for seed + state restore/save |
-| `content.js` | MODIFIED | renderFeed now calls `tryRestoreFromCache()` before `reset()`; saves to cache after every page |
-| `config.js` | MODIFIED | Adds `FEED_SEED_TTL: 30 * 60 * 1000` to `ALL_BUTTON` |
-| `nav-core.js` | MODIFIED | Adds `feed-cache.js` to Phase 2 of the module loader |
-
-## How to install
-
-### Option A — apply the patch
-
-From the root of your local `fanhoard-page` clone:
-
-```bash
-git apply feed-system-v2.1.patch
-# Then copy the new file (not tracked by patch since it's a new file)
-cp feed-cache.js assets/js/nav-core-modules/feed-cache.js
-```
-
-### Option B — copy files directly
-
-Copy each file to its corresponding path under `assets/js/`:
-
-```
-feed-cache.js → assets/js/nav-core-modules/feed-cache.js   (NEW)
-feed.js       → assets/js/nav-core-modules/feed.js
-content.js    → assets/js/nav-core-modules/content.js
-config.js     → assets/js/nav-core-modules/config.js
-nav-core.js   → assets/js/nav-core.js
-```
-
-No build step is required — these are plain ES5-compatible modules loaded
-dynamically by `nav-core.js`.
-
-## How it works (architectural summary)
-
-### Seed strategy
-
-```
-Old (v2.0):  _seed = Date.now() ^ Math.random()
-             → new seed every reset()
-             → every page load = brand-new feed order
-             → effectively all users see a "fresh" feed (no real personalization)
-
-New (v2.1):  _seed = FeedCache.getOrCreateSeed()
-             → seed persisted in localStorage with timestamp
-             → within TTL (30 min): same seed = same feed order
-             → different browsers → different seeds → different feeds
-             → after TTL: new seed generated → fresh rotation
-```
-
-### State persistence
-
-Feed state (which segments were already emitted, per-category show counts,
-diversity windows, soft-reset progress, slot index) is also persisted to
-`localStorage` so the user resumes exactly where they left off.
-
-What we store (lightweight, < 50 KB typically):
-- `seed`, `softResets`, `isExhausted`, `slotIndex` — cycle progress
-- `catShowCounts` (as entries array) — novelty tracking
-- `recentCats`, `recentTypes` — diversity windows
-- `emittedIds` (ordered list of segment IDs) — lets us rebuild the unseen
-  pool accurately on restore without storing full segment objects
-
-What we **do not** store:
-- Full segment objects (too big — they're deterministically rebuilt from DB +
-  seed)
-- DOM snapshots (content.js handles its own DOM via RouteCache)
-
-### Cache-first flow in `content.js → renderFeed()`
-
-```
-1. Try RouteCache (in-session, 5 min TTL) → if hit, restore DOM + state + scroll
-2. Else → try FeedCache (localStorage, 30 min TTL) → if hit, queue state restore
-3. Else → FeedService.reset() → FeedCache.getOrCreateSeed() (may return same seed if within TTL)
-4. After loadNextPage() → FeedService.saveToCache()  ← persists for next visit
-```
-
-### Storage layout (localStorage keys)
-
-- `fv_feed_seed_v1`: `{ seed:number, createdAt:number }`
-- `fv_feed_state_v1`: `{ seed, softResets, isExhausted, slotIndex, catShowCounts, recentCats, recentTypes, emittedIds, savedAt }`
-
-Both keys are versioned (`_v1` suffix) for future schema migrations.
-
-### Graceful degradation
-
-- If `localStorage` is unavailable (private browsing, quota exceeded) → FeedCache
-  silently degrades; the feed still works, just doesn't persist across reloads.
-- If `FeedCache` module fails to load → `FeedService.reset()` falls back to the
-  original `Date.now() ^ Math.random()` seed behavior.
-- If a cached state's seed doesn't match the current seed (user cleared seed
-  manually, or seed was refreshed) → state is discarded as stale.
-
-## Configuration
-
-In `config.js → ALL_BUTTON`:
-
-```js
-FEED_SEED_TTL: 30 * 60 * 1000,  // 30 minutes — adjust to taste
-```
-
-- Shorter TTL → feed feels fresher, less persistent
-- Longer TTL → feed feels more "delivered", more stable across visits
-
-## Alignment with discovery focus
-
-This change directly serves the project's pivot toward **discovery as the core
-feature**:
-
-1. **Different users see different content** — per-browser seed breaks the
-   "everyone sees the same feed" anti-pattern of v2.0.
-2. **Feed feels delivered, not re-rolled** — within TTL, the same feed greets
-   the user across visits, reinforcing the sense of a personalized discovery
-   surface.
-3. **Resume where you left off** — even after closing the tab, users return to
-   the same point in their feed, supporting long discovery sessions.
-4. **Fresh rotation over time** — TTL-based seed refresh ensures content
-   doesn't go stale over a day, keeping discovery feeling alive.
-
-## Validation
-
-All 5 files pass `node --check` syntax validation. No build step required.
