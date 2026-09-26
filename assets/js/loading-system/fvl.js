@@ -568,13 +568,15 @@
       // forces `display: none !important`, which would prevent the overlay
       // from ever showing. Visibility is controlled via the .fvl-entering /
       // .fvl-shown / .fvl-leaving classes (opacity transitions) instead.
-      var root = Utils.DOM.create('div', 'fvl fvl-fullscreen', {
+      var typeClass = 'fvl-' + (inst.options.type || 'global');
+      var root = Utils.DOM.create('div', 'fvl fvl-fullscreen ' + typeClass, {
         'role': 'status',
         'aria-live': 'polite',
         'aria-atomic': 'true',
       });
       root.setAttribute(CONFIG.DOM.DATA_MODE, 'fullscreen');
       root.setAttribute(CONFIG.DOM.DATA_ATTR, inst.id);
+      root.setAttribute('data-fvl-type', inst.options.type || 'global');
 
       // coverAll: cover entire viewport including header (for initial page load)
       if (inst.options.coverAll) {
@@ -635,7 +637,9 @@
 
     // ── Inline mode (inside target — e.g. button) ──
     function buildInline(inst) {
-      var wrap = Utils.DOM.create('span', 'fvl fvl-inline', { 'aria-hidden': 'true' });
+      var typeClass = 'fvl-' + (inst.options.type || 'component');
+      var wrap = Utils.DOM.create('span', 'fvl fvl-inline ' + typeClass, { 'aria-hidden': 'true' });
+      wrap.setAttribute('data-fvl-type', inst.options.type || 'component');
       wrap.setAttribute(CONFIG.DOM.DATA_MODE, 'inline');
       wrap.setAttribute(CONFIG.DOM.DATA_ATTR, inst.id);
 
@@ -1154,7 +1158,7 @@
       }
 
       // Lock scroll (fullscreen only)
-      if (mode === 'fullscreen' && opts.lockScroll) {
+      if ((mode === 'fullscreen' || mode === 'global' || (opts && opts.type === 'global')) && opts.lockScroll) {
         try {
           var prev = window.scrollY || 0;
           document.body.style.position = 'fixed';
@@ -1226,7 +1230,7 @@
     // ── Cleanup DOM + restore target ──
     function _cleanup(inst) {
       // Restore scroll lock
-      if (inst.mode === 'fullscreen' && inst._lockedScrollY != null) {
+      if ((inst.mode === 'fullscreen' || inst.mode === 'global' || (inst.options && inst.options.type === 'global')) && inst._lockedScrollY != null) {
         try {
           document.body.style.position = '';
           document.body.style.top = '';
