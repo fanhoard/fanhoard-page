@@ -215,7 +215,7 @@
         if (M.LoadingService?.showInContent) {
           M.LoadingService.showInContent();
         } else {
-          M.LoadingService?.show?.({ mode: 'boundary', target: '#content-loading' });
+          M.LoadingService?.show?.({ type: 'page', target: '#content-loading' });
         }
       } catch (_) {}
 

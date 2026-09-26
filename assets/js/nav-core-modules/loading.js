@@ -145,23 +145,35 @@
       this._sessionCount++;
 
       var o = (typeof opts === 'string') ? { message: opts } : (opts || {});
-      o.mode = o.mode || (o.fullscreen ? 'fullscreen' : 'boundary');
-      if (o.mode === 'boundary' && !o.target) {
+      // Map to typed v2 loading API
+      if (!o.type) {
+        if (o.fullscreen || o.mode === 'fullscreen') {
+          o.type = 'global';
+        } else if (o.mode === 'boundary' || o.mode === 'scoped' || o.mode === 'page') {
+          o.type = (o.target === '#content-loading' || !o.target) ? 'page' : 'content';
+        } else if (o.mode === 'inline' || o.mode === 'component') {
+          o.type = 'component';
+        } else {
+          o.type = 'page';
+        }
+      }
+      if (o.type === 'page' && !o.target) {
         o.target = '#content-loading';
       }
 
       // If an inline boot loader (#fv-boot-loader) or early overlay (#nc-early-overlay) is currently visible,
-      // adopt it ONLY when requested mode is 'fullscreen'. Scoped/inline actions must render content-scoped.
+      // adopt it ONLY when requested type is 'global'. Contextual page/content actions render in-flow.
       var bootEl = document.getElementById('fv-boot-loader') || document.getElementById('nc-early-overlay');
       var isBootVisible = bootEl && !bootEl.classList.contains('fv-boot-hidden') && (typeof window.getComputedStyle !== 'function' || window.getComputedStyle(bootEl).display !== 'none');
 
-      if (isBootVisible && o.mode === 'fullscreen') {
+      if (isBootVisible && o.type === 'global') {
         this._visibleSince = Date.now();
         this._el = bootEl;
         var self = this;
         return {
           id: DEFAULT_ID,
-          mode: 'fullscreen',
+          mode: 'global',
+          type: 'global',
           element: bootEl,
           hide: function () { return self.readinessHandshake(); },
           update: function () {},
@@ -177,32 +189,28 @@
         return;
       }
 
-      if (o.mode === 'fullscreen') {
+      if (o.type === 'global') {
         o.id = o.id || DEFAULT_ID;
         if (o.zIndex == null) o.zIndex = NAV_BEHIND_Z;
         o.lockScroll = o.lockScroll !== false; // default true
-      } else if (o.mode === 'boundary') {
+      } else if (o.type === 'page') {
         if (!o.id) {
-          if (o.target === '#content-loading' || !o.target) {
-            o.id = 'fvl-boundary-content';
-          } else if (typeof o.target === 'string') {
-            o.id = 'fvl-boundary-' + o.target.replace(/[^a-zA-Z0-9_-]/g, '');
-          } else {
-            o.id = 'fvl-boundary-content';
-          }
+          var targetStr = typeof o.target === 'string' ? o.target.replace(/[^a-zA-Z0-9_-]/g, '') : 'content-loading';
+          o.id = 'fvl-page-' + (targetStr || 'content-loading');
+        }
+        o.lockScroll = false;
+      } else if (o.type === 'content') {
+        if (!o.id) {
+          var targetStr = typeof o.target === 'string' ? o.target.replace(/[^a-zA-Z0-9_-]/g, '') : 'section';
+          o.id = 'fvl-content-' + (targetStr || 'section');
         }
         o.lockScroll = false;
       } else {
         if (!o.id) {
-          if (o.target === '#content-loading' || !o.target) {
-            o.id = 'fvl-scoped-content';
-          } else if (typeof o.target === 'string') {
-            o.id = 'fvl-scoped-' + o.target.replace(/[^a-zA-Z0-9_-]/g, '');
-          } else {
-            o.id = 'fvl-scoped-content';
-          }
+          var targetStr = typeof o.target === 'string' ? o.target.replace(/[^a-zA-Z0-9_-]/g, '') : 'micro';
+          o.id = 'fvl-component-' + (targetStr || 'micro');
         }
-        o.lockScroll = false; // content-scoped mode never locks scroll
+        o.lockScroll = false;
       }
       o.instant = o.instant !== false; // default true
       o.message = o.message || _loadingMessage();
@@ -323,18 +331,14 @@
       if (!fvl) fvl = _fvl();
       if (!fvl) return;
       try {
-        var scopedInsts = typeof fvl.getByMode === 'function' ? fvl.getByMode('scoped') : [];
-        if (Array.isArray(scopedInsts)) {
-          scopedInsts.forEach(function(inst) {
-            if (inst && inst.id) fvl.hide(inst.id);
-          });
-        }
-        var boundaryInsts = typeof fvl.getByMode === 'function' ? fvl.getByMode('boundary') : [];
-        if (Array.isArray(boundaryInsts)) {
-          boundaryInsts.forEach(function(inst) {
-            if (inst && inst.id) fvl.hide(inst.id);
-          });
-        }
+        ['scoped', 'boundary', 'page', 'content', 'component'].forEach(function(m) {
+          var insts = typeof fvl.getByMode === 'function' ? fvl.getByMode(m) : [];
+          if (Array.isArray(insts)) {
+            insts.forEach(function(inst) {
+              if (inst && inst.id) fvl.hide(inst.id);
+            });
+          }
+        });
       } catch (_) {}
     },
 
@@ -342,18 +346,14 @@
       if (!fvl) fvl = _fvl();
       if (!fvl) return;
       try {
-        var scopedInsts = typeof fvl.getByMode === 'function' ? fvl.getByMode('scoped') : [];
-        if (Array.isArray(scopedInsts)) {
-          scopedInsts.forEach(function(inst) {
-            if (inst && inst.id) fvl.hideInstant(inst.id);
-          });
-        }
-        var boundaryInsts = typeof fvl.getByMode === 'function' ? fvl.getByMode('boundary') : [];
-        if (Array.isArray(boundaryInsts)) {
-          boundaryInsts.forEach(function(inst) {
-            if (inst && inst.id) fvl.hideInstant(inst.id);
-          });
-        }
+        ['scoped', 'boundary', 'page', 'content', 'component'].forEach(function(m) {
+          var insts = typeof fvl.getByMode === 'function' ? fvl.getByMode(m) : [];
+          if (Array.isArray(insts)) {
+            insts.forEach(function(inst) {
+              if (inst && inst.id) fvl.hideInstant(inst.id);
+            });
+          }
+        });
       } catch (_) {}
     },
 
@@ -425,13 +425,13 @@
 
     showInContent: function (opts) {
       var o = (typeof opts === 'string') ? { message: opts } : (opts || {});
-      o.mode = o.mode || 'boundary';
+      o.type = o.type || 'page';
       o.target = o.target || '#content-loading';
       return this.show(o);
     },
 
     hideFromContent: function (id) {
-      return this.hide(id || 'fvl-boundary-content');
+      return this.hide(id || 'fvl-page-content-loading');
     },
 
     // ── Emergency reset ───────────────────────────────────────────────────

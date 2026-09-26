@@ -146,6 +146,8 @@
    * @param {{label?:string, title?:string}} [opts]
    */
   function showErrorFullscreen(error, opts = {}) {
+    opts = opts || {};
+    opts.type = 'global';
     _injectErrorDetailCSS();
 
     var errorObj = error;
@@ -169,6 +171,7 @@
       var fsTitle = opts.title || (shortMsg.length > 60 ? shortMsg.substring(0, 57) + '...' : shortMsg);
 
       window.PopupSystem.fullscreen({
+        type       : 'global',
         title      : fsTitle,
         body       : html,
         showHeader : true,
