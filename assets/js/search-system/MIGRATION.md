@@ -1,141 +1,53 @@
-# Search System Migration Guide (v2.x to v3.0.0)
+# Search System Migration Guide (v3.0 to v3.1.0 Overhaul)
 
-- **System Described**: FanHoard Search System Migration & Modular Architecture Refactor
+- **System Described**: FanHoard Search System Architecture Refactor & Refresh Bug Fix
 - **Entry File**: `assets/js/search-system/search.js`
 - **Dependencies**: `assets/js/search-system/search-modules/*`, `assets/js/search-system/search-system.css`
-- **Verification**: `npm test`
+- **Verification**: `npm test`, `npm run type-check`, `npm run lint`
 
 ---
 
-## 1. Overview of Architecture Migration
+## 1. Architectural Evolution
 
-The FanHoard v3.0.0 search system refactors the legacy 2-file architecture (`search-engine.js` + `search-ui.js`) into a single self-loading entry point (`assets/js/search-system/search.js`) paired with a modularized sub-service directory (`assets/js/search-system/search-modules/`).
+The v3.1.0 refactor simplifies the search system architecture from 15 files and a 5-phase dynamic script injection engine into **8 consolidated ES Modules** with static imports and private state encapsulation.
 
-### Architectural Comparison
+### Module Consolidation Mapping
 
-#### Legacy Architecture (v2.x)
-In v2.x, HTML files required manual inclusion of two separate standalone scripts in order:
-
-```
-assets/js/
-├── search-engine.js            # Standalone Search Engine
-└── search-ui.js                # Search UI & Event Orchestrator
-```
-
-```html
-<!-- Legacy Inclusion Pattern (v2.x) -->
-<script defer src="/assets/js/search-engine.js"></script>
-<script defer src="/assets/js/search-ui.js"></script>
-```
-
-#### Modular Architecture (v3.0.0)
-In v3.0.0, HTML files load a single orchestrating entry point (`search.js`) that automatically loads all 14 modular sub-services in 5 parallel phases:
-
-```
-assets/js/search-system/
-├── search.js                    # Auto-loader & Primary Entry Point
-├── search-system.css            # Supplemental Badge & UI CSS
-└── search-modules/              # 14 Specialized Sub-Service Modules
-    ├── types.js
-    ├── config.js
-    ├── state.js
-    ├── utils.js
-    ├── virtual-scroll.js
-    ├── url-history.js
-    ├── keyboard.js
-    ├── rendering.js
-    ├── suggestions.js
-    ├── input-bar.js
-    ├── overlay.js
-    ├── discovery.js
-    ├── engine.js                # Modular Search Engine Core
-    └── search-service.js        # Search Orchestrator & ConDataService Bridge
-```
-
-```html
-<!-- Modular Inclusion Pattern (v3.0.0) -->
-<script defer src="/assets/js/search-system/search.js"></script>
-```
+| Legacy v3.0 Module | Consolidated v3.1.0 ES Module | Key Changes |
+| :--- | :--- | :--- |
+| `types.js` + `config.js` | `search-modules/config.js` | Merged JSDoc types into config exports |
+| `utils.js` + `virtual-scroll.js` | `search-modules/utils.js` | Unified stateless helpers & fallback VScroll |
+| `overlay.js` + `rendering.js` + `input-bar.js` + `keyboard.js` | `search-modules/ui.js` | Unified UI controller & URE render guards |
+| `discovery.js` + `suggestions.js` | `search-modules/suggestions.js` | Merged autocomplete & related discovery cards |
+| `state.js` + `search-service.js` | `search-modules/search-service.js` | Encapsulated private state store & orchestrator |
+| `url-history.js` | `search-modules/url-history.js` | Simplified via native `URLSearchParams` |
+| `engine.js` | `search-modules/engine.js` | Bucket index fast-path & LRU cache |
+| `search.js` | `search.js` | Standard ESM entry point & global facade |
 
 ---
 
-## 2. HTML Migration Protocol
+## 2. Key Bug Fixes in v3.1.0
 
-To migrate HTML pages from v2.x to v3.0.0, execute the following steps:
+### Refresh Bug Resolution
+- **Problem**: Query text remained in `#searchInput` on reload (`/search/?q=...`), but search results vanished due to script loading races with `ure.js`, data fetch timeouts, category resets, and placeholder DOM overwrites.
+- **Fixes Applied**:
+  1. `RenderingService` now awaits `ensureURE()` before attempting `URE.mount()`.
+  2. Data loading in `SearchService.init()` is event-driven and awaits `ConDataService.getAssembled()`.
+  3. Filter state (`selectedCategory`, `selectedType`) is preserved across URL search executions.
+  4. Initial search results are never overwritten by empty placeholder assignments.
 
-1. **Replace Legacy Script Tags**: Remove `search-engine.js` and `search-ui.js` tags and replace them with the unified `search.js` script tag:
+---
+
+## 3. HTML Inclusion Pattern
+
+Replace legacy script tags with ES Module loading:
 
 ```html
-<!-- BEFORE (v2.x) -->
-<script defer src="/assets/js/search-engine.js"></script>
-<script defer src="/assets/js/search-ui.js"></script>
-
-<!-- AFTER (v3.0.0) -->
+<!-- BEFORE (v3.0.0) -->
 <script defer src="/assets/js/ure/ure.js"></script>
 <script defer src="/assets/js/search-system/search.js"></script>
+
+<!-- AFTER (v3.1.0) -->
+<script defer src="/assets/js/ure/ure.js"></script>
+<script type="module" src="/assets/js/search-system/search.js"></script>
 ```
-
-2. **Verify Loading Order**: Ensure `ure.js` precedes `search.js` so that `RenderingService` can leverage URE for result card rendering.
-3. **Automatic CSS Injection**: Do not manually link `search-system.css`. The entry point `search.js` injects `search-system.css` automatically via DOM `<link>` insertion during boot.
-
----
-
-## 3. Sub-Module Breakdown & Load Phases
-
-`assets/js/search-system/search.js` executes module loading across 5 sequential phases:
-
-| Phase | Loaded Modules | Purpose |
-| :--- | :--- | :--- |
-| **Phase 1** | `types.js`, `config.js`, `state.js` | Foundation constants, JSDoc typedefs, shared state store |
-| **Phase 2** | `utils.js`, `virtual-scroll.js` | String normalization helpers, fallback virtual scroll engine |
-| **Phase 3** | `url-history.js`, `keyboard.js`, `rendering.js`, `suggestions.js`, `input-bar.js` | Keyboard management, rendering, suggestion engine, input bar widgets |
-| **Phase 4** | `overlay.js`, `discovery.js` | Fullscreen overlay manager and discovery related content service |
-| **Phase 5** | `engine.js`, `search-service.js` | Modular search engine core and search service orchestrator |
-
----
-
-## 4. Key Performance & Algorithmic Enhancements in v3.0.0
-
-### 4.1 Modular Search Engine (`search-modules/engine.js`)
-The search engine is no longer a monolithic file. It is instantiated inside `SearchModules.SearchEngine` and exposes the exact same public API as v2.x (`window.SearchEngine`).
-
-### 4.2 Candidate Bucket Indexing for Short Queries
-For query strings where `nq.length <= 3`, `SearchEngine` uses `_bucketIndex.get(firstChar)` to immediately retrieve candidate documents rather than scanning the entire document set:
-
-```javascript
-// Candidate bucket index fast-path (search-modules/engine.js:616)
-if (nq.length <= 3 && _bucketIndex) {
-  const firstChar = nq.charAt(0);
-  if (_bucketIndex.has(firstChar)) {
-    candidates = _bucketIndex.get(firstChar);
-  }
-}
-```
-
-### 4.3 Capped LRU Query Cache
-`SearchEngine` maintains an LRU result cache (`_resultCache`) capped at `50` entries (`RESULT_CACHE_CAP = 50`). When the cache exceeds capacity, the oldest entry is evicted:
-
-```javascript
-// LRU result cache capping (search-modules/engine.js:908)
-if (_resultCache.size >= RESULT_CACHE_CAP) {
-  const oldestKey = _resultCache.keys().next().value;
-  _resultCache.delete(oldestKey);
-}
-```
-
-### 4.4 Early Prefetch & Stashed Query Resolution
-During script loading, `search.js` initiates an early prefetch Promise targeting `ConDataService.getAssembled()`. If user queries occur prior to data assembly, `SearchService` stashes the query in `window.__pendingSearch` and executes it immediately upon boot completion.
-
----
-
-## 5. Backward Compatibility & Public API Mapping
-
-The public global APIs remain 100% backward-compatible with v2.x integrations:
-
-| Public Global API | v2.x Reference | v3.0.0 Provider Module |
-| :--- | :--- | :--- |
-| `window.SearchEngine.search(q, type)` | `search-engine.js` | `search-modules/engine.js` |
-| `window.SearchEngine.querySuggestions(q, max)` | `search-engine.js` | `search-modules/engine.js` |
-| `window.__searchUI.init()` | `search-ui.js` | `search-modules/search-service.js` |
-| `window.__searchUI.getState()` | `search-ui.js` | `search-modules/state.js` |
-| `window.__searchUI.getConfig()` | `search-ui.js` | `search-modules/config.js` |

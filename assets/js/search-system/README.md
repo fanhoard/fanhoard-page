@@ -1,29 +1,29 @@
 # FanHoard Search System
 
-- **System Described**: FanHoard Search System v3.0.0 Architecture & Service Contracts
+- **System Described**: FanHoard Search System v3.1.0 Architecture & Service Contracts
 - **Entry File**: `assets/js/search-system/search.js`
 - **Dependencies**: `assets/js/search-system/search-system.css`, `assets/js/search-system/search-modules/*`, `ConDataService`, `URE`
-- **Verification**: `npm test`
+- **Verification**: `npm test`, `npm run type-check`, `npm run lint`
 
 ---
 
-## 1. System Architecture & 5-Layer Model
+## 1. System Architecture & Simplified ES Module Design
 
-The FanHoard search system provides aerospace-grade, deterministic, low-latency search capabilities across all FanHoard pages. It operates as a self-loading entry point (`assets/js/search-system/search.js`) that dynamically loads 14 modular sub-services in 5 sequential phases.
+The FanHoard search system provides deterministic, low-latency search capabilities across all FanHoard pages. Following the v3.1.0 overhaul, it operates as a simplified ES Module system (`assets/js/search-system/search.js`) comprising 8 consolidated ES modules with static imports, replacing the legacy 14-file 5-phase dynamic script injection engine.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │ Layer 5: UI Layer                                                       │
-│   OverlayService  •  UIService  •  SuggestionService  •  Discovery     │
+│   ui.js (Overlay, Rendering, Input Bar, Soft Keyboard) • suggestions.js │
 ├────────────────────────────────────────────────────────────────────────┤
-│ Layer 4: Service Orchestration Layer                                    │
-│   SearchService (Manages data loading, debouncing, history, rendering)  │
+│ Layer 4: Service Orchestration & State                                  │
+│   search-service.js (Private state store, data loading, URL sync)       │
 ├────────────────────────────────────────────────────────────────────────┤
-│ Layer 3: Search & Query Layer                                          │
-│   SearchEngine (search, querySuggestions, queryRelated)                 │
+│ Layer 3: Search & Query Engine                                          │
+│   engine.js (search, querySuggestions, queryRelated)                    │
 ├────────────────────────────────────────────────────────────────────────┤
-│ Layer 2: Indexing Layer                                                │
-│   Bucket Index (Map<char, SearchDoc[]>) • Fuse.js • Type/Cat Index     │
+│ Layer 2: Indexing & Utilities                                          │
+│   config.js (Frozen config + types) • utils.js (DOM, string, vscroll)  │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Layer 1: Data Ingestion Layer                                          │
 │   ConDataService (Prefetched) → db.min.json Fallback                    │
@@ -36,144 +36,81 @@ The FanHoard search system provides aerospace-grade, deterministic, low-latency 
 
 ```
 assets/js/search-system/
-├── search.js                    # Primary Entry Point (Auto-loader & Bootstrap)
+├── search.js                    # ES Module Entry Point & Facade
 ├── search-system.css            # Supplemental Styles & Badge Definitions
-├── MIGRATION.md                 # Migration Guide from Legacy Search Scripts
+├── MIGRATION.md                 # Migration Guide from Legacy Search System
 ├── NAMING.md                    # DOM & CSS Class Naming Conventions
 ├── README.md                    # Architecture & Contract Specifications
-└── search-modules/              # 14 Sub-Service Modules
-    ├── types.js                 # JSDoc Type Definitions & Enums
-    ├── config.js                # Immutable Configuration (Object.freeze)
-    ├── state.js                 # Shared Mutable State Store
-    ├── utils.js                 # Stateless Helpers & Text Normalizer
-    ├── virtual-scroll.js        # Legacy Virtual Scroll Engine (Fallback)
-    ├── url-history.js           # Two-Stack Browser History Sync
-    ├── keyboard.js              # KeyboardService, GapBasedKeyboardService, KeyboardAutoToggleService
-    ├── rendering.js             # URE-Backed Result Rendering Service
-    ├── suggestions.js           # Multi-Source Suggestion Engine
-    ├── input-bar.js             # IconSlotService, ClearBtnService, UIService
-    ├── overlay.js               # Fullscreen Search Overlay Controller
-    ├── discovery.js             # Related Content Discovery Engine
-    ├── engine.js                # Modular Search Engine Core
-    └── search-service.js        # Search Orchestrator & Lifecycle Manager
+└── search-modules/              # 7 Core ESM Sub-Modules (8 total search files)
+    ├── config.js                # Immutable Configuration & JSDoc Typedefs (merged types.js)
+    ├── utils.js                 # Stateless Helpers, Text Normalizer & Fallback VScroll
+    ├── engine.js                # Search Engine Core & Bucket Index
+    ├── ui.js                    # Unified UI Controller (merged overlay, rendering, input-bar, keyboard)
+    ├── suggestions.js           # Multi-Source Suggestion Engine (merged discovery.js)
+    ├── url-history.js           # Native URLSearchParams & Browser History Sync
+    └── search-service.js        # Search Orchestrator & Private State Store (merged state.js)
 ```
 
 ---
 
-## 3. Module Loading Order & Phase Sequence
+## 3. ES Module Loading & Boot Sequence
 
-The entry point `assets/js/search-system/search.js` loads all modules in 5 sequential phases. Scripts within the same phase execute in parallel, while each phase must resolve completely before the subsequent phase starts:
+All modules use standard ES module imports (`import ... from '...'`). Dynamic script injection and 5-phase Promise loading loops have been eliminated.
 
-```
-Phase 1 (Foundation):    types.js, config.js, state.js
-                               │
-                               ▼
-Phase 2 (Utilities):     utils.js, virtual-scroll.js
-                               │
-                               ▼
-Phase 3 (Features):      url-history.js, keyboard.js, rendering.js, suggestions.js, input-bar.js
-                               │
-                               ▼
-Phase 4 (UI / Overlay):  overlay.js, discovery.js
-                               │
-                               ▼
-Phase 5 (Engine Core):   engine.js, search-service.js
-```
+1. **Static Import Resolution**: Dependencies resolve statically at load time.
+2. **Data & URE Readiness**: `SearchService.init()` awaits `ConDataService` data assembly and verifies `window.URE` readiness before rendering initial results.
+3. **URL Search Hydration**: Restores query, category, and type parameters from `window.location.search` without race conditions or timeouts.
 
 ---
 
-## 4. Key System Invariants & Performance Constants
+## 4. Refresh Bug Resolution & Technical Safeguards
+
+1. **URE Readiness Guard**: `RenderingService.renderResults()` awaits `ensureURE()` (listening for `ure:ready` or checking `window.URE`), preventing `TypeError: window.URE.mount is not a function` during page load/refresh.
+2. **Event-Driven Data Readiness**: Replaced fixed retry polling (3.6s timeout) with async data loading via `ConDataService.getAssembled()` / `SearchEngine.init()`.
+3. **Preserved Filter State**: `doSearch()` preserves active category and type filters passed from URL state instead of forcibly resetting category to `'all'`.
+4. **No Initial Placeholder Overwrite**: Removed synchronous DOM resets in `init()`, preventing mounted search results from being overwritten by placeholder HTML.
+
+---
+
+## 5. Key System Invariants & Performance Constants
 
 | Invariant / Rule | Enforcing File & Location | Value / Code Reference |
 | :--- | :--- | :--- |
-| **LRU Result Cache Cap** | `search-modules/engine.js:122` | `RESULT_CACHE_CAP = 50` |
-| **Short Query Early-Exit** | `search-modules/engine.js:616` | `nq.length <= 3` uses `_bucketIndex` lookup |
-| **Data Fetch Timeout** | `search-modules/config.js:57` | `conDataServiceWaitMs: 1200` |
-| **Early Prefetch Window** | `search.js:77` | 40 attempts × 20ms = 800ms window |
-| **Debounce Interval** | `search-modules/config.js:56` | `debounceMs: 150` |
-| **Escape Key Handling** | `search-modules/overlay.js:192` | Centralized via `OverlayService.close('escape')` |
-
-### Grounded Code Examples
-
-#### 4.1 LRU Result Cache Cap (`engine.js`)
-```javascript
-/** PF-02: Query result cache (Map, capped at 50 entries). */
-const RESULT_CACHE_CAP = 50;
-
-if (_resultCache.size >= RESULT_CACHE_CAP) {
-  const oldestKey = _resultCache.keys().next().value;
-  _resultCache.delete(oldestKey);
-}
-```
-
-#### 4.2 Candidate Bucket Index Fast-Path (`engine.js`)
-```javascript
-/** PF-04: Candidate bucket index Map: char -> SearchDoc[] */
-let _bucketIndex = new Map();
-
-// Fast-path candidate retrieval for short queries (<= 3 characters)
-if (nq.length <= 3 && _bucketIndex) {
-  const firstChar = nq.charAt(0);
-  if (_bucketIndex.has(firstChar)) {
-    candidates = _bucketIndex.get(firstChar);
-  }
-}
-```
-
-#### 4.3 Soft Keyboard Detection & Gap Throttling (`keyboard.js`)
-```javascript
-const GapBasedKeyboardService = {
-  isGapExpired:      () => (Date.now() - State.lastKeyboardToggleTime) >= CONFIG.TIMING.keyboardGapMinMs,
-  isRecoveryExpired: () => (Date.now() - State.lastKeyboardToggleTime) >= CONFIG.TIMING.keyboardGapRecoveryMs,
-  recordToggle:      () => { State.lastKeyboardToggleTime = Date.now(); },
-};
-```
+| **LRU Result Cache Cap** | `search-modules/engine.js` | `RESULT_CACHE_CAP = 50` |
+| **Short Query Early-Exit** | `search-modules/engine.js` | `nq.length <= 3` uses `_bucketIndex` lookup |
+| **Debounce Interval** | `search-modules/config.js` | `debounceMs: 150` |
+| **Keyboard Gap Threshold** | `search-modules/config.js` | `keyboardGapMinMs: 300` |
+| **Suggestion Limit** | `search-modules/config.js` | `suggestionMax: 6` |
 
 ---
 
-## 5. Public API Contracts
+## 6. Public API Contracts
 
-### 5.1 HTML Inclusion
-Single-line inclusion in HTML document `<head>` or body:
+### 6.1 HTML Inclusion
+Standard ES module script tag in HTML `<head>`:
 
 ```html
 <script defer src="/assets/js/ure/ure.js"></script>
-<script defer src="/assets/js/search-system/search.js"></script>
+<script type="module" src="/assets/js/search-system/search.js"></script>
 ```
 
-### 5.2 `window.SearchEngine` Interface
+### 6.2 `window.SearchEngine` Interface
 ```javascript
 window.SearchEngine = {
   init(data, options): Promise<boolean>,
   search(query, typeFilter): { results: SearchDoc[], keywords: Keyword[] },
   querySuggestions(query, maxCount): Suggestion[],
   queryRelated(query, maxCount): RelatedItem[],
-  generateAllKeywords(): Keyword[],
-  _internals: {
-    getDocs(): SearchDoc[],
-    getTypeIndex(): Map<string, SearchDoc[]>,
-    getCategoryIndex(): Map<string, SearchDoc[]>,
-    getFuse(): Fuse|null,
-    isFuseReady(): boolean
-  }
+  generateAllKeywords(): Keyword[]
 };
 ```
 
-### 5.3 `window.__searchUI` Interface
+### 6.3 `window.__searchUI` Interface
 ```javascript
 window.__searchUI = {
-  init(): void,
+  init(): Promise<void>,
   destroy(): void,
   getState(): StateObject,
-  getConfig(): ConfigObject,
-  querySuggestions(query): Suggestion[]
+  getConfig(): ConfigObject
 };
 ```
-
----
-
-## 6. Development Standards & Compliance
-
-- **ES Specifications**: IIFE design pattern, strictly `'use strict'`, no ES modules (`import`/`export`), no external framework dependencies (React, jQuery, Vue).
-- **DOM & CSS Standard**: Refer strictly to [`NAMING.md`](./NAMING.md) for BEM and DOM element conventions.
-- **Migration & History**: Refer to [`MIGRATION.md`](./MIGRATION.md) for upgrade history from legacy search scripts.
