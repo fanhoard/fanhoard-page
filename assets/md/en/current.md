@@ -1,8 +1,8 @@
 ---
-version: 3.0.3
-date: 2026-09-25T05:13:54.496Z
-title: Report form was blocked by its own security policy
-subtitle: The site's content security policy only allowed the report server's old address, so browsers silently blocked every submission. The policy now points at the live report server.
+version: 3.0.4
+date: 2026-09-30T05:55:00.000Z
+title: Search page now recovers on its own after a refresh
+subtitle: If the data files fail or time out during a refresh, the page used to stay blank forever until you searched again. It now retries, clears the bad cache and shows results on its own.
 notify: true
 ---
 
