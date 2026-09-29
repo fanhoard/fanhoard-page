@@ -1,8 +1,8 @@
 ---
-version: 3.0.4
-date: 2026-09-30T05:55:00.000Z
-title: Search page now recovers on its own after a refresh
-subtitle: If the data files fail or time out during a refresh, the page used to stay blank forever until you searched again. It now retries, clears the bad cache and shows results on its own.
+version: 3.0.5
+date: 2026-09-30T06:35:00.000Z
+title: Refresh now shows result cards even when the renderer loads late
+subtitle: When you refreshed the search page with a query in the URL, the results counter showed but the cards never appeared until you searched again. The renderer now waits for the render engine and draws the cards on its own.
 notify: true
 ---
 

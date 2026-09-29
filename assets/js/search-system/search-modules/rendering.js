@@ -180,6 +180,30 @@
      * @param {boolean}        [showSuggestionsIfNoResult=false]
      */
     renderResults(results, showSuggestionsIfNoResult = false) {
+      // BUG FIX (refresh with ?q= shows the count but no result cards):
+      // After a refresh, the first render can fire while ure.js is still
+      // loading. window.URE.mount() then threw into this function's silent
+      // catch, so the results label showed "Found N results" but no cards
+      // ever rendered until the user searched again. Wait for URE and
+      // re-render instead of dropping the render on the floor.
+      if (!window.URE) {
+        const pending = this._urePending || (this._urePending = { tries: 0 });
+        if (pending.tries < 40) { // ~10s budget (40 × 250ms)
+          pending.tries++;
+          pending.results = results;
+          pending.showSuggestionsIfNoResult = showSuggestionsIfNoResult;
+          setTimeout(() => {
+            if (this._urePending === pending) {
+              this.renderResults(pending.results, pending.showSuggestionsIfNoResult);
+            }
+          }, 250);
+          return;
+        }
+        // URE never arrived — fall through so the original path logs the error.
+      } else {
+        this._urePending = null;
+      }
+
       try {
         const container = DOMService.get(CONFIG.DOM.searchResultsId);
         if (!container) return;
