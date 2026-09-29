@@ -1,302 +1,266 @@
 // @ts-check
 /**
  * @file search-service.js
- * SearchService — executes searches and manages history commits.
+ * SearchService — private state store and search execution orchestrator.
  *
- * Renamed from legacy `search.js` to avoid collision with the new unified
- * entry point `search-system/search.js`. Behaviour is preserved; only the
- * file name and the way SearchEngine is referenced changed.
- *
- * PATCH v2 — performance + reliability (preserved from legacy)
- *
- * BUG 1 FIXED (speed):
- *   doSearchFromURL used to wait up to 15 × 120ms = 1800ms for Fuse before
- *   showing anything, even though immediateSearch (substring) is ready the
- *   moment SearchEngine.init() resolves.
- *   FIX: show immediateSearch results right away; schedule one silent Fuse
- *   upgrade pass ~1s later so results improve without blocking the user.
- *
- * BUG 2 FIXED (no-results silent fail):
- *   doSearch form/enter handlers are attached synchronously in init() before
- *   loadData() resolves. If the user submits while docs are still loading,
- *   search() returns [] silently — nothing rendered, no retry.
- *   FIX: when docs aren't ready, stash the query in window.__pendingSearch
- *   and bail. search-system/search.js drains __pendingSearch after init completes.
- *
- * BUG 3 FIXED (placeholder clipped when browser nav bar hides):
- *   _showPlaceholder() was calling _syncPlaceholderHeight() which sets
- *   --placeholder-h to a px snapshot of window.innerHeight. When the browser
- *   nav bar hides, innerHeight grows but --placeholder-h stays stale, so
- *   .search-result-placeholder is clipped at the bottom.
- *   FIX: removed _syncPlaceholderHeight() and _ensureResizeListener() entirely.
- *   CSS already handles .search-result-placeholder height correctly without any JS.
- *   JS does not set --placeholder-h at all.
+ * Merges: state.js and search-service.js
+ * Fixes: URL reload/refresh bug, category wipes, data race timeouts.
  *
  * @module search-service
- * @depends {config.js, state.js, utils.js, url-history.js,
- *           rendering.js, suggestions.js, overlay.js, input-bar.js,
- *           engine.js}
  */
-(function (M) {
-  'use strict';
 
-  const {
-    CONFIG, State,
-    DOMService, LanguageService, URLService,
-    RenderingService, FilterService,
-    ReadyModeService, OverlayService,
-    UIService, IconSlotService, ClearBtnService,
-    VirtualScrollEngine,
-  } = M;
+import { CONFIG, DB } from './config.js';
+import { DOMService, LanguageService } from './utils.js';
+import { SearchEngine } from './engine.js';
+import { SuggestionService, ReadyModeService, DiscoveryService } from './suggestions.js';
+import { RenderingService, FilterService, OverlayService, UIService, IconSlotService, ClearBtnService } from './ui.js';
+import { URLService } from './url-history.js';
 
-  // ── SearchEngine reference ────────────────────────────────────────────────
-  // Resolve SearchEngine lazily so this module doesn't break if engine.js
-  // loads after search-service.js (defensive coding — in practice both load
-  // in Phase 5 in parallel, so SearchEngine is available by boot time).
-  function _engine() {
-    return M.SearchEngine || window.SearchEngine;
-  }
+// ── Private State Store ───────────────────────────────────────────────────
+export const State = {
+  /** @type {any} */
+  apiData: null,
+  /** @type {any[]} */
+  allKeywordsCache: [],
+  /** @type {any[]} */
+  currentResults: [],
+  /** @type {any[]} */
+  currentFilteredResults: [],
 
-  // ── Fuse upgrade scheduler ────────────────────────────────────────────────
-  // After we show immediate (substring) results, schedule one silent upgrade
-  // to Fuse results once the index finishes building in idle time.
-  // Only upgrades if the input value hasn't changed — avoids stale swaps.
+  selectedType: 'all',
+  selectedCategory: 'all',
+  /** @type {any} */
+  lastCommittedSearchState: null,
 
-  let _fuseUpgradeTimer = null;
+  /** @type {any[]} */
+  currentDiscovery: [],
+  discoveryActive: false,
+  /** @type {any} */
+  discoveryHandle: null,
 
-  function _scheduleFuseUpgrade(q, type) {
-    clearTimeout(_fuseUpgradeTimer);
-    const CHECK_INTERVAL_MS = 500;
-    const MAX_WAIT_MS       = 8000;
-    const started           = Date.now();
+  overlayOpen: false,
+  overlayTransitioning: false,
+  overlayHistoryPushed: false,
+  /** @type {any} */
+  preOverlayState: null,
+  /** @type {number|null} */
+  overlayOpenedAt: null,
+  _savedScrollY: 0,
 
-    (function checkFuse() {
-      try {
-        const ready = _engine()?._internals?.getFuse?.() != null;
-        const inp   = DOMService.get(CONFIG.DOM.searchInputId);
-        const still = inp?.value?.trim() === q;
+  /** @type {any} */
+  debounceTimeout: null,
+  /** @type {any} */
+  scrollIdleTimer: null,
+  isScrollingActive: false,
+  lastKeyboardToggleTime: 0,
+  isSoftKeyboardOpen: false,
+  _timeouts: new Set(),
+};
 
-        if (ready && still) {
-          let out = { results: [], keywords: [] };
-          try { out = _engine().search(q, type) || out; } catch {}
-          if (out.results.length) {
-            State.currentResults = out.results;
-            FilterService.setupCategoryFilter(
-              RenderingService.extractResultCategories(out.results), 'all'
-            );
-            RenderingService.renderResults(out.results);
-          }
-          _fuseUpgradeTimer = null;
-          return;
+// ── SearchService Orchestrator ────────────────────────────────────────────
+export const SearchService = {
+  _initialized: false,
+
+  async loadData() {
+    try {
+      // @ts-ignore
+      if (window.ConDataService?.getAssembled) {
+        // @ts-ignore
+        const data = await window.ConDataService.getAssembled();
+        if (data) {
+          State.apiData = data;
+          await SearchEngine.init(data);
+          return data;
         }
-
-        if (!ready && Date.now() - started < MAX_WAIT_MS) {
-          _fuseUpgradeTimer = setTimeout(checkFuse, CHECK_INTERVAL_MS);
-        }
-      } catch {
-        _fuseUpgradeTimer = null;
       }
-    })();
-  }
+    } catch (e) {
+      console.warn('[SearchService] ConDataService fetch failed, falling back to db.min.json:', e);
+    }
 
-  // ── SearchService ─────────────────────────────────────────────────────────
+    try {
+      const res = await fetch(CONFIG.DB.path || DB.path);
+      const data = await res.json();
+      State.apiData = data;
+      await SearchEngine.init(data);
+      return data;
+    } catch (e) {
+      console.error('[SearchService] Failed to load database:', e);
+      return null;
+    }
+  },
 
-  const SearchService = {
+  /**
+   * @param {string} rawQuery
+   * @param {Object} [options]
+   * @param {string} [options.q]
+   * @param {string} [options.type]
+   * @param {string} [options.category]
+   * @param {boolean} [options.fromURL]
+   * @param {boolean} [options.restore]
+   * @param {boolean} [options.skipURL]
+   * @param {boolean} [options.keepPlaceholder]
+   * @param {boolean} [options.closeOverlay]
+   */
+  doSearch(rawQuery, options = {}) {
+    const q = String(rawQuery || '').trim();
 
-    // ── Main search ──────────────────────────────────────────────────────
+    // Preserve category filter state unless explicitly overridden
+    if (options.category) {
+      State.selectedCategory = options.category;
+    }
+    if (options.type) {
+      State.selectedType = options.type;
+    }
 
-    /**
-     * Execute a search from the current input value.
-     *
-     * @param {Event|null}  [e]
-     * @param {boolean}     [preventPush]
-     * @param {Object}      [options]
-     * @param {boolean}     [options.closeOverlay]
-     */
-    doSearch(e, preventPush = false, options = {}) {
-      try {
-        e?.preventDefault?.();
-
-        window.__renderIsRestore = !!preventPush;
-
-        const inp = DOMService.get(CONFIG.DOM.searchInputId);
-        const q   = inp?.value || '';
-        State.selectedCategory = 'all';
-
-        // ── Guard: docs not ready yet ──────────────────────────────────────
-        if (q.trim() && !preventPush) {
-          const docsReady = (_engine()?._internals?.getDocs?.()?.length ?? 0) > 0;
-          if (!docsReady) {
-            window.__pendingSearch = { q: q.trim(), type: State.selectedType || 'all' };
-            const rc = DOMService.get(CONFIG.DOM.searchResultsId);
-            if (rc && !rc.querySelector('.search-result-placeholder')) {
-              rc.innerHTML = `<div class="search-result-placeholder" style="opacity:.5">${LanguageService.t('search_result_here')}</div>`;
-            }
-            window.__renderIsRestore = false;
-            return;
-          }
-        }
-
-        // ── Empty query ────────────────────────────────────────────────────
-        if (!q.trim()) {
-          this._showPlaceholder();
-
-          if (!preventPush && !State.suppressHistoryPush) {
-            const cleared = { q: '', type: 'all', category: 'all' };
-            if (!URLService.isEqual(cleared, State.lastCommittedSearchState)) {
-              URLService.replaceSearch(cleared);
-            }
-          }
-
-          if (State.overlayOpen) ReadyModeService.renderReadyModeSuggestions();
-          if (State.overlayOpen && options.closeOverlay) OverlayService.close('manual');
-          ClearBtnService.sync();
-          IconSlotService.update();
-          window.__renderIsRestore = false;
-          return;
-        }
-
-        // ── Execute search ─────────────────────────────────────────────────
-        let out = { results: [], keywords: [] };
-        try {
-          if (_engine()?.search) out = _engine().search(q, State.selectedType) || out;
-        } catch (err) {
-          console.error('[SearchService] Search engine failed:', err);
-          out = { results: [], keywords: [] };
-        }
-
-        State.currentResults   = out.results  || [];
-        State.allKeywordsCache = out.keywords || [];
-
-        FilterService.setupCategoryFilter(
-          RenderingService.extractResultCategories(State.currentResults),
-          'all'
+    if (!q) {
+      State.currentResults = [];
+      State.currentFilteredResults = [];
+      const container = DOMService.get(CONFIG.DOM.searchResultsId);
+      if (container && !options.keepPlaceholder) {
+        DOMService.setHTML(
+          container,
+          `<div class="search-result-placeholder"><p>${LanguageService.t('search_result_here')}</p></div>`
         );
-
-        // ── History commit (two-stack model) ───────────────────────────────
-        if (!preventPush && !State.suppressHistoryPush) {
-          const searchState = { q, type: State.selectedType || 'all', category: 'all' };
-          if (State.overlayOpen) {
-            State.lastCommittedSearchState = searchState;
-          } else {
-            URLService.commitSearch(searchState);
-          }
-        }
-
-        // ── Render ─────────────────────────────────────────────────────────
-        RenderingService.renderResults(State.currentResults, State.currentResults.length === 0);
-        window.__renderIsRestore = false;
-
-        if (State.overlayOpen) OverlayService.close('manual');
-
-        ClearBtnService.sync();
-        IconSlotService.update();
-      } catch (err) {
-        console.error('[SearchService] doSearch failed:', err);
-        State.currentResults = [];
       }
-    },
+      DiscoveryService.destroy();
+      return;
+    }
 
-    // ── URL-init search ───────────────────────────────────────────────────
+    try {
+      const searchRes = SearchEngine.search(q, State.selectedType);
+      let results = searchRes.results || [];
 
-    /**
-     * Run a search from URL parameters on page load.
-     * Shows immediateSearch results right away; Fuse upgrade runs silently later.
-     *
-     * @param {string} q
-     * @param {string} type
-     * @param {string} category
-     * @param {number} [retryCount=0]
-     */
-    doSearchFromURL(q, type, category, retryCount = 0) {
-      const maxR    = CONFIG.TIMING.urlSearchMaxRetries;
-      const retryMs = CONFIG.TIMING.urlSearchRetryMs;
-
-      const scheduleRetry = () => {
-        if (retryCount < maxR) {
-          setTimeout(() => this.doSearchFromURL(q, type, category, retryCount + 1), retryMs);
-        } else {
-          console.warn('[SearchService] SearchEngine not ready after', maxR, 'retries for URL query:', q);
-        }
-      };
-
-      try {
-        const se = _engine();
-        if (!se?.search) { scheduleRetry(); return; }
-
-        const internals = se._internals;
-        const hasDocs = (() => {
-          try { return (internals?.getDocs?.()?.length || 0) > 0; }
-          catch { return false; }
-        })();
-
-        if (!hasDocs) { scheduleRetry(); return; }
-
-        let out = { results: [], keywords: [] };
-        try { out = se.search(q, type) || out; } catch {}
-
-        State.suppressHistoryPush = true;
-        try {
-          const inp = DOMService.get(CONFIG.DOM.searchInputId);
-          if (inp) inp.value = q;
-          State.selectedType     = type     || 'all';
-          State.selectedCategory = category || 'all';
-          FilterService.setupTypeFilter(State.selectedType);
-          this.doSearch(null, /* preventPush */ true);
-          URLService.replaceSearch({ q, type: State.selectedType, category: State.selectedCategory });
-        } finally {
-          State.suppressHistoryPush = false;
-        }
-
-        ClearBtnService.sync();
-        IconSlotService.update();
-
-        // Schedule silent Fuse upgrade if not ready yet
-        const hasFuse = (() => {
-          try { return internals?.getFuse?.() != null; }
-          catch { return false; }
-        })();
-        if (!hasFuse) _scheduleFuseUpgrade(q, type);
-
-      } catch (e) {
-        console.error('[SearchService] doSearchFromURL failed', e);
-        scheduleRetry();
+      if (State.selectedCategory && State.selectedCategory !== 'all') {
+        const catLower = State.selectedCategory.toLowerCase();
+        results = results.filter(
+          (/** @type {any} */ r) =>
+            (r.catName || '').toLowerCase() === catLower || (r.category?.name?.en || '').toLowerCase() === catLower
+        );
       }
-    },
 
-    // ── Private helpers ───────────────────────────────────────────────────
+      State.currentResults = results;
+      State.currentFilteredResults = results;
 
-    /**
-     * Show the "results will appear here" placeholder.
-     *
-     * BUG FIX: Removed _syncPlaceholderHeight() and _ensureResizeListener().
-     * Those functions set --placeholder-h to a px snapshot of window.innerHeight,
-     * which becomes stale when the browser nav bar shows/hides (innerHeight changes).
-     * CSS already handles .search-result-placeholder height correctly without any JS.
-     *
-     * @private
-     */
-    _showPlaceholder() {
-      // Properly destroy URE handle BEFORE wiping container innerHTML.
-      // Without this, _searchHandle stays non-null with destroyed DOM,
-      // causing renderResults() to skip fresh URE mount on next search
-      // (it reuses the dangling handle → nothing renders).
-      RenderingService.disconnectRenderObserver();
-      const rc = DOMService.get(CONFIG.DOM.searchResultsId);
-      if (rc) {
-        rc.innerHTML = `<div class="search-result-placeholder">${LanguageService.t('search_result_here')}</div>`;
+      RenderingService.renderResults(results, { query: q });
+
+      if (!options.fromURL && !options.restore && !options.skipURL) {
+        URLService.commitSearch({
+          q,
+          type: State.selectedType,
+          category: State.selectedCategory,
+        });
       }
-      // VirtualScrollEngine.destroy() removed — rendering uses URE, not the old VSE
-      FilterService.setupCategoryFilter([], 'all');
-      if (typeof UIService.updateUILanguage === 'function') UIService.updateUILanguage();
-      if (!window.__renderIsRestore) {
-        window.scrollTo({ top: 0, behavior: 'instant' });
-        if (window._showStickyHeader) window._showStickyHeader();
+
+      if (OverlayService.close && options.closeOverlay !== false) {
+        OverlayService.close('search');
       }
-    },
-  };
+    } catch (err) {
+      console.error('[SearchService] Search execution failed:', err);
+      State.currentResults = [];
+      RenderingService.renderResults([], { query: q });
+    }
+  },
 
-  // ── Export ──────────────────────────────────────────────────────────────
-  M.SearchService = SearchService;
+  async doSearchFromURL() {
+    await this.loadData();
 
-})(window.SearchModules = window.SearchModules || {});
+    const params = URLService.getParams();
+    const q = params.q || '';
+    const type = params.type || 'all';
+    const category = params.category || 'all';
+
+    if (q) {
+      const input = /** @type {HTMLInputElement|null} */ (DOMService.get(CONFIG.DOM.searchInputId));
+      if (input) {
+        input.value = q;
+        ClearBtnService.update(q);
+      }
+
+      State.selectedType = type;
+      State.selectedCategory = category;
+
+      this.doSearch(q, { fromURL: true, type, category });
+    }
+  },
+
+  async init() {
+    if (this._initialized) return;
+
+    UIService.setupAutoSearchInput(
+      (/** @type {any} */ val) => {
+        SuggestionService.renderQuerySuggestions(val);
+      },
+      (/** @type {any} */ val) => {
+        this.doSearch(val);
+      }
+    );
+
+    FilterService.setupTypeFilter((/** @type {any} */ type) => {
+      State.selectedType = type;
+      const input = /** @type {HTMLInputElement|null} */ (DOMService.get(CONFIG.DOM.searchInputId));
+      this.doSearch(input?.value || '');
+    });
+
+    FilterService.setupCategoryFilter((/** @type {any} */ category) => {
+      State.selectedCategory = category;
+      const input = /** @type {HTMLInputElement|null} */ (DOMService.get(CONFIG.DOM.searchInputId));
+      this.doSearch(input?.value || '');
+    });
+
+    // Handle popstate for back/forward navigation
+    window.addEventListener('popstate', (ev) => {
+      const params = URLService.getParams();
+      const q = params.q || '';
+      const input = /** @type {HTMLInputElement|null} */ (DOMService.get(CONFIG.DOM.searchInputId));
+      if (input) {
+        input.value = q;
+        ClearBtnService.update(q);
+      }
+      if (q) {
+        this.doSearch(q, {
+          restore: true,
+          type: params.type || 'all',
+          category: params.category || 'all',
+        });
+      } else {
+        this.doSearch('', { restore: true });
+      }
+    });
+
+    // Event-driven data readiness and initial URL search
+    await this.loadData();
+
+    // Check for stashed pending search or URL query
+    const pending = /** @type {{ q?: string, type?: string, category?: string } | null} */ (
+      // @ts-ignore
+      window.__pendingSearch
+    );
+    if (pending && pending.q) {
+      const input = /** @type {HTMLInputElement|null} */ (DOMService.get(CONFIG.DOM.searchInputId));
+      if (input) input.value = pending.q;
+      // @ts-ignore
+      delete window.__pendingSearch;
+      this.doSearch(pending.q, { type: pending.type, category: pending.category });
+    } else {
+      await this.doSearchFromURL();
+    }
+
+    this._initialized = true;
+  },
+
+  destroy() {
+    RenderingService.disconnectRenderObserver();
+    DiscoveryService.destroy();
+    this._initialized = false;
+  },
+};
+
+if (typeof window !== 'undefined') {
+  // @ts-ignore
+  window.SearchModules = window.SearchModules || {};
+  // @ts-ignore
+  Object.assign(window.SearchModules, {
+    State,
+    SearchService,
+  });
+}
