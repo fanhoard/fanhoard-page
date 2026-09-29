@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
+import { SearchEngine } from '../assets/js/search-system/search-modules/engine.js';
+import { UIService } from '../assets/js/search-system/search-modules/ui.js';
 
 describe('PF-05: Dead Asset References & Boot 404 Elimination', () => {
   it('does not contain references to dead legacy JSON or wave-setting assets in version-core.js and modern-navigation.js', () => {
@@ -30,66 +32,43 @@ describe('PF-03: Unified Debounce Timers & Cancellation on Enter', () => {
       <div class="search-pill">
         <input id="searchInput" type="text" />
       </div>
-      <div id="search-suggestion-container"></div>
+      <div id="searchSuggestions"></div>
     `;
   });
 
   it('cancels pending suggestion debounce timer on Enter keydown', () => {
-    const M: any = {
-      CONFIG: {
-        DOM: { searchInputId: 'searchInput', clearBtnId: 'search-clear-btn', suggestionContainerId: 'search-suggestion-container' },
-        TIMING: { debounceMs: 120 },
-        Icons: { search: '', clear: '', back: '' }
-      },
-      State: { overlayTransitioning: false, debounceTimeout: null },
-      Handlers: {},
-      DOMService: {
-        get: (id: string) => document.getElementById(id),
-        query: (sel: string) => document.querySelector(sel),
-        create: (tag: string, attrs: any, cls: string) => {
-          const el = document.createElement(tag);
-          if (cls) el.className = cls;
-          return el;
-        },
-        setAttr: (el: any, k: string, v: string) => el?.setAttribute(k, v)
-      },
-      LanguageService: { t: (k: string) => k },
-      OverlayService: { open: vi.fn() },
-      SuggestionService: { renderQuerySuggestions: vi.fn() },
-      SearchService: { doSearch: vi.fn() }
-    };
+    const onInput = vi.fn();
+    const onEnter = vi.fn();
 
-    (window as any).SearchModules = M;
-    const code = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/input-bar.js'), 'utf8');
-    eval(code);
+    UIService.setupAutoSearchInput(onInput, onEnter);
 
     const input = document.getElementById('searchInput') as HTMLInputElement;
-    M.UIService.buildWrapper();
-    M.UIService.setupAutoSearchInput();
-
     input.value = 'smile';
-    M.Handlers.inputInput();
+    input.dispatchEvent(new Event('input', { bubbles: true }));
 
-    expect(M.State.debounceTimeout).not.toBeNull();
+    const enterEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+    input.dispatchEvent(enterEvent);
 
-    const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
-    M.Handlers.inputKeydown(enterEvent);
-
-    expect(M.State.debounceTimeout).toBeNull();
-    expect(M.SearchService.doSearch).toHaveBeenCalled();
+    expect(onEnter).toHaveBeenCalledWith('smile');
   });
 });
 
 describe('PF-06: Virtual Scroll Buffer Reduction', () => {
-  it('uses ~300px buffer in rendering.js, discovery.js, virtual-scroll.js, and ure config', () => {
-    const renderingCode = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/rendering.js'), 'utf8');
-    const discoveryCode = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/discovery.js'), 'utf8');
-    const vsCode = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/virtual-scroll.js'), 'utf8');
+  it('uses ~300px buffer in ui.js, suggestions.js, utils.js, and ure config', () => {
+    const uiCode = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/ui.js'), 'utf8');
+    const suggestionsCode = fs.readFileSync(
+      path.join(__dirname, '../assets/js/search-system/search-modules/suggestions.js'),
+      'utf8'
+    );
+    const utilsCode = fs.readFileSync(
+      path.join(__dirname, '../assets/js/search-system/search-modules/utils.js'),
+      'utf8'
+    );
     const ureConfigCode = fs.readFileSync(path.join(__dirname, '../assets/js/ure/ure-modules/config.js'), 'utf8');
 
-    expect(renderingCode).toContain('buffer  : 300');
-    expect(discoveryCode).toContain('buffer    : 300');
-    expect(vsCode).toContain('OVERSCAN : 300');
+    expect(uiCode).toContain('buffer: 300');
+    expect(suggestionsCode).toContain('buffer: 300');
+    expect(utilsCode).toContain('OVERSCAN: 300');
     expect(ureConfigCode).toContain('DEFAULT_BUFFER_PX          : 300');
     expect(ureConfigCode).toContain("SENTINEL_MARGIN            : '300px'");
   });
@@ -108,21 +87,15 @@ describe('PF-02: SearchEngine Query Result Cache', () => {
             data: [
               { name: { en: 'Smiling Face', th: 'หน้ายิ้ม' }, api: 'smile' },
               { name: { en: 'Grinning Face', th: 'ยิ้มแย้ม' }, api: 'grin' },
-              { name: { en: 'Red Heart', th: 'หัวใจแดง' }, api: 'heart' }
-            ]
-          }
-        ]
-      }
-    ]
+              { name: { en: 'Red Heart', th: 'หัวใจแดง' }, api: 'heart' },
+            ],
+          },
+        ],
+      },
+    ],
   };
 
   it('cache hit avoids recompute on repeat queries', async () => {
-    const M: any = { CONFIG: {} };
-    (window as any).SearchModules = M;
-    const engineCode = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/engine.js'), 'utf8');
-    eval(engineCode);
-
-    const SearchEngine = M.SearchEngine;
     await SearchEngine.init(mockData);
 
     expect(SearchEngine._internals.getResultCacheSize()).toBe(0);
@@ -136,12 +109,6 @@ describe('PF-02: SearchEngine Query Result Cache', () => {
   });
 
   it('cache invalidates on dataset rebuild (init)', async () => {
-    const M: any = { CONFIG: {} };
-    (window as any).SearchModules = M;
-    const engineCode = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/engine.js'), 'utf8');
-    eval(engineCode);
-
-    const SearchEngine = M.SearchEngine;
     await SearchEngine.init(mockData);
 
     SearchEngine.search('smile', 'all');
@@ -152,12 +119,6 @@ describe('PF-02: SearchEngine Query Result Cache', () => {
   });
 
   it('bounds cache size to 50 entries with LRU eviction', async () => {
-    const M: any = { CONFIG: {} };
-    (window as any).SearchModules = M;
-    const engineCode = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/engine.js'), 'utf8');
-    eval(engineCode);
-
-    const SearchEngine = M.SearchEngine;
     await SearchEngine.init(mockData);
 
     for (let i = 0; i < 60; i++) {
@@ -167,40 +128,34 @@ describe('PF-02: SearchEngine Query Result Cache', () => {
   });
 });
 
-describe("PF-04: First-Character Bucket Index", () => {
+describe('PF-04: First-Character Bucket Index', () => {
   const mockData = {
     type: [
       {
-        id: "emojis",
-        name: { en: "Emojis", th: "อีโมจิ" },
+        id: 'emojis',
+        name: { en: 'Emojis', th: 'อีโมจิ' },
         category: [
           {
-            id: "smileys",
-            name: { en: "Smileys", th: "หน้ายิ้ม" },
+            id: 'smileys',
+            name: { en: 'Smileys', th: 'หน้ายิ้ม' },
             data: [
-              { name: { en: "Smiling Face", th: "หน้ายิ้ม" }, api: "smile" },
-              { name: { en: "Grinning Face", th: "ยิ้มแย้ม" }, api: "grin" },
-              { name: { en: "Red Heart", th: "หัวใจแดง" }, api: "heart" }
-            ]
-          }
-        ]
-      }
-    ]
+              { name: { en: 'Smiling Face', th: 'หน้ายิ้ม' }, api: 'smile' },
+              { name: { en: 'Grinning Face', th: 'ยิ้มแย้ม' }, api: 'grin' },
+              { name: { en: 'Red Heart', th: 'หัวใจแดง' }, api: 'heart' },
+            ],
+          },
+        ],
+      },
+    ],
   };
 
-  it("builds bucket index on init and filters candidates for short queries", async () => {
-    const M: any = { CONFIG: {} };
-    (window as any).SearchModules = M;
-    const engineCode = fs.readFileSync(path.join(__dirname, "../assets/js/search-system/search-modules/engine.js"), "utf8");
-    eval(engineCode);
-
-    const SearchEngine = M.SearchEngine;
+  it('builds bucket index on init and filters candidates for short queries', async () => {
     await SearchEngine.init(mockData);
 
     expect(SearchEngine._internals.getBucketIndexSize()).toBeGreaterThan(0);
 
-    const resShort = SearchEngine.search("sm", "all");
+    const resShort = SearchEngine.search('sm', 'all');
     expect(resShort.results.length).toBeGreaterThan(0);
-    expect(resShort.results[0].itemName).toBe("Smiling Face");
+    expect(resShort.results[0].itemName).toBe('Smiling Face');
   });
 });

@@ -163,43 +163,7 @@ describe('Core Search Defects Regression Suite (DS-01, DS-06, DS-07, DS-09, DS-0
     const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
     const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
 
-    (window as any).SearchModules = {
-      CONFIG: { DOM: {} },
-      State: {
-        overlayOpen: false,
-        _timeouts: new Set(),
-      },
-      Handlers: {},
-      DOMService: {
-        off: vi.fn(),
-        get: vi.fn().mockReturnValue(null),
-        remove: vi.fn(),
-      },
-      StorageService: {},
-      URLService: {},
-      KeyboardService: { destroy: vi.fn() },
-      FilterService: {},
-      SearchService: {},
-      UIService: {},
-      OverlayService: { close: vi.fn() },
-      ClearBtnService: {},
-      IconSlotService: {},
-      VirtualScrollEngine: { destroy: vi.fn() },
-      KeyboardAutoToggleService: { disableAutoToggle: vi.fn() },
-      SearchEngine: {},
-    };
-
-    const searchJsPath = path.resolve(__dirname, '../assets/js/search-system/search.js');
-    let searchJsCode = fs.readFileSync(searchJsPath, 'utf8');
-
-    // Replace async module script fetching with immediate resolution to trigger _boot()
-    searchJsCode = searchJsCode.replace('loadPhases(LOAD_PHASES, base)', 'Promise.resolve()');
-
-    // Evaluate search.js
-    const runCode = new Function('window', 'document', 'console', searchJsCode);
-    runCode(window, document, console);
-
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await import('../assets/js/search-system/search.js');
 
     expect((window as any).__searchUI).toBeDefined();
 
