@@ -11,8 +11,8 @@
 
 All CSS classes and DOM element attributes conform strictly to:
 
-1. **Explicity Over Abbreviation**: Clear semantic names (`.search-card`, `.search-pill`).
-2. **BEM Methodology**: Block (`.search-card`), Element (`.search-card__symbol`), Modifier (`.suggestion-item--trending`).
+1. **Explicity Over Abbreviation**: Clear semantic names (`.result-card`, `.search-pill`).
+2. **BEM Methodology**: Block (`.result-card`), Element (`.result-card__symbol`), Modifier (`.suggestion-item--trending`).
 3. **Prefix Discipline**: Prefixed with `search-`, `suggestion-`, or `discovery-`.
 
 ---
@@ -30,14 +30,14 @@ All CSS classes and DOM element attributes conform strictly to:
 
 ---
 
-### 2.2 Result Card Component (`.search-card`)
+### 2.2 Result Card Component (`.result-card`)
 
 | Active Class | Description / Semantic Purpose |
 | :--- | :--- |
-| `.search-card` | Base container for a single search result item |
-| `.search-card-main` | Card body container holding symbol and name |
-| `.search-card-symbol` | Symbol/API badge text |
-| `.search-card-name` | Display title/label |
+| `.result-card` | Base container for a single search result item |
+| `.result-card-main` | Card body container holding symbol and name |
+| `.result-card-symbol` | Symbol/API badge text |
+| `.result-card-name` | Display title/label |
 
 ---
 

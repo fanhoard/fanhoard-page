@@ -9,7 +9,8 @@
  */
 
 import { CONFIG } from './config.js';
-import { DOMService, StringService, LanguageService, HighlightService } from './utils.js';
+import { DOMService, StringService, LanguageService, HighlightService, NotificationService } from './utils.js';
+import { renderResultItem } from './ui.js';
 import { SearchEngine } from './engine.js';
 
 // Helper to ensure URE is loaded before discovery rendering
@@ -333,25 +334,30 @@ export const DiscoveryAssistService = {
       data: items,
       keyField: 'api',
       buffer: 300,
-      template: (/** @type {any} */ item) => {
-        const raw = item.item || item;
-        const name = item.itemName || raw.name || '';
-        const api = raw.api || '';
-        const text = raw.text || '';
-        const copyVal = text || api || name;
-        const escCopy = StringService.escapeHtml(copyVal);
-        const escName = StringService.escapeHtml(name);
-
-        return `
-          <div class="search-card discovery-card" data-copy="${escCopy}">
-            <div class="search-card-main">
-              <span class="search-card-symbol">${StringService.escapeHtml(api || text)}</span>
-              <span class="search-card-name">${escName}</span>
-            </div>
-          </div>
-        `;
-      },
+      template: (/** @type {any} */ item, /** @type {string} */ [lang]) => renderResultItem(item, lang),
     });
+
+    const htmlListEl = /** @type {HTMLElement} */ (listEl);
+    if (!htmlListEl.dataset.copyBound) {
+      htmlListEl.dataset.copyBound = 'true';
+      const handleCopy = (/** @type {Event} */ ev) => {
+        const target = /** @type {HTMLElement} */ (ev.target);
+        const card = target.closest('.result-card');
+        if (!card) return;
+        if (ev.type === 'keydown') {
+          const ke = /** @type {KeyboardEvent} */ (ev);
+          if (ke.key !== 'Enter' && ke.key !== ' ') return;
+          ke.preventDefault();
+        }
+        const rawText = card.getAttribute('data-text');
+        const copyText = rawText ? StringService.decodeUrl(rawText) : (card.getAttribute('data-copy') || '');
+        if (copyText) {
+          NotificationService.copyToClipboard(copyText);
+        }
+      };
+      htmlListEl.addEventListener('click', handleCopy);
+      htmlListEl.addEventListener('keydown', handleCopy);
+    }
   },
 
   destroy() {

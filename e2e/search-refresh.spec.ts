@@ -19,7 +19,7 @@ test.describe('Search System Refresh & Navigation Regression Suite', () => {
     await expect(searchInput).toHaveValue('heart');
 
     const searchResults = page.locator('#searchResults');
-    await expect(searchResults.locator('.search-card').first()).toBeVisible({ timeout: 10000 });
+    await expect(searchResults.locator('.result-card').first()).toBeVisible({ timeout: 10000 });
     await expect(searchResults.locator('.search-result-placeholder')).not.toBeVisible();
   });
 
@@ -35,14 +35,14 @@ test.describe('Search System Refresh & Navigation Regression Suite', () => {
 
     await expect(page).toHaveURL(/q=smile/);
     const searchResults = page.locator('#searchResults');
-    await expect(searchResults.locator('.search-card').first()).toBeVisible({ timeout: 10000 });
+    await expect(searchResults.locator('.result-card').first()).toBeVisible({ timeout: 10000 });
 
     // Perform page reload
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
 
     await expect(searchInput).toHaveValue('smile');
-    await expect(searchResults.locator('.search-card').first()).toBeVisible({ timeout: 10000 });
+    await expect(searchResults.locator('.result-card').first()).toBeVisible({ timeout: 10000 });
     await expect(searchResults.locator('.search-result-placeholder')).not.toBeVisible();
   });
 
@@ -54,7 +54,7 @@ test.describe('Search System Refresh & Navigation Regression Suite', () => {
     await page.waitForLoadState('domcontentloaded');
 
     const searchResults = page.locator('#searchResults');
-    await expect(searchResults.locator('.search-card').first()).toBeVisible({ timeout: 10000 });
+    await expect(searchResults.locator('.result-card').first()).toBeVisible({ timeout: 10000 });
 
     // Navigate away to Setting page
     await page.goto('/setting/');
@@ -67,7 +67,7 @@ test.describe('Search System Refresh & Navigation Regression Suite', () => {
     await expect(page).toHaveURL(/q=star/);
     const searchInput = page.locator('#searchInput');
     await expect(searchInput).toHaveValue('star');
-    await expect(searchResults.locator('.search-card').first()).toBeVisible({ timeout: 10000 });
+    await expect(searchResults.locator('.result-card').first()).toBeVisible({ timeout: 10000 });
   });
 
   // (4) empty/whitespace query shows the expected empty/default state
@@ -80,7 +80,7 @@ test.describe('Search System Refresh & Navigation Regression Suite', () => {
     await expect(searchResults.locator('.search-result-placeholder')).toBeVisible({
       timeout: 10000,
     });
-    await expect(searchResults.locator('.search-card')).toHaveCount(0);
+    await expect(searchResults.locator('.result-card')).toHaveCount(0);
 
     // Type whitespace in input bar and press Enter
     const searchInput = page.locator('#searchInput');
@@ -89,7 +89,7 @@ test.describe('Search System Refresh & Navigation Regression Suite', () => {
     await searchInput.press('Enter');
 
     await expect(searchResults.locator('.search-result-placeholder')).toBeVisible();
-    await expect(searchResults.locator('.search-card')).toHaveCount(0);
+    await expect(searchResults.locator('.result-card')).toHaveCount(0);
   });
 
   // (5) at least one case for the suggestion panel (opens, shows suggestions, closes) to guard UX contract

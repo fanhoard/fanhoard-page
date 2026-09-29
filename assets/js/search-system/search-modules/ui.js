@@ -266,8 +266,75 @@ export const OverlayService = {
   },
 };
 
+
+/**
+ * @param {string} s
+ * @returns {number}
+ */
+function _wordCount(s) {
+  let n = 0, inW = false;
+  for (let i = 0; i < s.length; i++) {
+    const ws = s.charCodeAt(i) <= 32;
+    if (!ws && !inW) { n++; inW = true; }
+    else if (ws) { inW = false; }
+  }
+  return n;
+}
+
+/**
+ * Build card HTML string for a search result item.
+ *
+ * @param {any} item
+ * @param {string} [lang]
+ * @returns {string}
+ */
+export function renderResultItem(item, lang) {
+  try {
+    const currentLang = lang || LanguageService.getLang();
+    const data     = item.item || item;
+    const rawText  = data?.text || '';
+    const itemText = rawText || data?.name?.[currentLang] || data?.name?.en || item.itemName || '';
+    const itemApi  = data?.api || '';
+
+    const emojiLbl = LanguageService.t('emoji');
+    const typeName = item.typeObj?.name?.[currentLang]
+      || item.typeObj?.name?.en
+      || item.typeName
+      || emojiLbl;
+
+    const catName = item.category?.name?.[currentLang]
+      || item.category?.name?.en
+      || item.catName
+      || '';
+
+    const nameStr = data?.name?.[currentLang]
+      || (currentLang !== 'en' ? data?.name?.en : '')
+      || item.itemName
+      || '';
+
+    const text     = itemText || itemApi || '-';
+    const vertical = text.length > 45
+      || text.indexOf('\n') !== -1
+      || _wordCount(text) > 7;
+    const disp     = text.length > 300 ? text.slice(0, 300) : text;
+    const esc      = StringService.escapeHtml;
+    const titleStr = nameStr || data?.api || text;
+    const subStr   = itemApi || typeName || '';
+    const tags     = (typeName ? `<span class="result-card__tag">${esc(typeName)}</span>` : '')
+                   + (catName  ? `<span class="result-card__tag">${esc(catName)}</span>`  : '');
+    const encodedName = nameStr ? StringService.encodeUrl(nameStr) : '';
+
+    return `<div class="result-card${vertical ? ' result-card--vertical' : ''}" role="button" tabindex="0" aria-label="${esc(nameStr || text)}" data-text="${StringService.encodeUrl(text)}" data-name="${encodedName}"><div class="result-card__glyph">${esc(disp)}</div><div class="result-card__body"><div class="result-card__title">${esc(titleStr)}</div><div class="result-card__subtitle">${esc(subStr)}</div>${tags ? `<div class="result-card__tags" aria-hidden="true">${tags}</div>` : ''}</div></div>`;
+  } catch {
+    return '<div class="result-card"><div class="result-card__glyph">-</div></div>';
+  }
+}
+
 // ── RenderingService & FilterService ───────────────────────────────────────
 export const RenderingService = {
+  renderResultItem(/** @type {any} */ item, /** @type {string} */ [lang]) {
+    return renderResultItem(item, lang);
+  },
   /** @type {any} */
   _searchHandle: null,
 
@@ -329,38 +396,29 @@ export const RenderingService = {
         data: list,
         keyField: 'api',
         buffer: 300,
-        template: (/** @type {any} */ item) => {
-          const raw = item.item || item;
-          const name = item.itemName || raw.name || '';
-          const api = raw.api || '';
-          const text = raw.text || '';
-          const copyVal = text || api || name;
-          const escCopy = StringService.escapeHtml(copyVal);
-          const escName = StringService.escapeHtml(name);
-
-          return `
-            <div class="search-card" data-copy="${escCopy}">
-              <div class="search-card-main">
-                <span class="search-card-symbol">${StringService.escapeHtml(api || text)}</span>
-                <span class="search-card-name">${escName}</span>
-              </div>
-            </div>
-          `;
-        },
+        template: (/** @type {any} */ item, /** @type {string} */ [lang]) => renderResultItem(item, lang),
       });
 
       // Delegate copy click handler
       if (!container.dataset.copyBound) {
         container.dataset.copyBound = 'true';
-        container.addEventListener('click', (ev) => {
+        const handleCopy = (/** @type {Event} */ ev) => {
           const target = /** @type {HTMLElement} */ (ev.target);
-          const card = target.closest('.search-card');
+          const card = target.closest('.result-card');
           if (!card) return;
-          const copyText = card.getAttribute('data-copy');
+          if (ev.type === 'keydown') {
+            const ke = /** @type {KeyboardEvent} */ (ev);
+            if (ke.key !== 'Enter' && ke.key !== ' ') return;
+            ke.preventDefault();
+          }
+          const rawText = card.getAttribute('data-text');
+          const copyText = rawText ? StringService.decodeUrl(rawText) : (card.getAttribute('data-copy') || '');
           if (copyText) {
             NotificationService.copyToClipboard(copyText);
           }
-        });
+        };
+        container.addEventListener('click', handleCopy);
+        container.addEventListener('keydown', handleCopy);
       }
 
       DiscoveryAssistService.renderDiscovery(options.query || '', list);
