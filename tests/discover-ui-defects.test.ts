@@ -69,7 +69,7 @@ describe('Discover UI Defects Regression Suite (DS-03, DS-04, DS-08, DS-10, DS-1
     consoleError.mockRestore();
   });
 
-  // DS-10: suggestions.js attribute escaping for data-val
+  // DS-10: search-assist.js attribute escaping for data-val
   it('DS-10: data-val attribute in suggestions uses proper HTML attribute escaping', () => {
     const raw = 'test "><script>alert(1)</script>';
     const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

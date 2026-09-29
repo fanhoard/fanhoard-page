@@ -17,7 +17,7 @@ import {
   VirtualScrollEngine,
 } from './search-modules/utils.js';
 import { SearchEngine } from './search-modules/engine.js';
-import { SuggestionService, ReadyModeService, DiscoveryService } from './search-modules/suggestions.js';
+import { SearchAssistService, ReadyAssistService, DiscoveryAssistService, SearchAssist, SuggestionService, ReadyModeService, DiscoveryService } from './search-modules/search-assist.js';
 import {
   UIService,
   OverlayService,
@@ -73,6 +73,10 @@ if (typeof window !== 'undefined') {
   // @ts-ignore
   Object.assign(window.SearchModules, {
     CONFIG,
+    SearchAssistService,
+    ReadyAssistService,
+    DiscoveryAssistService,
+    SearchAssist,
     LanguageService,
     DOMService,
     StringService,

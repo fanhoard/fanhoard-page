@@ -10,7 +10,7 @@
 
 import { CONFIG } from './config.js';
 import { DOMService, StringService, LanguageService, NotificationService } from './utils.js';
-import { SuggestionService, ReadyModeService, DiscoveryService } from './suggestions.js';
+import { SearchAssistService, ReadyAssistService, DiscoveryAssistService, SuggestionService, ReadyModeService, DiscoveryService } from './search-assist.js';
 
 // URE Readiness Guard
 function ensureURE() {
@@ -245,7 +245,7 @@ export const OverlayService = {
       setTimeout(() => input.focus(), CONFIG.TIMING.focusDelayMs);
     }
 
-    ReadyModeService.renderTrendingSuggestions();
+    ReadyAssistService.renderTrendingSuggestions();
   },
 
   close(reason = 'manual') {
@@ -305,7 +305,7 @@ export const RenderingService = {
         </div>
       `
       );
-      DiscoveryService.renderDiscovery(options.query || '', []);
+      DiscoveryAssistService.renderDiscovery(options.query || '', []);
       return;
     }
 
@@ -315,7 +315,7 @@ export const RenderingService = {
     if (this._searchHandle) {
       try {
         /** @type {any} */ (this._searchHandle).setData(list);
-        DiscoveryService.renderDiscovery(options.query || '', list);
+        DiscoveryAssistService.renderDiscovery(options.query || '', list);
         return;
       } catch (e) {
         console.error('[RenderingService] URE setData failed, re-mounting:', e);
@@ -363,7 +363,7 @@ export const RenderingService = {
         });
       }
 
-      DiscoveryService.renderDiscovery(options.query || '', list);
+      DiscoveryAssistService.renderDiscovery(options.query || '', list);
     } catch (e) {
       console.error('[RenderingService] URE mount failed:', e);
     }

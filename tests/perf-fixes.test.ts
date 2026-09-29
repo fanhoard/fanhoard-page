@@ -54,10 +54,10 @@ describe('PF-03: Unified Debounce Timers & Cancellation on Enter', () => {
 });
 
 describe('PF-06: Virtual Scroll Buffer Reduction', () => {
-  it('uses ~300px buffer in ui.js, suggestions.js, utils.js, and ure config', () => {
+  it('uses ~300px buffer in ui.js, search-assist.js, utils.js, and ure config', () => {
     const uiCode = fs.readFileSync(path.join(__dirname, '../assets/js/search-system/search-modules/ui.js'), 'utf8');
     const suggestionsCode = fs.readFileSync(
-      path.join(__dirname, '../assets/js/search-system/search-modules/suggestions.js'),
+      path.join(__dirname, '../assets/js/search-system/search-modules/search-assist.js'),
       'utf8'
     );
     const utilsCode = fs.readFileSync(

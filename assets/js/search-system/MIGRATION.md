@@ -18,7 +18,7 @@ The v3.1.0 refactor simplifies the search system architecture from 15 files and 
 | `types.js` + `config.js` | `search-modules/config.js` | Merged JSDoc types into config exports |
 | `utils.js` + `virtual-scroll.js` | `search-modules/utils.js` | Unified stateless helpers & fallback VScroll |
 | `overlay.js` + `rendering.js` + `input-bar.js` + `keyboard.js` | `search-modules/ui.js` | Unified UI controller & URE render guards |
-| `discovery.js` + `suggestions.js` | `search-modules/suggestions.js` | Merged autocomplete & related discovery cards |
+| `discovery.js` + `search-assist.js` | `search-modules/search-assist.js` | Merged autocomplete & related discovery cards |
 | `state.js` + `search-service.js` | `search-modules/search-service.js` | Encapsulated private state store & orchestrator |
 | `url-history.js` | `search-modules/url-history.js` | Simplified via native `URLSearchParams` |
 | `engine.js` | `search-modules/engine.js` | Bucket index fast-path & LRU cache |

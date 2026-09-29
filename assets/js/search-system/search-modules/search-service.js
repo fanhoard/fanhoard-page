@@ -12,7 +12,7 @@
 import { CONFIG, DB } from './config.js';
 import { DOMService, LanguageService } from './utils.js';
 import { SearchEngine } from './engine.js';
-import { SuggestionService, ReadyModeService, DiscoveryService } from './suggestions.js';
+import { SearchAssistService, ReadyAssistService, DiscoveryAssistService, SuggestionService, ReadyModeService, DiscoveryService } from './search-assist.js';
 import { RenderingService, FilterService, OverlayService, UIService, IconSlotService, ClearBtnService } from './ui.js';
 import { URLService } from './url-history.js';
 
@@ -188,7 +188,7 @@ export const SearchService = {
 
     UIService.setupAutoSearchInput(
       (/** @type {any} */ val) => {
-        SuggestionService.renderQuerySuggestions(val);
+        SearchAssistService.renderQuerySuggestions(val);
       },
       (/** @type {any} */ val) => {
         this.doSearch(val);

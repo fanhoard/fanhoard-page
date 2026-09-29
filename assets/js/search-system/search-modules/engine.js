@@ -16,7 +16,7 @@ const FUSE_THRESHOLDS = Object.freeze({
   long: 0.30,
 });
 
-const SUGGESTION_SOURCE = Object.freeze({
+const ASSIST_SOURCE = Object.freeze({
   KEYWORD_EXACT: 1,
   TYPE_NAME: 2,
   CATEGORY_NAME: 3,
@@ -24,6 +24,7 @@ const SUGGESTION_SOURCE = Object.freeze({
   FUSE: 5,
   IMMEDIATE: 6,
 });
+const SUGGESTION_SOURCE = ASSIST_SOURCE;
 
 // ── Module-private state ───────────────────────────────────────────────────
 /** @type {any} */
@@ -520,7 +521,7 @@ function generateAllKeywords() {
  * @param {any} rawQuery
  * @param {any} [maxCount]
  */
-function querySuggestions(rawQuery, maxCount) {
+function queryAssist(rawQuery, maxCount) {
   maxCount = maxCount || 8;
   const q = String(rawQuery || '').trim();
   if (!q) return [];
@@ -1008,7 +1009,8 @@ export const SearchEngine = {
   init,
   isReady: () => _docs.length > 0,
   generateAllKeywords,
-  querySuggestions,
+  queryAssist,
+  querySuggestions: queryAssist,
   search,
   queryRelated,
   _internals: {

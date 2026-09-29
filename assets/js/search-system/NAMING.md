@@ -2,7 +2,7 @@
 
 - **System Described**: CSS Class and DOM Element Naming Standard for FanHoard Search System
 - **Entry File**: `assets/js/search-system/search-system.css`
-- **Dependencies**: `assets/js/search-system/search-modules/ui.js`, `suggestions.js`
+- **Dependencies**: `assets/js/search-system/search-modules/ui.js`, `search-assist.js`
 - **Verification**: `npm test`
 
 ---
@@ -41,7 +41,7 @@ All CSS classes and DOM element attributes conform strictly to:
 
 ---
 
-### 2.3 Search Suggestions & Discovery (`.suggestion-*`, `.discovery-*`)
+### 2.3 Search Assist & Discovery (`.suggestion-*`, `.discovery-*`)
 
 | Active Class / ID | Description / Semantic Purpose |
 | :--- | :--- |

@@ -14,13 +14,13 @@ The FanHoard search system provides deterministic, low-latency search capabiliti
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │ Layer 5: UI Layer                                                       │
-│   ui.js (Overlay, Rendering, Input Bar, Soft Keyboard) • suggestions.js │
+│   ui.js (Overlay, Rendering, Input Bar, Soft Keyboard) • search-assist.js │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Layer 4: Service Orchestration & State                                  │
 │   search-service.js (Private state store, data loading, URL sync)       │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Layer 3: Search & Query Engine                                          │
-│   engine.js (search, querySuggestions, queryRelated)                    │
+│   engine.js (search, queryAssist, queryRelated)                    │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Layer 2: Indexing & Utilities                                          │
 │   config.js (Frozen config + types) • utils.js (DOM, string, vscroll)  │
@@ -46,7 +46,7 @@ assets/js/search-system/
     ├── utils.js                 # Stateless Helpers, Text Normalizer & Fallback VScroll
     ├── engine.js                # Search Engine Core & Bucket Index
     ├── ui.js                    # Unified UI Controller (merged overlay, rendering, input-bar, keyboard)
-    ├── suggestions.js           # Multi-Source Suggestion Engine (merged discovery.js)
+    ├── search-assist.js           # Multi-Source Search Assist Subsystem (merged discovery.js)
     ├── url-history.js           # Native URLSearchParams & Browser History Sync
     └── search-service.js        # Search Orchestrator & Private State Store (merged state.js)
 ```
@@ -99,7 +99,7 @@ Standard ES module script tag in HTML `<head>`:
 window.SearchEngine = {
   init(data, options): Promise<boolean>,
   search(query, typeFilter): { results: SearchDoc[], keywords: Keyword[] },
-  querySuggestions(query, maxCount): Suggestion[],
+  queryAssist(query, maxCount): Suggestion[],
   queryRelated(query, maxCount): RelatedItem[],
   generateAllKeywords(): Keyword[]
 };

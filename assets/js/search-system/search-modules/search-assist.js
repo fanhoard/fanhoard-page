@@ -1,11 +1,11 @@
 // @ts-check
 /**
- * @file suggestions.js
+ * @file search-assist.js
  * SuggestionService  — query suggestions as user types
  * ReadyModeService   — trending suggestions when search input is empty
  * DiscoveryService   — post-search related content cards (YouTube-style)
  *
- * @module suggestions
+ * @module search-assist
  */
 
 import { CONFIG } from './config.js';
@@ -37,7 +37,7 @@ function ensureURE() {
 }
 
 // ── ReadyModeService ────────────────────────────────────────────────────────
-export const ReadyModeService = {
+export const ReadyAssistService = {
   extractSmartNames() {
     try {
       const all = SearchEngine.generateAllKeywords();
@@ -99,7 +99,7 @@ export const ReadyModeService = {
 
       return out;
     } catch (e) {
-      console.error('[ReadyModeService] extractSmartNames failed:', e);
+      console.error('[ReadyAssistService] extractSmartNames failed:', e);
       return [];
     }
   },
@@ -164,7 +164,7 @@ export const ReadyModeService = {
 };
 
 // ── SuggestionService ───────────────────────────────────────────────────────
-export const SuggestionService = {
+export const SearchAssistService = {
   /**
    * @param {string} [query]
    * @param {number} [maxCount]
@@ -175,7 +175,7 @@ export const SuggestionService = {
 
     const q = String(query || '').trim();
     if (!q) {
-      ReadyModeService.renderTrendingSuggestions();
+      ReadyAssistService.renderTrendingSuggestions();
       return;
     }
 
@@ -269,7 +269,7 @@ export const SuggestionService = {
 };
 
 // ── DiscoveryService ────────────────────────────────────────────────────────
-export const DiscoveryService = {
+export const DiscoveryAssistService = {
   /** @type {any} */
   _handle: null,
 
@@ -323,7 +323,7 @@ export const DiscoveryService = {
         /** @type {any} */ (this._handle).setData(items);
         return;
       } catch (e) {
-        console.error('[DiscoveryService] URE setData failed, re-mounting:', e);
+        console.error('[DiscoveryAssistService] URE setData failed, re-mounting:', e);
         this.destroy();
       }
     }
@@ -359,7 +359,7 @@ export const DiscoveryService = {
       try {
         /** @type {any} */ (this._handle).destroy?.();
       } catch (e) {
-        console.error('[DiscoveryService] URE teardown error:', e);
+        console.error('[DiscoveryAssistService] URE teardown error:', e);
       }
       this._handle = null;
     }
@@ -368,11 +368,29 @@ export const DiscoveryService = {
   },
 };
 
+// Backward-compatibility aliases
+export const SuggestionService = SearchAssistService;
+export const ReadyModeService = ReadyAssistService;
+export const DiscoveryService = DiscoveryAssistService;
+
+export const SearchAssist = {
+  SearchAssistService,
+  ReadyAssistService,
+  DiscoveryAssistService,
+  SuggestionService,
+  ReadyModeService,
+  DiscoveryService,
+};
+
 if (typeof window !== 'undefined') {
   // @ts-ignore
   window.SearchModules = window.SearchModules || {};
   // @ts-ignore
   Object.assign(window.SearchModules, {
+    SearchAssistService,
+    ReadyAssistService,
+    DiscoveryAssistService,
+    SearchAssist,
     ReadyModeService,
     SuggestionService,
     DiscoveryService,

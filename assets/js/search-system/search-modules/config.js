@@ -78,7 +78,8 @@
  */
 
 /**
- * @typedef {Object} Suggestion
+ * @typedef {Object} SearchAssistItem
+ * @typedef {SearchAssistItem} Suggestion
  * @property {string} text
  * @property {number} [source]
  * @property {SearchDoc} [doc]
@@ -149,7 +150,9 @@ export const TIMING = Object.freeze({
 
 /** @type {Readonly<Record<string,number>>} */
 export const RENDER = Object.freeze({
+  assistMax: 8,
   suggestionMax: 8,
+  assistFullscreenMax: 30,
   suggestionsFullscreenMax: 30,
   vsOverscanPx: 320,
   vsPoolMax: 40,
@@ -178,6 +181,7 @@ export const LANG_WEIGHT = Object.freeze({
 
 /** @type {Readonly<Record<string,string>>} */
 export const DOM = Object.freeze({
+  assistContainerId: 'searchSuggestions',
   suggestionContainerId: 'searchSuggestions',
   overlayContainerId: 'searchOverlayContainer',
   sentinelId: 'search-render-sentinel',
@@ -205,7 +209,9 @@ export const TEXTS = Object.freeze({
     not_found_hint: 'ลองดูสิ่งเหล่านี้แทน',
     copy: 'คัดลอก',
     copy_failed: 'คัดลอกไม่สำเร็จ',
+    assist_label: 'คำค้นที่เกี่ยวข้อง',
     suggestion_label: 'คำค้นที่เกี่ยวข้อง',
+    assist_for_you: 'อาจเกี่ยวข้อง',
     suggestions_for_you: 'อาจเกี่ยวข้อง',
     discovery_label: 'คุณอาจสนใจ',
     discovery_more: 'ยังมีให้สำรวจอีก',
@@ -228,7 +234,9 @@ export const TEXTS = Object.freeze({
     not_found_hint: 'Try these instead',
     copy: 'Copy',
     copy_failed: 'Failed to copy',
+    assist_label: 'Related searches',
     suggestion_label: 'Related searches',
+    assist_for_you: 'You might also like',
     suggestions_for_you: 'You might also like',
     discovery_label: 'You might also like',
     discovery_more: 'More to explore',
