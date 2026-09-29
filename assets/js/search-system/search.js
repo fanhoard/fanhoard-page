@@ -283,13 +283,81 @@
       });
     }
 
+
+    // ── Refresh-recovery helpers (BUG: refresh sometimes showed no results) ──
+    // If the data fetch was aborted or returned empty (ConService assemble can
+    // "succeed" with an empty type[] after fetch timeouts), the page used to
+    // boot with 0 docs and the URL search gave up after its retry budget,
+    // leaving the results area blank until the user searched manually.
+    // Fix: retry the data load with backoff, and if it is STILL empty, keep a
+    // background watcher that finishes the boot as soon as real data arrives.
+
+    function _dataHasTypes(data) {
+      return !!(data && Array.isArray(data.type) && data.type.length);
+    }
+
+    function loadDataWithRetry(maxAttempts, backoffMs) {
+      let attempt = 0;
+      function run() {
+        attempt++;
+        return loadData().then(function (data) {
+          if (_dataHasTypes(data) || attempt >= maxAttempts) return data;
+          console.warn('[Search] Data empty after fetch (attempt ' + attempt + '/' + maxAttempts + ') — invalidating cache and retrying in ' + backoffMs + 'ms');
+          try {
+            var _cds = window.ConDataService;
+            if (_cds && typeof _cds.invalidateCache === 'function') _cds.invalidateCache();
+            else if (_cds && typeof _cds.invalidate === 'function') _cds.invalidate();
+          } catch (_) {}
+          return new Promise(function (r) { setTimeout(r, backoffMs); }).then(run);
+        });
+      }
+      return run();
+    }
+
+    // Last-resort watcher: if boot finished with empty data, poll until real
+    // data shows up, then re-init the engine and run the URL search again.
+    function _watchForLateData() {
+      const intervalMs = 4000;
+      const maxChecks  = 22; // ~88s
+      let checks = 0;
+      const id = setInterval(function () {
+        checks++;
+        const docs = (() => {
+          try { return (SearchEngine._internals && SearchEngine._internals.getDocs && SearchEngine._internals.getDocs()) || []; }
+          catch (_) { return []; }
+        })();
+        if (docs.length || checks >= maxChecks) { clearInterval(id); return; }
+        // docs still empty — try to pull data again (clear any cached empty assemble first)
+        try {
+          var _cds2 = window.ConDataService;
+          if (_cds2 && typeof _cds2.invalidateCache === 'function') _cds2.invalidateCache();
+          else if (_cds2 && typeof _cds2.invalidate === 'function') _cds2.invalidate();
+        } catch (_) {}
+        loadData().then(function (data) {
+          if (!_dataHasTypes(data)) return;
+          clearInterval(id);
+          State.apiData = data;
+          SearchEngine.init(State.apiData, {}).catch(function (e) {
+            console.error('[Search] Late re-init failed', e);
+          }).then(function () {
+            try { State.allKeywordsCache = SearchEngine.generateAllKeywords ? SearchEngine.generateAllKeywords() : []; }
+            catch (_) { State.allKeywordsCache = []; }
+            const urlState = URLService.readStateFromURL();
+            if (urlState && urlState.q) {
+              SearchService.doSearchFromURL(urlState.q, urlState.type || 'all', urlState.category || 'all');
+            }
+          });
+        }).catch(function () {});
+      }, intervalMs);
+    }
+
     // ── Init ────────────────────────────────────────────────────────────────
 
     function init() {
       try {
         KeyboardService.initKeyboardDetection();
 
-        loadData()
+        loadDataWithRetry(4, 2000)
           .then(function (data) {
             State.apiData = data || {};
             if (!Array.isArray(State.apiData.type))
@@ -350,6 +418,14 @@
             } else {
               URLService.replaceSearch({ q: '', type: 'all', category: 'all' });
             }
+
+            // If data never arrived (all retries empty), watch for late data
+            // so a refresh always ends up showing results on its own.
+            const _bootDocs = (() => {
+              try { return (SearchEngine._internals && SearchEngine._internals.getDocs && SearchEngine._internals.getDocs()) || []; }
+              catch (_) { return []; }
+            })();
+            if (!_bootDocs.length) _watchForLateData();
           })
           .catch(e => {
             console.error('[Search] Initialisation failed:', e);
