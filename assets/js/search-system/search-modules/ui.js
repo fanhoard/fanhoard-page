@@ -329,7 +329,7 @@ export const RenderingService = {
         data: list,
         keyField: 'api',
         buffer: 300,
-        renderItem: (/** @type {any} */ item) => {
+        template: (/** @type {any} */ item) => {
           const raw = item.item || item;
           const name = item.itemName || raw.name || '';
           const api = raw.api || '';
@@ -439,8 +439,21 @@ export const UIService = {
       }, CONFIG.TIMING.debounceMs);
     });
 
+    const form = DOMService.get(CONFIG.DOM.searchFormId);
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
+          debounceTimer = null;
+        }
+        if (typeof onEnter === 'function') onEnter(input.value);
+      });
+    }
+
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
+        e.preventDefault();
         if (debounceTimer) {
           clearTimeout(debounceTimer);
           debounceTimer = null;

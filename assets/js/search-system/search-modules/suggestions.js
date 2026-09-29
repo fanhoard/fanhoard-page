@@ -333,7 +333,7 @@ export const DiscoveryService = {
       data: items,
       keyField: 'api',
       buffer: 300,
-      renderItem: (/** @type {any} */ item) => {
+      template: (/** @type {any} */ item) => {
         const raw = item.item || item;
         const name = item.itemName || raw.name || '';
         const api = raw.api || '';
