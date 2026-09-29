@@ -1,7 +1,7 @@
 // @ts-check
 /**
  * @file utils.js
- * Pure utility services — stateless helpers with no side-effects on import.
+ * Pure utility services — stateless helpers and fallback virtual scrolling engine.
  *
  * Exports:
  *  LanguageService    — language detection + translation
@@ -10,491 +10,391 @@
  *  StorageService     — session history read/write
  *  NotificationService — clipboard copy + showCopyNotification bridge
  *  HighlightService   — character-level match highlighting
+ *  VirtualScrollEngine — fallback virtual scroll implementation
  *
  * @module utils
- * @depends {config.js, state.js}
  */
-(function (M) {
-  'use strict';
 
-  const { CONFIG } = M;
+import { CONFIG } from './config.js';
 
-  // ── LanguageService ───────────────────────────────────────────────────────
-  const LanguageService = {
-    /**
-     * Returns the active UI language code.
-     * Priority: localStorage → browser lang → default ('en').
-     * @returns {'th'|'en'}
-     */
-    getLang() {
-      try {
-        return (
-          localStorage.getItem(CONFIG.STORAGE.langKey) ||
-          (CONFIG.LANG.autoDetect && navigator.language?.startsWith('th') ? 'th' : CONFIG.LANG.default)
-        );
-      } catch {
-        return CONFIG.LANG.default;
+// ── LanguageService ─────────────────────────────────────────────────────────
+export const LanguageService = {
+  getLang() {
+    try {
+      return (
+        localStorage.getItem(CONFIG.STORAGE.langKey) ||
+        (CONFIG.LANG.autoDetect && navigator.language?.startsWith('th') ? 'th' : CONFIG.LANG.default)
+      );
+    } catch {
+      return CONFIG.LANG.default;
+    }
+  },
+
+  /** @param {string} key */
+  t(key) {
+    const lang = this.getLang();
+    return CONFIG.TEXTS[lang]?.[key] ?? CONFIG.TEXTS[CONFIG.LANG.default][key] ?? key;
+  },
+
+  /** @param {string} query */
+  detectQueryLanguage(query) {
+    const q = String(query || '');
+    let thai = 0;
+    let latin = 0;
+
+    for (let i = 0; i < q.length; i++) {
+      const c = q.charCodeAt(i);
+      if (c >= 0x0e00 && c <= 0x0e7f) {
+        thai++;
+        continue;
       }
-    },
-
-    /**
-     * Translate a key to the active language.
-     * Falls back to 'en', then returns the key itself.
-     * @param {string} key
-     * @returns {string}
-     */
-    t(key) {
-      const lang = this.getLang();
-      return CONFIG.TEXTS[lang]?.[key] ?? CONFIG.TEXTS[CONFIG.LANG.default][key] ?? key;
-    },
-
-    /**
-     * Detect the dominant language of a search query (v4.0).
-     *
-     * WHY this exists:
-     *   The user reported that typing an English query sometimes surfaced
-     *   Thai suggestions, and vice versa. The root cause was that the old
-     *   suggestion engine returned matches in any language without
-     *   considering what script the user was typing in.
-     *
-     *   This function inspects the query's character composition and
-     *   returns the language that "dominates" by character count, with a
-     *   configurable dominance ratio. A single stray character (e.g. one
-     *   Thai char in an otherwise-English query) will NOT flip the
-     *   detected language, satisfying the user's requirement that one
-     *   stray character should not change the suggestion language.
-     *
-     * Algorithm (deterministic — aerospace: no magic, no ML):
-     *   1. Count Thai chars (U+0E00–U+0E7F) and Latin chars (A-Z, a-z).
-     *      Whitespace, digits, and punctuation are ignored.
-     *   2. If both counts are 0 → fallback to UI language.
-     *   3. If only one language has chars ≥ minCharsForDominance → that
-     *      language wins.
-     *   4. If both have ≥ minCharsForDominance → compute ratio
-     *      (max/min). If ratio ≥ dominanceRatio → dominant language wins.
-     *      Otherwise → fallback to UI language (close to 50/50).
-     *
-     * @param {string} query
-     * @returns {QueryLanguageInfo}
-     */
-    detectQueryLanguage(query) {
-      const q   = String(query || '');
-      let thai  = 0;
-      let latin = 0;
-
-      // Single-pass char scan — O(n), bounded by query length.
-      for (let i = 0; i < q.length; i++) {
-        const c = q.charCodeAt(i);
-        // Thai block: U+0E00 – U+0E7F (consonants, vowels, tone marks, digits)
-        if (c >= 0x0E00 && c <= 0x0E7F) { thai++; continue; }
-        // Latin: A-Z, a-z (basic ASCII letters only)
-        if ((c >= 0x41 && c <= 0x5A) || (c >= 0x61 && c <= 0x7A)) { latin++; continue; }
-        // Everything else (digits, punctuation, whitespace, other scripts)
-        // is intentionally ignored — it doesn't vote for either language.
+      if ((c >= 0x41 && c <= 0x5a) || (c >= 0x61 && c <= 0x7a)) {
+        latin++;
+        continue;
       }
+    }
 
-      const cfg = CONFIG.LANG_WEIGHT || { dominanceRatio: 1.5, minCharsForDominance: 2, fallback: 'auto' };
-      const minChars = cfg.minCharsForDominance;
-      const ratio    = cfg.dominanceRatio;
+    const cfg = CONFIG.LANG_WEIGHT || { dominanceRatio: 1.5, minCharsForDominance: 2, fallback: 'auto' };
+    const minChars = cfg.minCharsForDominance;
+    const ratio = cfg.dominanceRatio;
 
-      // Case 1: neither language has enough chars → fallback to UI lang.
-      if (thai < minChars && latin < minChars) {
-        const lang = cfg.fallback === 'auto' ? this.getLang() : cfg.fallback;
-        return { language: lang, thaiChars: thai, latinChars: latin, reason: 'fallback-ui', confident: false };
-      }
-
-      // Case 2: only Thai meets the threshold.
-      if (thai >= minChars && latin < minChars) {
-        return { language: 'th', thaiChars: thai, latinChars: latin, reason: 'dominant-thai', confident: true };
-      }
-
-      // Case 3: only Latin meets the threshold.
-      if (latin >= minChars && thai < minChars) {
-        return { language: 'en', thaiChars: thai, latinChars: latin, reason: 'dominant-latin', confident: true };
-      }
-
-      // Case 4: both meet the threshold → check dominance ratio.
-      const maxLang = thai > latin ? 'th' : 'en';
-      const maxVal  = Math.max(thai, latin);
-      const minVal  = Math.min(thai, latin);
-      // minVal is > 0 here (both ≥ minChars ≥ 2), so division is safe.
-      if (maxVal / minVal >= ratio) {
-        return {
-          language    : maxLang,
-          thaiChars   : thai,
-          latinChars  : latin,
-          reason      : maxLang === 'th' ? 'dominant-thai' : 'dominant-latin',
-          confident   : true,
-        };
-      }
-
-      // Case 5: close to 50/50 → fallback to UI lang.
+    if (thai < minChars && latin < minChars) {
       const lang = cfg.fallback === 'auto' ? this.getLang() : cfg.fallback;
       return { language: lang, thaiChars: thai, latinChars: latin, reason: 'fallback-ui', confident: false };
-    },
+    }
 
-    /**
-     * Quick check: does a string contain any Thai characters?
-     * Used by suggestion rendering to decide whether a suggestion is
-     * Thai or Latin (for language-aware filtering).
-     * @param {string} s
-     * @returns {boolean}
-     */
-    hasThaiChars(s) {
-      const str = String(s || '');
-      for (let i = 0; i < str.length; i++) {
-        const c = str.charCodeAt(i);
-        if (c >= 0x0E00 && c <= 0x0E7F) return true;
+    if (thai >= minChars && latin < minChars) {
+      return { language: 'th', thaiChars: thai, latinChars: latin, reason: 'dominant-thai', confident: true };
+    }
+
+    if (latin >= minChars && thai < minChars) {
+      return { language: 'en', thaiChars: thai, latinChars: latin, reason: 'dominant-latin', confident: true };
+    }
+
+    const maxLang = thai > latin ? 'th' : 'en';
+    const maxVal = Math.max(thai, latin);
+    const minVal = Math.min(thai, latin);
+    if (maxVal / minVal >= ratio) {
+      return {
+        language: maxLang,
+        thaiChars: thai,
+        latinChars: latin,
+        reason: maxLang === 'th' ? 'dominant-thai' : 'dominant-latin',
+        confident: true,
+      };
+    }
+
+    const lang = cfg.fallback === 'auto' ? this.getLang() : cfg.fallback;
+    return { language: lang, thaiChars: thai, latinChars: latin, reason: 'fallback-ui', confident: false };
+  },
+
+  /** @param {string} s */
+  hasThaiChars(s) {
+    const str = String(s || '');
+    for (let i = 0; i < str.length; i++) {
+      const c = str.charCodeAt(i);
+      if (c >= 0x0e00 && c <= 0x0e7f) return true;
+    }
+    return false;
+  },
+};
+
+// ── DOMService ──────────────────────────────────────────────────────────────
+export const DOMService = {
+  /** @param {string} id */
+  get: (id) => document.getElementById(id),
+
+  /** @param {string} sel @param {any} [parent] */
+  query: (sel, parent) =>
+    // @ts-ignore
+    window.NavCoreModules?.qs ? window.NavCoreModules.qs(sel, parent) : (parent || document).querySelector(sel),
+
+  /** @param {string} sel @param {any} [parent] */
+  queryAll: (sel, parent) =>
+    // @ts-ignore
+    window.NavCoreModules?.qsa ? window.NavCoreModules.qsa(sel, parent) : (parent || document).querySelectorAll(sel),
+
+  getMainLandmark() {
+    return (
+      document.getElementById('fv-main') ||
+      document.getElementById('searchResults') ||
+      document.getElementById('main') ||
+      document.querySelector('main.fv-main, main')
+    );
+  },
+
+  getNavHeight() {
+    try {
+      const val = getComputedStyle(document.documentElement).getPropertyValue('--fv-nav-height').trim();
+      if (val) {
+        const parsed = parseFloat(val);
+        if (!isNaN(parsed)) return parsed;
       }
+    } catch (_) {}
+    const nav = document.querySelector('header nav, nav.fv-nav, .fv-nav');
+    return nav ? /** @type {HTMLElement} */ (nav).offsetHeight : 56;
+  },
+
+  getScrollOffset() {
+    try {
+      const val = getComputedStyle(document.documentElement).getPropertyValue('--fv-scroll-offset').trim();
+      if (val && val.includes('px')) {
+        const parsed = parseFloat(val);
+        if (!isNaN(parsed)) return parsed;
+      }
+    } catch (_) {}
+    return this.getNavHeight() + 12;
+  },
+
+  /** @param {string} tag @param {string} [id] @param {string} [cls] @param {any} [styles] */
+  create(tag, id, cls, styles) {
+    // @ts-ignore
+    if (window.NavCoreModules?.createElement) {
+      // @ts-ignore
+      return window.NavCoreModules.createElement(tag, id, cls, styles);
+    }
+    const el = document.createElement(tag);
+    if (id) el.id = id;
+    if (cls) el.className = cls;
+    if (styles) Object.assign(el.style, styles);
+    return el;
+  },
+
+  /** @param {any} el */
+  remove(el) {
+    try {
+      if (el && el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
+    } catch {}
+  },
+
+  /** @param {any} el @param {any} s */
+  setStyles(el, s) {
+    if (!el || !s || typeof s !== 'object') return;
+    try {
+      Object.assign(el.style, s);
+    } catch (e) {
+      console.warn('[DOMService] setStyles failed:', e);
+    }
+  },
+
+  /** @param {any} el @param {string} html */
+  setHTML(el, html) {
+    if (el) el.innerHTML = html;
+  },
+
+  /** @param {any} el @param {string} k @param {string} v */
+  setAttr(el, k, v) {
+    if (el) el.setAttribute(k, v);
+  },
+
+  /** @param {any} el @param {string} ev @param {any} fn @param {any} [opts] */
+  on(el, ev, fn, opts) {
+    if (el && fn) el.addEventListener(ev, fn, opts);
+  },
+
+  /** @param {any} el @param {string} ev @param {any} fn */
+  off(el, ev, fn) {
+    if (el && fn) el.removeEventListener(ev, fn);
+  },
+};
+
+// ── StringService ───────────────────────────────────────────────────────────
+export const StringService = {
+  /** @param {any} s */
+  escapeHtml(s) {
+    const str = String(s ?? '');
+    let out = '';
+    for (let i = 0; i < str.length; i++) {
+      const c = str.charCodeAt(i);
+      if (c === 38) out += '&amp;';
+      else if (c === 60) out += '&lt;';
+      else if (c === 62) out += '&gt;';
+      else if (c === 34) out += '&quot;';
+      else if (c === 39) out += '&#39;';
+      else out += str[i];
+    }
+    return out;
+  },
+
+  /** @param {any} s */
+  encodeUrl(s) {
+    return encodeURIComponent(String(s || ''));
+  },
+
+  /** @param {any} s */
+  decodeUrl(s) {
+    try {
+      return decodeURIComponent(String(s || ''));
+    } catch {
+      return String(s || '');
+    }
+  },
+
+  /** @param {any} str @param {number} [len] */
+  truncate(str, len = 60) {
+    const s = String(str || '');
+    return s.length <= len ? s : s.slice(0, len) + '…';
+  },
+};
+
+// ── StorageService ──────────────────────────────────────────────────────────
+export const StorageService = {
+  readHistory() {
+    try {
+      const raw = localStorage.getItem(CONFIG.STORAGE.historyKey);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  /** @param {string[]} items */
+  writeHistory(items) {
+    try {
+      localStorage.setItem(CONFIG.STORAGE.historyKey, JSON.stringify(items.slice(0, 20)));
+    } catch {}
+  },
+
+  /** @param {string} item */
+  addHistoryItem(item) {
+    if (!item?.trim()) return;
+    const clean = item.trim();
+    const cur = this.readHistory().filter((/** @type {string} */ x) => x !== clean);
+    cur.unshift(clean);
+    this.writeHistory(cur);
+  },
+};
+
+// ── NotificationService ─────────────────────────────────────────────────────
+export const NotificationService = {
+  /**
+   * @param {string} text
+   */
+  async copyText(text) {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {}
+
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    } catch {
       return false;
-    },
-  };
+    }
+  },
 
-  // ── DOMService ────────────────────────────────────────────────────────────
-  const DOMService = {
-    /** @param {string} id @returns {HTMLElement|null} */
-    get: (id) => document.getElementById(id),
+  /**
+   * @param {string} text
+   */
+  async copyToClipboard(text) {
+    const ok = await this.copyText(text);
+    if (ok) {
+      const msg = LanguageService.t('copied_to_clipboard') || 'Copied to clipboard';
+      this.showCopyToast(msg);
+    }
+  },
 
-    /** @param {string} sel @param {Element|Document} [parent] @returns {Element|null} */
-    query: (sel, parent) => window.NavCoreModules?.qs ? window.NavCoreModules.qs(sel, parent) : (parent || document).querySelector(sel),
+  /** @param {string} msg */
+  showCopyToast(msg) {
+    // @ts-ignore
+    if (typeof window.showCopyNotification === 'function') {
+      // @ts-ignore
+      window.showCopyNotification(msg);
+      return;
+    }
 
-    /** @param {string} sel @param {Element|Document} [parent] @returns {NodeListOf<Element>|Element[]} */
-    queryAll: (sel, parent) => window.NavCoreModules?.qsa ? window.NavCoreModules.qsa(sel, parent) : (parent || document).querySelectorAll(sel),
+    let toast = DOMService.get(CONFIG.DOM.copyToastId);
+    if (!toast) {
+      toast = DOMService.create('div', CONFIG.DOM.copyToastId, 'copy-toast');
+      if (toast) document.body.appendChild(toast);
+    }
+    if (toast) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        if (toast) toast.classList.remove('show');
+      }, CONFIG.TIMING.toastDisplayMs);
+    }
+  },
+};
 
-    /**
-     * Get the main landmark element (#fv-main with fallbacks).
-     * @returns {HTMLElement|null}
-     */
-    getMainLandmark() {
-      return document.getElementById("fv-main") ||
-             document.getElementById("searchResults") ||
-             document.getElementById("main") ||
-             document.querySelector("main.fv-main, main");
-    },
+// ── HighlightService ────────────────────────────────────────────────────────
+export const HighlightService = {
+  /**
+   * @param {string} text
+   * @param {string} query
+   */
+  highlightMatches(text, query) {
+    const escapedText = StringService.escapeHtml(text);
+    if (!query?.trim()) return escapedText;
 
-    /**
-     * Get nav height consuming --fv-nav-height token.
-     * @returns {number}
-     */
-    getNavHeight() {
-      try {
-        const val = getComputedStyle(document.documentElement).getPropertyValue("--fv-nav-height").trim();
-        if (val) {
-          const parsed = parseFloat(val);
-          if (!isNaN(parsed)) return parsed;
-        }
-      } catch (_) {}
-      const nav = document.querySelector("header nav, nav.fv-nav, .fv-nav");
-      return nav ? nav.offsetHeight : 56;
-    },
+    const q = query.trim().toLowerCase();
+    const idx = text.toLowerCase().indexOf(q);
+    if (idx === -1) return escapedText;
 
-    /**
-     * Get standardized scroll offset consuming --fv-scroll-offset token.
-     * @returns {number}
-     */
-    getScrollOffset() {
-      try {
-        const val = getComputedStyle(document.documentElement).getPropertyValue("--fv-scroll-offset").trim();
-        if (val && val.includes("px")) {
-          const parsed = parseFloat(val);
-          if (!isNaN(parsed)) return parsed;
-        }
-      } catch (_) {}
-      return this.getNavHeight() + 12;
-    },
+    const before = StringService.escapeHtml(text.slice(0, idx));
+    const match = StringService.escapeHtml(text.slice(idx, idx + q.length));
+    const after = StringService.escapeHtml(text.slice(idx + q.length));
 
-    /**
-     * Create a DOM element with optional id, class and inline styles.
-     * @param {string} tag
-     * @param {string|null} [id]
-     * @param {string|null} [cls]
-     * @param {Partial<CSSStyleDeclaration>} [styles]
-     * @returns {HTMLElement}
-     */
-    create(tag, id, cls, styles) {
-      if (window.NavCoreModules?.createElement) {
-        return window.NavCoreModules.createElement(tag, id, cls, styles);
-      }
-      const el = document.createElement(tag);
-      if (id)     el.id        = id;
-      if (cls)    el.className = cls;
-      if (styles) Object.assign(el.style, styles);
-      return el;
-    },
+    return `${before}<mark class="search-highlight">${match}</mark>${after}`;
+  },
+};
 
-    /** Safely remove an element from the DOM. */
-    remove(/** @type {Element|null|undefined} */ el) {
-      try { el?.parentNode?.removeChild(el); } catch {}
-    },
+// ── VirtualScrollEngine (Fallback) ──────────────────────────────────────────
+export const VirtualScrollEngine = {
+  OVERSCAN: 300,
+  ESTIMATED_HEIGHT: CONFIG.RENDER.vsEstimatedItemHeight,
 
-    /** @param {Element|null} el @param {Partial<CSSStyleDeclaration>} s */
-    setStyles(el, s) {
-      if (!el || !s || typeof s !== "object") return;
-      try { Object.assign(el.style, s); } catch (e) { console.warn("[DOMService] setStyles failed:", e); }
-    },
+  /** @param {any[]} [items] */
+  createState(items = []) {
+    return {
+      items,
+      startIndex: 0,
+      endIndex: Math.min(items.length, 10),
+      totalHeight: items.length * this.ESTIMATED_HEIGHT,
+      offsetY: 0,
+    };
+  },
 
-    /** @param {Element|null} el @param {string} html */
-    setHTML(el, html) { if (el) el.innerHTML = html; },
+  /** @param {number} scrollTop @param {number} viewportHeight @param {number} itemCount */
+  computeRange(scrollTop, viewportHeight, itemCount) {
+    const start = Math.max(0, Math.floor((scrollTop - this.OVERSCAN) / this.ESTIMATED_HEIGHT));
+    const end = Math.min(itemCount, Math.ceil((scrollTop + viewportHeight + this.OVERSCAN) / this.ESTIMATED_HEIGHT));
+    return {
+      startIndex: start,
+      endIndex: end,
+      totalHeight: itemCount * this.ESTIMATED_HEIGHT,
+      offsetY: start * this.ESTIMATED_HEIGHT,
+    };
+  },
 
-    /** @param {Element|null} el @param {string} k @param {string} v */
-    setAttr(el, k, v) { if (el) el.setAttribute(k, v); },
+  destroy() {},
+};
 
-    /**
-     * @param {EventTarget|null} el
-     * @param {string} ev
-     * @param {EventListener} fn
-     * @param {AddEventListenerOptions} [opts]
-     */
-    on(el, ev, fn, opts) { if (el && fn) el.addEventListener(ev, fn, opts); },
-
-    /** @param {EventTarget|null} el @param {string} ev @param {EventListener|null} fn */
-    off(el, ev, fn) { if (el && fn) el.removeEventListener(ev, fn); },
-  };
-
-  // ── StringService ─────────────────────────────────────────────────────────
-  const StringService = {
-    /** @param {unknown} s @returns {string} */
-    /**
-     * Escape HTML special characters.
-     * Single-pass char scan — one output string, zero regex, zero intermediate strings.
-     * 3 chained .replace() = 3 full scans + 2 intermediate strings per call.
-     * Called ~300×/render frame (10× per card × 30 visible cards).
-     * @param {unknown} s
-     * @returns {string}
-     */
-    escapeHtml(s) {
-      if (window.NavCoreModules?.escapeHtml) {
-        return window.NavCoreModules.escapeHtml(s);
-      }
-      const str = String(s);
-      let out = '';
-      for (let i = 0; i < str.length; i++) {
-        const c = str.charCodeAt(i);
-        if      (c === 38) out += '&amp;';   // &
-        else if (c === 60) out += '&lt;';    // <
-        else if (c === 62) out += '&gt;';    // >
-        else if (c === 34) out += '&quot;';  // " (bonus: safe in attributes)
-        else               out += str[i];
-      }
-      return out;
-    },
-
-    /** @param {string} s @returns {string} */
-    encodeUrl: (s) => encodeURIComponent(s),
-
-    /** @param {string} s @returns {string} */
-    decodeUrl(s) { try { return decodeURIComponent(s); } catch { return s; } },
-  };
-
-  // ── StorageService ────────────────────────────────────────────────────────
-  const StorageService = {
-    /**
-     * Read session search history.
-     * @returns {SearchHistoryEntry[]}
-     */
-    getHistory() {
-      try { return JSON.parse(sessionStorage.getItem(CONFIG.STORAGE.historyKey) || '[]'); }
-      catch { return []; }
-    },
-
-    /**
-     * Append one entry to session search history.
-     * @param {Omit<SearchHistoryEntry,'ts'>} entry
-     */
-    addSearchToHistory(entry) {
-      try {
-        const arr = this.getHistory();
-        arr.push({ ...entry, ts: Date.now() });
-        sessionStorage.setItem(CONFIG.STORAGE.historyKey, JSON.stringify(arr));
-      } catch {}
-    },
-  };
-
-  // ── NotificationService ───────────────────────────────────────────────────
-  //
-  // WHY no toast() here:
-  //   All copy feedback is delegated to the global showCopyNotification()
-  //   (copyNotification.js). That module owns the premium capsule UI,
-  //   timing, i18n, and name resolution — duplicating it here would
-  //   create two competing notification systems on the same page.
-  //
-  // showCopyNotification availability:
-  //   copyNotification.js loads with `defer`, same as search-ui.js.
-  //   Both are guaranteed ready by the time any user interaction fires.
-  //   The optional-chaining call (?.) is a safe belt-and-suspenders guard.
-  //
-  const NotificationService = {
-    /**
-     * Copy text to clipboard, then fire showCopyNotification.
-     *
-     * name: passed through so the capsule can display
-     *   "Copied  |  Heart Eyes" instead of just "Copied".
-     *   Callers that don't have a name omit it — showCopyNotification
-     *   degrades gracefully (capsule without the name segment).
-     *
-     * Falls back to execCommand('copy') for older browsers.
-     * execCommand return value is unreliable in modern browsers —
-     * assume success if no exception is thrown.
-     *
-     * @param {string}  text
-     * @param {string}  [name]  Human-readable item name for the capsule
-     * @returns {Promise<void>}
-     */
-    async copyText(text, name) {
-      let ok = false;
-      try {
-        if (navigator.clipboard?.writeText) {
-          await navigator.clipboard.writeText(text);
-          ok = true;
-        } else {
-          // Legacy fallback: execCommand('copy') return value intentionally ignored
-          const ta = Object.assign(document.createElement('textarea'), { value: text });
-          Object.assign(ta.style, { position: 'fixed', left: '-9999px', opacity: '0' });
-          document.body.appendChild(ta);
-          ta.focus();
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-          ok = true;
-        }
-      } catch {
-        ok = false;
-      }
-
-      if (ok) {
-        const lang = LanguageService.getLang();
-        window.showCopyNotification?.({ text, name, lang });
-      }
-    },
-  };
-
-  // ── HighlightService ──────────────────────────────────────────────────────
-  const HighlightService = {
-    // Cache last query's char Set — one Set per query, reused for all items in batch
-    _lastQuery : '',
-    _lastChars : /** @type {Set<string>} */ (new Set()),
-
-    /**
-     * Wrap matching grapheme clusters in <mark> tags.
-     *
-     * KEY FIX — Thai diacritic displacement:
-     *   Thai vowel marks (U+0E30–U+0E4E) are COMBINING characters.
-     *   They render relative to the PRECEDING base consonant.
-     *   Wrapping a combining char alone in <mark> = separate inline box =
-     *   the mark floats away from its base → visual displacement.
-     *
-     *   Fix: use Intl.Segmenter (Chrome 87+, Safari 16.4+, FF 125+) to get
-     *   grapheme clusters. Each cluster = base consonant + all its combining
-     *   marks = one visual unit. We highlight the whole cluster together.
-     *
-     *   Fallback for older browsers: manual Thai combining char detection.
-     *   Thai combining range: U+0E30–U+0E4E (sara, mai han akat, tone marks).
-     *   We attach combining chars to the PREVIOUS cluster before deciding
-     *   whether to wrap in <mark>.
-     *
-     * A cluster is highlighted if ANY character in it matches the query chars.
-     * This is correct: highlighting ย in ยิ้ม highlights the whole cluster.
-     *
-     * @param {string} text
-     * @param {string} query
-     * @returns {string} Safe HTML string
-     */
-    highlight(text, query) {
-      if (!text || !query) return StringService.escapeHtml(text || '');
-      try {
-        const t = String(text);
-        const q = String(query).toLowerCase();
-
-        // Rebuild char set only when query changes (amortised O(1) per item)
-        if (q !== this._lastQuery) {
-          this._lastQuery = q;
-          this._lastChars = new Set(q);
-        }
-
-        const chars   = this._lastChars;
-        const clusters = this._graphemeClusters(t);
-        let out = '';
-
-        for (const cluster of clusters) {
-          // Escape the entire cluster as a unit
-          let esc = '';
-          for (let i = 0; i < cluster.length; i++) {
-            const c = cluster[i];
-            esc += c === '&' ? '&amp;' : c === '<' ? '&lt;' : c === '>' ? '&gt;' : c === '"' ? '&quot;' : c;
-          }
-          // Check if any char in this cluster matches query chars
-          const match = cluster.toLowerCase().split('').some(c => chars.has(c));
-          out += match ? `<mark>${esc}</mark>` : esc;
-        }
-        return out;
-      } catch {
-        return StringService.escapeHtml(text);
-      }
-    },
-
-    /**
-     * Split text into grapheme clusters (base + combining chars stay together).
-     *
-     * Uses Intl.Segmenter when available (modern browsers).
-     * Falls back to manual Thai combining char grouping for older browsers.
-     *
-     * Thai combining range U+0E30–U+0E4E:
-     *   sara a, sara aa, sara i, sara ii, sara ue, sara uee, sara u, sara uu,
-     *   sara e, sara ae, sara o, sara ai, sara am, mai han akat,
-     *   and all tone marks (mai ek, mai tho, mai tri, mai chattawa).
-     *
-     * @param {string} text
-     * @returns {string[]} array of grapheme cluster strings
-     */
-    _graphemeClusters(text) {
-      // Modern path: Intl.Segmenter with grapheme granularity
-      if (typeof Intl !== 'undefined' && Intl.Segmenter) {
-        try {
-          const seg = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
-          return Array.from(seg.segment(text), s => s.segment);
-        } catch {}
-      }
-
-      // Fallback: manual combining char grouping
-      // Thai combining characters U+0E30–U+0E4E attach to the preceding consonant
-      const out     = [];
-      let   cluster = '';
-
-      for (let i = 0; i < text.length; i++) {
-        const cp = text.codePointAt(i) ?? 0;
-
-        // Skip the second code unit of a surrogate pair
-        if (cp > 0xFFFF) i++;
-
-        const ch = String.fromCodePoint(cp);
-
-        // Thai combining: sara, mai han akat, tone marks
-        const isThaicombining = cp >= 0x0E30 && cp <= 0x0E4E;
-        // General Unicode combining categories (Mn, Mc, Me):
-        // Simple heuristic — most common ranges
-        const isGeneralCombining = (cp >= 0x0300 && cp <= 0x036F)   // Combining Diacritical Marks
-                                 || (cp >= 0x1AB0 && cp <= 0x1AFF)  // Combining Diacritical Marks Extended
-                                 || (cp >= 0x20D0 && cp <= 0x20FF); // Combining Diacritical Marks for Symbols
-
-        if (isThaicombining || isGeneralCombining) {
-          // Attach to current cluster (or start a new one if none)
-          cluster += ch;
-        } else {
-          if (cluster) out.push(cluster);
-          cluster = ch;
-        }
-      }
-      if (cluster) out.push(cluster);
-      return out;
-    },
-  };
-
-  // ── Exports ───────────────────────────────────────────────────────────────
-  M.LanguageService     = LanguageService;
-  M.DOMService          = DOMService;
-  M.StringService       = StringService;
-  M.StorageService      = StorageService;
-  M.NotificationService = NotificationService;
-  M.HighlightService    = HighlightService;
-
-})(window.SearchModules = window.SearchModules || {});
+if (typeof window !== 'undefined') {
+  // @ts-ignore
+  window.SearchModules = window.SearchModules || {};
+  // @ts-ignore
+  Object.assign(window.SearchModules, {
+    LanguageService,
+    DOMService,
+    StringService,
+    StorageService,
+    NotificationService,
+    HighlightService,
+    VirtualScrollEngine,
+  });
+}

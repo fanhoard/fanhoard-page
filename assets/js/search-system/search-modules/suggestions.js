@@ -1,321 +1,380 @@
 // @ts-check
 /**
  * @file suggestions.js
- * SuggestionService  — renders query-based suggestion list as user types.
- * ReadyModeService   — renders trending suggestions when the input is empty.
- *
- * Both render into #searchSuggestions inside the overlay.
- *
- * v2.0 — Comprehensive suggestion diversity
- *   Now renders suggestion "type" badges so users can distinguish item
- *   matches from type matches (e.g., "อีโมจิ") and category matches
- *   (e.g., "Arrows"). The underlying engine returns a `source` field
- *   that drives the badge label.
- *
- * v4.0 — Smart query-language detection
- *   The user reported a long-standing issue: typing an English query
- *   sometimes surfaced Thai suggestions, and vice versa. The root cause
- *   was that the engine returned matches in any language without
- *   considering what script the user was typing in.
- *
- *   SuggestionService now detects the dominant language of the query
- *   (via LanguageService.detectQueryLanguage) and re-ranks the
- *   suggestion list so that suggestions in the same language as the
- *   query appear first. Suggestions in the other language are kept as
- *   a fallback so the user still sees them if the primary language
- *   doesn't have enough matches — but they no longer dominate the list.
- *
- *   The detection uses a configurable dominance ratio (default 1.5×)
- *   so a single stray character in the other script will NOT flip the
- *   suggestion language.
+ * SuggestionService  — query suggestions as user types
+ * ReadyModeService   — trending suggestions when search input is empty
+ * DiscoveryService   — post-search related content cards (YouTube-style)
  *
  * @module suggestions
- * @depends {config.js, state.js, utils.js, engine.js}
  */
-(function (M) {
-  'use strict';
 
-  const {
-    CONFIG, State,
-    DOMService, StringService, LanguageService, HighlightService,
-  } = M;
+import { CONFIG } from './config.js';
+import { DOMService, StringService, LanguageService, HighlightService } from './utils.js';
+import { SearchEngine } from './engine.js';
 
-  // ── ReadyModeService ──────────────────────────────────────────────────────
-  /**
-   * Shows "trending" suggestions when the overlay opens with no query.
-   * Filters out short Latin-only strings (likely internal API codes).
-   *
-   * v4.0 — Re-ranks by UI language so trending suggestions the user
-   *        sees first match their UI language. Trending is a discovery
-   *        surface, so we still show items in the other language below
-   *        the primary-language ones rather than hiding them entirely.
-   */
-  const ReadyModeService = {
-    /**
-     * Extract human-readable display names from allKeywordsCache,
-     * re-ranked so items in the active UI language come first.
-     * @returns {{raw:string, highlightedHtml:string}[]}
-     */
-    extractSmartNames() {
-      try {
-        if (!State.allKeywordsCache?.length) return [];
-        const uiLang = LanguageService.getLang();
-        const out    = [];
-        const seen   = new Set();
-        // Two buckets: primary (UI lang) and secondary (other lang)
-        const primary   = [];
-        const secondary = [];
-        const max = CONFIG.RENDER.suggestionsFullscreenMax;
+// Helper to ensure URE is loaded before discovery rendering
+function ensureURE() {
+  // @ts-ignore
+  if (window.URE && window.URE.mount) return Promise.resolve(window.URE);
+  return new Promise((resolve) => {
+    const onReady = () => {
+      window.removeEventListener('ure:ready', onReady);
+      clearInterval(interval);
+      // @ts-ignore
+      resolve(window.URE);
+    };
+    window.addEventListener('ure:ready', onReady);
+    const interval = setInterval(() => {
+      // @ts-ignore
+      if (window.URE && window.URE.mount) {
+        window.removeEventListener('ure:ready', onReady);
+        clearInterval(interval);
+        // @ts-ignore
+        resolve(window.URE);
+      }
+    }, 20);
+  });
+}
 
-        for (const kw of State.allKeywordsCache) {
-          if (primary.length + secondary.length >= max) break;
-          if (!kw?.item) continue;
+// ── ReadyModeService ────────────────────────────────────────────────────────
+export const ReadyModeService = {
+  extractSmartNames() {
+    try {
+      const all = SearchEngine.generateAllKeywords();
+      if (!all || !all.length) return [];
 
-          const name = (kw.item.name && typeof kw.item.name === 'object')
-            ? (kw.item.name[uiLang] || kw.item.name.en || '')
-            : '';
+      const seen = new Set();
+      const rawCandidates = [];
 
-          if (!name || name.length < 2) continue;
-          // Skip short pure-ASCII strings (internal API names, not user-facing)
-          if (!/[\u0E00-\u0E7F]/.test(name) && /^[A-Za-z0-9_\-]+$/.test(name) && name.length <= 20) continue;
-          if (seen.has(name)) continue;
+      for (let i = 0; i < all.length; i++) {
+        const name = all[i]?.raw || all[i]?.itemName || '';
+        if (!name) continue;
 
-          seen.add(name);
-          const entry = { raw: name, highlightedHtml: StringService.escapeHtml(name) };
+        if (/^[a-zA-Z0-9_\-\s]+$/.test(name)) continue;
 
-          // v4.0 — Bucket by language: items whose name matches the UI
-          // language go to primary; everything else goes to secondary.
-          // We use hasThaiChars() to classify — Thai chars → 'th' bucket.
-          const isThaiName = LanguageService.hasThaiChars(name);
-          if ((uiLang === 'th' && isThaiName) || (uiLang === 'en' && !isThaiName)) {
-            primary.push(entry);
-          } else {
-            secondary.push(entry);
+        const norm = name.toLowerCase().trim();
+        if (seen.has(norm)) continue;
+        seen.add(norm);
+
+        rawCandidates.push(name);
+      }
+
+      if (rawCandidates.length === 0) {
+        for (let i = 0; i < Math.min(all.length, 30); i++) {
+          const name = all[i]?.raw || all[i]?.itemName || '';
+          if (name && !seen.has(name.toLowerCase())) {
+            seen.add(name.toLowerCase());
+            rawCandidates.push(name);
           }
         }
+      }
 
-        // Concatenate primary first, then secondary, up to max.
-        for (const e of primary)   { if (out.length >= max) break; out.push(e); }
-        for (const e of secondary) { if (out.length >= max) break; out.push(e); }
-        return out;
-      } catch { return []; }
-    },
+      const activeLang = LanguageService.getLang();
+      const primaryList = [];
+      const secondaryList = [];
 
-    /** Render trending suggestions into #searchSuggestions. */
-    renderReadyModeSuggestions() {
-      try {
-        if (!State.overlayOpen) return;
-        const container = DOMService.get(CONFIG.DOM.suggestionContainerId);
-        if (!container) return;
+      for (let i = 0; i < rawCandidates.length; i++) {
+        const cand = rawCandidates[i];
+        const isThai = LanguageService.hasThaiChars(cand);
+        const matchesPrimary = activeLang === 'th' ? isThai : !isThai;
 
-        const sgs = this.extractSmartNames();
-        if (!sgs.length) { container.style.display = 'none'; return; }
-
-        let html = `<div class="search-suggestions-title">${LanguageService.t('trending')}</div>`;
-        for (const s of sgs) {
-          html += `<div class="search-suggestion-item" role="option" tabindex="0" data-val="${StringService.escapeHtml(StringService.encodeUrl(s.raw))}">
-  <div class="search-suggestion-body">${s.highlightedHtml}</div>
-</div>`;
+        if (matchesPrimary) {
+          primaryList.push(cand);
+        } else {
+          secondaryList.push(cand);
         }
-        container.innerHTML     = html;
-        container.style.display = 'block';
-        // Reset overlay scroll to top — user may have scrolled down in suggestions
-        if (State.overlayScrollable) State.overlayScrollable.scrollTop = 0;
-      } catch {}
-    },
-  };
+      }
 
-  // ── SuggestionService ─────────────────────────────────────────────────────
-  const SuggestionService = {
-    /**
-     * Handle keyboard navigation inside the suggestion list.
-     * Arrow keys move focus; Enter clicks the focused item; Escape closes overlay.
-     * @param {KeyboardEvent} ev
-     * @param {Element}       container  The suggestion list element
-     */
-    handleKeydown(ev, container) {
-      try {
-        const items = [...container.querySelectorAll('.search-suggestion-item')];
-        if (!items.length) return;
-        const idx = items.indexOf(document.activeElement);
+      const orderedNames = [...primaryList, ...secondaryList];
 
-        if      (ev.key === 'ArrowDown') { ev.preventDefault(); items[idx === -1 ? 0 : Math.min(items.length - 1, idx + 1)]?.focus?.(); }
-        else if (ev.key === 'ArrowUp')   { ev.preventDefault(); items[idx === -1 ? items.length - 1 : Math.max(0, idx - 1)]?.focus?.(); }
-        else if (ev.key === 'Enter')     { ev.preventDefault(); document.activeElement?.classList?.contains('search-suggestion-item') && document.activeElement?.click?.(); }
-        else if (ev.key === 'Escape')    { M.OverlayService.close('escape'); }
-      } catch {}
-    },
+      const out = [];
+      const limit = Math.min(orderedNames.length, 12);
+      for (let i = 0; i < limit; i++) {
+        const raw = orderedNames[i];
+        out.push({
+          raw,
+          highlightedHtml: StringService.escapeHtml(raw),
+        });
+      }
 
-    /**
-     * Handle click on a suggestion item — fills the input and triggers search.
-     * @param {MouseEvent} ev
-     */
-    handleClick(ev) {
-      try {
-        const item = ev.target.closest('.search-suggestion-item');
-        if (!item) return;
-        ev.stopPropagation?.();
-        ev.preventDefault?.();
+      return out;
+    } catch (e) {
+      console.error('[ReadyModeService] extractSmartNames failed:', e);
+      return [];
+    }
+  },
 
-        const val = StringService.decodeUrl(item.getAttribute('data-val') || '');
-        const inp = DOMService.get(CONFIG.DOM.searchInputId);
-        if (inp) inp.value = val;
+  renderTrendingSuggestions(state = {}) {
+    const container = DOMService.get(CONFIG.DOM.suggestionContainerId);
+    if (!container) return;
 
-        State.suggestionsLocked = false;
-        M.ClearBtnService.sync();
-        M.SearchService.doSearch(null, false);
-      } catch {}
-    },
+    const names = this.extractSmartNames();
+    if (!names.length) {
+      DOMService.setHTML(container, '');
+      return;
+    }
 
-    /**
-     * Render query-based suggestions as the user types.
-     * Falls back to ReadyModeService if no suggestions found.
-     *
-     * v4.0 — Smart language re-ranking:
-     *   1. Detect the dominant language of the query using
-     *      LanguageService.detectQueryLanguage().
-     *   2. Pull a larger candidate pool from the engine (2× maxCount).
-     *   3. Split into same-language and other-language buckets.
-     *   4. Concatenate: same-language first, then other-language.
-     *   5. Slice to maxCount.
-     *
-     *   This keeps suggestions in the language the user is typing in
-     *   at the top of the list, without hiding the other language
-     *   entirely (in case the user is searching for a cross-language
-     *   term). The dominance ratio in LANG_WEIGHT prevents a single
-     *   stray character from flipping the detected language.
-     *
-     * Each suggestion may come from a different source (item name, type
-     * name, category name, fuzzy match). We render a small badge next to
-     * non-item suggestions so the user understands what they're selecting.
-     *
-     * @param {string} query
-     */
-    renderQuerySuggestions(query) {
-      try {
-        if (State.overlayTransitioning) return;
-        const container = DOMService.get(CONFIG.DOM.suggestionContainerId);
-        if (!container) return;
+    const itemsHtml = names
+      .map((item) => {
+        const rawEsc = StringService.escapeHtml(item.raw);
+        return `
+        <li class="suggestion-item suggestion-item--trending" data-val="${rawEsc}">
+          <span class="suggestion-icon suggestion-icon--trending" aria-hidden="true">
+            <svg width="16" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
+          </span>
+          <span class="suggestion-text">${item.highlightedHtml}</span>
+        </li>
+      `;
+      })
+      .join('');
 
-        if (!query?.trim()) {
-          ReadyModeService.renderReadyModeSuggestions();
-          return;
+    const trendingLabel = LanguageService.t('trending');
+    const fullHtml = `
+      <div class="suggestion-group suggestion-group--trending">
+        <div class="suggestion-group__label">
+          <span class="suggestion-group__label-text">${StringService.escapeHtml(trendingLabel)}</span>
+        </div>
+        <ul class="suggestion-list">${itemsHtml}</ul>
+      </div>
+    `;
+
+    DOMService.setHTML(container, fullHtml);
+
+    const list = container.querySelector('.suggestion-list');
+    if (list) {
+      list.addEventListener('click', (ev) => {
+        const target = /** @type {HTMLElement} */ (ev.target);
+        const itemEl = target.closest('.suggestion-item');
+        if (!itemEl) return;
+
+        const val = itemEl.getAttribute('data-val');
+        if (val) {
+          const input = /** @type {HTMLInputElement|null} */ (DOMService.get(CONFIG.DOM.searchInputId));
+          if (input) {
+            input.value = val;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+          }
         }
+      });
+    }
+  },
+};
 
-        // Use SearchEngine from the module namespace; falls back to
-        // window.SearchEngine for any legacy code paths.
-        const engine = M.SearchEngine || window.SearchEngine;
-
-        // v4.0 — Pull a larger candidate pool so we have headroom for
-        // language re-ranking. If we only pull maxCount, we might end
-        // up with too few same-language suggestions after filtering.
-        const max = CONFIG.RENDER.suggestionsFullscreenMax;
-        const poolSize = Math.min(max * 2, max + 16);
-        const raw = engine?.querySuggestions?.(query, poolSize) || [];
-        if (!raw.length) {
-          ReadyModeService.renderReadyModeSuggestions();
-          return;
-        }
-
-        // v4.0 — Detect dominant query language and re-rank.
-        const langInfo = LanguageService.detectQueryLanguage(query);
-        const sgs = _rerankByLanguage(raw, langInfo.language, max);
-
-        let html = `<div class="search-suggestions-title">${LanguageService.t('suggestion_label')}</div>`;
-        for (const s of sgs) {
-          const badge = _sourceBadge(s.source);
-          html += `<div class="search-suggestion-item" role="option" tabindex="0" data-val="${StringService.escapeHtml(StringService.encodeUrl(s.raw))}">
-  <div class="search-suggestion-body">${HighlightService.highlight(s.raw, query)}</div>${badge}
-</div>`;
-        }
-        container.innerHTML     = html;
-        container.style.display = 'block';
-        // Reset overlay scroll to top on every suggestion update
-        if (State.overlayScrollable) State.overlayScrollable.scrollTop = 0;
-
-        // Let ArrowDown from the input focus the first suggestion
-        const inp = DOMService.get(CONFIG.DOM.searchInputId);
-        if (inp) {
-          inp.onkeydown = (e) => {
-            if      (e.key === 'ArrowDown') { e.preventDefault(); container.querySelector('.search-suggestion-item')?.focus?.(); }
-            else if (e.key === 'Escape')    { M.OverlayService.close('escape'); }
-          };
-        }
-      } catch {}
-    },
-  };
-
-  // ── Language re-ranking helper (v4.0) ─────────────────────────────────────
+// ── SuggestionService ───────────────────────────────────────────────────────
+export const SuggestionService = {
   /**
-   * Re-rank a suggestion pool so items in the target language appear first.
-   *
-   * Strategy:
-   *   • Walk the pool once. Bucket each suggestion into "same-lang" or
-   *     "other-lang" based on whether its display string contains Thai
-   *     characters (for target='th') or not (for target='en').
-   *   • Concatenate same-lang first, then other-lang.
-   *   • Slice to maxCount.
-   *
-   * This preserves the engine's priority ordering within each bucket
-   * (e.g., prefix matches still come before fuzzy matches in the same
-   * language), so the user still gets the best matches first — they
-   * just no longer have to scan past cross-language suggestions.
-   *
-   * @param {Suggestion[]} pool
-   * @param {string}       targetLang  'th' | 'en'
-   * @param {number}       maxCount
-   * @returns {Suggestion[]}
+   * @param {string} [query]
+   * @param {number} [maxCount]
    */
-  function _rerankByLanguage(pool, targetLang, maxCount) {
-    const sameLang  = [];
-    const otherLang = [];
-    for (let i = 0; i < pool.length; i++) {
-      const s = pool[i];
-      if (!s) continue;
-      const isThai = LanguageService.hasThaiChars(s.raw || '');
-      // targetLang 'th' → Thai strings go to sameLang
-      // targetLang 'en' → non-Thai strings go to sameLang
-      if ((targetLang === 'th' && isThai) || (targetLang !== 'th' && !isThai)) {
-        sameLang.push(s);
+  renderQuerySuggestions(query, maxCount) {
+    const container = DOMService.get(CONFIG.DOM.suggestionContainerId);
+    if (!container) return;
+
+    const q = String(query || '').trim();
+    if (!q) {
+      ReadyModeService.renderTrendingSuggestions();
+      return;
+    }
+
+    maxCount = maxCount || CONFIG.RENDER.suggestionMax;
+    const rawSuggestions = SearchEngine.querySuggestions(q, maxCount * 2) || [];
+    if (!rawSuggestions.length) {
+      DOMService.setHTML(container, '');
+      return;
+    }
+
+    const langInfo = LanguageService.detectQueryLanguage(q);
+    const queryLang = langInfo.language;
+
+    const primaryList = [];
+    const secondaryList = [];
+
+    for (let i = 0; i < rawSuggestions.length; i++) {
+      const sug = rawSuggestions[i];
+      const text = sug.display || sug.raw || '';
+      const isThai = LanguageService.hasThaiChars(text);
+      const matchesQueryLang = queryLang === 'th' ? isThai : !isThai;
+
+      if (matchesQueryLang) {
+        primaryList.push(sug);
       } else {
-        otherLang.push(s);
+        secondaryList.push(sug);
       }
     }
-    const out = [];
-    for (const s of sameLang)  { if (out.length >= maxCount) break; out.push(s); }
-    for (const s of otherLang) { if (out.length >= maxCount) break; out.push(s); }
-    return out;
-  }
 
-  // ── Source badge helper ─────────────────────────────────────────────────
-  /**
-   * Build a small badge HTML string indicating the suggestion's source.
-   * Returns '' for item-name matches (the default — no badge needed).
-   *
-   * @param {string} source
-   * @returns {string}
-   */
-  function _sourceBadge(source) {
-    if (!source) return '';
-    let label = '';
-    let cls   = 'search-suggestion-badge';
-    if (source === 'type') {
-      label = LanguageService.t('type');
-      cls  += ' search-suggestion-badge--type';
-    } else if (source === 'category') {
-      label = LanguageService.t('category');
-      cls  += ' search-suggestion-badge--category';
-    } else if (source === 'fuse' || source === 'immediate' || source === 'keyword-contains') {
-      // No badge for fuzzy / fallback matches — keeps the UI clean
-      return '';
+    const orderedSuggestions = [...primaryList, ...secondaryList].slice(0, maxCount);
+
+    const labelText = LanguageService.t('suggestion_label');
+    const itemsHtml = orderedSuggestions
+      .map((sug) => {
+        const text = sug.display || sug.raw || '';
+        const highlighted = HighlightService.highlightMatches(text, q);
+        const rawEsc = StringService.escapeHtml(text);
+        const sourceClass = sug.source ? ` suggestion-item--${sug.source}` : '';
+
+        let badgeHtml = '';
+        if (sug.source === 'type' && sug.typeName) {
+          badgeHtml = `<span class="suggestion-badge suggestion-badge--type">${StringService.escapeHtml(
+            sug.typeName
+          )}</span>`;
+        } else if (sug.source === 'category' && sug.catName) {
+          badgeHtml = `<span class="suggestion-badge suggestion-badge--category">${StringService.escapeHtml(
+            sug.catName
+          )}</span>`;
+        }
+
+        return `
+        <li class="suggestion-item${sourceClass}" data-val="${rawEsc}">
+          <span class="suggestion-icon" aria-hidden="true">${CONFIG.Icons.search}</span>
+          <span class="suggestion-text">${highlighted}</span>
+          ${badgeHtml}
+        </li>
+      `;
+      })
+      .join('');
+
+    const fullHtml = `
+      <div class="suggestion-group">
+        <div class="suggestion-group__label">
+          <span class="suggestion-group__label-text">${StringService.escapeHtml(labelText)}</span>
+        </div>
+        <ul class="suggestion-list">${itemsHtml}</ul>
+      </div>
+    `;
+
+    DOMService.setHTML(container, fullHtml);
+
+    const list = container.querySelector('.suggestion-list');
+    if (list) {
+      list.addEventListener('click', (ev) => {
+        const target = /** @type {HTMLElement} */ (ev.target);
+        const itemEl = target.closest('.suggestion-item');
+        if (!itemEl) return;
+
+        const val = itemEl.getAttribute('data-val');
+        if (val) {
+          const input = /** @type {HTMLInputElement|null} */ (DOMService.get(CONFIG.DOM.searchInputId));
+          if (input) {
+            input.value = val;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+          }
+        }
+      });
     }
-    // Default: item match — no badge
-    if (!label) return '';
-    return `<span class="${cls}" aria-hidden="true">${StringService.escapeHtml(label)}</span>`;
-  }
+  },
+};
 
-  // ── Exports ───────────────────────────────────────────────────────────────
-  M.ReadyModeService  = ReadyModeService;
-  M.SuggestionService = SuggestionService;
+// ── DiscoveryService ────────────────────────────────────────────────────────
+export const DiscoveryService = {
+  /** @type {any} */
+  _handle: null,
 
-})(window.SearchModules = window.SearchModules || {});
+  /**
+   * @param {string} [query]
+   * @param {any[]} [primaryResults]
+   */
+  async renderDiscovery(query, primaryResults) {
+    const resultsContainer = DOMService.get(CONFIG.DOM.searchResultsId);
+    if (!resultsContainer) return;
+
+    let discoveryContainer = DOMService.get(CONFIG.DOM.discoveryContainerId);
+    if (!discoveryContainer) {
+      discoveryContainer = DOMService.create('div', CONFIG.DOM.discoveryContainerId, 'search-discovery-section');
+      if (resultsContainer.parentNode) {
+        if (discoveryContainer) resultsContainer.after(discoveryContainer);
+      }
+    }
+
+    const items = SearchEngine.queryRelated(query, primaryResults, CONFIG.DISCOVERY.maxRelatedItems);
+    if (!items || !items.length) {
+      this.destroy();
+      return;
+    }
+
+    const title = LanguageService.t('discovery_label');
+    const hint = LanguageService.t('discovery_hint');
+
+    if (discoveryContainer) {
+      DOMService.setHTML(
+        /** @type {any} */ (discoveryContainer),
+        `
+        <div class="discovery-header">
+          <h3 class="discovery-title">${StringService.escapeHtml(title)}</h3>
+          <p class="discovery-hint">${StringService.escapeHtml(hint)}</p>
+        </div>
+        <div class="discovery-list" id="${CONFIG.DOM.discoverySentinelId}"></div>
+      `
+      );
+    }
+
+    if (!discoveryContainer) return;
+    const listEl = discoveryContainer.querySelector('.discovery-list');
+    if (!listEl) return;
+
+    const ure = await ensureURE();
+    if (!ure) return;
+
+    if (this._handle) {
+      try {
+        /** @type {any} */ (this._handle).setData(items);
+        return;
+      } catch (e) {
+        console.error('[DiscoveryService] URE setData failed, re-mounting:', e);
+        this.destroy();
+      }
+    }
+
+    this._handle = ure.mount({
+      container: listEl,
+      data: items,
+      keyField: 'api',
+      buffer: 300,
+      renderItem: (/** @type {any} */ item) => {
+        const raw = item.item || item;
+        const name = item.itemName || raw.name || '';
+        const api = raw.api || '';
+        const text = raw.text || '';
+        const copyVal = text || api || name;
+        const escCopy = StringService.escapeHtml(copyVal);
+        const escName = StringService.escapeHtml(name);
+
+        return `
+          <div class="search-card discovery-card" data-copy="${escCopy}">
+            <div class="search-card-main">
+              <span class="search-card-symbol">${StringService.escapeHtml(api || text)}</span>
+              <span class="search-card-name">${escName}</span>
+            </div>
+          </div>
+        `;
+      },
+    });
+  },
+
+  destroy() {
+    if (this._handle) {
+      try {
+        /** @type {any} */ (this._handle).destroy?.();
+      } catch (e) {
+        console.error('[DiscoveryService] URE teardown error:', e);
+      }
+      this._handle = null;
+    }
+    const el = DOMService.get(CONFIG.DOM.discoveryContainerId);
+    if (el) DOMService.remove(el);
+  },
+};
+
+if (typeof window !== 'undefined') {
+  // @ts-ignore
+  window.SearchModules = window.SearchModules || {};
+  // @ts-ignore
+  Object.assign(window.SearchModules, {
+    ReadyModeService,
+    SuggestionService,
+    DiscoveryService,
+  });
+}
