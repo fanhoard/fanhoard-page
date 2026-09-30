@@ -1,8 +1,8 @@
 ---
-version: 3.0.5
-date: 2026-09-30T06:35:00.000Z
-title: Refresh now shows result cards even when the renderer loads late
-subtitle: When you refreshed the search page with a query in the URL, the results counter showed but the cards never appeared until you searched again. The renderer now waits for the render engine and draws the cards on its own.
+version: 3.0.6
+date: 2026-09-30T07:45:00.000Z
+title: Search system restructure: clearer names, same behavior
+subtitle: Internal code names were cleaned up for easier development (search-controller, search UI controller). No visual or functional change.
 notify: true
 ---
 
