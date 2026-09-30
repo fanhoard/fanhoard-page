@@ -32,7 +32,7 @@
  *   CSS already handles .search-result-placeholder height correctly without any JS.
  *   JS does not set --placeholder-h at all.
  *
- * @module search-service
+ * @module search-controller
  * @depends {config.js, state.js, utils.js, url-history.js,
  *           rendering.js, suggestions.js, overlay.js, input-bar.js,
  *           engine.js}

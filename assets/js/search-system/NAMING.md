@@ -1,4 +1,4 @@
-# Search Page — Class Naming Conventions & Dictionary (v3.0.0)
+# Search Page — Class & DOM Naming Conventions & Dictionary (v3.0.0)
 
 - **System Described**: CSS Class and DOM Element Naming Standard for FanHoard Search System v3.0.0
 - **Entry File**: `assets/js/search-system/search-system.css`
@@ -20,7 +20,7 @@ To maintain strict specificity control, consistency, and clarity across FanHoard
 
 ---
 
-## 2. Search System Class Dictionary
+## 2. Search System Class & ID Dictionary
 
 ### 2.1 Search Bar Component (`.search-pill`)
 
@@ -60,8 +60,9 @@ Result cards render individual search matches for items, types, or categories.
 
 Suggestions display real-time autocomplete candidates and source origin badges.
 
-| Active Class | Description / Semantic Purpose | Legacy Name (Deprecated) |
+| Active Class / ID | Description / Semantic Purpose | Legacy Name (Deprecated) |
 | :--- | :--- | :--- |
+| `#search-suggestions-list` | DOM element container for suggestion list | `#searchSuggestions` |
 | `.search-suggestions-fullscreen` | Fullscreen overlay drawer displaying live suggestions | `.search-suggestions-fullscreen` |
 | `.search-suggestions-title` | Section heading (e.g., "Trending Searches", "Suggestions") | `.suggestions-head` |
 | `.search-suggestion-item` | Single clickable suggestion row | `.suggestion-item` |
@@ -72,7 +73,16 @@ Suggestions display real-time autocomplete candidates and source origin badges.
 
 ---
 
-### 2.4 Virtual Scroll Engine Component (`.vscroll-*`)
+### 2.4 Overlay & Sentinel DOM IDs
+
+| Active ID | Description / Semantic Purpose | Legacy Name (Deprecated) |
+| :--- | :--- | :--- |
+| `#search-overlay-container` | Fullscreen modal overlay container | `#searchOverlayContainer` |
+| `#search-sentinel-el` | Sentinel DOM element for infinite scroll / render trigger | `#search-render-sentinel` |
+
+---
+
+### 2.5 Virtual Scroll Engine Component (`.vscroll-*`)
 
 Fallback virtual scrolling container used when URE is unmounted.
 
@@ -83,7 +93,7 @@ Fallback virtual scrolling container used when URE is unmounted.
 
 ---
 
-### 2.5 Layout & Empty State Controls
+### 2.6 Layout & Empty State Controls
 
 | Active Class | Description / Semantic Purpose | Legacy Name (Deprecated) |
 | :--- | :--- | :--- |
@@ -100,7 +110,19 @@ Fallback virtual scrolling container used when URE is unmounted.
 
 ---
 
-## 3. Rules for Adding New Classes
+## 3. Global & Module Renaming Conventions
+
+| Active Variable / Module | Description / Semantic Purpose | Legacy Name (Deprecated) |
+| :--- | :--- | :--- |
+| `search-controller.js` / `SearchController` | Search orchestrator module and class | `search-service.js` / `SearchService` |
+| `window.__searchUIController` | Global UI controller instance | `window.__searchUI` |
+| `window.__isRestoringScroll` | Internal window flag tracking scroll restoration state | `window.__renderIsRestore` |
+| `window._hasCopyResultHandler` | Internal window flag tracking copy event handler setup | `window._copyResultTextHandlerSet` |
+| `window._revealStickyHeader` | Sticky header display function | `window._showStickyHeader` |
+
+---
+
+## 4. Rules for Adding New Classes
 
 1. **Verify Existing Inventory**: Consult Section 2 above to avoid creating near-duplicate class names.
 2. **Apply BEM & Prefix Constraints**: Always prefix new search classes with `search-` or `result-card__`.

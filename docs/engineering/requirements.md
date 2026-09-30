@@ -90,7 +90,7 @@ The Search and Discover subsystems provide client-side discovery, fuzzy/substrin
   - Single stray character in another script shall not trigger a language flip.
 
 ### REQ-S07: Search Overlay Lifecycle & Accessibility
-- **Description:** Fullscreen search modal `#searchOverlayContainer` shall control overlay open/close lifecycle, scroll locking, and focus trap.
+- **Description:** Fullscreen search modal `#search-overlay-container` shall control overlay open/close lifecycle, scroll locking, and focus trap.
 - **Verification Method:** E2E Test (`playwright` overlay tests).
 - **Specification Details:**
   - `OverlayService.open()` locks body scrolling (`overflow: hidden`).

@@ -262,7 +262,7 @@ search.js รัน
   ├── loadPhase(2) → utils, virtual-scroll
   ├── loadPhase(3) → url-history, keyboard, rendering, suggestions, input-bar
   ├── loadPhase(4) → overlay
-  ├── loadPhase(5) → engine, search-service    ← v3.0 เพิ่ม engine.js
+  ├── loadPhase(5) → engine, search-controller    ← v3.0 เพิ่ม engine.js
   └── _boot()
        ├── KeyboardService.initKeyboardDetection()
        ├── loadData() → ใช้ _earlyDataPromise (อาจเรียบร้อยแล้ว)
@@ -878,14 +878,14 @@ async copyText(text, name) {
 ### 8.1 โครงสร้าง DOM
 
 ```
-#searchOverlayContainer (position:fixed, full screen, z-index:9998)
+#search-overlay-container (position:fixed, full screen, z-index:9998)
 ├── #overlay-header-bar
 │    └── .search-input-wrapper  ← ย้ายมาจาก header ชั่วคราว
 │         ├── .search-input-icon (🔍 หรือ ←)
 │         ├── #searchInput
 │         └── #search-clear-btn
 └── .search-overlay-scrollable-content (flex:1, overflow:auto)
-     └── #searchSuggestions
+     └── #search-suggestions-list
           ├── .suggestions-head ("ข้อเสนอแนะ" / "Suggestions")
           └── .suggestion-item × N
 ```
@@ -946,7 +946,7 @@ close(src = 'manual') {
   wrapper.parentNode.insertBefore(wrapper, State._wrapperNext);
 
   // ④ ลบ overlay DOM
-  DOMService.remove(DOMService.get('searchOverlayContainer'));
+  DOMService.remove(DOMService.get('search-overlay-container'));
 
   // ⑤ คืน scroll-lock
   document.body.style.position = '';
@@ -1437,9 +1437,9 @@ CONFIG = {
     vsEstimatedItemHeight: 96,     // ความสูงเริ่มต้นของ item
   },
   DOM: {
-    suggestionContainerId: 'searchSuggestions',
-    overlayContainerId: 'searchOverlayContainer',
-    sentinelId: 'search-render-sentinel',
+    suggestionContainerId: 'search-suggestions-list',
+    overlayContainerId: 'search-overlay-container',
+    sentinelId: 'search-sentinel-el',
     searchInputId: 'searchInput',
     searchFormId: 'searchForm',
     typeFilterId: 'typeFilter',
@@ -1578,8 +1578,8 @@ Handlers = {
 | `keydown` (Enter/Space) | `#searchResults` | anonymous | Copy ด้วย keyboard |
 | `keydown` (Escape) | `document` | `Handlers.documentKeydownOverlay` | ปิด overlay |
 | `scroll` | overlay scrollable | `keyboardAutoToggleHandler` | Auto toggle keyboard |
-| `click` | `#searchSuggestions` | `Handlers.suggestionClick` | เลือก suggestion |
-| `keydown` | `#searchSuggestions` | `Handlers.suggestionKeydown` | นำทางด้วย arrow keys |
+| `click` | `#search-suggestions-list` | `Handlers.suggestionClick` | เลือก suggestion |
+| `keydown` | `#search-suggestions-list` | `Handlers.suggestionKeydown` | นำทางด้วย arrow keys |
 | `beforeunload` | `window` | anonymous | เรียก destroy() |
 
 ### 14.3 `window.__searchUIController` Public API
@@ -1731,7 +1731,7 @@ _boot()
 ผู้ใช้พิมพ์ → input event → debounce 120ms
   → SuggestionService.renderQuerySuggestions()
   → SearchEngine.querySuggestions() → 3-tier fallback
-  → Highlight + render ใน #searchSuggestions
+  → Highlight + render ใน #search-suggestions-list
 
 ผู้ใช้กด Enter:
   ├── doSearch()
