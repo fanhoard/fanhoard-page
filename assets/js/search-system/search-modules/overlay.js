@@ -6,11 +6,11 @@
  * ┌─────────────────────────────────────────────────────────────┐
  * │  Overlay structure                                          │
  * │                                                             │
- * │  #searchOverlayContainer  (position:fixed, full screen)    │
+ * │  #search-overlay-container  (position:fixed, full screen)    │
  * │  ├── #overlay-header-bar                                    │
  * │  │    └── .search-pill  ← moved from header       │
  * │  └── .search-overlay-scrollable-content                     │
- * │       └── #searchSuggestions                                │
+ * │       └── #search-suggestions-list                                │
  * │                                                             │
  * │  Results stay on the MAIN PAGE (#searchResults).           │
  * └─────────────────────────────────────────────────────────────┘

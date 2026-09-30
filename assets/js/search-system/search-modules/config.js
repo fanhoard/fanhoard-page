@@ -143,9 +143,9 @@
 
   /** @type {Readonly<Record<string,string>>} */
   const DOM = Object.freeze({
-    suggestionContainerId: 'searchSuggestions',
-    overlayContainerId: 'searchOverlayContainer',
-    sentinelId: 'search-render-sentinel',
+    suggestionContainerId: 'search-suggestions-list',
+    overlayContainerId: 'search-overlay-container',
+    sentinelId: 'search-sentinel-el',
     searchInputId: 'searchInput',
     searchFormId: 'searchForm',
     typeFilterId: 'typeFilter',

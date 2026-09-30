@@ -4,7 +4,7 @@
  * SuggestionService  — renders query-based suggestion list as user types.
  * ReadyModeService   — renders trending suggestions when the input is empty.
  *
- * Both render into #searchSuggestions inside the overlay.
+ * Both render into #search-suggestions-list inside the overlay.
  *
  * v2.0 — Comprehensive suggestion diversity
  *   Now renders suggestion "type" badges so users can distinguish item
@@ -101,7 +101,7 @@
       } catch { return []; }
     },
 
-    /** Render trending suggestions into #searchSuggestions. */
+    /** Render trending suggestions into #search-suggestions-list. */
     renderReadyModeSuggestions() {
       try {
         if (!State.overlayOpen) return;
