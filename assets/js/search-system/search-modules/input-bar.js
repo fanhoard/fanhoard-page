@@ -117,7 +117,7 @@
           if (inp) { inp.value = ''; inp.focus(); }
           this.sync();
           IconSlotService.update();
-          M.SearchService.doSearch(null, false);
+          M.SearchController.doSearch(null, false);
         });
         btn._clearListenerAttached = true;
       }
@@ -197,7 +197,7 @@
               clearTimeout(State.debounceTimeout);
               State.debounceTimeout = null;
             }
-            M.SearchService.doSearch();
+            M.SearchController.doSearch();
             this.closeKB();
           } else if (e.key === 'ArrowDown') {
             DOMService.get(CONFIG.DOM.suggestionContainerId)?.querySelector('.search-suggestion-item')?.focus?.();

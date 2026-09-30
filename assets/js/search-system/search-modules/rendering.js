@@ -230,10 +230,10 @@
           this.disconnectRenderObserver();
           DOMService.setHTML(container, '');
           this._renderEmpty(container, lang, showSuggestionsIfNoResult);
-          if (!window.__renderIsRestore) {
+          if (!window.__isRestoringScroll) {
             if (window.SearchModules?.State?.overlayOpen) window.__overlayDidSearch = true;
             window.scrollTo({ top: 0, behavior: 'instant' });
-            if (window._showStickyHeader) window._showStickyHeader();
+            if (window._revealStickyHeader) window._revealStickyHeader();
           }
           // v4.0 — Empty-state discovery: surface related items so the
           // user has something to explore even when search returns nothing.
@@ -265,10 +265,10 @@
           });
         }
 
-        if (!window.__renderIsRestore) {
+        if (!window.__isRestoringScroll) {
           if (window.SearchModules?.State?.overlayOpen) window.__overlayDidSearch = true;
           window.scrollTo({ top: 0, behavior: 'instant' });
-          if (window._showStickyHeader) window._showStickyHeader();
+          if (window._revealStickyHeader) window._revealStickyHeader();
         }
 
         // v4.0 — Trigger discovery rendering after primary results.
@@ -357,7 +357,7 @@
      * @private
      */
     _attachCopyHandler(container) {
-      if (window._copyResultTextHandlerSet) return;
+      if (window._hasCopyResultHandler) return;
 
       const _copy = (card) => {
         if (!card?.hasAttribute('data-text')) return;
@@ -378,7 +378,7 @@
         if (card) { e.preventDefault(); _copy(card); }
       });
 
-      window._copyResultTextHandlerSet = true;
+      window._hasCopyResultHandler = true;
     },
   };
 
@@ -426,8 +426,8 @@
             p.setAttribute('aria-pressed', isActive ? 'true' : 'false');
           });
           State.selectedCategory = 'all';
-          if (window.SearchModules?.SearchService) {
-            window.SearchModules.SearchService.doSearch(null, false);
+          if (window.SearchModules?.SearchController) {
+            window.SearchModules.SearchController.doSearch(null, false);
           }
         };
         el.addEventListener('click', el._pillHandler);

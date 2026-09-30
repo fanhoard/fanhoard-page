@@ -91,7 +91,7 @@
   ─ Custom Events: fv:langchange (new), languageChange (legacy),
                    routeChanged, urlChanged, ure:ready, fp:*, fvl:*
   ─ Global Variables: window.URE, window.PopupSystem, window.FVL,
-                       window.FvLang, window.ConDataService, window.__searchUI
+                       window.FvLang, window.ConDataService, window.__searchUIController
   ─ BroadcastChannel('fv-lang-v3'): ซิงค์ภาษาระหว่าง tabs
 ```
 
@@ -125,7 +125,7 @@
 | ระบบ | Internal namespace | Public API |
 |---|---|---|
 | URE | `window.UREModules` | `window.URE` (frozen) |
-| Search | `window.SearchModules` | `window.SearchEngine` + `window.__searchUI` |
+| Search | `window.SearchModules` | `window.SearchEngine` + `window.__searchUIController` |
 | Nav-Core | `window.NavCoreModules` | `window._navCore` (boot marker) |
 | Language | `window.LangModules` | `window.FvLang` + `window.languageManager` |
 | ConData | (ไม่มี modules) | `window.ConDataService` + `window.ConDataRegistry` |
@@ -393,7 +393,7 @@ assets/db/con-data/
 | `window.ConDataService` | `con-data-service.js` (auto-preloads) | Nav-Core, Search, Home |
 | `window.ConDataRegistry` | `con-data-registry.js` | ConData Service |
 | `window.SearchEngine` | `search-engine.js` | search-ui.js (internal) |
-| `window.__searchUI` | `search-ui.js` | ภายนอก (user-facing API) |
+| `window.__searchUIController` | `search-ui.js` | ภายนอก (user-facing API) |
 | `window.languageManager` | `language.js` | ทุกระบบ (alias to `LangModules.LanguageManager`) |
 
 #### Internal namespaces (mutable, populated by every module)

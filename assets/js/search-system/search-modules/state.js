@@ -76,7 +76,7 @@
     // ── Internals ────────────────────────────────────────────────────────────
     _timeouts                : new Set(),
     _handlersAttached        : false,
-    _overlayStateMarker      : '__searchUI_overlay_open__',
+    _overlayStateMarker      : '__searchUIController_overlay_open__',
   };
 
   /** @type {SearchHandlers} */

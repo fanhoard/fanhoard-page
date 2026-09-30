@@ -17,7 +17,7 @@ The FanHoard search system provides aerospace-grade, deterministic, low-latency 
 │   OverlayService  •  UIService  •  SuggestionService  •  Discovery     │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Layer 4: Service Orchestration Layer                                    │
-│   SearchService (Manages data loading, debouncing, history, rendering)  │
+│   SearchController (Manages data loading, debouncing, history, rendering)  │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Layer 3: Search & Query Layer                                          │
 │   SearchEngine (search, querySuggestions, queryRelated)                 │
@@ -55,7 +55,7 @@ assets/js/search-system/
     ├── overlay.js               # Fullscreen Search Overlay Controller
     ├── discovery.js             # Related Content Discovery Engine
     ├── engine.js                # Modular Search Engine Core
-    └── search-service.js        # Search Orchestrator & Lifecycle Manager
+    └── search-controller.js        # Search Orchestrator & Lifecycle Manager
 ```
 
 ---
@@ -77,7 +77,7 @@ Phase 3 (Features):      url-history.js, keyboard.js, rendering.js, suggestions.
 Phase 4 (UI / Overlay):  overlay.js, discovery.js
                                │
                                ▼
-Phase 5 (Engine Core):   engine.js, search-service.js
+Phase 5 (Engine Core):   engine.js, search-controller.js
 ```
 
 ---
@@ -159,9 +159,9 @@ window.SearchEngine = {
 };
 ```
 
-### 5.3 `window.__searchUI` Interface
+### 5.3 `window.__searchUIController` Interface
 ```javascript
-window.__searchUI = {
+window.__searchUIController = {
   init(): void,
   destroy(): void,
   getState(): StateObject,

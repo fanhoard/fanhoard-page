@@ -163,7 +163,7 @@
 
         State.suggestionsLocked = false;
         M.ClearBtnService.sync();
-        M.SearchService.doSearch(null, false);
+        M.SearchController.doSearch(null, false);
       } catch {}
     },
 

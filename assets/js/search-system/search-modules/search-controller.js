@@ -1,7 +1,7 @@
 // @ts-check
 /**
- * @file search-service.js
- * SearchService — executes searches and manages history commits.
+ * @file search-controller.js
+ * SearchController — executes searches and manages history commits.
  *
  * Renamed from legacy `search.js` to avoid collision with the new unified
  * entry point `search-system/search.js`. Behaviour is preserved; only the
@@ -51,7 +51,7 @@
 
   // ── SearchEngine reference ────────────────────────────────────────────────
   // Resolve SearchEngine lazily so this module doesn't break if engine.js
-  // loads after search-service.js (defensive coding — in practice both load
+  // loads after search-controller.js (defensive coding — in practice both load
   // in Phase 5 in parallel, so SearchEngine is available by boot time).
   function _engine() {
     return M.SearchEngine || window.SearchEngine;
@@ -99,9 +99,9 @@
     })();
   }
 
-  // ── SearchService ─────────────────────────────────────────────────────────
+  // ── SearchController ─────────────────────────────────────────────────────────
 
-  const SearchService = {
+  const SearchController = {
 
     // ── Main search ──────────────────────────────────────────────────────
 
@@ -117,7 +117,7 @@
       try {
         e?.preventDefault?.();
 
-        window.__renderIsRestore = !!preventPush;
+        window.__isRestoringScroll = !!preventPush;
 
         const inp = DOMService.get(CONFIG.DOM.searchInputId);
         const q   = inp?.value || '';
@@ -132,7 +132,7 @@
             if (rc && !rc.querySelector('.search-result-placeholder')) {
               rc.innerHTML = `<div class="search-result-placeholder" style="opacity:.5">${LanguageService.t('search_result_here')}</div>`;
             }
-            window.__renderIsRestore = false;
+            window.__isRestoringScroll = false;
             return;
           }
         }
@@ -152,7 +152,7 @@
           if (State.overlayOpen && options.closeOverlay) OverlayService.close('manual');
           ClearBtnService.sync();
           IconSlotService.update();
-          window.__renderIsRestore = false;
+          window.__isRestoringScroll = false;
           return;
         }
 
@@ -161,7 +161,7 @@
         try {
           if (_engine()?.search) out = _engine().search(q, State.selectedType) || out;
         } catch (err) {
-          console.error('[SearchService] Search engine failed:', err);
+          console.error('[SearchController] Search engine failed:', err);
           out = { results: [], keywords: [] };
         }
 
@@ -185,14 +185,14 @@
 
         // ── Render ─────────────────────────────────────────────────────────
         RenderingService.renderResults(State.currentResults, State.currentResults.length === 0);
-        window.__renderIsRestore = false;
+        window.__isRestoringScroll = false;
 
         if (State.overlayOpen) OverlayService.close('manual');
 
         ClearBtnService.sync();
         IconSlotService.update();
       } catch (err) {
-        console.error('[SearchService] doSearch failed:', err);
+        console.error('[SearchController] doSearch failed:', err);
         State.currentResults = [];
       }
     },
@@ -216,7 +216,7 @@
         if (retryCount < maxR) {
           setTimeout(() => this.doSearchFromURL(q, type, category, retryCount + 1), retryMs);
         } else {
-          console.warn('[SearchService] SearchEngine not ready after', maxR, 'retries for URL query:', q);
+          console.warn('[SearchController] SearchEngine not ready after', maxR, 'retries for URL query:', q);
         }
       };
 
@@ -259,7 +259,7 @@
         if (!hasFuse) _scheduleFuseUpgrade(q, type);
 
       } catch (e) {
-        console.error('[SearchService] doSearchFromURL failed', e);
+        console.error('[SearchController] doSearchFromURL failed', e);
         scheduleRetry();
       }
     },
@@ -289,14 +289,14 @@
       // VirtualScrollEngine.destroy() removed — rendering uses URE, not the old VSE
       FilterService.setupCategoryFilter([], 'all');
       if (typeof UIService.updateUILanguage === 'function') UIService.updateUILanguage();
-      if (!window.__renderIsRestore) {
+      if (!window.__isRestoringScroll) {
         window.scrollTo({ top: 0, behavior: 'instant' });
-        if (window._showStickyHeader) window._showStickyHeader();
+        if (window._revealStickyHeader) window._revealStickyHeader();
       }
     },
   };
 
   // ── Export ──────────────────────────────────────────────────────────────
-  M.SearchService = SearchService;
+  M.SearchController = SearchController;
 
 })(window.SearchModules = window.SearchModules || {});

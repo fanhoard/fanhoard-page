@@ -19,19 +19,19 @@ describe('Core Search Defects Regression Suite (DS-01, DS-06, DS-07, DS-09, DS-0
       set _initialized(val: boolean) { initialized = val; },
       init: vi.fn(),
     };
-    (window as any).__searchUI = mockSearchUI;
+    (window as any).__searchUIController = mockSearchUI;
 
     const handleInitFailure = (err: Error) => {
       console.error('[Search] Initialisation failed:', err);
-      if ((window as any).__searchUI) {
-        (window as any).__searchUI._initialized = false;
+      if ((window as any).__searchUIController) {
+        (window as any).__searchUIController._initialized = false;
       }
     };
 
     handleInitFailure(new Error('Data load network error'));
 
     expect(consoleError).toHaveBeenCalledWith('[Search] Initialisation failed:', expect.any(Error));
-    expect((window as any).__searchUI._initialized).toBe(false);
+    expect((window as any).__searchUIController._initialized).toBe(false);
   });
 
   // DS-06: ensureFuseLoaded rejection unlocks _fuseBuilding in finally
@@ -88,7 +88,7 @@ describe('Core Search Defects Regression Suite (DS-01, DS-06, DS-07, DS-09, DS-0
       try {
         throw new Error('Engine crash');
       } catch (err) {
-        console.error('[SearchService] Search engine failed:', err);
+        console.error('[SearchController] Search engine failed:', err);
         out = { results: [], keywords: [] };
       }
       State.currentResults = out.results || [];
@@ -96,7 +96,7 @@ describe('Core Search Defects Regression Suite (DS-01, DS-06, DS-07, DS-09, DS-0
 
     faultySearch();
 
-    expect(consoleError).toHaveBeenCalledWith('[SearchService] Search engine failed:', expect.any(Error));
+    expect(consoleError).toHaveBeenCalledWith('[SearchController] Search engine failed:', expect.any(Error));
     expect(State.currentResults).toEqual([]);
   });
 
@@ -158,7 +158,7 @@ describe('Core Search Defects Regression Suite (DS-01, DS-06, DS-07, DS-09, DS-0
 
   // DS-02: search.js removes beforeunload listener on destroy()
   it('DS-02: search.js removes beforeunload listener when destroy() is called', async () => {
-    delete (window as any).__searchUI;
+    delete (window as any).__searchUIController;
 
     const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
     const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
@@ -179,7 +179,7 @@ describe('Core Search Defects Regression Suite (DS-01, DS-06, DS-07, DS-09, DS-0
       URLService: {},
       KeyboardService: { destroy: vi.fn() },
       FilterService: {},
-      SearchService: {},
+      SearchController: {},
       UIService: {},
       OverlayService: { close: vi.fn() },
       ClearBtnService: {},
@@ -201,14 +201,14 @@ describe('Core Search Defects Regression Suite (DS-01, DS-06, DS-07, DS-09, DS-0
 
     await new Promise((resolve) => setTimeout(resolve, 50));
 
-    expect((window as any).__searchUI).toBeDefined();
+    expect((window as any).__searchUIController).toBeDefined();
 
     const beforeUnloadCalls = addEventListenerSpy.mock.calls.filter(c => c[0] === 'beforeunload');
     expect(beforeUnloadCalls.length).toBeGreaterThan(0);
     const beforeUnloadHandler = beforeUnloadCalls[0][1];
 
     // Call destroy() on searchUI
-    (window as any).__searchUI.destroy();
+    (window as any).__searchUIController.destroy();
 
     const beforeUnloadRemovals = removeEventListenerSpy.mock.calls.filter(c => c[0] === 'beforeunload');
     expect(beforeUnloadRemovals.length).toBeGreaterThan(0);

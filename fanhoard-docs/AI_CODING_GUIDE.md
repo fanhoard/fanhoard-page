@@ -125,7 +125,7 @@ Before implementing a new function or utility, verify whether it already exists:
 | Subsystem | Internal Module Namespace | Public API Namespace |
 | :--- | :--- | :--- |
 | **URE** | `window.UREModules` | `window.URE` |
-| **Search Engine** | `window.SearchModules` | `window.SearchEngine`, `window.__searchUI` |
+| **Search Engine** | `window.SearchModules` | `window.SearchEngine`, `window.__searchUIController` |
 | **Nav-Core** | `window.NavCoreModules` | `window.NavCore` |
 | **Language** | `window.LangModules` | `window.languageManager`, `window.FvLang` |
 | **Popup System** | `window.PopupModules` | `window.PopupSystem` |

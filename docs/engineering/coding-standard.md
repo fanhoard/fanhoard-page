@@ -38,7 +38,7 @@ The Discover and Search subsystems enforce strict single-responsibility module b
 │ • Rule: Stateless search algorithm & Fuse.js index. MUST NOT touch DOM.│
 ├────────────────────────────────────────────────────────────────────────┤
 │ Layer 3: Orchestration & URL Routing                                   │
-│ • search-service.js, url-history.js, input-bar.js, keyboard.js          │
+│ • search-controller.js, url-history.js, input-bar.js, keyboard.js          │
 │ • Rule: Manages query submission, history pushState, and input events.  │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Layer 4: UI & Virtual Scroll Rendering                                 │
@@ -55,7 +55,7 @@ The Discover and Search subsystems enforce strict single-responsibility module b
 1. `SearchEngine` (`engine.js`) is strictly stateless and DOM-agnostic. It takes data and query strings and returns pure result arrays. It shall never access `document` or `window.location`.
 2. `SearchStore` (`SearchStore.ts`) is a pure reactive state container. UI components subscribe to `SearchStore`, but `SearchStore` never directly mutates DOM nodes.
 3. `DiscoveryService` (`discovery.js`) owns the discovery DOM section (`#searchDiscovery`) and its URE handle. It reads primary search results from `SearchEngine.queryRelated()` but never modifies primary search result cards.
-4. Entry points expose public APIs on global namespaces (`window.SearchEngine`, `window.__searchUI`, `window.FVL`).
+4. Entry points expose public APIs on global namespaces (`window.SearchEngine`, `window.__searchUIController`, `window.FVL`).
 
 ---
 

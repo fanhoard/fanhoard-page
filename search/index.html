@@ -134,7 +134,7 @@
       sticky.style.pointerEvents = '';
       _visible = true;
     }
-    window._showStickyHeader = function() { if (!_visible) _show(); };
+    window._revealStickyHeader = function() { if (!_visible) _show(); };
 
     sticky.style.transition = 'transform 0.22s cubic-bezier(0.33,1,0.68,1)';
     _lastY = window.scrollY;

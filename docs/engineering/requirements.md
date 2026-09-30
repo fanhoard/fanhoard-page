@@ -29,7 +29,7 @@ The Search and Discover subsystems provide client-side discovery, fuzzy/substrin
 |---|---|---|
 | **Layer 1: Ingestion & Store** | Ingest content databases, manage reactive UI state | `ConDataService`, `src/stores/SearchStore.ts`, `LanguageStore.ts` |
 | **Layer 2: Search Index & Logic** | Pure, stateless search engine, indexing, scoring | `assets/js/search-system/search-modules/engine.js`, `config.js`, `types.js` |
-| **Layer 3: Search Orchestration** | Search execution, URL parameter sync, history push | `search-service.js`, `url-history.js`, `input-bar.js`, `keyboard.js` |
+| **Layer 3: Search Orchestration** | Search execution, URL parameter sync, history push | `search-controller.js`, `url-history.js`, `input-bar.js`, `keyboard.js` |
 | **Layer 4: UI & Feed Rendering** | Result card DOM rendering, URE virtual scroll, overlays | `rendering.js`, `overlay.js`, `suggestions.js`, `virtual-scroll.js` |
 | **Layer 5: Discovery Feed & Actions** | YouTube-style recommendations, feed node recycling, scoped loading | `discovery.js`, `src/components/DiscoverFeed.ts`, `assets/js/loading-system/fvl.js` |
 

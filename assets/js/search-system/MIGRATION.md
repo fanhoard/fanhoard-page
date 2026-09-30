@@ -49,7 +49,7 @@ assets/js/search-system/
     ├── overlay.js
     ├── discovery.js
     ├── engine.js                # Modular Search Engine Core
-    └── search-service.js        # Search Orchestrator & ConDataService Bridge
+    └── search-controller.js        # Search Orchestrator & ConDataService Bridge
 ```
 
 ```html
@@ -90,7 +90,7 @@ To migrate HTML pages from v2.x to v3.0.0, execute the following steps:
 | **Phase 2** | `utils.js`, `virtual-scroll.js` | String normalization helpers, fallback virtual scroll engine |
 | **Phase 3** | `url-history.js`, `keyboard.js`, `rendering.js`, `suggestions.js`, `input-bar.js` | Keyboard management, rendering, suggestion engine, input bar widgets |
 | **Phase 4** | `overlay.js`, `discovery.js` | Fullscreen overlay manager and discovery related content service |
-| **Phase 5** | `engine.js`, `search-service.js` | Modular search engine core and search service orchestrator |
+| **Phase 5** | `engine.js`, `search-controller.js` | Modular search engine core and search service orchestrator |
 
 ---
 
@@ -124,7 +124,7 @@ if (_resultCache.size >= RESULT_CACHE_CAP) {
 ```
 
 ### 4.4 Early Prefetch & Stashed Query Resolution
-During script loading, `search.js` initiates an early prefetch Promise targeting `ConDataService.getAssembled()`. If user queries occur prior to data assembly, `SearchService` stashes the query in `window.__pendingSearch` and executes it immediately upon boot completion.
+During script loading, `search.js` initiates an early prefetch Promise targeting `ConDataService.getAssembled()`. If user queries occur prior to data assembly, `SearchController` stashes the query in `window.__pendingSearch` and executes it immediately upon boot completion.
 
 ---
 
@@ -136,6 +136,6 @@ The public global APIs remain 100% backward-compatible with v2.x integrations:
 | :--- | :--- | :--- |
 | `window.SearchEngine.search(q, type)` | `search-engine.js` | `search-modules/engine.js` |
 | `window.SearchEngine.querySuggestions(q, max)` | `search-engine.js` | `search-modules/engine.js` |
-| `window.__searchUI.init()` | `search-ui.js` | `search-modules/search-service.js` |
-| `window.__searchUI.getState()` | `search-ui.js` | `search-modules/state.js` |
-| `window.__searchUI.getConfig()` | `search-ui.js` | `search-modules/config.js` |
+| `window.__searchUIController.init()` | `search-ui.js` | `search-modules/search-controller.js` |
+| `window.__searchUIController.getState()` | `search-ui.js` | `search-modules/state.js` |
+| `window.__searchUIController.getConfig()` | `search-ui.js` | `search-modules/config.js` |

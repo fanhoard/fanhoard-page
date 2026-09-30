@@ -1,7 +1,7 @@
 // Path:    assets/js/search-system/search.js
 // Purpose: Self-loading entry point for the new unified search system.
 //          Loads all search-modules/* in dependency order, then exposes
-//          the public __searchUI + SearchEngine global APIs.
+//          the public __searchUIController + SearchEngine global APIs.
 //
 // This file consolidates the legacy `search-engine.js` and `search-ui.js`
 // into a single entry point, following the same pattern used by the
@@ -16,13 +16,13 @@
 //   Phase 3 (parallel): url-history, keyboard,         — need phase 2
 //                       rendering, suggestions, input-bar
 //   Phase 4 (parallel): overlay, discovery             — need phase 3
-//   Phase 5 (parallel): engine, search-service         — need everything
+//   Phase 5 (parallel): engine, search-controller         — need everything
 //
 // ARCHITECTURE (aerospace-grade, SpaceX/NASA-inspired):
 //   Layer 1: Data ingestion    (ConDataService → engine.init)
 //   Layer 2: Index             (engine builds docs + keywords + type/cat indexes + Fuse)
 //   Layer 3: Search            (engine.search + engine.querySuggestions + engine.queryRelated)
-//   Layer 4: Service           (search-service orchestrates search + history + render)
+//   Layer 4: Service           (search-controller orchestrates search + history + render)
 //   Layer 5: UI                (overlay, input-bar, suggestions, rendering, discovery)
 //
 // v4.0 — Discovery system + smart language detection
@@ -37,7 +37,7 @@
 //
 // Public API:
 //   window.SearchEngine  — search engine (init, search, querySuggestions, _internals)
-//   window.__searchUI    — UI orchestrator (init, destroy, getState, getConfig, ...)
+//   window.__searchUIController    — UI orchestrator (init, destroy, getState, getConfig, ...)
 //
 // RELIABILITY:
 //   • Early data prefetch starts polling ConDataService the moment this script runs.
@@ -49,7 +49,7 @@
 (function () {
   'use strict';
 
-  if (window.__searchUI?._initialized) return;
+  if (window.__searchUIController?._initialized) return;
 
   // ── Build ID (replaced at build time by scripts/update-version.js) ──────────
   // WHY: search-modules/*.js don't appear in HTML directly, so the
@@ -77,7 +77,7 @@
     //   engine.js (Phase 5) — those references are resolved at runtime.
     ['overlay.js', 'discovery.js'],
     // Phase 5: Engine + Search service — depend on everything above
-    ['engine.js', 'search-service.js'],
+    ['engine.js', 'search-controller.js'],
   ];
 
   // ── Early data prefetch ───────────────────────────────────────────────────
@@ -216,7 +216,7 @@
       CONFIG, State, Handlers,
       DOMService, StorageService, URLService,
       KeyboardService, FilterService,
-      SearchService, UIService, OverlayService,
+      SearchController, UIService, OverlayService,
       ClearBtnService, IconSlotService,
       VirtualScrollEngine, KeyboardAutoToggleService,
       SearchEngine,
@@ -344,7 +344,7 @@
             catch (_) { State.allKeywordsCache = []; }
             const urlState = URLService.readStateFromURL();
             if (urlState && urlState.q) {
-              SearchService.doSearchFromURL(urlState.q, urlState.type || 'all', urlState.category || 'all');
+              SearchController.doSearchFromURL(urlState.q, urlState.type || 'all', urlState.category || 'all');
             }
           });
         }).catch(function () {});
@@ -406,7 +406,7 @@
               if (inp) inp.value = pending.q;
               State.selectedType = pending.type || 'all';
               FilterService.setupTypeFilter(State.selectedType);
-              SearchService.doSearch(null, false);
+              SearchController.doSearch(null, false);
               URLService.replaceSearch({ q: pending.q, type: State.selectedType, category: 'all' });
               return;
             }
@@ -414,7 +414,7 @@
             // ── Normal path: URL-based search ─────────────────────────────────
             const urlState = URLService.readStateFromURL();
             if (urlState.q) {
-              SearchService.doSearchFromURL(urlState.q, urlState.type || 'all', urlState.category || 'all');
+              SearchController.doSearchFromURL(urlState.q, urlState.type || 'all', urlState.category || 'all');
             } else {
               URLService.replaceSearch({ q: '', type: 'all', category: 'all' });
             }
@@ -429,7 +429,7 @@
           })
           .catch(e => {
             console.error('[Search] Initialisation failed:', e);
-            if (window.__searchUI) window.__searchUI._initialized = false;
+            if (window.__searchUIController) window.__searchUIController._initialized = false;
           });
 
         // Form/Enter handlers — attached synchronously so they work immediately.
@@ -442,7 +442,7 @@
             if (typeof window.announceToScreenReader === "function") {
               window.announceToScreenReader(lang === "th" ? "กำลังค้นหา..." : "Searching...", "polite");
             }
-            SearchService.doSearch();
+            SearchController.doSearch();
             UIService.closeKB();
           };
           DOMService.on(form, 'submit', Handlers.formSubmit);
@@ -453,7 +453,7 @@
           DOMService.on(inp, 'keydown', e => {
             if (e.key === 'Enter') {
               e.preventDefault();
-              SearchService.doSearch();
+              SearchController.doSearch();
               UIService.closeKB();
             }
           });
@@ -538,7 +538,7 @@
         State.selectedType     = st.type     || 'all';
         State.selectedCategory = st.category || 'all';
         FilterService.setupTypeFilter(State.selectedType);
-        SearchService.doSearch(null, true);
+        SearchController.doSearch(null, true);
         ClearBtnService.sync();
         IconSlotService.update();
       } finally { State.suppressHistoryPush = false; }
@@ -547,9 +547,9 @@
     // ── Destroy ─────────────────────────────────────────────────────────────
 
     function destroy() {
-      if (window.__searchUI && window.__searchUI._beforeUnloadHandler) {
-        try { window.removeEventListener('beforeunload', window.__searchUI._beforeUnloadHandler); } catch (_) {}
-        window.__searchUI._beforeUnloadHandler = null;
+      if (window.__searchUIController && window.__searchUIController._beforeUnloadHandler) {
+        try { window.removeEventListener('beforeunload', window.__searchUIController._beforeUnloadHandler); } catch (_) {}
+        window.__searchUIController._beforeUnloadHandler = null;
       }
       try {
         if (State.overlayOpen) OverlayService.close('manual');
@@ -602,15 +602,15 @@
         State.keyboardAutoToggleEnabled = false;
         try { KeyboardService?.destroy?.(); } catch (_) {}
         UIService._wrapperBuilt         = false;
-        window._copyResultTextHandlerSet  = false;
+        window._hasCopyResultHandler  = false;
 
-        if (window.__searchUI) window.__searchUI._initialized = false;
+        if (window.__searchUIController) window.__searchUIController._initialized = false;
       } catch (e) { console.error('[Search] destroy failed', e); }
     }
 
     // ── Public API ───────────────────────────────────────────────────────────
 
-    window.__searchUI = {
+    window.__searchUIController = {
       _initialized : true,
       init,
       destroy,
@@ -637,12 +637,12 @@
     };
 
     init();
-    if (window.__searchUI) {
-      if (window.__searchUI._beforeUnloadHandler) {
-        window.removeEventListener('beforeunload', window.__searchUI._beforeUnloadHandler);
+    if (window.__searchUIController) {
+      if (window.__searchUIController._beforeUnloadHandler) {
+        window.removeEventListener('beforeunload', window.__searchUIController._beforeUnloadHandler);
       }
-      window.__searchUI._beforeUnloadHandler = () => { try { destroy(); } catch (_) {} };
-      window.addEventListener('beforeunload', window.__searchUI._beforeUnloadHandler, { passive: true });
+      window.__searchUIController._beforeUnloadHandler = () => { try { destroy(); } catch (_) {} };
+      window.addEventListener('beforeunload', window.__searchUIController._beforeUnloadHandler, { passive: true });
     }
 
     // Dispatch ready event for any listeners (matches URE pattern)
