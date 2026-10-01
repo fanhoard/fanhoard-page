@@ -273,7 +273,8 @@
         if      (c === 38) out += '&amp;';   // &
         else if (c === 60) out += '&lt;';    // <
         else if (c === 62) out += '&gt;';    // >
-        else if (c === 34) out += '&quot;';  // " (bonus: safe in attributes)
+        else if (c === 34) out += '&quot;';  // "
+        else if (c === 39) out += '&#39;';   // '
         else               out += str[i];
       }
       return out;

@@ -258,18 +258,7 @@
     if (window.SearchModules?.StringService?.escapeHtml) {
       return window.SearchModules.StringService.escapeHtml(s);
     }
-    const str = String(s);
-    let out = "";
-    for (let i = 0; i < str.length; i++) {
-      const c = str.charCodeAt(i);
-      if      (c === 38) out += "&amp;";   // &
-      else if (c === 60) out += "&lt;";    // <
-      else if (c === 62) out += "&gt;";    // >
-      else if (c === 34) out += "&quot;";  // "
-      else if (c === 39) out += "&#39;";   // '
-      else               out += str[i];
-    }
-    return out;
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
   /**
