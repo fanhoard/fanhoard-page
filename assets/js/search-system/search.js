@@ -75,7 +75,7 @@
     //   v4.0: discovery.js added here. It uses lazy lookups for
     //   RenderingService and SearchEngine so it can safely load before
     //   engine.js (Phase 5) — those references are resolved at runtime.
-    ['overlay.js', 'discovery.js', 'engine-data.js'],
+    ['overlay.js', 'discovery.js', 'engine-data.js', 'data-loader.js'],
     // Phase 5: Engine + Search service — depend on everything above
     ['engine.js', 'search-controller.js'],
   ];
@@ -227,128 +227,28 @@
       return;
     }
 
-    // ── Data loading ────────────────────────────────────────────────────────
-    // Uses _earlyDataPromise if the prefetch already has data.
-    // Falls back to the normal ConDataService poll + fetch chain.
+    // ── Data loading (delegates to DataLoader in data-loader.js) ───────────
 
-    /**
-     * Poll for ConDataService availability up to `ms` milliseconds.
-     * @param {number} ms
-     * @returns {Promise<Object|null>}
-     */
-    function waitForConDataService(ms) {
-      return new Promise(function (resolve) {
-        if (window.ConDataService?.getAssembled) return resolve(window.ConDataService);
-        const start = Date.now();
-        const id = setInterval(function () {
-          if (window.ConDataService?.getAssembled) {
-            clearInterval(id);
-            resolve(window.ConDataService);
-          } else if (Date.now() - start >= ms) {
-            clearInterval(id);
-            resolve(null);
-          }
-        }, CONFIG.TIMING.conDataServicePollMs);
-      });
+    function _dataHasTypes(data) {
+      const DL = M.DataLoader || window.SearchModules?.DataLoader;
+      return DL ? DL._dataHasTypes(data) : !!(data && Array.isArray(data.type) && data.type.length);
     }
 
-    /**
-     * Load data via early-prefetch promise, or fall back to direct fetch.
-     * @returns {Promise<Object>}
-     */
-    function loadData() {
-      // Fast path: prefetch already resolved
-      if (_earlyDataPromise) {
+    function loadDataWithRetry(maxAttempts, backoffMs) {
+      const DL = M.DataLoader || window.SearchModules?.DataLoader;
+      if (DL) {
         const p = _earlyDataPromise;
         _earlyDataPromise = null;
-        return p.then(function (data) {
-          if (data) return data;
-          // Prefetch returned null — fall through to normal path
-          return _normalLoadData();
-        });
+        return DL.loadDataWithRetry(maxAttempts, backoffMs, p);
       }
       return _normalLoadData();
     }
 
-    function _normalLoadData() {
-      return waitForConDataService(CONFIG.TIMING.conDataServiceWaitMs).then(function (svc) {
-        if (svc) {
-          return svc.getAssembled().catch(function (err) {
-            console.warn('[Search] ConDataService failed, using fallback:', err);
-            return fetch(CONFIG.DB.path).then(r => r.json()).catch(() => ({}));
-          });
-        }
-        console.warn('[Search] ConDataService not ready — using fallback db');
-        return fetch(CONFIG.DB.path).then(r => r.json()).catch(() => ({}));
-      });
-    }
-
-
-    // ── Refresh-recovery helpers (BUG: refresh sometimes showed no results) ──
-    // If the data fetch was aborted or returned empty (ConService assemble can
-    // "succeed" with an empty type[] after fetch timeouts), the page used to
-    // boot with 0 docs and the URL search gave up after its retry budget,
-    // leaving the results area blank until the user searched manually.
-    // Fix: retry the data load with backoff, and if it is STILL empty, keep a
-    // background watcher that finishes the boot as soon as real data arrives.
-
-    function _dataHasTypes(data) {
-      return !!(data && Array.isArray(data.type) && data.type.length);
-    }
-
-    function loadDataWithRetry(maxAttempts, backoffMs) {
-      let attempt = 0;
-      function run() {
-        attempt++;
-        return loadData().then(function (data) {
-          if (_dataHasTypes(data) || attempt >= maxAttempts) return data;
-          console.warn('[Search] Data empty after fetch (attempt ' + attempt + '/' + maxAttempts + ') — invalidating cache and retrying in ' + backoffMs + 'ms');
-          try {
-            var _cds = window.ConDataService;
-            if (_cds && typeof _cds.invalidateCache === 'function') _cds.invalidateCache();
-            else if (_cds && typeof _cds.invalidate === 'function') _cds.invalidate();
-          } catch (_) {}
-          return new Promise(function (r) { setTimeout(r, backoffMs); }).then(run);
-        });
-      }
-      return run();
-    }
-
-    // Last-resort watcher: if boot finished with empty data, poll until real
-    // data shows up, then re-init the engine and run the URL search again.
     function _watchForLateData() {
-      const intervalMs = 4000;
-      const maxChecks  = 22; // ~88s
-      let checks = 0;
-      const id = setInterval(function () {
-        checks++;
-        const docs = (() => {
-          try { return (SearchEngine._internals && SearchEngine._internals.getDocs && SearchEngine._internals.getDocs()) || []; }
-          catch (_) { return []; }
-        })();
-        if (docs.length || checks >= maxChecks) { clearInterval(id); return; }
-        // docs still empty — try to pull data again (clear any cached empty assemble first)
-        try {
-          var _cds2 = window.ConDataService;
-          if (_cds2 && typeof _cds2.invalidateCache === 'function') _cds2.invalidateCache();
-          else if (_cds2 && typeof _cds2.invalidate === 'function') _cds2.invalidate();
-        } catch (_) {}
-        loadData().then(function (data) {
-          if (!_dataHasTypes(data)) return;
-          clearInterval(id);
-          State.apiData = data;
-          SearchEngine.init(State.apiData, {}).catch(function (e) {
-            console.error('[Search] Late re-init failed', e);
-          }).then(function () {
-            try { State.allKeywordsCache = SearchEngine.generateAllKeywords ? SearchEngine.generateAllKeywords() : []; }
-            catch (_) { State.allKeywordsCache = []; }
-            const urlState = URLService.readStateFromURL();
-            if (urlState && urlState.q) {
-              SearchController.doSearchFromURL(urlState.q, urlState.type || 'all', urlState.category || 'all');
-            }
-          });
-        }).catch(function () {});
-      }, intervalMs);
+      const DL = M.DataLoader || window.SearchModules?.DataLoader;
+      if (DL) {
+        return DL.watchForLateData();
+      }
     }
 
     // ── Init ────────────────────────────────────────────────────────────────
