@@ -223,7 +223,7 @@
               inp.focus({ preventScroll: true });
               const l = inp.value.length;
               inp.setSelectionRange(l, l);
-            } catch { try { inp.focus(); } catch {} }
+            } catch (e) { try { inp.focus(); } catch (err) { console.warn('[SearchModule:overlay]', err); } }
           }, CONFIG.TIMING.focusDelayMs);
         }
       } catch (e) {
@@ -329,7 +329,7 @@
         if (inpClose) {
           inpClose.setAttribute('aria-expanded', 'false');
           if (document.activeElement && document.activeElement !== inpClose && document.activeElement.closest && document.activeElement.closest('#' + CONFIG.DOM.overlayContainerId)) {
-            try { inpClose.focus(); } catch {}
+            try { inpClose.focus(); } catch (e) { console.warn('[SearchModule:overlay]', e); }
           }
         }
         
@@ -353,7 +353,7 @@
     // ── Nav helpers ────────────────────────────────────────────────────────
 
     _hideNav() {
-      try { State.navHiddenBySearch = true; window.modernNav?.hideNav?.('search-overlay'); } catch {}
+      try { State.navHiddenBySearch = true; window.modernNav?.hideNav?.('search-overlay'); } catch (e) { console.warn('[SearchModule:overlay]', e); }
     },
 
     _showNav() {
@@ -362,7 +362,7 @@
           State.navHiddenBySearch = false;
           window.modernNav.showNav('search-overlay-closed');
         }
-      } catch {}
+      } catch (e) { console.warn('[SearchModule:overlay]', e); }
     },
   };
 

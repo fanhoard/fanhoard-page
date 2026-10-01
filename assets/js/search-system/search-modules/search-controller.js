@@ -78,7 +78,7 @@
 
         if (ready && still) {
           let out = { results: [], keywords: [] };
-          try { out = _engine().search(q, type) || out; } catch {}
+          try { out = _engine().search(q, type) || out; } catch (e) { console.warn('[SearchModule:search-controller]', e); }
           if (out.results.length) {
             State.currentResults = out.results;
             FilterService.setupCategoryFilter(
@@ -93,7 +93,8 @@
         if (!ready && Date.now() - started < MAX_WAIT_MS) {
           _fuseUpgradeTimer = setTimeout(checkFuse, CHECK_INTERVAL_MS);
         }
-      } catch {
+      } catch (e) {
+        console.warn('[SearchModule:search-controller]', e);
         _fuseUpgradeTimer = null;
       }
     })();
@@ -227,13 +228,13 @@
         const internals = se._internals;
         const hasDocs = (() => {
           try { return (internals?.getDocs?.()?.length || 0) > 0; }
-          catch { return false; }
+          catch (e) { console.warn('[SearchModule:search-controller]', e); return false; }
         })();
 
         if (!hasDocs) { scheduleRetry(); return; }
 
         let out = { results: [], keywords: [] };
-        try { out = se.search(q, type) || out; } catch {}
+        try { out = se.search(q, type) || out; } catch (e) { console.warn('[SearchModule:search-controller]', e); }
 
         State.suppressHistoryPush = true;
         try {
@@ -254,7 +255,7 @@
         // Schedule silent Fuse upgrade if not ready yet
         const hasFuse = (() => {
           try { return internals?.getFuse?.() != null; }
-          catch { return false; }
+          catch (e) { console.warn('[SearchModule:search-controller]', e); return false; }
         })();
         if (!hasFuse) _scheduleFuseUpgrade(q, type);
 

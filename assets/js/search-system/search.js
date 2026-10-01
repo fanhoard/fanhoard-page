@@ -268,7 +268,7 @@
           })
           .then(function () {
             try { State.allKeywordsCache = SearchEngine.generateAllKeywords?.() ?? []; }
-            catch { State.allKeywordsCache = []; }
+            catch (e) { console.warn('[SearchModule:search]', e); State.allKeywordsCache = []; }
 
             UIService.buildWrapper();
             FilterService.setupTypeFilter('all');
@@ -282,7 +282,7 @@
                 const navH = DOMService.getNavHeight ? DOMService.getNavHeight() : 56;
                 sticky.style.setProperty("--fv-nav-height", navH + "px");
               }
-            } catch (_) {}
+            } catch (e) { console.warn('[SearchModule:search]', e); }
 
             document.body.style.marginBottom = '';
             const sr = DOMService.get(CONFIG.DOM.searchResultsId) || (DOMService.getMainLandmark ? DOMService.getMainLandmark() : null);
@@ -323,7 +323,7 @@
             // so a refresh always ends up showing results on its own.
             const _bootDocs = (() => {
               try { return (SearchEngine._internals && SearchEngine._internals.getDocs && SearchEngine._internals.getDocs()) || []; }
-              catch (_) { return []; }
+              catch (e) { console.warn('[SearchModule:search]', e); return []; }
             })();
             if (!_bootDocs.length) _watchForLateData();
           })
@@ -427,7 +427,7 @@
             State.lastCommittedSearchState = null;
           }
         }
-      } catch { State.lastCommittedSearchState = null; }
+      } catch (e) { console.warn('[SearchModule:search]', e); State.lastCommittedSearchState = null; }
     }
 
     function _restoreUIState(st) {
@@ -448,7 +448,7 @@
 
     function destroy() {
       if (window.__searchUIController && window.__searchUIController._beforeUnloadHandler) {
-        try { window.removeEventListener('beforeunload', window.__searchUIController._beforeUnloadHandler); } catch (_) {}
+        try { window.removeEventListener('beforeunload', window.__searchUIController._beforeUnloadHandler); } catch (e) { console.warn('[SearchModule:search]', e); }
         window.__searchUIController._beforeUnloadHandler = null;
       }
       try {
@@ -456,7 +456,7 @@
         // v4.0 — Tear down discovery section before the rest so URE
         // handles inside discovery get a clean shutdown.
         if (M.DiscoveryService?.destroy) {
-          try { M.DiscoveryService.destroy(); } catch (_) {}
+          try { M.DiscoveryService.destroy(); } catch (e) { console.warn('[SearchModule:search]', e); }
         }
         VirtualScrollEngine.destroy();
         KeyboardAutoToggleService.disableAutoToggle();
@@ -499,7 +499,7 @@
         State.lastCommittedSearchState  = null;
         State._handlersAttached         = false;
         State.keyboardAutoToggleEnabled = false;
-        try { KeyboardService?.destroy?.(); } catch (_) {}
+        try { KeyboardService?.destroy?.(); } catch (e) { console.warn('[SearchModule:search]', e); }
         UIService._wrapperBuilt         = false;
         window._hasCopyResultHandler  = false;
 
@@ -540,14 +540,14 @@
       if (window.__searchUIController._beforeUnloadHandler) {
         window.removeEventListener('beforeunload', window.__searchUIController._beforeUnloadHandler);
       }
-      window.__searchUIController._beforeUnloadHandler = () => { try { destroy(); } catch (_) {} };
+      window.__searchUIController._beforeUnloadHandler = () => { try { destroy(); } catch (e) { console.warn('[SearchModule:search]', e); } };
       window.addEventListener('beforeunload', window.__searchUIController._beforeUnloadHandler, { passive: true });
     }
 
     // Dispatch ready event for any listeners (matches URE pattern)
     try {
       window.dispatchEvent(new CustomEvent('search:ready', { detail: { version: '4.0.0' } }));
-    } catch (_) {}
+    } catch (e) { console.warn('[SearchModule:search]', e); }
   }
 
 })();

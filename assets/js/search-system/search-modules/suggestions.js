@@ -98,7 +98,7 @@
         for (const e of primary)   { if (out.length >= max) break; out.push(e); }
         for (const e of secondary) { if (out.length >= max) break; out.push(e); }
         return out;
-      } catch { return []; }
+      } catch (e) { console.warn('[SearchModule:suggestions]', e); return []; }
     },
 
     /** Render trending suggestions into #search-suggestions-list. */
@@ -121,7 +121,7 @@
         container.style.display = 'block';
         // Reset overlay scroll to top — user may have scrolled down in suggestions
         if (State.overlayScrollable) State.overlayScrollable.scrollTop = 0;
-      } catch {}
+      } catch (e) { console.warn('[SearchModule:suggestions]', e); }
     },
   };
 
@@ -143,7 +143,7 @@
         else if (ev.key === 'ArrowUp')   { ev.preventDefault(); items[idx === -1 ? items.length - 1 : Math.max(0, idx - 1)]?.focus?.(); }
         else if (ev.key === 'Enter')     { ev.preventDefault(); document.activeElement?.classList?.contains('search-suggestion-item') && document.activeElement?.click?.(); }
         else if (ev.key === 'Escape')    { M.OverlayService.close('escape'); }
-      } catch {}
+      } catch (e) { console.warn('[SearchModule:suggestions]', e); }
     },
 
     /**
@@ -164,7 +164,7 @@
         State.suggestionsLocked = false;
         M.ClearBtnService.sync();
         M.SearchController.doSearch(null, false);
-      } catch {}
+      } catch (e) { console.warn('[SearchModule:suggestions]', e); }
     },
 
     /**
@@ -241,7 +241,7 @@
             else if (e.key === 'Escape')    { M.OverlayService.close('escape'); }
           };
         }
-      } catch {}
+      } catch (e) { console.warn('[SearchModule:suggestions]', e); }
     },
   };
 
