@@ -9,7 +9,7 @@
 
 ## 1. System Architecture & 5-Layer Model
 
-The FanHoard search system provides aerospace-grade, deterministic, low-latency search capabilities across all FanHoard pages. It operates as a self-loading entry point (`assets/js/search-system/search.js`) that dynamically loads 14 modular sub-services in 5 sequential phases.
+The FanHoard search system provides aerospace-grade, deterministic, low-latency search capabilities across all FanHoard pages. It operates as a self-loading entry point (`assets/js/search-system/search.js`) that dynamically loads 16 modular sub-services in 5 sequential phases.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -17,12 +17,14 @@ The FanHoard search system provides aerospace-grade, deterministic, low-latency 
 │   OverlayService  •  UIService  •  SuggestionService  •  Discovery     │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Layer 4: Service Orchestration Layer                                    │
-│   SearchController (Manages data loading, debouncing, history, rendering)  │
+│   SearchController (Manages search execution, debouncing, history)    │
+│   DataLoader (Manages data fetching retries & late-data watching)     │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Layer 3: Search & Query Layer                                          │
 │   SearchEngine (search, querySuggestions, queryRelated)                 │
 ├────────────────────────────────────────────────────────────────────────┤
-│ Layer 2: Indexing Layer                                                │
+│ Layer 2: Indexing & Ingestion Layer                                    │
+│   EngineData (Data flattening, type/category indexing)                │
 │   Bucket Index (Map<char, SearchDoc[]>) • Fuse.js • Type/Cat Index     │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Layer 1: Data Ingestion Layer                                          │
@@ -36,16 +38,16 @@ The FanHoard search system provides aerospace-grade, deterministic, low-latency 
 
 ```
 assets/js/search-system/
-├── search.js                    # Primary Entry Point (Auto-loader & Bootstrap)
+├── search.js                    # Primary Entry Point (Slim Orchestrator & Auto-loader)
 ├── search-system.css            # Supplemental Styles & Badge Definitions
 ├── MIGRATION.md                 # Migration Guide from Legacy Search Scripts
 ├── NAMING.md                    # DOM & CSS Class Naming Conventions
 ├── README.md                    # Architecture & Contract Specifications
-└── search-modules/              # 14 Sub-Service Modules
+└── search-modules/              # 16 Sub-Service Modules
     ├── types.js                 # JSDoc Type Definitions & Enums
     ├── config.js                # Immutable Configuration (Object.freeze)
-    ├── state.js                 # Shared Mutable State Store
-    ├── utils.js                 # Stateless Helpers & Text Normalizer
+    ├── state.js                 # Shared Mutable State Store (Encapsulated Accessors)
+    ├── utils.js                 # Stateless Helpers, String Normalizer & Canonical Escaper
     ├── virtual-scroll.js        # Legacy Virtual Scroll Engine (Fallback)
     ├── url-history.js           # Two-Stack Browser History Sync
     ├── keyboard.js              # KeyboardService, GapBasedKeyboardService, KeyboardAutoToggleService
@@ -54,15 +56,17 @@ assets/js/search-system/
     ├── input-bar.js             # IconSlotService, ClearBtnService, UIService
     ├── overlay.js               # Fullscreen Search Overlay Controller
     ├── discovery.js             # Related Content Discovery Engine
-    ├── engine.js                # Modular Search Engine Core
-    └── search-controller.js        # Search Orchestrator & Lifecycle Manager
+    ├── engine-data.js           # Raw Data Normalization & Document Flattening Engine
+    ├── data-loader.js           # Resilient Data Loader & Exponential Backoff Retry Service
+    ├── engine.js                # Modular Search Engine Core & Query Scorer
+    └── search-controller.js     # Search Orchestrator & Lifecycle Manager
 ```
 
 ---
 
 ## 3. Module Loading Order & Phase Sequence
 
-The entry point `assets/js/search-system/search.js` loads all modules in 5 sequential phases. Scripts within the same phase execute in parallel, while each phase must resolve completely before the subsequent phase starts:
+The entry point `assets/js/search-system/search.js` loads all 16 modules in 5 sequential phases. Scripts within the same phase execute in parallel, while each phase must resolve completely before the subsequent phase starts:
 
 ```
 Phase 1 (Foundation):    types.js, config.js, state.js
@@ -74,7 +78,7 @@ Phase 2 (Utilities):     utils.js, virtual-scroll.js
 Phase 3 (Features):      url-history.js, keyboard.js, rendering.js, suggestions.js, input-bar.js
                                │
                                ▼
-Phase 4 (UI / Overlay):  overlay.js, discovery.js
+Phase 4 (Data/Overlay):  overlay.js, discovery.js, engine-data.js, data-loader.js
                                │
                                ▼
 Phase 5 (Engine Core):   engine.js, search-controller.js
@@ -87,11 +91,12 @@ Phase 5 (Engine Core):   engine.js, search-controller.js
 | Invariant / Rule | Enforcing File & Location | Value / Code Reference |
 | :--- | :--- | :--- |
 | **LRU Result Cache Cap** | `search-modules/engine.js:122` | `RESULT_CACHE_CAP = 50` |
-| **Short Query Early-Exit** | `search-modules/engine.js:616` | `nq.length <= 3` uses `_bucketIndex` lookup |
+| **Short Query Early-Exit** | `search-modules/engine.js` | `nq.length <= 3` uses `_bucketIndex` lookup |
 | **Data Fetch Timeout** | `search-modules/config.js:57` | `conDataServiceWaitMs: 1200` |
-| **Early Prefetch Window** | `search.js:77` | 40 attempts × 20ms = 800ms window |
+| **Early Prefetch Window** | `search.js` | 40 attempts × 20ms = 800ms window |
 | **Debounce Interval** | `search-modules/config.js:56` | `debounceMs: 150` |
-| **Escape Key Handling** | `search-modules/overlay.js:192` | Centralized via `OverlayService.close('escape')` |
+| **Escape Key Handling** | `search-modules/overlay.js` | Centralized via `OverlayService.close('escape')` |
+| **Structured Log Catches**| All search-modules | `console.warn('[SearchModule:<name>]', e)` |
 
 ### Grounded Code Examples
 
@@ -175,5 +180,7 @@ window.__searchUIController = {
 ## 6. Development Standards & Compliance
 
 - **ES Specifications**: IIFE design pattern, strictly `'use strict'`, no ES modules (`import`/`export`), no external framework dependencies (React, jQuery, Vue).
+- **Encapsulated State Accessors**: State properties are accessed and modified via method helpers on `State` (e.g. `State.setWrapperParent()`, `State.getSavedScrollY()`, `State.clearTimeouts()`).
+- **Structured Log Safety**: Catch blocks log structured warnings (`console.warn('[SearchModule:<name>]', e)`) while preserving exact fallback return contracts.
 - **DOM & CSS Standard**: Refer strictly to [`NAMING.md`](./NAMING.md) for BEM and DOM element conventions.
 - **Migration & History**: Refer to [`MIGRATION.md`](./MIGRATION.md) for upgrade history from legacy search scripts.

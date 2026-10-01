@@ -4,7 +4,7 @@
 >
 > **สำหรับ:** AI และนักพัฒนาที่จะแก้/ขยายระบบ Search
 >
-> **ไฟล์หลัก (v4.0):** `assets/js/search-system/search.js` (entry point หลัก ที่โหลดทุก module) + `assets/js/search-system/search-modules/` (14 modules รวม `engine.js` และ `discovery.js`)
+> **ไฟล์หลัก (v4.0):** `assets/js/search-system/search.js` (entry point หลัก ที่โหลดทุก module) + `assets/js/search-system/search-modules/` (16 modules รวม `engine.js`, `discovery.js`, `engine-data.js`, และ `data-loader.js`)
 >
 > **ไฟล์ legacy (ยังคงอยู่ชั่วคราว):** `assets/js/search-engine.js` + `assets/js/search-ui.js` + `assets/js/search-modules/` — ดู [`assets/js/search-system/MIGRATION.md`](../assets/js/search-system/MIGRATION.md) สำหรับการ migrate
 >
@@ -44,7 +44,7 @@
 
 - **`search-system/search.js`** — Entry point หลัก (IIFE, ไม่มี dependency) ที่โหลด modules ทั้งหมดแบบ 5-phase parallel, จัดการ data prefetch, และบูตระบบ — เหมือน `ure.js` ของระบบ URE
 - **`search-system/search-modules/engine.js`** — เอนจินค้นหา (IIFE module) ใช้ **substring search** แบบเบาสำหรับผลลัพธ์ทันที และ **Fuse.js** สำหรับ fuzzy search ที่แม่นยำกว่า — แทนที่ `search-engine.js` แบบ standalone เดิม
-- **`search-system/search-modules/`** — กลุ่มโมดูล 13 ไฟล์ แบ่งเป็น 5 phases ตาม dependency
+- **`search-system/search-modules/`** — กลุ่มโมดูล 16 ไฟล์ แบ่งเป็น 5 phases ตาม dependency
 
 ### โครงสร้างข้อมูล (Data Shape)
 
@@ -90,7 +90,7 @@
              │                                 │
              ▼                                 ▼
 ┌─────────────────────────┐    ┌──────────────────────────────┐
-│  search-engine.js       │    │  search-modules/ (12 files)  │
+│  search-engine.js       │    │  search-modules/ (16 files)  │
 │  • Immediate substring  │    │  Phase 1: types, config,     │
 │    search (O(n))        │    │          state               │
 │  • Fuse.js (CDN, async) │    │  Phase 2: utils,             │
@@ -149,7 +149,10 @@
 | 3 | `suggestions.js` | `SuggestionService`, `ReadyModeService` | ข้อเสนอแนะระหว่างพิมพ์ + trending เมื่อ input ว่าง (v2.0: multi-source + badges) |
 | 3 | `input-bar.js` | `UIService`, `IconSlotService`, `ClearBtnService` | จัดการ input bar, ปุ่มล้าง, ไอคอน search/back |
 | 4 | `overlay.js` | `OverlayService` | จัดการ fullscreen search overlay |
-| 5 | `engine.js` | `SearchEngine` | ★ v3.0 — comprehensive search engine (modular IIFE) |
+| 4 | `discovery.js` | `DiscoveryService` | Render related content section |
+| 4 | `engine-data.js` | `EngineData` | Raw data normalization, flattenDataToDocs, type/category indexing |
+| 4 | `data-loader.js` | `DataLoader` | Resilient data loading with retry backoff & late-data watcher |
+| 5 | `engine.js` | `SearchEngine` | ★ v3.0 — comprehensive search engine core & query scoring |
 | 5 | `search-controller.js` | `SearchController` | ดำเนินการค้นหา จัดการ history commit, Fuse upgrade (rename จาก `search.js` เดิม) |
 
 ### Namespace
@@ -165,6 +168,7 @@ window.SearchModules = {
   KeyboardAutoToggleService, RenderingService, FilterService,
   SuggestionService, ReadyModeService, UIService,
   IconSlotService, ClearBtnService, OverlayService,
+  DiscoveryService, EngineData, DataLoader,
   SearchController, VirtualScrollEngine,
   SearchEngine,  // ★ v3.0 — engine อยู่ใน namespace เดียวกับ modules อื่น
 };
@@ -359,7 +363,7 @@ function defaultNormalizeText(s) {
 - ★ v3.0: สร้าง `_typeIndex` (entry สำหรับ type names ทุกภาษา)
 - ★ v3.0: สร้าง `_categoryIndex` (entry สำหรับ category names ทุกภาษา)
 
-**`flattenDataToDocs(data, normalizeFn)`** — เต็มรูปแบบ ใช้สำหรับ Fuse.js:
+**`flattenDataToDocs(data, normalizeFn)`** — เต็มรูปแบบ อยู่ใน `engine-data.js` (`EngineData.flattenDataToDocs`):
 - ทำ normalization ผ่าน `normalizeFn` ที่ส่งเข้ามา
 - รวม field เพิ่มเติม: `*_name` fields (เช่น `short_name`, `official_name`)
 - ใช้เมื่อสร้าง Fuse index เท่านั้น
@@ -2099,3 +2103,16 @@ Test cases ครอบคลุม:
 - [`AI_CODING_GUIDE.md`](./AI_CODING_GUIDE.md) — มาตรฐานโค้ดที่ยึดใน v4.0 (IIFE, 2-space, single quotes)
 - [`AI_FORBIDDEN.md`](./AI_FORBIDDEN.md) — กฎเหล็กที่ v4.0 ปฏิบัติตาม (no ES modules, no jQuery, no innerHTML with user input)
 - [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) — มาตรฐานเอกสารที่ section นี้ปฏิบัติตาม
+
+
+### 19.17 Structural Architecture Refactoring (Slice A + Slice B)
+
+ในเวอร์ชันล่าสุด ระบบ Search ได้รับการปรับปรุงโครงสร้างภายในเพื่อเพิ่มเสถียรภาพและ Dev Experience โดยคงพฤติกรรม ผลลัพธ์ และ Public API เดิม 100%:
+
+1. **สกัด `engine-data.js` จาก `engine.js`**: แยกฟังก์ชัน `flattenDataToDocs` และ helpers ในการแปลงโครงสร้างข้อมูลดิบออกจากเอนจินค้นหา ทำให้ `engine.js` กระชับและมุ่งเน้นที่การให้คะแนนและค้นหา
+2. **สกัด `data-loader.js` จาก `search.js`**: แยก `loadDataWithRetry` และ late-data watcher ออกจาก `search.js` ทำให้ `search.js` ทำหน้าที่เป็นเพียง lifecycle orchestrator
+3. **Encapsulate State Accessors**: เพิ่ม accessor methods บน `State` (`setWrapperParent`, `getSavedScrollY`/`setSavedScrollY`, `clearTimeouts`) เพื่อเลิกการแก้ไข property ตรงๆ ใน `overlay.js` และ `rendering.js`
+4. **Deduplicate Card Copy Handler**: ย้าย copy listener ใน `discovery.js` ให้เรียกผ่าน `RenderingService._attachCopyHandler` ลดการผูก event ซ้ำซ้อนและลบ duplicate discovery copy flag
+5. **Canonical HTML Escaping**: รวมการ escape HTML ใน `engine.js` ให้ผ่าน `StringService.escapeHtml` ใน `utils.js`
+6. **Guarded Lifecycle Listeners**: เพิ่ม guard ใน `search.js` สำหรับ cleanup/bind `beforeunload` listener เพื่อป้องกัน listener leak เมื่อ re-init
+7. **Structured Log Safety**: เปลี่ยน empty catch blocks ทั้งหมดเป็น `console.warn('[SearchModule:<name>]', e)` โดยคงค่า fallback return contract เดิม

@@ -2,7 +2,7 @@
 
 - **System Described**: CSS Class and DOM Element Naming Standard for FanHoard Search System v3.0.0
 - **Entry File**: `assets/js/search-system/search-system.css`
-- **Dependencies**: `assets/js/search-system/search-modules/input-bar.js`, `overlay.js`, `rendering.js`, `suggestions.js`
+- **Dependencies**: `assets/js/search-system/search-modules/input-bar.js`, `overlay.js`, `rendering.js`, `discovery.js`, `suggestions.js`
 - **Verification**: `npm test`
 
 ---
@@ -117,7 +117,7 @@ Fallback virtual scrolling container used when URE is unmounted.
 | `search-controller.js` / `SearchController` | Search orchestrator module and class | `search-service.js` / `SearchService` |
 | `window.__searchUIController` | Global UI controller instance | `window.__searchUI` |
 | `window.__isRestoringScroll` | Internal window flag tracking scroll restoration state | `window.__renderIsRestore` |
-| `window._hasCopyResultHandler` | Internal window flag tracking copy event handler setup | `window._copyResultTextHandlerSet` |
+| `window._hasCopyResultHandler` | Internal window flag tracking copy event handler setup | `window._copyResultTextHandlerSet` (Note: `discovery copy flag` removed) |
 | `window._revealStickyHeader` | Sticky header display function | `window._showStickyHeader` |
 
 ---

@@ -29,13 +29,13 @@ assets/js/
 ```
 
 #### Modular Architecture (v3.0.0)
-In v3.0.0, HTML files load a single orchestrating entry point (`search.js`) that automatically loads all 14 modular sub-services in 5 parallel phases:
+In v3.0.0, HTML files load a single orchestrating entry point (`search.js`) that automatically loads all 16 modular sub-services in 5 parallel phases:
 
 ```
 assets/js/search-system/
 ├── search.js                    # Auto-loader & Primary Entry Point
 ├── search-system.css            # Supplemental Badge & UI CSS
-└── search-modules/              # 14 Specialized Sub-Service Modules
+└── search-modules/              # 16 Specialized Sub-Service Modules
     ├── types.js
     ├── config.js
     ├── state.js
@@ -48,8 +48,10 @@ assets/js/search-system/
     ├── input-bar.js
     ├── overlay.js
     ├── discovery.js
+    ├── engine-data.js           # Raw Data Normalization & Document Flattening
+    ├── data-loader.js           # Exponential Backoff Retry Loader & Late-Data Watcher
     ├── engine.js                # Modular Search Engine Core
-    └── search-controller.js        # Search Orchestrator & ConDataService Bridge
+    └── search-controller.js     # Search Orchestrator & ConDataService Bridge
 ```
 
 ```html
@@ -89,21 +91,21 @@ To migrate HTML pages from v2.x to v3.0.0, execute the following steps:
 | **Phase 1** | `types.js`, `config.js`, `state.js` | Foundation constants, JSDoc typedefs, shared state store |
 | **Phase 2** | `utils.js`, `virtual-scroll.js` | String normalization helpers, fallback virtual scroll engine |
 | **Phase 3** | `url-history.js`, `keyboard.js`, `rendering.js`, `suggestions.js`, `input-bar.js` | Keyboard management, rendering, suggestion engine, input bar widgets |
-| **Phase 4** | `overlay.js`, `discovery.js` | Fullscreen overlay manager and discovery related content service |
+| **Phase 4** | `overlay.js`, `discovery.js`, `engine-data.js`, `data-loader.js` | Fullscreen overlay manager, discovery related content, document flattening, and data loader |
 | **Phase 5** | `engine.js`, `search-controller.js` | Modular search engine core and search service orchestrator |
 
 ---
 
 ## 4. Key Performance & Algorithmic Enhancements in v3.0.0
 
-### 4.1 Modular Search Engine (`search-modules/engine.js`)
-The search engine is no longer a monolithic file. It is instantiated inside `SearchModules.SearchEngine` and exposes the exact same public API as v2.x (`window.SearchEngine`).
+### 4.1 Modular Search Engine (`search-modules/engine.js` & `search-modules/engine-data.js`)
+The search engine is no longer a monolithic file. Raw data parsing and document flattening logic (`flattenDataToDocs`) is isolated inside `search-modules/engine-data.js`. Search scoring and query execution are handled by `search-modules/engine.js`. The global public API (`window.SearchEngine`) remains identical to v2.x.
 
 ### 4.2 Candidate Bucket Indexing for Short Queries
 For query strings where `nq.length <= 3`, `SearchEngine` uses `_bucketIndex.get(firstChar)` to immediately retrieve candidate documents rather than scanning the entire document set:
 
 ```javascript
-// Candidate bucket index fast-path (search-modules/engine.js:616)
+// Candidate bucket index fast-path (search-modules/engine.js)
 if (nq.length <= 3 && _bucketIndex) {
   const firstChar = nq.charAt(0);
   if (_bucketIndex.has(firstChar)) {
@@ -116,15 +118,15 @@ if (nq.length <= 3 && _bucketIndex) {
 `SearchEngine` maintains an LRU result cache (`_resultCache`) capped at `50` entries (`RESULT_CACHE_CAP = 50`). When the cache exceeds capacity, the oldest entry is evicted:
 
 ```javascript
-// LRU result cache capping (search-modules/engine.js:908)
+// LRU result cache capping (search-modules/engine.js)
 if (_resultCache.size >= RESULT_CACHE_CAP) {
   const oldestKey = _resultCache.keys().next().value;
   _resultCache.delete(oldestKey);
 }
 ```
 
-### 4.4 Early Prefetch & Stashed Query Resolution
-During script loading, `search.js` initiates an early prefetch Promise targeting `ConDataService.getAssembled()`. If user queries occur prior to data assembly, `SearchController` stashes the query in `window.__pendingSearch` and executes it immediately upon boot completion.
+### 4.4 Resilient Data Fetching & Early Prefetching
+During script loading, `search.js` initiates an early prefetch Promise targeting `ConDataService.getAssembled()`. `DataLoader` (`search-modules/data-loader.js`) manages exponential backoff retry attempts (`loadDataWithRetry`) and late data arrival watching (`_watchForLateData`). If user queries occur prior to data assembly, `SearchController` stashes the query in `window.__pendingSearch` and executes it immediately upon boot completion.
 
 ---
 
