@@ -1,5 +1,5 @@
 ---
-version: 3.0.7
+version: 3.0.8
 date: 2026-09-30T07:45:00.000Z
 title: Search system restructure: clearer names, same behavior
 subtitle: Internal code names were cleaned up for easier development (search-controller, search UI controller). No visual or functional change.
