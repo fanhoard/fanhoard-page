@@ -75,7 +75,7 @@
     //   v4.0: discovery.js added here. It uses lazy lookups for
     //   RenderingService and SearchEngine so it can safely load before
     //   engine.js (Phase 5) — those references are resolved at runtime.
-    ['overlay.js', 'discovery.js'],
+    ['overlay.js', 'discovery.js', 'engine-data.js'],
     // Phase 5: Engine + Search service — depend on everything above
     ['engine.js', 'search-controller.js'],
   ];
