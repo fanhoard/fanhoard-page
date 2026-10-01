@@ -1,7 +1,7 @@
 // Path:    assets/js/loading-system/fvl-modules/renderer.js
 // Purpose: DOM structure builders for each FVL display mode.
 
-(function(window) {
+(function() {
   'use strict';
 
   var M = window.FVLModules = window.FVLModules || {};
@@ -9,10 +9,25 @@
   var Renderer = (function() {
 
     function spinnerSVG() {
+      if (M.Spinner) {
+        return M.Spinner.renderSVG();
+      }
       return '<svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
            +   '<circle class="fvl-track" cx="26" cy="26" r="22"/>'
            +   '<circle class="fvl-arc"   cx="26" cy="26" r="22"/>'
            + '</svg>';
+    }
+
+    function _applyVariantIfOpted(spinnerEl, inst) {
+      if (!spinnerEl || !M.Spinner) return;
+      var opts = inst.options || {};
+      var vOpts = opts.variant || opts.spinner;
+      if (!vOpts && (opts.determinate || opts.progress != null)) {
+        vOpts = { determinate: opts.determinate, progress: opts.progress };
+      }
+      if (vOpts) {
+        M.Spinner.applyVariant(spinnerEl, vOpts);
+      }
     }
 
     function applyTheme(rootEl, theme, targetEl) {
@@ -39,6 +54,7 @@
 
       var spinner = M.Utils.DOM.create('div', 'fvl-spinner', { 'aria-hidden': 'true' });
       spinner.innerHTML = spinnerSVG();
+      _applyVariantIfOpted(spinner, inst);
 
       var text = M.Utils.DOM.create('div', 'fvl-text');
       var msg  = M.Utils.DOM.create('div', 'fvl-msg');
@@ -69,6 +85,7 @@
       var inner = M.Utils.DOM.create('div', 'fvl-scoped-inner');
       var spinner = M.Utils.DOM.create('div', 'fvl-spinner', { 'aria-hidden': 'true' });
       spinner.innerHTML = spinnerSVG();
+      _applyVariantIfOpted(spinner, inst);
 
       inner.appendChild(spinner);
       if (inst.options.message) {
@@ -96,6 +113,8 @@
 
       var spinner = M.Utils.DOM.create('span', 'fvl-spinner fvl-spinner-inline', { 'aria-hidden': 'true' });
       spinner.innerHTML = spinnerSVG();
+      _applyVariantIfOpted(spinner, inst);
+
       wrap.appendChild(spinner);
 
       if (inst.options.message) {
@@ -145,4 +164,4 @@
   })();
 
   M.Renderer = Renderer;
-})(typeof window !== 'undefined' ? window : globalThis);
+})();

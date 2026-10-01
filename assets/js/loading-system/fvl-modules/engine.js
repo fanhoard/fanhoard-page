@@ -357,15 +357,20 @@
       if (newOpts.message !== undefined || newOpts.lang !== undefined) {
         _setTexts(inst);
       }
-      if (newOpts.progress !== undefined && inst.barEl) {
-        if (newOpts.progress == null) {
-          inst.barEl.classList.remove('fvl-topbar-determinate');
-          inst.barEl.classList.add('fvl-topbar-indeterminate');
-          inst.barEl.style.width = '';
-        } else {
-          inst.barEl.classList.remove('fvl-topbar-indeterminate');
-          inst.barEl.classList.add('fvl-topbar-determinate');
-          inst.barEl.style.width = Math.max(0, Math.min(1, newOpts.progress)) * 100 + '%';
+      if (newOpts.progress !== undefined) {
+        if (inst.barEl) {
+          if (newOpts.progress == null) {
+            inst.barEl.classList.remove('fvl-topbar-determinate');
+            inst.barEl.classList.add('fvl-topbar-indeterminate');
+            inst.barEl.style.width = '';
+          } else {
+            inst.barEl.classList.remove('fvl-topbar-indeterminate');
+            inst.barEl.classList.add('fvl-topbar-determinate');
+            inst.barEl.style.width = Math.max(0, Math.min(1, newOpts.progress)) * 100 + '%';
+          }
+        }
+        if (inst.spinnerEl && M.Spinner) {
+          M.Spinner.updateProgress(inst.spinnerEl, newOpts.progress);
         }
       }
       M.State.emit('updated', { id: id, mode: inst.mode });
@@ -410,6 +415,7 @@
         update: function(o) { update(inst.id, o); },
         setMessage: function(msg) { update(inst.id, { message: msg }); },
         setProgress: function(p) { update(inst.id, { progress: p }); },
+        updateProgress: function(p) { update(inst.id, { progress: p }); },
         getState: function() { return inst.state; },
         on: function(event, fn) {
           return M.State.on('instance:' + inst.id + ':' + event, fn);

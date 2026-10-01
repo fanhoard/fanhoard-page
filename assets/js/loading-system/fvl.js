@@ -9,7 +9,7 @@
 
   if (win.FVL && win.FVL._initialized) return;
 
-  console.log("[DEBUG isNode]", typeof process, typeof window); var isNode = typeof process !== 'undefined' && process.versions && process.versions.node;
+ var isNode = typeof process !== 'undefined' && process.versions && process.versions.node;
   var _req = (function() {
     try { return eval('require'); } catch (_) { return null; }
   })();
@@ -20,7 +20,7 @@
   var LOAD_PHASES = [
     ['namespace.js', 'types.js', 'config.js'],
     ['utils.js', 'state.js'],
-    ['renderer.js', 'animator.js'],
+    ['renderer.js', 'animator.js', 'spinner.js'],
     ['engine.js']
   ];
 
@@ -103,7 +103,7 @@
         var modFiles = [
           'namespace.js', 'types.js', 'config.js',
           'utils.js', 'state.js',
-          'renderer.js', 'animator.js',
+          'renderer.js', 'animator.js', 'spinner.js',
           'engine.js'
         ];
         modFiles.forEach(function(file) {
@@ -167,8 +167,10 @@
         _injectCSS();
         var Utils = M.Utils;
         var o = Utils ? Utils.normalizeOptions(opts) : ((typeof opts === 'string') ? { message: opts } : (opts || {}));
-        o.mode = 'fullscreen';
-        o.id = CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
+        if (!o.mode) o.mode = 'fullscreen';
+        if (o.mode === 'fullscreen' && !o.id) {
+          o.id = CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
+        }
         return Engine.show(o);
       },
 
@@ -198,28 +200,39 @@
         return inst ? inst.rootEl : null;
       },
 
-      showInContent: function(opts) { return this.show(opts); },
-      hideFromContent: function()   { return this.hide(); },
+      showInContent: function(opts) {
+        var Utils = M.Utils;
+        var o = Utils ? Utils.normalizeOptions(opts) : ((typeof opts === 'string') ? { message: opts } : (opts || {}));
+        o.mode = o.mode || 'scoped';
+        o.target = o.target || '#content-loading';
+        return this.show(o);
+      },
+      hideFromContent: function(id) { return this.hide(id || 'fvl-scoped-content'); },
     };
 
     function installGlobalAliases() {
       try {
-        win.showInstantLoadingOverlay   = function(opts) { return LoadingService.show(opts); };
-        win.removeInstantLoadingOverlay = function()     { return LoadingService.hide(); };
-
+        if (!win.showInstantLoadingOverlay) {
+          win.showInstantLoadingOverlay = function(opts) { return LoadingService.show(opts); };
+        }
+        if (!win.removeInstantLoadingOverlay) {
+          win.removeInstantLoadingOverlay = function() { return LoadingService.hide(); };
+        }
         if (!win._navCore_contentLoadingManager) {
           win._navCore_contentLoadingManager = LoadingService;
         }
         if (!win._headerV2_contentLoadingManager) {
           win._headerV2_contentLoadingManager = LoadingService;
         }
-        win.__removeInstantLoadingOverlay = function() { return LoadingService.hide(); };
+        if (!win.__removeInstantLoadingOverlay) {
+          win.__removeInstantLoadingOverlay = function() { return LoadingService.hide(); };
+        }
       } catch (_) {}
     }
 
     function installNavCoreProxy() {
       try {
-        if (win.NavCoreModules) {
+        if (win.NavCoreModules && !win.NavCoreModules.LoadingService) {
           win.NavCoreModules.LoadingService = LoadingService;
         }
       } catch (_) {}
@@ -291,6 +304,7 @@
         opts.mode = 'inline';
         return Engine.show(opts);
       },
+      spinner: function(opts) { return M.Spinner ? M.Spinner.create(opts) : null; },
       topbar: function(opts) {
         opts = opts || {};
         opts.mode = 'topbar';
