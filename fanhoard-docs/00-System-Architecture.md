@@ -54,7 +54,7 @@
 | 4 | **Language/i18n System** | ระบบแปลภาษา client-side พร้อม build-time static generation | `assets/js/lang-core.js` + `language.js` + 14 modules (static mode: 6) | [`04-Language`](./04-Internationalization-And-Build.md) |
 | 5 | **ConData Service** | Data access layer สำหรับ content (emoji, symbol, fancy, cards) | `assets/js/con-data-service/con-data-service.js` + `con-data-registry.js` | [`05-ConData`](./05-Content-Data-Service.md) |
 | 6 | **Popup System** | ระบบ popup ส่วนกลาง — 9 presets, fullscreen, zero coupling | `assets/js/popup.js` + 12 popup-modules | [`06-Popup`](./06-Popup-System.md) |
-| 7 | **Loading System (FVL)** | Fullscreen Visual Loader — หน้าจอโหลดที่ครอบการเปลี่ยนเนื้อหา | `assets/js/loading-system/fvl.js` (single file, 9 inline sections) | [`07-Loading`](./07-Loading-System.md) |
+| 7 | **Loading System (FVL)** | Fullscreen Visual Loader — หน้าจอโหลดที่ครอบการเปลี่ยนเนื้อหา | `assets/js/loading-system/fvl.js` + `fvl-modules/` (9 modules) | [`07-Loading`](./07-Loading-System.md) |
 
 > เอกสารเพิ่มเติมที่ครอบคลุม cross-cutting concerns: [`08-Performance`](./08-Performance-Architecture.md), [`09-Deployment`](./09-Deployment-Guide.md), [`10-Content`](./10-Content-Guide.md), [`11-Whats-New`](./11-Release-Notes-System.md)
 
@@ -142,7 +142,7 @@
 - Loading strategies:
   - **Sequential**: URE (12 modules), Popup (12 modules) — ต้องโหลดตามลำดับ dependency
   - **Parallel-within-phase**: Search (5 phases), Nav-Core (5 phases), Language (3 phases) — โหลดกลุ่ม module พร้อมกัน
-  - **Inline single-file**: FVL (9 sections ในไฟล์เดียว, 1 HTTP request)
+  - **Parallel-within-phase**: Search (5 phases), Nav-Core (5 phases), Language (3 phases), FVL (4 phases)
 
 > ดูมาตรฐานการเขียนโค้ดทั้งหมดใน [`AI_CODING_GUIDE.md`](./AI_CODING_GUIDE.md)
 
@@ -196,7 +196,8 @@ fanhoard-page/
 │   │   ├── popup.js                    # Popup System entry (sequential loader)
 │   │   ├── popup-modules/              # 12 popup modules
 │   │   ├── loading-system/
-│   │   │   └── fvl.js                  # Single-file FVL (9 inline sections)
+│   │   │   ├── fvl.js                  # FVL Orchestrator (4 LOAD_PHASES)
+│   │   │   └── fvl-modules/            # 9 FVL submodules
 │   │   │
 │   │   ├── modern-navigation.js        # Bottom nav bar
 │   │   ├── copyNotification.js         # Copy feedback UI
@@ -451,7 +452,7 @@ assets/db/con-data/
 | requestIdleCallback | Search (Fuse index), ConData (warmup) |
 | RAF Batching | URE Scheduler |
 | DocumentFragment | ทั่วไป |
-| Single-file inline modules | FVL (1 HTTP request) |
+| Modular Phased Loading | FVL (4 LOAD_PHASES) |
 
 ---
 
