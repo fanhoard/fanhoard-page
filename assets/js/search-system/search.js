@@ -458,7 +458,7 @@
         if (M.DiscoveryService?.destroy) {
           try { M.DiscoveryService.destroy(); } catch (e) { console.warn('[SearchModule:search]', e); }
         }
-        VirtualScrollEngine.destroy();
+        VirtualScrollEngine?.destroy?.();
         KeyboardAutoToggleService.disableAutoToggle();
 
         DOMService.off(window,   'resize',   Handlers.resize);
@@ -528,10 +528,10 @@
       isKeyboardOpen  : () => M.KeyboardService.isKeyboardOpen(),
 
       getVSStats: () => ({
-        itemCount   : VirtualScrollEngine._items.length,
-        visibleCount: VirtualScrollEngine._vis?.size ?? 0,
-        poolSize    : VirtualScrollEngine._pool.length,
-        totalHeight : VirtualScrollEngine._total,
+        itemCount   : VirtualScrollEngine?._items?.length ?? 0,
+        visibleCount: VirtualScrollEngine?._vis?.size ?? 0,
+        poolSize    : VirtualScrollEngine?._pool?.length ?? 0,
+        totalHeight : VirtualScrollEngine?._total ?? 0,
       }),
     };
 
