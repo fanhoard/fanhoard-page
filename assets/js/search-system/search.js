@@ -538,7 +538,7 @@
     init();
     if (window.__searchUIController) {
       if (window.__searchUIController._beforeUnloadHandler) {
-        window.removeEventListener('beforeunload', window.__searchUIController._beforeUnloadHandler);
+        try { window.removeEventListener('beforeunload', window.__searchUIController._beforeUnloadHandler); } catch (e) { console.warn('[SearchModule:search]', e); }
       }
       window.__searchUIController._beforeUnloadHandler = () => { try { destroy(); } catch (e) { console.warn('[SearchModule:search]', e); } };
       window.addEventListener('beforeunload', window.__searchUIController._beforeUnloadHandler, { passive: true });

@@ -60,6 +60,12 @@
   }
 
   // ── RenderingService ──────────────────────────────────────────────────────
+  function _markOverlayDidSearch() {
+    if (window.SearchModules?.State?.overlayOpen) {
+      window.__overlayDidSearch = true;
+    }
+  }
+
   const RenderingService = {
 
     /** Refresh i18n cache after language change. */
@@ -231,7 +237,7 @@
           DOMService.setHTML(container, '');
           this._renderEmpty(container, lang, showSuggestionsIfNoResult);
           if (!window.__isRestoringScroll) {
-            if (window.SearchModules?.State?.overlayOpen) window.__overlayDidSearch = true;
+            _markOverlayDidSearch();
             window.scrollTo({ top: 0, behavior: 'instant' });
             if (window._revealStickyHeader) window._revealStickyHeader();
           }
@@ -266,7 +272,7 @@
         }
 
         if (!window.__isRestoringScroll) {
-          if (window.SearchModules?.State?.overlayOpen) window.__overlayDidSearch = true;
+          _markOverlayDidSearch();
           window.scrollTo({ top: 0, behavior: 'instant' });
           if (window._revealStickyHeader) window._revealStickyHeader();
         }
