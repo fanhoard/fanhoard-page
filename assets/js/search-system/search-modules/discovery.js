@@ -259,54 +259,16 @@
    * @param {Element} listEl
    */
   function _attachCopyHandler(listEl) {
-    try {
-      if (!listEl || listEl._discoveryCopyAttached) return;
-
-      const _copy = (card) => {
-        if (!card?.hasAttribute('data-text')) return;
-        const text = StringService.decodeUrl(card.getAttribute('data-text'));
-        const name = StringService.decodeUrl(card.getAttribute('data-name') || '');
-        if (M.NotificationService?.copyText) {
-          M.NotificationService.copyText(text, name || undefined);
-        }
-      };
-
-      const clickHandler = (e) => {
-        const card = e.target.closest('.result-card');
-        if (card) { e.preventDefault(); _copy(card); }
-      };
-
-      const keydownHandler = (e) => {
-        if (e.key !== 'Enter' && e.key !== ' ') return;
-        const card = e.target.closest('.result-card');
-        if (card) { e.preventDefault(); _copy(card); }
-      };
-
-      listEl.addEventListener('click', clickHandler);
-      listEl.addEventListener('keydown', keydownHandler);
-
-      listEl._discoveryClickHandler = clickHandler;
-      listEl._discoveryKeydownHandler = keydownHandler;
-      listEl._discoveryCopyAttached = true;
-    } catch (e) {
-      console.warn('[Discovery] _attachCopyHandler failed:', e);
+    const RS = M.RenderingService || window.SearchModules?.RenderingService;
+    if (RS && RS._attachCopyHandler) {
+      RS._attachCopyHandler(listEl);
     }
   }
 
   function _detachCopyHandler(listEl) {
-    try {
-      if (!listEl) return;
-      if (listEl._discoveryClickHandler) {
-        listEl.removeEventListener('click', listEl._discoveryClickHandler);
-        delete listEl._discoveryClickHandler;
-      }
-      if (listEl._discoveryKeydownHandler) {
-        listEl.removeEventListener('keydown', listEl._discoveryKeydownHandler);
-        delete listEl._discoveryKeydownHandler;
-      }
-      delete listEl._discoveryCopyAttached;
-    } catch (e) {
-      console.warn('[Discovery] _detachCopyHandler failed:', e);
+    const RS = M.RenderingService || window.SearchModules?.RenderingService;
+    if (RS && RS._detachCopyHandler) {
+      RS._detachCopyHandler(listEl);
     }
   }
 

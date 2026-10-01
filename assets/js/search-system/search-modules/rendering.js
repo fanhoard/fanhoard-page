@@ -357,28 +357,52 @@
      * @private
      */
     _attachCopyHandler(container) {
-      if (window._hasCopyResultHandler) return;
+      if (!container || container._hasCopyHandler) return;
 
       const _copy = (card) => {
         if (!card?.hasAttribute('data-text')) return;
         const text = StringService.decodeUrl(card.getAttribute('data-text'));
         const name = StringService.decodeUrl(card.getAttribute('data-name') || '');
-        NotificationService.copyText(text, name || undefined);
+        const ns = M.NotificationService || NotificationService;
+        if (ns && ns.copyText) ns.copyText(text, name || undefined);
       };
 
-      Handlers.copyClick = (e) => {
+      const clickHandler = (e) => {
         const card = e.target.closest('.result-card');
         if (card) { e.preventDefault(); _copy(card); }
       };
-      DOMService.on(container, 'click', Handlers.copyClick);
 
-      DOMService.on(container, 'keydown', (e) => {
+      const keydownHandler = (e) => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
         const card = e.target.closest('.result-card');
         if (card) { e.preventDefault(); _copy(card); }
-      });
+      };
 
-      window._hasCopyResultHandler = true;
+      DOMService.on(container, 'click', clickHandler);
+      DOMService.on(container, 'keydown', keydownHandler);
+
+      container._copyClickHandler = clickHandler;
+      container._copyKeydownHandler = keydownHandler;
+      container._hasCopyHandler = true;
+      if (container.id === 'searchResults' || !window._hasCopyResultHandler) {
+        window._hasCopyResultHandler = true;
+      }
+      if (container.id === 'searchResults') {
+        Handlers.copyClick = clickHandler;
+      }
+    },
+
+    _detachCopyHandler(container) {
+      if (!container) return;
+      if (container._copyClickHandler) {
+        DOMService.off(container, 'click', container._copyClickHandler);
+        delete container._copyClickHandler;
+      }
+      if (container._copyKeydownHandler) {
+        DOMService.off(container, 'keydown', container._copyKeydownHandler);
+        delete container._copyKeydownHandler;
+      }
+      delete container._hasCopyHandler;
     },
   };
 
