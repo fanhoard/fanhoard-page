@@ -136,6 +136,27 @@ spinner.updateProgress(80);
 spinner.destroy();
 ```
 
+### Scoped Empty-Target Fallback (v3.0.9)
+
+The scoped overlay is absolutely positioned inside its target. During a route
+swap the target (`#content-loading`) is emptied before the fetch completes, so
+its height collapses to 0 — and the spinner collapsed with it, leaving a blank
+content area. FVL now guards against this:
+
+- While a scoped loader is shown, if the target's height is below
+  `CONFIG.SCOPED_EMPTY_MIN_HEIGHT.THRESHOLD_PX` (240px), FVL holds
+  `min-height: 60vh` (`SCOPED_EMPTY_MIN_HEIGHT.MIN_HEIGHT`) on the target so
+  the spinner stays visible.
+- The target's original inline `min-height` is restored on hide. If several
+  scoped instances share one target, they inherit the original backup so the
+  last one to hide restores the true pre-fallback value.
+- Computed-style lookups use `target.ownerDocument.defaultView` so attach and
+  restore also work in sandboxed/test windows.
+- Zero effect when the target already has content (height ≥ threshold):
+  pages without the empty-target situation render byte-identically.
+
+Covered by `tests/loading-scoped-fallback.test.ts`.
+
 ---
 
 ## 6. Verification & Test Suite

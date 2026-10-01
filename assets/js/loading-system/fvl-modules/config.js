@@ -35,6 +35,18 @@
       topbar: 0, // N/A
     }),
 
+    // ── Scoped-mode empty-target fallback ──
+    // WHY: scoped overlay is absolutely positioned inside its target. If the
+    //   target is emptied while loading (route swap: content cleared -> fetch),
+    //   its height collapses to 0 and the spinner disappears with it, leaving
+    //   the user staring at a blank content area. When the target is shorter
+    //   than this threshold we hold a min-height on the target while shown so
+    //   the spinner stays visible; original value restored on hide.
+    SCOPED_EMPTY_MIN_HEIGHT: Object.freeze({
+      THRESHOLD_PX: 240, // apply fallback only when target is shorter than this
+      MIN_HEIGHT: '60vh',
+    }),
+
     // ── DOM tokens ──
     DOM: Object.freeze({
       ROOT_CLASS: 'fvl',

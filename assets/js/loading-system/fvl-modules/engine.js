@@ -85,9 +85,36 @@
         return false;
       }
       try {
-        inst.origTargetPos = window.getComputedStyle(target).position;
+        // ownerDocument.defaultView: works in browser AND sandboxed/test
+        // contexts where the ambient `window` is not the target's window.
+        var view = target.ownerDocument && target.ownerDocument.defaultView;
+        if (view && typeof view.getComputedStyle === 'function') {
+          inst.origTargetPos = view.getComputedStyle(target).position;
+        }
         if (inst.origTargetPos === 'static') {
           target.style.position = 'relative';
+        }
+      } catch (_) {}
+      // Empty-target fallback: keep the spinner visible when the target
+      // collapses (content cleared while loading, e.g. route swap).
+      // If another scoped instance already holds this target, inherit its
+      // ORIGINAL backup so the last instance to hide restores the true
+      // pre-fallback value instead of our own fallback height.
+      try {
+        var fb = M.CONFIG.SCOPED_EMPTY_MIN_HEIGHT;
+        if (fb && target.offsetHeight < fb.THRESHOLD_PX) {
+          var holder = (M.State.getByMode('scoped') || []).find(function(other) {
+            return other !== inst && other.targetEl === target
+              && other._setScopedFallbackMinHeight
+              && other.state !== 'hidden' && other.state !== 'destroyed';
+          });
+          if (holder) {
+            inst.origTargetMinHeight = holder.origTargetMinHeight;
+          } else {
+            inst.origTargetMinHeight = target.style.minHeight;
+            target.style.minHeight = fb.MIN_HEIGHT;
+          }
+          inst._setScopedFallbackMinHeight = true;
         }
       } catch (_) {}
       target.setAttribute('aria-busy', 'true');
@@ -189,6 +216,7 @@
         rafId: null,
         leaveTimer: null,
         origTargetPos: '',
+        origTargetMinHeight: '',
         origTargetHTML: '',
         listeners: new Set(),
       };
@@ -334,6 +362,18 @@
         } else {
           inst.targetEl.style.position = inst.origTargetPos;
         }
+      }
+      if (inst.mode === 'scoped' && inst.targetEl && inst._setScopedFallbackMinHeight) {
+        // Restore min-height only when no other scoped instance still
+        // holds the same target (avoid clobbering a follow-up loader).
+        var stillHeld = (M.State.getByMode('scoped') || []).some(function(other) {
+          return other !== inst && other.targetEl === inst.targetEl
+            && other.state !== 'hidden' && other.state !== 'destroyed';
+        });
+        if (!stillHeld) {
+          inst.targetEl.style.minHeight = inst.origTargetMinHeight || '';
+        }
+        inst._setScopedFallbackMinHeight = false;
       }
       if (inst.mode === 'inline' && inst.targetEl && inst.options.replaceContent && inst.origTargetHTML != null) {
         inst.targetEl.innerHTML = inst.origTargetHTML;
