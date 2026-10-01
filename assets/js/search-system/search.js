@@ -477,8 +477,7 @@
         if (Handlers.documentKeydownOverlay)
           DOMService.off(document, 'keydown', Handlers.documentKeydownOverlay);
 
-        State._timeouts.forEach(t => { try { clearTimeout(t); } catch {} });
-        State._timeouts.clear();
+        if (typeof State.clearTimeouts === 'function') State.clearTimeouts();
 
         DOMService.remove(DOMService.get(CONFIG.DOM.suggestionContainerId));
         DOMService.remove(DOMService.get(CONFIG.DOM.overlayContainerId));

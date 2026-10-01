@@ -77,6 +77,38 @@
     _timeouts                : new Set(),
     _handlersAttached        : false,
     _overlayStateMarker      : '__searchUIController_overlay_open__',
+
+    // ── Encapsulated Accessors & Helpers ─────────────────────────────────────
+    setWrapperParent(parent, next = null) {
+      this._wrapperParent = parent;
+      this._wrapperNext   = next;
+    },
+    getWrapperParent() {
+      return this._wrapperParent;
+    },
+    getWrapperNext() {
+      return this._wrapperNext;
+    },
+    getSavedScrollY() {
+      return this._savedScrollY || 0;
+    },
+    setSavedScrollY(y) {
+      this._savedScrollY = y || 0;
+    },
+    addTimeout(id) {
+      if (this._timeouts && typeof this._timeouts.add === 'function') {
+        this._timeouts.add(id);
+      }
+    },
+    clearTimeouts() {
+      if (Array.isArray(this._timeouts)) {
+        this._timeouts.forEach(t => { try { clearTimeout(t); } catch {} });
+        this._timeouts = [];
+      } else if (this._timeouts && typeof this._timeouts.clear === 'function') {
+        this._timeouts.forEach(t => { try { clearTimeout(t); } catch {} });
+        this._timeouts.clear();
+      }
+    },
   };
 
   /** @type {SearchHandlers} */

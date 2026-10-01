@@ -123,8 +123,7 @@
         // Move .search-pill into the overlay header bar
         const wrapper = DOMService.query('.search-pill');
         if (wrapper) {
-          State._wrapperParent = wrapper.parentNode;
-          State._wrapperNext   = wrapper.nextSibling;
+          State.setWrapperParent(wrapper.parentNode, wrapper.nextSibling);
 
           const bar = DOMService.create('div', 'overlay-header-bar', null, {
             display      : 'flex',
@@ -177,7 +176,7 @@
         //   Scroll window to top FIRST, then lock. overlay inset:0 then
         //   correctly anchors to the actual viewport top edge.
         const _savedScrollY = window.scrollY || window.pageYOffset || 0;
-        State._savedScrollY = _savedScrollY;
+        State.setSavedScrollY(_savedScrollY);
 
         // Bring page to top so overlay position:fixed inset:0 is correct
         if (_savedScrollY > 0) {
@@ -280,7 +279,7 @@
 
         // ⑤ Restore scroll-lock — reverse of the body-fixed technique
         // Remove fixed lock first, then restore scroll position atomically.
-        const savedScrollY = State._savedScrollY || 0;
+        const savedScrollY = State.getSavedScrollY() || 0;
         const _didSearch = !!window.__overlayDidSearch;
         window.__overlayDidSearch = false;
 
@@ -294,7 +293,7 @@
         document.body.style.position = '';
         document.body.style.top      = '';
         document.body.style.width    = '';
-        State._savedScrollY = 0;
+        State.setSavedScrollY(0);
 
         if (savedScrollY > 0 && !_didSearch) {
           window.scrollTo({ top: savedScrollY, behavior: 'instant' });
@@ -342,13 +341,7 @@
         this._showNav();
 
         // Clear any pending timeouts registered during overlay lifetime
-        if (Array.isArray(State._timeouts)) {
-          State._timeouts.forEach(t => { try { clearTimeout(t); } catch {} });
-          State._timeouts = [];
-        } else if (State._timeouts && typeof State._timeouts.clear === "function") {
-          State._timeouts.forEach(t => { try { clearTimeout(t); } catch {} });
-          State._timeouts.clear();
-        }
+        State.clearTimeouts();
 
         setTimeout(() => { State.overlayTransitioning = false; }, CONFIG.TIMING.transitionDelayMs);
       } catch (e) {
