@@ -164,6 +164,9 @@
 
         } catch (err) {
           lastErr = err;
+          if (err.name === 'AbortError' || err.message === 'AbortError') {
+            return { ok: false, aborted: true };
+          }
           if (attempt < DELAYS.length) {
             await new Promise(r => setTimeout(r, DELAYS[attempt]));
           }
