@@ -1,6 +1,11 @@
 {
   "versions": [
     {
+      "version": "3.2.18",
+      "date": "2026-10-03T22:28:51.517Z",
+      "hasDetails": true
+    },
+    {
       "version": "3.2.17",
       "date": "2026-10-03T22:21:49.624Z",
       "hasDetails": true
@@ -29,12 +34,7 @@
       "version": "3.2.12",
       "date": "2026-10-03T17:19:08.874Z",
       "hasDetails": true
-    },
-    {
-      "version": "3.2.11",
-      "date": "2026-10-03T17:11:28.877Z",
-      "hasDetails": true
     }
   ],
-  "updatedAt": "2026-10-03T22:28:51.517Z"
+  "updatedAt": "2026-10-03T22:35:19.101Z"
 }

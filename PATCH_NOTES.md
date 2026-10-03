@@ -1,23 +1,23 @@
-# แพตช์ระบบค้นหาดีไซน์ใหม่ (v3.2.18)
+# แพตช์ Data Verse ดีไซน์ใหม่ (v3.2.19)
 
 วางไฟล์ทั้งหมดใน patch นี้ทับลงบน repo ตามโครงสร้างเดิม — แตก ZIP แล้ว copy ทับได้เลย
 
-## สรุปการเปลี่ยนแปลง (v3.2.18 - Search Redesign)
+## สรุปการเปลี่ยนแปลง (v3.2.19 - Data Verse Redesign)
 
 | ไฟล์ | การเปลี่ยนแปลง |
 |------|----------------|
-| `assets/css/search.css` | การ์ดผลลัพธ์ 16px + ขอบจาง + เงานุ่ม + hover ลอย, focus ring 3px มาตรฐานใหม่, hover surface รวมศูนย์เป็น token, กำจัด Material teal เก่า (#009688) 4 จุด, fallback เพี้ยนรีเซ็ตตาม v3 |
-| `assets/js/search-system/search-system.css` | overlay + sticky header ใช้ motion มาตรฐาน (เดิม 180/160/220ms curve เก่า), คำแนะนำเป็นชิปโค้งมน 12px + focus ring ใหม่, ป้ายกำกับ pill สีแบรนด์ teal, กำจัด #009688/#13b47f เก่า |
-| `assets/md/en/current.md`, `assets/md/th/current.md` | โน้ตรีลีส v3.2.18 (EN/TH) |
+| `assets/css/nav-core-ext.css` | การ์ดฟีด radius-lg 16px (ตามสเปก ไม่ใช่ xl 24px ที่ token ยกค่าแล้ว) + hover เงา shadow-sm พร้อม transition, focus ring 3px มาตรฐานใหม่ 3 จุด, กำจัด fallback teal ยุค Material 2 จุด, ขอบ rgba(0,0,0,0.06) เก่า 3 จุด, แก้ var ซ้อนกัน 4 แบบ |
+| `assets/js/ure/ure.css` | skeleton shimmer ใช้พื้นกลาง v3 + radius 12px, curve ของ ure-appear/ure-appear-fade → มาตรฐาน cubic-bezier(0.2,0,0,1), render-error ใช้พาเลตต์ danger ใหม่ |
+| `assets/css/modern-styles.css` | fallback scope-card ปรับตาม v3, bottom nav กำจัด #009688 เก่า (stroke + ring), label active ใช้ --color-brand-hover |
+| `assets/md/en/current.md`, `assets/md/th/current.md` | โน้ตรีลีส v3.2.19 (EN/TH) |
 | `assets/md/{en,th}/releases/*`, `assets/json/version.json`, HTML/loaders | ของที่ release pipeline สร้างให้อัตโนมัติ |
 
-## จุดเด่น
+## จุดสำคัญที่ต้องรู้
 
-- **การ์ดไม่ซ้อน**: ตรวจใน browser จริง 12 การ์ด ตำแหน่ง top ต่างกันหมดทั้ง light/dark (guard เดิมของหน้านี้ยังแน่น) — อนิเมชั่น URE ยัง opacity-only ตามข้อห้ามเหล็ก
-- **ชิปคำแนะนำ**: 12px โค้งมน + ArrowDown พา focus เข้าชุดคำแนะนำได้จริง (ตรวจ activeElement ใน DOM จริง)
-- **สีตกค้างเก่าหมดสิ้น**: Material teal เดิม (#009688/rgba(0,150,136)/rgba(19,180,127)) หายจากระบบค้นหาทั้งสองไฟล์ แทนด้วยแบรนด์ teal/emerald
+- **ข้อห้ามเหล็กครบ**: wrapper `.ure-visible` ยังอนิเมต opacity อย่างเดียว (กันการ์ดซ้อน) — transform reveal อยู่ที่ `.cm-group`/`.feed-page` ที่เป็นเนื้อหาข้างใน ไม่ชนการวางตำแหน่งของ engine
+- **หน้า scope**: การ์ดใช้คลาสคู่ `.scope-card fv-card` — atom `fv-card` กลาง (24px, เงา 0 ตอนพัก = มาตรฐาน S-series) ชนะใน cascade และนั่นคือภาษาการ์ดทั้งเว็บ จึงยืนยันรับสถานะนี้ ส่วนที่แก้ใน modern-styles.css เป็นการปรับ fallback ให้ถูก v3
 
 ## ผลการทดสอบ
 
-- Unit: 234/234 ผ่าน (37 ไฟล์) | Build: ผ่านสะอาด | e2e: 16/16 (search-refresh-regression 3/3)
-- Effective DOM จริง (Playwright, light+dark): radius การ์ด 16px, พื้นการ์ดรับธีม (dark `rgb(30,41,59)`), pill 9999px, ชิป 12px, focus ring 3px `rgba(13,148,136,0.35)`
+- Unit: 234/234 (37 ไฟล์) | Build: สะอาด | e2e เต็ม: 16/16 (discover suite + scroll-lock = 9 ผ่าน)
+- Effective DOM จริง (Playwright, discover × light/dark × 375/768/1280 + scope × light/dark): ไทล์ 180 + การ์ด 2, radius 16px, พื้นรับธีม (dark `rgb(30,41,59)`), grid ปรับ 4→6 คอลัมน์ตามความกว้าง, scope การ์ด 24px มาตรฐาน fv-card ครบทั้งสองธีม
