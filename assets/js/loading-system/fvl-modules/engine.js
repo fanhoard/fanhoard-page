@@ -390,8 +390,9 @@
 
       if (_shouldLockScroll(inst)) {
         inst._scrollLocked = true;
-        if (M.ScrollLockManager) {
-          M.ScrollLockManager.lock();
+        var lockMgr = M.ScrollLockManager || (M.Utils && M.Utils.ScrollLockManager);
+        if (lockMgr) {
+          lockMgr.lock();
         }
       }
 
@@ -413,8 +414,9 @@
 
       if (inst._scrollLocked) {
         inst._scrollLocked = false;
-        if (M.ScrollLockManager) {
-          M.ScrollLockManager.unlock();
+        var lockMgr = M.ScrollLockManager || (M.Utils && M.Utils.ScrollLockManager);
+        if (lockMgr) {
+          lockMgr.unlock();
         }
       }
 

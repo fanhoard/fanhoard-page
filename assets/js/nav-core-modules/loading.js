@@ -155,6 +155,12 @@
       if (isBootVisible && o.mode === 'fullscreen') {
         this._visibleSince = Date.now();
         this._el = bootEl;
+        this._bootScrollLocked = true;
+        var M = window.FVLModules;
+        var lockMgr = (M && M.ScrollLockManager) || (M && M.Utils && M.Utils.ScrollLockManager);
+        if (lockMgr) {
+          lockMgr.lock();
+        }
         var self = this;
         return {
           id: DEFAULT_ID,

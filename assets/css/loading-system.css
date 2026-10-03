@@ -166,6 +166,8 @@
   }
 
   .fvl-fullscreen {
+    touch-action: none;
+    overscroll-behavior: none;
     position: fixed;
     top: var(--fvl-top);
     left: 0;

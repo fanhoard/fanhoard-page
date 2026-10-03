@@ -10,6 +10,11 @@ describe('Central Loader Architecture & Loading Contract (FVL)', () => {
     document.body.style.position = '';
     document.body.style.top = '';
     document.body.style.width = '';
+    document.documentElement.style.overflow = '';
+    document.documentElement.style.overscrollBehavior = '';
+    if ((window as any).FVLModules && (window as any).FVLModules.Utils && (window as any).FVLModules.Utils.ScrollLockManager) {
+      (window as any).FVLModules.Utils.ScrollLockManager.reset();
+    }
 
     // Clear globals
     delete (window as any).FVL;
@@ -226,22 +231,99 @@ describe('Central Loader Architecture & Loading Contract (FVL)', () => {
   });
 
   describe("FVL Part 1 Polish: Scroll Lock, Centered Spinners & Accessibility Polish", () => {
-    it("engages scroll-lock during fullscreen overlay and restores exact original state on hide", async () => {
+    // WHY previous tests gave false confidence:
+    // Previous tests asserted internal flags and body.style.position = 'fixed' alone without asserting actual effective DOM state
+    // on html/documentElement (which is the actual scrolling element in standard mode <!DOCTYPE html>), missing overflow: hidden
+    // and overscroll-behavior: none on documentElement, missing touch-action: none on the overlay, missing non-passive wheel/touchmove
+    // event prevention, and failing to verify all show entry paths.
+
+    it("engages scroll-lock on BOTH html and body during fullscreen overlay and restores exact original state on hide", async () => {
+      document.documentElement.style.overflow = "visible";
       document.body.style.position = "relative";
       document.body.style.color = "rgb(255, 0, 0)";
 
       const FVL = (window as any).FVL;
       FVL.show({ instant: true });
 
+      // Effective DOM state check on both html (documentElement) and body
+      expect(document.documentElement.style.overflow).toBe("hidden");
+      expect(document.documentElement.style.overscrollBehavior).toBe("none");
       expect(document.body.style.position).toBe("fixed");
       expect(document.body.style.overflow).toBe("hidden");
       expect(document.body.style.width).toBe("100%");
+      expect(document.body.style.overscrollBehavior).toBe("none");
+
+      const overlay = document.querySelector('.fvl-fullscreen') as HTMLElement;
+      expect(overlay).not.toBeNull();
+      expect(overlay.style.touchAction).toBe("none");
+      expect(overlay.style.overscrollBehavior).toBe("none");
 
       await FVL.hideInstant();
 
+      expect(document.documentElement.style.overflow).toBe("visible");
       expect(document.body.style.position).toBe("relative");
       expect(document.body.style.overflow).toBe("");
       expect(document.body.style.top).toBe("");
+    });
+
+    it("engages scroll-lock on every fullscreen show() entry path", async () => {
+      const FVL = (window as any).FVL;
+      const LoadingService = (window as any).NavCoreModules.LoadingService;
+      const showInstantOverlay = (window as any).showInstantLoadingOverlay;
+
+      // Entry path 1: FVL.show() default fullscreen
+      FVL.show({ instant: true });
+      expect(document.documentElement.style.overflow).toBe("hidden");
+      expect(document.body.style.position).toBe("fixed");
+      await FVL.hideInstant();
+      expect(document.documentElement.style.overflow).toBe("");
+      expect(document.body.style.position).toBe("");
+
+      // Entry path 2: FVL.show({ mode: 'fullscreen' })
+      FVL.show({ mode: 'fullscreen', instant: true });
+      expect(document.documentElement.style.overflow).toBe("hidden");
+      expect(document.body.style.position).toBe("fixed");
+      await FVL.hideInstant();
+      expect(document.documentElement.style.overflow).toBe("");
+
+      // Entry path 3: LoadingService.show()
+      LoadingService.show({ instant: true });
+      expect(document.documentElement.style.overflow).toBe("hidden");
+      expect(document.body.style.position).toBe("fixed");
+      await LoadingService.hideInstant();
+      expect(document.documentElement.style.overflow).toBe("");
+
+      // Entry path 4: showInstantLoadingOverlay()
+      showInstantOverlay({ instant: true });
+      expect(document.documentElement.style.overflow).toBe("hidden");
+      expect(document.body.style.position).toBe("fixed");
+      await FVL.hideInstant();
+      expect(document.documentElement.style.overflow).toBe("");
+    });
+
+    it("intercepts wheel, touchmove, and keydown scroll events when scroll-locked", async () => {
+      const FVL = (window as any).FVL;
+      FVL.show({ instant: true });
+
+      let wheelPrevented = false;
+      const wheelEvent = new Event("wheel", { cancelable: true });
+      wheelEvent.preventDefault = () => { wheelPrevented = true; };
+      document.dispatchEvent(wheelEvent);
+      expect(wheelPrevented).toBe(true);
+
+      let touchPrevented = false;
+      const touchEvent = new Event("touchmove", { cancelable: true });
+      touchEvent.preventDefault = () => { touchPrevented = true; };
+      document.dispatchEvent(touchEvent);
+      expect(touchPrevented).toBe(true);
+
+      let keyPrevented = false;
+      const keyEvent = new KeyboardEvent("keydown", { key: "PageDown", cancelable: true });
+      keyEvent.preventDefault = () => { keyPrevented = true; };
+      document.dispatchEvent(keyEvent);
+      expect(keyPrevented).toBe(true);
+
+      await FVL.hideInstant();
     });
 
     it("handles nested overlays and ref-counting for scroll-lock", async () => {
@@ -249,15 +331,19 @@ describe('Central Loader Architecture & Loading Contract (FVL)', () => {
 
       const h1 = FVL.show({ id: "fvl-1", instant: true });
       expect(document.body.style.position).toBe("fixed");
+      expect(document.documentElement.style.overflow).toBe("hidden");
 
       const h2 = FVL.show({ id: "fvl-2", instant: true });
       expect(document.body.style.position).toBe("fixed");
+      expect(document.documentElement.style.overflow).toBe("hidden");
 
       await h1.hideInstant();
       expect(document.body.style.position).toBe("fixed"); // still locked by h2
+      expect(document.documentElement.style.overflow).toBe("hidden");
 
       await h2.hideInstant();
       expect(document.body.style.position).toBe(""); // unlocked
+      expect(document.documentElement.style.overflow).toBe("");
     });
 
     it("centers mounted spinners by default and supports opt-out via options", () => {

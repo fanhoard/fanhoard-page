@@ -77,6 +77,8 @@
       if (role === "dialog") rootAttrs["aria-modal"] = "true";
       var root = M.Utils.DOM.create("div", rootClasses, rootAttrs);
       root.setAttribute(CONFIG.DOM.DATA_MODE, 'fullscreen');
+      root.style.touchAction = 'none';
+      root.style.overscrollBehavior = 'none';
       root.setAttribute(CONFIG.DOM.DATA_ATTR, inst.id);
 
       if (opts.coverAll) {

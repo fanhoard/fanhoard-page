@@ -6,6 +6,196 @@
 
   var M = window.FVLModules = window.FVLModules || {};
 
+    // ── ScrollLockManager ──
+    var ScrollLockManager = (function() {
+      var lockCount = 0;
+      var savedScrollY = 0;
+      var origBodyStyle = null;
+      var origHtmlStyle = null;
+      var touchMoveHandler = null;
+      var wheelHandler = null;
+      var keydownHandler = null;
+
+      function lock() {
+        var doc = (typeof window !== "undefined" && window.document) || document;
+        if (!doc || !doc.body) {
+          lockCount++;
+          return;
+        }
+
+        if (lockCount === 0) {
+          var win = typeof window !== "undefined" ? window : {};
+          var scrollbarWidth = Math.max(0, (win.innerWidth || 0) - (doc.documentElement ? doc.documentElement.clientWidth : (win.innerWidth || 0)));
+          savedScrollY = win.scrollY || win.pageYOffset || (doc.documentElement && doc.documentElement.scrollTop) || (doc.body && doc.body.scrollTop) || 0;
+
+          var body = doc.body;
+          var html = doc.documentElement;
+
+          origBodyStyle = {
+            position: body.style.position || "",
+            top: body.style.top || "",
+            width: body.style.width || "",
+            overflow: body.style.overflow || "",
+            paddingRight: body.style.paddingRight || "",
+            overscrollBehavior: body.style.overscrollBehavior || "",
+            hasStyleAttr: body.hasAttribute("style"),
+          };
+
+          if (html) {
+            origHtmlStyle = {
+              overflow: html.style.overflow || "",
+              overscrollBehavior: html.style.overscrollBehavior || "",
+              hasStyleAttr: html.hasAttribute("style"),
+            };
+            html.style.overflow = "hidden";
+            html.style.overscrollBehavior = "none";
+          }
+
+          body.style.position = "fixed";
+          body.style.top = "-" + savedScrollY + "px";
+          body.style.width = "100%";
+          body.style.overflow = "hidden";
+          body.style.overscrollBehavior = "none";
+
+          if (scrollbarWidth > 0) {
+            var computedPR = 0;
+            try {
+              var view = body.ownerDocument && body.ownerDocument.defaultView;
+              if (view && typeof view.getComputedStyle === "function") {
+                computedPR = parseFloat(view.getComputedStyle(body).paddingRight || "0") || 0;
+              }
+            } catch (_) {}
+            body.style.paddingRight = (computedPR + scrollbarWidth) + "px";
+          }
+
+          if (html) {
+            html.style.setProperty("--fvl-scrollbar-width", scrollbarWidth + "px");
+          }
+
+          if (!touchMoveHandler && doc.addEventListener) {
+            touchMoveHandler = function(e) {
+              if (e.target && e.target.closest && e.target.closest(".fvl-scrollable")) return;
+              if (e.cancelable) e.preventDefault();
+            };
+            doc.addEventListener("touchmove", touchMoveHandler, { passive: false });
+          }
+
+          if (!wheelHandler && doc.addEventListener) {
+            wheelHandler = function(e) {
+              if (e.target && e.target.closest && e.target.closest(".fvl-scrollable")) return;
+              if (e.cancelable) e.preventDefault();
+            };
+            doc.addEventListener("wheel", wheelHandler, { passive: false });
+          }
+
+          if (!keydownHandler && doc.addEventListener) {
+            var SCROLL_KEYS = {
+              32: 1, 33: 1, 34: 1, 35: 1, 36: 1, 37: 1, 38: 1, 39: 1, 40: 1,
+              "Space": 1, "PageUp": 1, "PageDown": 1, "End": 1, "Home": 1,
+              "ArrowUp": 1, "ArrowDown": 1, "ArrowLeft": 1, "ArrowRight": 1
+            };
+            keydownHandler = function(e) {
+              var k = e.key || e.keyCode;
+              if (SCROLL_KEYS[k]) {
+                var tag = e.target && e.target.tagName;
+                if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (e.target && e.target.isContentEditable)) return;
+                if (e.target && e.target.closest && e.target.closest(".fvl-scrollable")) return;
+                if (e.cancelable) e.preventDefault();
+              }
+            };
+            doc.addEventListener("keydown", keydownHandler, { passive: false });
+          }
+        }
+
+        lockCount++;
+      }
+
+      function unlock() {
+        if (lockCount <= 0) return;
+        lockCount--;
+
+        if (lockCount === 0) {
+          var doc = (typeof window !== "undefined" && window.document) || document;
+          var win = typeof window !== "undefined" ? window : {};
+
+          if (doc && doc.body && origBodyStyle) {
+            var body = doc.body;
+            body.style.position = origBodyStyle.position;
+            body.style.top = origBodyStyle.top;
+            body.style.width = origBodyStyle.width;
+            body.style.overflow = origBodyStyle.overflow;
+            body.style.paddingRight = origBodyStyle.paddingRight;
+            body.style.overscrollBehavior = origBodyStyle.overscrollBehavior;
+
+            if (!origBodyStyle.hasStyleAttr && body.getAttribute("style") === "") {
+              body.removeAttribute("style");
+            }
+            origBodyStyle = null;
+          }
+
+          if (doc && doc.documentElement && origHtmlStyle) {
+            var html = doc.documentElement;
+            html.style.overflow = origHtmlStyle.overflow;
+            html.style.overscrollBehavior = origHtmlStyle.overscrollBehavior;
+            html.style.removeProperty("--fvl-scrollbar-width");
+
+            if (!origHtmlStyle.hasStyleAttr && html.getAttribute("style") === "") {
+              html.removeAttribute("style");
+            }
+            origHtmlStyle = null;
+          }
+
+          if (win.scrollTo) {
+            win.scrollTo(0, savedScrollY);
+          }
+
+          if (touchMoveHandler && doc && doc.removeEventListener) {
+            doc.removeEventListener("touchmove", touchMoveHandler, { passive: false });
+            touchMoveHandler = null;
+          }
+
+          if (wheelHandler && doc && doc.removeEventListener) {
+            doc.removeEventListener("wheel", wheelHandler, { passive: false });
+            wheelHandler = null;
+          }
+
+          if (keydownHandler && doc && doc.removeEventListener) {
+            doc.removeEventListener("keydown", keydownHandler, { passive: false });
+            keydownHandler = null;
+          }
+        }
+      }
+
+      function getLockCount() { return lockCount; }
+
+      function reset() {
+        var doc = (typeof window !== "undefined" && window.document) || document;
+        if (touchMoveHandler && doc && doc.removeEventListener) {
+          doc.removeEventListener("touchmove", touchMoveHandler, { passive: false });
+        }
+        if (wheelHandler && doc && doc.removeEventListener) {
+          doc.removeEventListener("wheel", wheelHandler, { passive: false });
+        }
+        if (keydownHandler && doc && doc.removeEventListener) {
+          doc.removeEventListener("keydown", keydownHandler, { passive: false });
+        }
+        lockCount = 0;
+        savedScrollY = 0;
+        origBodyStyle = null;
+        origHtmlStyle = null;
+        touchMoveHandler = null;
+        wheelHandler = null;
+        keydownHandler = null;
+      }
+
+      return {
+        lock: lock,
+        unlock: unlock,
+        getLockCount: getLockCount,
+        reset: reset,
+      };
+    })();
+
   var Utils = (function() {
 
     // ── Option normalization (dedupes string -> { message: string }) ──
@@ -143,126 +333,10 @@
       getMessage: getMessage,
       generateId: generateId,
       autoTheme: autoTheme,
+      ScrollLockManager: ScrollLockManager,
     });
   })();
 
-  
-    // ── ScrollLockManager ──
-    var ScrollLockManager = (function() {
-      var lockCount = 0;
-      var savedScrollY = 0;
-      var origBodyStyle = null;
-      var touchMoveHandler = null;
-
-      function lock() {
-        var doc = (typeof window !== "undefined" && window.document) || document;
-        if (!doc || !doc.body) {
-          lockCount++;
-          return;
-        }
-
-        if (lockCount === 0) {
-          var win = typeof window !== "undefined" ? window : {};
-          var scrollbarWidth = Math.max(0, (win.innerWidth || 0) - (doc.documentElement ? doc.documentElement.clientWidth : (win.innerWidth || 0)));
-          savedScrollY = win.scrollY || win.pageYOffset || (doc.documentElement && doc.documentElement.scrollTop) || (doc.body && doc.body.scrollTop) || 0;
-
-          var body = doc.body;
-          origBodyStyle = {
-            position: body.style.position || "",
-            top: body.style.top || "",
-            width: body.style.width || "",
-            overflow: body.style.overflow || "",
-            paddingRight: body.style.paddingRight || "",
-            hasStyleAttr: body.hasAttribute("style"),
-          };
-
-          body.style.position = "fixed";
-          body.style.top = "-" + savedScrollY + "px";
-          body.style.width = "100%";
-          body.style.overflow = "hidden";
-
-          if (scrollbarWidth > 0) {
-            var computedPR = 0;
-            try {
-              var view = body.ownerDocument && body.ownerDocument.defaultView;
-              if (view && typeof view.getComputedStyle === "function") {
-                computedPR = parseFloat(view.getComputedStyle(body).paddingRight || "0") || 0;
-              }
-            } catch (_) {}
-            body.style.paddingRight = (computedPR + scrollbarWidth) + "px";
-          }
-
-          if (doc.documentElement) {
-            doc.documentElement.style.setProperty("--fvl-scrollbar-width", scrollbarWidth + "px");
-          }
-
-          if (!touchMoveHandler && doc.addEventListener) {
-            touchMoveHandler = function(e) {
-              if (e.target && e.target.closest && e.target.closest(".fvl-scrollable")) return;
-              if (e.cancelable) e.preventDefault();
-            };
-            doc.addEventListener("touchmove", touchMoveHandler, { passive: false });
-          }
-        }
-
-        lockCount++;
-      }
-
-      function unlock() {
-        if (lockCount <= 0) return;
-        lockCount--;
-
-        if (lockCount === 0) {
-          var doc = (typeof window !== "undefined" && window.document) || document;
-          var win = typeof window !== "undefined" ? window : {};
-
-          if (doc && doc.body && origBodyStyle) {
-            var body = doc.body;
-            body.style.position = origBodyStyle.position;
-            body.style.top = origBodyStyle.top;
-            body.style.width = origBodyStyle.width;
-            body.style.overflow = origBodyStyle.overflow;
-            body.style.paddingRight = origBodyStyle.paddingRight;
-
-            if (!origBodyStyle.hasStyleAttr && body.getAttribute("style") === "") {
-              body.removeAttribute("style");
-            }
-            origBodyStyle = null;
-          }
-
-          if (doc && doc.documentElement) {
-            doc.documentElement.style.removeProperty("--fvl-scrollbar-width");
-          }
-
-          if (win.scrollTo) {
-            win.scrollTo(0, savedScrollY);
-          }
-
-          if (touchMoveHandler && doc && doc.removeEventListener) {
-            doc.removeEventListener("touchmove", touchMoveHandler, { passive: false });
-            touchMoveHandler = null;
-          }
-        }
-      }
-
-      function getLockCount() { return lockCount; }
-
-      function reset() {
-        lockCount = 0;
-        savedScrollY = 0;
-        origBodyStyle = null;
-        touchMoveHandler = null;
-      }
-
-      return {
-        lock: lock,
-        unlock: unlock,
-        getLockCount: getLockCount,
-        reset: reset,
-      };
-    })();
-
     M.ScrollLockManager = ScrollLockManager;
-
   M.Utils = Utils;
 })(typeof window !== 'undefined' ? window : globalThis);
