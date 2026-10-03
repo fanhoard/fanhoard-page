@@ -1,34 +1,39 @@
-# FanHoard Search Rendering Fix & Animation Restore v3.2.13
+# FanHoard Design Language v3 Foundation v3.2.14
 
-## What changed in v3.2.13 (Search Results Rendering Fix + Original Active-Button Animation)
+## What changed in v3.2.14 (Design Token Foundation — White-First, High-Radius)
 
-Fixed the search page result-card stacking bug found in real-browser testing, restored the original premium `.active` button animation, and added an E2E regression guard.
+First release of the full-site visual redesign: the design token foundation every page and component reads from now speaks FanHoard Design Language v3.
 
-1. **Search result cards no longer stack on one spot (`assets/js/ure/ure.css`)**:
-   The URE virtual scroll engine positions every wrapper with an inline `transform` (`virtual-list.js`). The content-appear animation added in v3.2.8 also animated `transform` on `.ure-visible` wrappers, and CSS animations override inline styles — so every card in the first window stacked at `translateY(0)` with only the topmost card visible. Added a dedicated opacity-only `ure-appear-fade` keyframe for `.ure-visible:not(.ure-settled)` wrappers so the engine's positioning is never overridden; in-flow `.cm-group` / `.feed-page` groups keep the existing `ure-appear` reveal.
+1. **White-first page canvas (`assets/css/tokens.css`)**:
+   `--surface-base` light theme moved from slate-50 (`#f8fafc`) to the soft off-white `#FAFAFC`; cards stay pure white (`--surface-card: #ffffff`) floating on the canvas. `--fv-surface-page` now resolves to the page canvas (distinct from cards) in both light and dark themes — dark keeps `#0F172A` page / `#1E293B` card parity via the existing ThemeCore system.
 
-2. **Original active-button animation restored (`assets/css/nav-core.css`)**:
-   The main navigation underline indicator returns to its designed dynamics: ease-in `transform 200ms` when inactive, springy overshoot `transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1)` on `.active` (replacing the flattened uniform 250ms curve from v3.2.5).
+2. **Radius scale raised (`assets/css/tokens.css`)**:
+   `--radius-sm` 6→8px, `--radius-md` 8→12px, `--radius-lg` 12→16px, `--radius-xl` 16→24px, `--radius-2xl` 24→28px (xs 4px and pill 9999px unchanged). Because every component references the tokens, the entire site becomes high-radius in one move.
 
-3. **Category pills no longer shrink while selected (`assets/css/nav-core-ext.css`)**:
-   Removed the permanent `transform: scale(0.97)` from `.button-sub.active` (introduced in v3.2.5); the shrink now applies only to the momentary `:active` press state, keeping the selected pill at full size as originally designed.
+3. **Subtle borders (`assets/css/tokens.css`)**:
+   Light `--border-subtle` slate-200 → `rgba(15, 23, 42, 0.08)`; `--border-strong` slate-300 → `rgba(15, 23, 42, 0.16)`. Dark borders unchanged.
 
-4. **E2E regression guard (`e2e/search-refresh-regression.spec.ts`)**:
-   New test `result cards render at distinct positions (no transform-override stacking)` — asserts result cards occupy unique positions after render; fails on the broken state, passes after the fix.
+4. **Softer shadows & focus ring (`assets/css/tokens.css`)**:
+   `--shadow-sm/md/lg` tuned to the v3 layering spec (md `0 4px 16px -2px rgba(0,0,0,.08)`, lg `0 12px 32px -4px rgba(0,0,0,.12)`); focus ring alpha 0.45 → 0.35.
+
+5. **Standardized motion (`assets/css/tokens.css`)**:
+   Added `--ease-standard: cubic-bezier(0.2, 0, 0, 1)`; composite `--transition-fast/normal/slow` now use it (150/250/350ms kept). `--ease-out`/`--ease-in-out` remain defined for direct references. The nav `.active` springy underline animation from v3.2.13 is untouched (hardcoded curves, not token-driven).
+
+6. **Shell buttons go pill (`assets/css/base.css`)**:
+   `.btn-primary` / `.btn-secondary` border-radius now `var(--radius-full)` (9999px pill) per the v3 high-radius language.
 
 ## Verification
 
-- `npx vitest run`: 234/234 tests green across 37 test files.
-- `npx playwright test`: full E2E suite 16/16 passing (scroll-lock 3/3 included).
-- Real-browser effective-DOM verification: 12/12 first-window search cards render at unique positions and are visible; discover feed groups render in normal flow at correct offsets.
+- `npx vitest run`: 234/234 tests green across 37 test files (no tests assert token values — confirmed by grep before editing).
+- `npm run build`: SSG + Vite clean, 16 sitemap entries.
+- Effective-DOM verification on `vite preview` (Playwright, 1280×900): light body computed `rgb(250,250,252)` + text `rgb(15,23,42)`, primary button radius `9999px`; dark discover body `rgb(15,23,42)`. Screenshots captured in v3-shots/ during QA (not committed).
+- All existing custom-property names kept working (aliases untouched); 20+ dependent CSS files needed zero edits by design.
 
-## Files changed in v3.2.13
+## Files changed in v3.2.14
 
 | File | Change |
 |------|--------|
-| `assets/js/ure/ure.css` | Opacity-only `ure-appear-fade` for URE wrappers; transform appear reserved for in-flow groups |
-| `assets/css/nav-core.css` | Restore original underline spring animation on `.active` |
-| `assets/css/nav-core-ext.css` | Remove permanent shrink on `.button-sub.active` |
-| `e2e/search-refresh-regression.spec.ts` | New no-stacking regression test |
-| `assets/md/en/current.md`, `assets/md/th/current.md` | v3.2.13 release notes |
-| `assets/md/{en,th}/releases/*`, `assets/json/version.json`, loaders, HTML | Release pipeline artifacts (v3.2.13) |
+| `assets/css/tokens.css` | Design Language v3.0: white-first canvas, raised radius scale, subtle borders, softer shadows, --ease-standard, fv-surface-page=canvas |
+| `assets/css/base.css` | Shell buttons (.btn-primary/.btn-secondary) → pill radius |
+| `assets/md/en/current.md`, `assets/md/th/current.md` | v3.2.14 release notes |
+| `assets/md/{en,th}/releases/*`, `assets/json/version.json`, loaders, HTML | Release pipeline artifacts |

@@ -21,7 +21,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   FANHOARD DESIGN TOKENS v2.1 (Phase 1 Native Foundation)
+   FANHOARD DESIGN TOKENS v3.0 (White-First High-Radius Design Language)
    assets/css/tokens.css
    Single Source of Truth for Design Custom Properties
    ═══════════════════════════════════════════════════════════════ */
@@ -64,7 +64,7 @@
   --color-brand-text:    var(--color-teal-700);
   --color-brand-accent:  var(--color-emerald-600);
 
-  --surface-base:   var(--color-slate-50);
+  --surface-base:   #FAFAFC; /* v3 white-first page canvas */
   --surface-card:   #ffffff;
   --surface-hover:  var(--color-slate-100);
   --surface-active: var(--color-slate-200);
@@ -74,8 +74,8 @@
   --text-faint:     var(--color-slate-400);
   --text-inverse:   #ffffff;
 
-  --border-subtle:  var(--color-slate-200);
-  --border-strong:  var(--color-slate-300);
+  --border-subtle:  rgba(15, 23, 42, 0.08);
+  --border-strong:  rgba(15, 23, 42, 0.16);
   --border-brand:   var(--color-teal-600);
 
   --color-success:  #16a34a;
@@ -91,7 +91,7 @@
   --fv-gradient-teal: var(--color-brand-primary, #009688);
   --fv-gradient-btn:  var(--color-brand-primary, #009688);
 
-  --fv-surface-page:       var(--surface-card);
+  --fv-surface-page:       var(--surface-base);
   --fv-surface-soft:       var(--surface-hover);
   --fv-surface-hover:      var(--surface-hover);
   --fv-surface-teal-hover: var(--color-teal-50);
@@ -149,11 +149,11 @@
 
   /* ── Corner Radii Harmonized Scale ── */
   --radius-xs:   4px;
-  --radius-sm:   6px;
-  --radius-md:   8px;
-  --radius-lg:   12px;
-  --radius-xl:   16px;
-  --radius-2xl:  24px;
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+  --radius-2xl:  28px;
   --radius-full: 9999px;
 
   --fv-radius-xs:   var(--radius-xs);
@@ -167,23 +167,24 @@
   --r-card: var(--radius-xl);
 
   /* ── Elevation Tokens (Lighter, Clean Native Layering) ── */
-  --shadow-sm:    0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md:    0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg:    0 12px 24px -4px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.04);
-  --focus-ring-color: rgba(13, 148, 136, 0.45);
+  --shadow-sm:    0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md:    0 4px 16px -2px rgba(0, 0, 0, 0.08);
+  --shadow-lg:    0 12px 32px -4px rgba(0, 0, 0, 0.12);
+  --focus-ring-color: rgba(13, 148, 136, 0.35);
   --shadow-focus: 0 0 0 3px var(--focus-ring-color);
   --fv-shadow-teal: 0 4px 14px 0 rgba(13, 148, 136, 0.20);
 
   /* ── Motion & Transitions ── */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --duration-fast:   150ms;
   --duration-normal: 250ms;
   --duration-slow:   350ms;
 
-  --transition-fast:   150ms var(--ease-out);
-  --transition-normal: 250ms var(--ease-out);
-  --transition-slow:   350ms var(--ease-out);
+  --transition-fast:   150ms var(--ease-standard);
+  --transition-normal: 250ms var(--ease-standard);
+  --transition-slow:   350ms var(--ease-standard);
 
   --fv-transition-fast:   var(--transition-fast);
   --fv-transition-normal: var(--transition-normal);
@@ -233,7 +234,7 @@
     --border-subtle: var(--color-slate-700);
     --border-strong: var(--color-slate-600);
 
-    --fv-surface-page:       var(--surface-card);
+    --fv-surface-page:       var(--surface-base);
     --fv-surface-soft:       var(--surface-hover);
     --fv-surface-hover:      var(--surface-hover);
     --fv-surface-teal-hover: rgba(45, 212, 191, 0.15);
@@ -268,7 +269,7 @@
   --border-subtle: var(--color-slate-700);
   --border-strong: var(--color-slate-600);
 
-  --fv-surface-page:       var(--surface-card);
+  --fv-surface-page:       var(--surface-base);
   --fv-surface-soft:       var(--surface-hover);
   --fv-surface-hover:      var(--surface-hover);
   --fv-surface-teal-hover: rgba(45, 212, 191, 0.15);
