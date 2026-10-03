@@ -1,29 +1,23 @@
-# FanHoard Fullscreen Scroll-Lock Fix & Release Notes Update v3.2.1
+# FanHoard Fullscreen Scroll-Lock Inversion Fix & Release Notes Update v3.2.2
 
 ## What changed
 
-The FVL (FanHoardVerse Loader) fullscreen scroll-lock implementation, user-facing release notes, and developer documentation have been updated to ensure effective scroll locking and strict adherence to release workflow standards:
+The FVL (FanHoardVerse Loader) fullscreen scroll-lock implementation and developer documentation have been updated to resolve an inverted scroll-lock bug and ensure strict lock/unlock call-pair invariance across all boot adoption and loading lifecycles:
 
-1. **Dual-Container Viewport Scroll Locking**: `ScrollLockManager` now locks both `document.documentElement` (`html`) and `document.body` with `overflow: hidden` and `overscroll-behavior: none` (plus `position: fixed` and scrollbar width compensation on body), addressing unconstrained viewport scrolling on modern standard HTML5 pages.
-2. **Comprehensive Gesture & Key Interception**: Non-passive event listeners on `document` intercept `wheel`, `touchmove`, and navigation `keydown` events (Space, PageUp, PageDown, End, Home, Arrow keys), bypassing only `.fvl-scrollable` elements and editable input controls. Fullscreen overlay CSS enforces `touch-action: none`.
-3. **Boot Loader Synchronization**: Synchronized scroll lock state during early boot loader adoption in `loading.js` and ensured clean release upon readiness handshake.
-4. **Exact Style Restoration**: Saved and restored inline style attributes for both `documentElement` and `body`, detached event listeners, and restored original scroll position (`window.scrollTo(0, savedScrollY)`).
-5. **User-Facing Release Notes & Docs Alignment**: Updated canonical user-facing release notes in `assets/md/en/current.md` and `assets/md/th/current.md` to `version: 3.2.1` consolidating unreleased rounds, and updated system documentation (`07-Loading-System.md`, `15-Loading-Contract-And-Test-Plan.md`, and `11-Release-Notes-System.md`).
+1. **Inverted Scroll-Lock Bug Fix**: Resolved root cause where the background page remained scrollable during early boot loading (before module init) and became permanently locked after loading disappeared (due to missing FVL instance lookup during boot adoption handshake).
+2. **Early Boot Lock at Module Load**: Added early boot lock checks during IIFE module initialization in `assets/js/loading-system/fvl-modules/engine.js` (line 673) and `assets/js/nav-core-modules/loading.js` (line 131) to lock page scrolling as soon as `#fv-boot-loader` or `#nc-early-overlay` is detected.
+3. **Balanced Boot-Adoption & Handshake Unlock**: Added `_ensureBootLock()` and `_releaseBootLock()` to `LoadingService`, and `_cleanBootLock()` to `Engine`, ensuring boot lock reference count (`_bootScrollLocked`) is tracked symmetrically and released unconditionally during `readinessHandshake()`, `hideInstant()`, `_forceReset()`, or direct fallback `window.__removeBootLoader` calls.
+4. **Lock/Unlock Call-Pair Invariant & Regression Tests**: Verified that all lock triggers (`lockMgr.lock()`) have corresponding release triggers (`lockMgr.unlock()`). Added 4 dedicated regression tests in `tests/loading-contract.test.ts` covering boot loader adoption, early module init locking, multi-show ref-counting, and transition sequences.
+5. **Developer Documentation & System Contract Updates**: Updated system documentation in `fanhoard-docs/07-Loading-System.md` and `fanhoard-docs/15-Loading-Contract-And-Test-Plan.md` with Scroll-Lock Architecture details, boot loader adoption lifecycle contracts, call-pair invariants, regression test seam definitions, and version history entries for `v3.2.2`.
 
 ## Files in this release
 
 | File | Status | Purpose |
 |---|---|---|
-| `assets/js/loading-system/fvl-modules/utils.js` | MODIFIED | Dual-container scroll lock (`html` + `body`), non-passive event listeners (`wheel`, `touchmove`, `keydown`), exact style/offset restoration. |
-| `assets/js/loading-system/fvl-modules/engine.js` | MODIFIED | Auto scroll-lock trigger on fullscreen and viewport-covering overlays, overlay ARIA modal attributes, focus trap/restore, Escape key handler. |
-| `assets/js/loading-system/fvl-modules/renderer.js` | MODIFIED | ARIA roles (`role="dialog"`, `aria-modal="true"`, `role="progressbar"`), default spinner centering class (`.fvl-spinner--center`), inline `touch-action: none`. |
-| `assets/css/loading-system.css` | MODIFIED | Fullscreen overlay `touch-action: none` and `overscroll-behavior: none` rules, `@media (prefers-reduced-motion: reduce)` rules. |
-| `assets/js/nav-core-modules/loading.js` | MODIFIED | Boot loader adoption scroll-lock sync and handshake release logic. |
-| `assets/md/en/current.md` | MODIFIED | Updated English user-facing release notes for v3.2.1. |
-| `assets/md/th/current.md` | MODIFIED | Updated Thai user-facing release notes for v3.2.1. |
-| `tests/loading-contract.test.ts` | MODIFIED | Unit tests for dual-container scroll lock, event interception, boot loader sync, and style restoration. |
-| `fanhoard-docs/07-Loading-System.md` | MODIFIED | Corrected Scroll-Lock Architecture section and added Version History entry v3.2.1. |
-| `fanhoard-docs/15-Loading-Contract-And-Test-Plan.md` | MODIFIED | Updated Scroll-Lock Contract (Section 2.9) and Test Seam (Seam 8). |
-| `fanhoard-docs/11-Release-Notes-System.md` | MODIFIED | Clarified rule that every release must update user-facing release notes (`assets/md/{en,th}/current.md`). |
-| `PATCH_NOTES.md` | MODIFIED | Updated patch summary notes in Thai. |
-| `CHANGES.md` | MODIFIED | Updated release changelog in English. |
+| `assets/js/nav-core-modules/loading.js` | MODIFIED | Boot loader adoption scroll-lock balance (`_ensureBootLock`, `_releaseBootLock`), `__removeBootLoader` wrapper, and handshake release logic. |
+| `assets/js/loading-system/fvl-modules/engine.js` | MODIFIED | Early boot lock check at module load (`engine.js:673`) and `_cleanBootLock()` release trigger in `readinessHandshake()`. |
+| `tests/loading-contract.test.ts` | MODIFIED | Inverted scroll-lock regression test suite covering boot adoption, early init lock, ref-counting symmetry, and transition sequences. |
+| `fanhoard-docs/07-Loading-System.md` | MODIFIED | Updated Scroll-Lock Architecture section with boot loader adoption lock lifecycle and added Version History entry v3.2.2. |
+| `fanhoard-docs/15-Loading-Contract-And-Test-Plan.md` | MODIFIED | Updated Scroll-Lock Contract (Section 2.9) with call-pair invariant and Test Seam 8 with inverted-symptom regression tests. |
+| `PATCH_NOTES.md` | MODIFIED | Updated patch summary notes in Thai for v3.2.2 fix release. |
+| `CHANGES.md` | MODIFIED | Updated release changelog in English for v3.2.2 fix release. |

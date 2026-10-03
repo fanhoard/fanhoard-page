@@ -131,6 +131,8 @@ Every FVL mode supports flexible options for text suppression, chromeless framin
   - Intercepts non-passive `wheel`, `touchmove`, and navigation `keydown` events (Space, PageUp, PageDown, End, Home, Arrow keys) on `document`, preventing default scrolling gestures outside `.fvl-scrollable` containers and editable form fields (`INPUT`, `TEXTAREA`, `SELECT`, `isContentEditable`).
   - Fullscreen overlays specify `touch-action: none` and `overscroll-behavior: none` via stylesheet classes and inline styles.
   - Synchronizes scroll lock engagement when Nav-Core/LoadingService adopts early boot loader DOM elements, safely releasing lock state upon readiness handshake.
+  - Enforces strict Lock/Unlock Call-Pair Invariant: Every execution pathway that increments lock state (`_ensureBootLock()`, `lockMgr.lock()`) MUST trigger a guaranteed, symmetrical release (`_releaseBootLock()`, `_cleanBootLock()`, `_cleanup()`, `lockMgr.unlock()`) across all success, error, fallback (`__removeBootLoader`), and handshake triggers.
+  - Guarantees early boot lock during IIFE module load (`engine.js:673`) when `#fv-boot-loader` or `#nc-early-overlay` is visible, preventing background page scrolling during early static page initialization prior to explicit `show()` calls.
   - Utilizes a module-level reference counter (`lockCount`) to support nested overlays and rapid show-hide cycles without losing scroll position or prematurely unlocking.
   - Dynamically calculates scrollbar width (`window.innerWidth - document.documentElement.clientWidth`), sets `--fvl-scrollbar-width` CSS variable on `documentElement`, and applies `paddingRight` compensation to `body` to prevent horizontal layout shift.
   - Preserves exact original inline styles for both `documentElement` (`overflow`, `overscrollBehavior`) and `body` (`position`, `top`, `width`, `overflow`, `paddingRight`, `overscrollBehavior`, `hasStyleAttr`).
@@ -182,6 +184,11 @@ Every FVL mode supports flexible options for text suppression, chromeless framin
   - Asserts `ScrollLockManager` engages dual-container scroll lock on both `html` (`documentElement.style.overflow === hidden`) and `body` (`body.style.position === fixed`) across all `fullscreen` and viewport-covering show entry paths, incrementing `lockCount`.
   - Asserts non-passive event listeners (`wheel`, `touchmove`, `keydown`) call `e.preventDefault()` on scroll gestures outside `.fvl-scrollable` containers and editable input fields.
   - Asserts early boot loader adoption sync and release behavior.
+  - Asserts inverted-symptom regression test suite:
+    1. Boot loader adoption & handshake unlock: locks page during adoption (`lockCount > 0`, `body.style.position === 'fixed'`) and guarantees unlock (`lockCount === 0`) after `readinessHandshake()`.
+    2. Double boot adoption ref-count symmetry: handles multi-show adoptions cleanly and releases lock on final session cleanup.
+    3. Early boot module init lock: locks page on IIFE module load if boot loader is visible in DOM without explicit `show()` call, then unlocks cleanly on handshake.
+    4. Transition sequence: seamless transition from boot loader adoption release -> subsequent normal FVL fullscreen show and hide without style leaks or lock leaks.
   - Asserts scrollbar width calculation and `--fvl-scrollbar-width` CSS variable setting.
   - Asserts exact restoration of original `documentElement` and `body` inline styles and scroll position when `lockCount` returns to 0.
   - Asserts default centering (`opts.center !== false`) applies `.fvl-spinner--center` class and alignment option overrides.
