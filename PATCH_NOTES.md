@@ -1,24 +1,22 @@
-# แพตช์ Settings ดีไซน์ใหม่ (v3.2.21)
+# แพตช์ Community & Forms ดีไซน์ใหม่ (v3.2.22)
 
 วางไฟล์ทั้งหมดใน patch นี้ทับลงบน repo ตามโครงสร้างเดิม — แตก ZIP แล้ว copy ทับได้เลย
 
-## สรุปการเปลี่ยนแปลง (v3.2.21 - Settings Redesign)
+## สรุปการเปลี่ยนแปลง (v3.2.22 - Community & Forms Redesign)
 
 | ไฟล์ | การเปลี่ยนแปลง |
 |------|----------------|
-| `setting/index.html` | บล็อก Appearance ใหม่ (fieldset + radio 3 ใบ: System ◐ / Light ☀ / Dark ☾, input ซ่อนเชิงสถานะเสียง การ์ดเป็น label), โหลด theme-core.js ใน head ก่อน |
-| `assets/css/setting.css` | กลุ่มการตั้งค่าเป็นการ์ดพื้นขาว/ธีมมืด 16px ขอบบางเงานุ่ม, การ์ดเลือกธีม 12px — เลือกแล้วขอบ teal + แต้มสีแบรนด์ 9% (color-mix), hover พื้น --surface-hover, focus ring 3px teal มาตรฐาน v3 ทุกตัวควบคุม, ปรับระยะบนมือถือ 480px, ปิด transition เมื่อ prefers-reduced-motion |
-| `assets/js/setting-system/setting-ui.js` | เส้นทางใหม่ของ setupThemeControl: sync สถานะ checked จาก ThemeCore, เปลี่ยน = setTheme + toast แจ้งบันทึก, ฟัง event `fv:themechange`; สวิตช์เก่ายังเป็น fallback เมื่อไม่มี radio |
-| `assets/md/en/current.md`, `assets/md/th/current.md` | โน้ตรีลีส v3.2.21 (EN/TH) |
-| `assets/md/{en,th}/releases/*`, `assets/json/version.json`, HTML assets strings | ของที่ release pipeline สร้าง (รวมไฟล์ v3.2.20 ที่ค้างจากรอบก่อน) |
+| `assets/css/report.css` | ช่องฟอร์มย้ายไปพื้น `--surface-card` (ขาวจริงบนผืน #FAFAFC), ขอบ fallback ปรับ v3, โฟกัส ring จางเก่า → `0 0 0 3px rgba(13,148,136,0.35)`, focus-visible 3px เทล, กำจัด ghost token `--color-brand-primary-hover` (ไม่มีใน tokens.css) → `--color-brand-hover`, ลูกศร select SVG เทลเก่า `#009688` → `#0d9488`, ปุ่ม submit + contact เป็น pill `--radius-full` พื้น primary hover brand-hover, transition เก่า 5 จุด → `--transition-fast` (easing v3), fallback เทา/ขอบ/เงาเก่าปรับหมด |
+| `assets/md/en/current.md`, `assets/md/th/current.md` | โน้ตรีลีส v3.2.22 (EN/TH) |
+| release pipeline artifacts | registry/version/HTML asset strings |
 
 ## จุดสำคัญที่ต้องรู้
 
-- **ThemeCore ไม่ถูกแตะเลย** — การเลือก "System" ยังตาม OS (`fv_theme: "system"` + resolve เป็นธีมจริงตามเครื่อง), ค่าคงอยู่หลัง reload, no-FOUC ตามเดิม
-- การเลือกธีมแล้วมี toast "Appearance preference saved" ใช้ระบบ toast r03 (pill ดีไซน์ใหม่)
-- ป๊อปอัปแจ้งอัปเดตเวอร์ชัน (notify: true) ยังเด้งตามปกติและปิดได้สะอาด
+- **พฤติกรรมฟอร์ม S10 ไม่ถูกแตะ**: aria-invalid / aria-describedby / focus restoration / ช่อง custom page ทำงานเหมือนเดิมทั้งหมด — ส่งฟอร์มว่างยังเด้ง error 3 จุด + โฟกัสพาไปช่องแรกที่ผิด
+- เลย์เอาต์แถว hairline (unboxed) ของ community links/contact คงไว้ตั้งใจ — สไตล์ low-noise เดียวกับ settings
+- ปุ่ม CTA พื้น primary #0D9488 (เดิมใช้ brand-hover เป็นพื้นพัก ซึ่งผิดบทบาท CTA)
 
 ## ผลการทดสอบ
 
-- Unit: 234/234 (37 ไฟล์) | Build: สะอาด | e2e เต็ม: 16/16 (รวม theme-toggle journey)
-- Effective DOM จริง (Playwright, ธีม OS dark): การ์ดกลุ่ม 16px พื้น `#FFFFFF`/dark `#1E293B`; เลือก Light → `data-theme=light` + `fv_theme=light` + toast; reload → คง light, radio=light, body `#FAFAFC`; เลือก System → `fv_theme=system` resolve เป็น dark; โฟกัสด้วยคีย์บอร์ด → ring `3px solid rgba(13,148,136,0.35)`
+- Unit: 234/234 (37 ไฟล์) | Build: สะอาด | **e2e เต็ม: 16/16** (รวม report-submission journey)
+- Effective DOM จริง (Playwright, light+dark): ช่องกรอก 12px พื้นขาว/`#1E293B` ขอบบางตามธีม; ปุ่ม submit pill 9999px เทล (light `rgb(13,148,136)` / dark `rgb(45,212,191)`); ส่งฟอร์มว่าง → error text 3 จุด + aria-invalid 3 + โฟกัสไปช่องแรกที่ต้องแก้; โฟกัสคีย์บอร์ด → ขอบเทล + เงา 3px เทล (ยืนยันหลัง transition 150ms เซตเทิร์ม)

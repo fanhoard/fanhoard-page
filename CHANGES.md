@@ -1,37 +1,30 @@
-# Settings Redesign v3.2.21 (r08)
+# Community & Forms Redesign v3.2.22 (r09)
 
-## What changed in v3.2.21 (Settings on Design Language v3)
+## What changed in v3.2.22 (Community pages on Design Language v3)
 
-### setting/index.html
-- New Appearance block at the top of the settings group: accessible `fieldset` (aria-label + sr-only legend) with 3 radio choice cards — System ◐ / Light ☀ / Dark ☾ — sr-only inputs, visual card labels (44px+ touch targets preserved)
-- theme-core.js now loads early (head) on the settings page for correct ThemeCore wiring
+### assets/css/report.css (report/contact/community forms)
+- Form fields (`.report-textinput`, `.report-textarea`, selects): surface `--surface-base` → `--surface-card` (true white inputs on the #FAFAFC canvas), border fallback rgba(0,0,0,0.15) → rgba(15,23,42,0.16), radius fallback 0.5rem → 12px (token already 12px)
+- Focus ring: faint old `0 0 0 3px rgba(0,150,136,0.15)` → v3 `0 0 0 3px rgba(13,148,136,0.35)`; focus-visible outline 2px → 3px teal v3 standard
+- GHOST TOKEN fixed: `--color-brand-primary-hover` (never defined in tokens.css — same bug class as r02/r04) → real `--color-brand-hover` (2 uses)
+- Select chevron SVG data-URI: old material teal `%23009688` → `%230d9488`
+- Buttons: `.report-submit` + `.contact-action-btn` → pill `--radius-full`; CTA background normalized to `--color-brand-primary` (was brand-hover as resting CTA), hover → `--color-brand-hover`, active `#0b726b` hardcoded → token
+- 5 legacy `var(--duration-fast, 150ms) ease-out` transitions → `var(--transition-fast, 150ms ease)` (v3 easing)
+- Hairline fallbacks rgba(0,0,0,0.06) → rgba(15,23,42,0.08); muted fallbacks #757575 → #475569; nested var() doubled fallbacks simplified
+- Unboxed hairline-row layout for community links / contact rows kept intentionally (low-noise design method, consistent with settings rows)
 
-### assets/css/setting.css
-- `.fv-setting-group`: white/dark surface card, --radius-lg 16px, subtle border, shadow-sm
-- `.theme-choice-card`: 12px rounded choice cards; selected state = teal border + brand tint via color-mix 9% + brand-hover text; hover --surface-hover; transitions on --transition-fast; reduced-motion off
-- Focus rings v3: 3px rgba(13,148,136,0.35) on choice cards (via input:focus-visible), selects, language button, buttons, toggle slider
-- Selects/buttons hover: --surface-hover + subtle border; section labels on type scale (18px semibold); mobile 480px tightening
-
-### assets/js/setting-system/setting-ui.js
-- `setupThemeControl()` gains a radio-based path: syncs checked state from ThemeCore.getTheme(), on change calls ThemeCore.setTheme(value, {transition:true}) + success toast, listens `fv:themechange` to stay in sync; legacy switch path kept as fallback when radios absent
-
-## Behavior notes
-- System choice resolves via ThemeCore to OS preference (stored `fv_theme: "system"`, effective theme applied to DOM)
-- Choice persists across reload (fv_theme); language button + selects restyled but untouched logically
-- Save feedback toast uses the r03 toast system
+### Pages (no markup changes needed)
+- /community, /community/contact, /community/report render through report.css tokens; S10 form behavior (aria-invalid, aria-describedby, focus restoration, custom page input) untouched
 
 ## Verification
 
-- Unit 234/234 (37 files) | build clean | full e2e 16/16 (incl. theme-toggle journey)
-- Real browser (dark OS context): groups 16px white/#1E293B surfaces, choice cards 12px; picked Light → data-theme=light + fv_theme=light + toast; reload → still light, radio=light, body #FAFAFC; picked System → fv_theme=system, effective dark (OS); focus-visible on choice = 3px solid rgba(13,148,136,0.35) teal
-- Version update popup (notify:true) renders on first load and dismisses cleanly
+- Unit 234/234 (37 files) | build clean | **full e2e 16/16** (report-submission journey green)
+- Real browser (Playwright, light+dark): inputs 12px on white/dark card surfaces with subtle themed borders; submit pill 9999px teal (light #0D9488 / dark teal-400); contact-action-btn pill teal; empty submit → 3 visible error texts + 3 aria-invalid + focus moves to first invalid field; keyboard focus on fields → teal border + 3px teal ring (verified after 150ms transition settles; earlier "missing ring" was a probe artifact reading at t=0 of the transition)
+- Version update popup opens and dismisses via the real dismiss button (scroll-lock releases correctly)
 
 ## Files changed
 
 | File | Change |
 |------|--------|
-| `setting/index.html` | Appearance fieldset UI, early theme-core load, v3.2.21 asset strings |
-| `assets/css/setting.css` | card groups, theme choice cards, v3 focus rings, hover states |
-| `assets/js/setting-system/setting-ui.js` | radio theme control wired to ThemeCore |
-| `assets/md/en/current.md`, `assets/md/th/current.md` | v3.2.21 release notes |
-| `assets/md/{en,th}/releases/v3.2.20.md, v3.2.21.md`, `assets/json/version.json`, HTML assets strings, `assets/md/{en,th}/releases/index.json` | release pipeline registry (incl. previously untracked v3.2.20 entries) |
+| `assets/css/report.css` | v3 surfaces, focus rings, pill buttons, ghost-token + old-teal purge |
+| `assets/md/en/current.md`, `assets/md/th/current.md` | v3.2.22 release notes |
+| release pipeline artifacts | registry/version/HTML asset strings (v3.2.22) |
