@@ -1099,11 +1099,26 @@
           window.sessionStorage.setItem(this._persistScrollKey(), JSON.stringify({ y, ts: Date.now() }));
         } catch (_) {}
       };
-      window.addEventListener('scroll', () => {
+      this._scrollPersistHandler = () => {
         if (deb) clearTimeout(deb);
         deb = setTimeout(write, 250);
-      }, { passive: true });
-      window.addEventListener('pagehide', write);
+      };
+      this._pagehideHandler = write;
+      window.addEventListener('scroll', this._scrollPersistHandler, { passive: true });
+      window.addEventListener('pagehide', this._pagehideHandler);
+    },
+
+    _cleanupScrollPersist() {
+      if (!this._scrollPersistBound) return;
+      if (this._scrollPersistHandler) {
+        window.removeEventListener('scroll', this._scrollPersistHandler);
+        this._scrollPersistHandler = null;
+      }
+      if (this._pagehideHandler) {
+        window.removeEventListener('pagehide', this._pagehideHandler);
+        this._pagehideHandler = null;
+      }
+      this._scrollPersistBound = false;
     },
 
     _readPersistedScroll(maxAgeMs) {
