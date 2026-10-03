@@ -1,7 +1,7 @@
 # FanHoard Loading System Contract & Test Plan
 
-- **System Described**: Central Loading Framework (FVL / FLV), Discover Page Lifecycle, and Search System Consumer Integration
-- **Entry File**: `assets/js/loading-system/fvl.js`
+- **System Described**: Central Loading Framework (FVL / FLV), Standalone Spinner Subsystem (`fvl-spinner.js`), Discover Page Lifecycle, and Search System Consumer Integration
+- **Entry Files**: `assets/js/loading-system/fvl.js` (Full Orchestrator) & `assets/js/loading-system/fvl-spinner.js` (Standalone Subsystem)
 - **Dependencies**: `assets/css/loading-system.css`, `assets/js/nav-core-early.js`, `assets/js/nav-core-modules/router.js`, `assets/js/search-system/search-modules/search-controller.js`
 - **Verification**: `npm run test` (runs Vitest loading suite) | `npx playwright test`
 
@@ -9,7 +9,7 @@
 
 ## 1. System Overview & Problem Analysis
 
-The FanHoard loading ecosystem provides a unified loading indicator framework across initial application boot, SPA route transitions, category switching, and search index preparation.
+The FanHoard loading ecosystem provides a unified loading indicator framework across initial application boot, SPA route transitions, category switching, search index preparation, and component-level widget indicators.
 
 An analysis of execution logs and browser harness runs identified five primary architectural issues in legacy loading behavior:
 
@@ -62,7 +62,30 @@ FVL.scoped({ target: '#content-loading', overlay: false });
 FVL.inline({ target: '#submit-btn' });
 ```
 
-### 2.3 ARIA Accessibility & Reduced Motion Standards
+### 2.3 Flexible Display Mode Options Contract
+
+Every FVL mode supports flexible options for text suppression, chromeless framing, and slot mounting:
+
+- **`spinnerOnly: true`**: Omits text wrapper containers (`.fvl-text`, `.fvl-msg`, `.fvl-sub`). Sets root container `aria-label` (falling back to `opts.message` or `'Loading'`) to maintain accessibility.
+- **`chromeless: true`**: Removes background overlay backdrop, borders, and shadows by adding `.fvl-chromeless` modifier class.
+- **`bare: true`**: Shorthand equivalent to `{ spinnerOnly: true, chromeless: true }`. Applies both `.fvl-bare` and `.fvl-chromeless` modifier classes.
+- **`targetSlot`**: Accepts a selector string or `HTMLElement` child slot inside the target container. Mounts the loader into the sub-slot while preserving the parent target container's `aria-busy="true"` state.
+
+### 2.4 Standalone Spinner Subsystem Contract (`fvl-spinner.js`)
+
+- **Zero-Dependency Isolation**: `assets/js/loading-system/fvl-spinner.js` operates independently without requiring `fvl.js` or `FVLModules`.
+- **Style Auto-Injection Contract**: Injects critical CSS (`@_fvl_spin` keyframes and `.fvl-spinner` rules) into `<style id="fvl-spinner-styles">` if `loading-system.css` is not linked.
+- **Namespace & Aliases**: Exposes global `window.FVLSpinner` and sets `window.FVL.spinner = window.FVLSpinner`.
+- **Instance Handle Capabilities**:
+  - `element`: Direct reference to the root `.fvl-spinner` DOM element.
+  - `setSize(size)`: Supports `'sm'`, `'md'`, `'lg'`, `'xl'` presets or numeric pixel values.
+  - `setColor(color)` / `setTrackColor(trackColor)`: Sets CSS custom properties `--fvl-spinner-color` and `--fvl-spinner-track-color`.
+  - `setSpeed(speed)`: Sets speed preset (`'fast'`, `'normal'`, `'slow'`).
+  - `setStrokeWidth(width)`: Sets stroke preset (`'thin'`, `'medium'`, `'thick'`) or numeric pixel width.
+  - `updateProgress(value)`: Sets determinate mode and updates SVG stroke-dashoffset (0..100%).
+  - `mount(target)` / `unmount()` / `destroy()`: DOM lifecycle control methods.
+
+### 2.5 ARIA Accessibility & Reduced Motion Standards
 
 - **Container ARIA Contract**: Every loader container must specify `role="status"` and `aria-live="polite"`. Inner SVG spinner elements must specify `aria-hidden="true"`.
 - **Target Busy State**: When scoped or inline loading starts, the target element receives `aria-busy="true"`. Upon completion or error, `aria-busy="false"` is restored.
@@ -76,13 +99,13 @@ FVL.inline({ target: '#submit-btn' });
   }
   ```
 
-### 2.4 Cancellation & Race Prevention
+### 2.6 Cancellation & Race Prevention
 
 - **In-flight Request Abort**: Navigating between categories or executing new search queries must abort active `Fetch` requests via `AbortController.abort()` and destroy active FVL instances bound to that request.
 - **Dynamic Filter Resolution**: `checkFuse()` in `search-controller.js` reads current filter state directly from `State.selectedType` at execution time rather than referencing stale closure variables.
 - **Pending Search Envelope Contract**: `window.__pendingSearch` captures full query context (`{ q: string, type: string, category: string }`). Queue draining dispatches through `doSearch(null, true)` once to prevent duplicate browser history entries.
 
-### 2.5 Error Boundary & Recovery Contract
+### 2.7 Error Boundary & Recovery Contract
 
 - **Network / Timeout Failure State**: If asynchronous fetch fails, FVL clears active indicators immediately and renders an inline error boundary inside the content container with `aria-live="assertive"` and a localized Retry action button.
 - **Backdrop Pointer-Events Isolation**: Non-active or hidden modal overlays (`aria-hidden="true"`) specify `pointer-events: none` to prevent blocking click events on underlying UI controls.
@@ -101,14 +124,24 @@ FVL.inline({ target: '#submit-btn' });
 - **Seam 2: `tests/search-races.test.ts`**
   - Simulates async Fuse.js upgrades and verifies `State.selectedType` is respected over closure parameters.
   - Verifies `window.__pendingSearch` retains `category` state during queue processing.
+- **Seam 3: `tests/loading-spinner-standalone.test.ts`**
+  - Asserts zero-dependency `FVLSpinner` standalone mounting without initializing `fvl.js`.
+  - Asserts `<style id="fvl-spinner-styles">` auto-injection into document `<head>`.
+  - Asserts factory static methods (`create`, `mount`, `applyVariant`, `updateProgress`, `renderSVG`).
+  - Asserts instance handle methods (`setSize`, `setColor`, `setTrackColor`, `setSpeed`, `setStrokeWidth`, `updateProgress`, `unmount`, `destroy`).
+- **Seam 4: `tests/loading-spinner-only.test.ts`**
+  - Asserts `spinnerOnly`, `bare`, and `chromeless` options across all 4 modes (`fullscreen`, `scoped`, `inline`, `topbar`).
+  - Verifies message DOM node suppression and root `aria-label` setting.
+  - Verifies modifier class application (`.fvl-bare`, `.fvl-chromeless`).
+  - Verifies `targetSlot` resolution inside target DOM containers.
 
 ### 3.2 End-to-End Browser Test Seams (Playwright)
 
-- **Seam 3: `e2e/discover-loading-contract.spec.ts`**
+- **Seam 5: `e2e/discover-loading-contract.spec.ts`**
   - Confirms single-phase overlay boot sequence on initial page load.
   - Confirms header navigation remains visible (`opacity: 1`) and clickable during scoped category switches.
   - Confirms hardcoded top-left loading text does not flash during cold start.
-- **Seam 4: `e2e/search-consumer-races.spec.ts`**
+- **Seam 6: `e2e/search-consumer-races.spec.ts`**
   - Rapidly toggles search type filters during index initialization to verify final search results match active filter state.
 
 ---
@@ -122,6 +155,7 @@ FVL.inline({ target: '#submit-btn' });
 | **Slice 3** | **Scoped Action Loading & Nav Isolation**: Remove `body.fvl-nav-mode.nav-loading` on button click in favor of scoped content loading | `assets/js/nav-core-modules/router.js`<br>`assets/css/loading-system.css` | `npx playwright test e2e/discover-loading-contract.spec.ts` |
 | **Slice 4** | **Search Race Conditions & Category Preservation**: Resolve closure bug in `_scheduleFuseUpgrade` and preserve `category` in `__pendingSearch` | `assets/js/search-system/search-modules/search-controller.js`<br>`assets/js/search-system/search.js` | `vitest run tests/search-races.test.ts`<br>`npx playwright test e2e/search-consumer-races.spec.ts` |
 | **Slice 5** | **Popup Backdrop Pointer Isolation**: Apply `pointer-events: none` on inactive `.fp-overlay` containers | `assets/css/popup.css` | `vitest run tests/popup-backdrop.test.ts` |
+| **Slice 6** | **Flexible Spinner & Standalone Subsystem**: Add standalone `fvl-spinner.js` subsystem and support `spinnerOnly`, `bare`, `chromeless`, `targetSlot` options across display modes | `assets/js/loading-system/fvl-spinner.js`<br>`assets/js/loading-system/fvl-modules/renderer.js`<br>`assets/js/loading-system/fvl-modules/engine.js`<br>`assets/css/loading-system.css` | `vitest run tests/loading-spinner-standalone.test.ts`<br>`vitest run tests/loading-spinner-only.test.ts` |
 
 ---
 
@@ -141,7 +175,7 @@ FVL.inline({ target: '#submit-btn' });
 
 ## 6. Cross-References
 
-- [`07-Loading-System.md`](./07-Loading-System.md) — Detailed FVL architecture and module specifications
+- [`07-Loading-System.md`](./07-Loading-System.md) — Detailed FVL architecture, standalone subsystem, and module specifications
 - [`02-Search-System.md`](./02-Search-System.md) — Two-tier search engine architecture
 - [`03-Navigation-And-Content.md`](./03-Navigation-And-Content.md) — Nav-Core SPA routing and boot lifecycle
 - [`docs/engineering/ai-docs-guide.md`](../docs/engineering/ai-docs-guide.md) — FanHoard AI-first documentation guide

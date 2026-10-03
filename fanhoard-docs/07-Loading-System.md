@@ -1,14 +1,14 @@
 # 07 — Loading System (FVL — FanHoardVerse Loader)
 
-> เอกสารนี้อธิบายระบบ **FVL (FanHoardVerse Loader)** ของ FanHoard — ระบบ loading ส่วนกลางที่แยกออกมาจาก Nav-Core เดิม ออกแบบมาเพื่อให้ทุก loading indicator ทั่วทั้งเว็บมีคุณภาพระดับเดียวกันและยืดหยุ่นพอที่จะแสดงได้ในทุกบริบท — ตั้งแต่ overlay เต็มหน้าจอ ไปจนถึง spinner เล็ก ๆ ในปุ่ม
+> เอกสารนี้อธิบายระบบ **FVL (FanHoardVerse Loader)** ของ FanHoard — ระบบ loading ส่วนกลางที่แยกออกมาจาก Nav-Core เดิม ออกแบบมาเพื่อให้ทุก loading indicator ทั่วทั้งเว็บมีคุณภาพระดับเดียวกันและยืดหยุ่นพอที่จะแสดงได้ในทุกบริบท — ตั้งแต่ overlay เต็มหน้าจอ, scoped containers, inline spinners ไปจนถึง standalone spinner subsystem ที่ไม่มี dependency
 >
 > **สำหรับ:** AI และนักพัฒนาที่จะแก้ FVL หรือเรียกใช้ loading indicator ในโค้ดใหม่
 >
-> **ไฟล์หลัก (v3.0.8):** `assets/js/loading-system/fvl.js` (orchestrator หลัก ที่โหลด sub-modules ผ่าน `LOAD_PHASES`) + `assets/js/loading-system/fvl-modules/` (9 sub-modules) + `assets/css/loading-system.css` (auto-injected)
+> **ไฟล์หลัก:** `assets/js/loading-system/fvl.js` (orchestrator หลัก ที่โหลด sub-modules ผ่าน `LOAD_PHASES`) + `assets/js/loading-system/fvl-spinner.js` (standalone spinner) + `assets/js/loading-system/fvl-modules/` (9 sub-modules) + `assets/css/loading-system.css` (auto-injected)
 >
-> **Namespace:** `window.FVL` (public API, frozen) + `window.FVLModules` (internal registry)
+> **Namespace:** `window.FVL` (public API, frozen), `window.FVLSpinner` (standalone spinner), `window.FVLModules` (internal registry)
 >
-> **เวอร์ชัน:** v3.0.8
+> **เวอร์ชัน:** v3.1.0
 
 ---
 
@@ -17,9 +17,9 @@
 1. [Overview](#1-overview)
 2. [ไฟล์และโครงสร้างโมดูล](#2-ไฟล์และโครงสร้างโมดูล)
 3. [ขั้นตอนการบูตและการโหลด (LOAD_PHASES)](#3-ขั้นตอนการบูตและการโหลด-load_phases)
-4. [Display Modes (4 แบบ)](#4-display-modes-4-แบบ)
-5. [Material Spinner Variant Subsystem (Opt-In API)](#5-material-spinner-variant-subsystem-opt-in-api)
-6. [Public API — `window.FVL`](#6-public-api--windowfvl)
+4. [Display Modes & Flexible Options (`spinnerOnly`, `bare`, `chromeless`, `targetSlot`)](#4-display-modes--flexible-options-spinneronly-bare-chromeless-targetslot)
+5. [Material Spinner Subsystem & Standalone Subsystem (`fvl-spinner.js`)](#5-material-spinner-subsystem--standalone-subsystem-fvl-spinnerjs)
+6. [Public API — `window.FVL` & `window.FVLSpinner`](#6-public-api--windowfvl--windowfvlspinner)
 7. [Theme System & Color Tokens](#7-theme-system--color-tokens)
 8. [Z-Index Stacking Layers](#8-z-index-stacking-layers)
 9. [i18n & Accessibility](#9-i18n--accessibility)
@@ -34,13 +34,19 @@
 
 ## 1. Overview
 
-FVL (FanHoardVerse Loader) คือระบบ loading ส่วนกลางของ FanHoard ที่แยกออกมาจาก Nav-Core เดิม ออกแบบมาเพื่อให้ **ทุก loading indicator ทั่วทั้งเว็บมีคุณภาพระดับเดียวกัน** และยืดหยุ่นพอที่จะแสดงได้ในทุกบริบท — ตั้งแต่ overlay เต็มหน้าจอ ไปจนถึง spinner เล็กๆ ในปุ่ม
+FVL (FanHoardVerse Loader) คือระบบ loading ส่วนกลางของ FanHoard ที่แยกออกมาจาก Nav-Core เดิม ออกแบบมาเพื่อให้ **ทุก loading indicator ทั่วทั้งเว็บมีคุณภาพระดับเดียวกัน** และยืดหยุ่นพอที่จะแสดงได้ในทุกบริบท — ตั้งแต่ overlay เต็มหน้าจอ ไปจนถึง spinner เล็กๆ ในปุ่ม หรือใช้ standalone spinner ย่อยแยกต่างหาก
 
 ### หลักการออกแบบ
 
 - **Lightweight & Modular**: Entry point หลัก (`fvl.js`) โหลด submodules ใน `fvl-modules/` แบบ phased parallel, zero external dependencies, ทำงานลื่นไหลบนอุปกรณ์สเปคต่ำ→สูง
 - **4 display modes**: `fullscreen` / `scoped` / `inline` / `topbar` — ใช้ API เดียว (`FVL.show()`)
-- **Material Spinner Variant Subsystem**: รองรับ opt-in sizes (`sm`/`md`/`lg`/`xl`), determinate/indeterminate mode, progress updates, และ color tokens ผ่าน CSS custom properties โดยที่ **default rendered DOM/UX บนหน้าปัจจุบันทั้งหมดคงเดิม 100% (byte-identical)**
+- **Flexible Options per Mode**:
+  - `spinnerOnly`: ซ่อนข้อความ message/submessage เหลือเพียงตัว spinner
+  - `chromeless`: ปลด backdrop, border, padding และ shadow สำหรับวางใน UI ไร้ขอบ
+  - `bare`: Shorthand ผสาน `{ spinnerOnly: true, chromeless: true }`
+  - `targetSlot`: กำหนด sub-selector หรือ child element เฉพาะจุดสำหรับ mount ภายใน container หลัก
+- **Standalone Spinner Subsystem (`fvl-spinner.js`)**: มอดูล spinner อิสระ zero-dependency ไม่พึ่งพา `fvl.js` หรือ `LOAD_PHASES` เหมาะกับหน้าเบาหรือ widget เฉพาะจุด
+- **Material Spinner Variant Subsystem**: รองรับ opt-in sizes (`sm`/`md`/`lg`/`xl`), determinate/indeterminate mode, progress updates, animation speed, stroke width และ color tokens ผ่าน CSS custom properties โดยที่ **default rendered DOM/UX บนหน้าปัจจุบันทั้งหมดคงเดิม 100%**
 - **Zero coupling กับระบบอื่น**: ทำงานได้เลยโดยไม่ต้องมี URE, NavCore, Search หรือ Language System
 - **Full backward-compat**: API เดิมของ Nav-Core (`LoadingService.show/hide`, `window.showInstantLoadingOverlay`, `window._navCore_contentLoadingManager`, `window.FLV` ฯลฯ) ทำงานเหมือนเดิมผ่าน proxy อัตโนมัติ
 - **ใช้ FanHoard Design Tokens**: สี/เงา/รัศมี ดึงจาก `tokens.css` ทั้งหมด
@@ -54,6 +60,7 @@ FVL (FanHoardVerse Loader) คือระบบ loading ส่วนกลา�
 ```
 assets/js/loading-system/
 ├── fvl.js                              # Orchestrator & entry point หลัก (LOAD_PHASES)
+├── fvl-spinner.js                      # Standalone Material Spinner Subsystem (zero-dependency)
 ├── README.md                           # สถาปัตยกรรมและสัญญาบริการ
 ├── NAMING.md                           # มาตรฐานชื่อ CSS classes / DOM elements
 ├── MIGRATION.md                        # คู่มือการย้ายจาก v1.0/v2.x
@@ -63,13 +70,13 @@ assets/js/loading-system/
     ├── config.js                       # Constants, presets, z-index, timing
     ├── utils.js                        # DOM helpers, options normalization, autoTheme
     ├── state.js                        # Instance registry, group maps, event bus
-    ├── renderer.js                     # DOM builders สำหรับ 4 display modes
+    ├── renderer.js                     # DOM builders สำหรับ 4 display modes (รองรับ spinnerOnly/bare/chromeless)
     ├── animator.js                     # Double-rAF enter/exit animations
-    ├── spinner.js                      # Material spinner variant & progress engine
-    └── engine.js                       # Lifecycle orchestrator, scroll lock & handshake
+    ├── spinner.js                      # Material spinner variant bridge & progress engine
+    └── engine.js                       # Lifecycle orchestrator, targetSlot resolution & handshake
 
 assets/css/
-└── loading-system.css                  # Auto-injected stylesheet
+└── loading-system.css                  # Auto-injected stylesheet (มี layer @layer fvl)
 
 assets/js/nav-core-modules/
 └── loading.js                          # Thin proxy shim (delegates to FVL)
@@ -93,14 +100,15 @@ var LOAD_PHASES = [
 ### การทำงานในเบราว์เซอร์
 1. `fvl.js` คำนวณ base URL จาก `<script src="...">` ของตัวเอง
 2. โหลดสคริปต์ในแต่ละ phase แบบขนาน (parallel within phase)
-3. เมื่อ Phase 4 (`engine.js`) โหลดเสร็จ จะทำการ freeze `window.FVL` และส่งส่งสัญญาณ CustomEvent `fvl:ready`
-
-### การทำงานใน Node.js / JSDOM Test Environment
-ในสภาพแวดล้อมการทดสอบ (Node.js/Vitest) `fvl.js` จะทำการโหลดและประเมินผลไฟล์ใน `fvl-modules/` แบบ synchronous เพื่อให้การทดสอบทำงานได้อย่างแม่นยำและไม่ติด network async race.
+3. เมื่อ Phase 4 (`engine.js`) โหลดเสร็จ จะทำการ freeze `window.FVL` และส่งสัญญาณ CustomEvent `fvl:ready`
 
 ---
 
-## 4. Display Modes (4 แบบ)
+## 4. Display Modes & Flexible Options (`spinnerOnly`, `bare`, `chromeless`, `targetSlot`)
+
+FVL รองรับ 4 display modes หลัก พร้อมตัวเลือกการแสดงผลแบบยืดหยุ่นผ่าน options object:
+
+### 4.1 Display Modes
 
 | Display Mode | คำอธิบาย | DOM Structure / CSS Class | Use Case |
 | :--- | :--- | :--- | :--- |
@@ -109,60 +117,87 @@ var LOAD_PHASES = [
 | **`inline`** | Spinner ขนาดเล็กสำหรับแทรกในเนื้อหาหรือปุ่ม | `.fvl.fvl-inline` | ปุ่มกดส่งข้อมูล, async inline search |
 | **`topbar`** | แถบ progress bar บางๆ ด้านบนสุด | `.fvl.fvl-topbar` | โหลดแบบ background, โหลดรูปภาพ |
 
+### 4.2 Flexible Mode Options
+
+สามารถส่ง options ต่อไปนี้ร่วมกับทุก display mode ใน `FVL.show()`, `FVL.scoped()`, `FVL.inline()` หรือ `FVL.topbar()`:
+
+| Option | Type | Default | คำอธิบาย |
+| :--- | :--- | :--- | :--- |
+| **`spinnerOnly`** | `boolean` | `false` | ซ่อนการสร้างโหนดข้อความ (`fvl-msg`, `fvl-sub`, `fvl-text`) แสดงเฉพาะ spinner และเพิ่ม `aria-label` บน root container เพื่อคง accessibility |
+| **`chromeless`** | `boolean` | `false` | ถอดพื้นหลัง overlay backdrop, border, padding และ shadow ออก (เพิ่ม class `.fvl-chromeless`) เหมาะสำหรับการแสดงผลกลมกลืนกับองค์ประกอบอื่น |
+| **`bare`** | `boolean` | `false` | Shorthand สอดคล้องกับ `{ spinnerOnly: true, chromeless: true }` (เพิ่ม class `.fvl-bare` และ `.fvl-chromeless`) |
+| **`targetSlot`** | `string \| HTMLElement` | `null` | กำหนด sub-selector หรือ DOM element ภายใน container หลักเพื่อเป็นที่วาง spinner โดย container หลักยังคงถูกตั้งค่า `aria-busy="true"` ตาม lifecycle |
+
 ---
 
-## 5. Material Spinner Variant Subsystem (Opt-In API)
+## 5. Material Spinner Subsystem & Standalone Subsystem (`fvl-spinner.js`)
 
-โมดูล `fvl-modules/spinner.js` เป็นระบบ spinner ย่อยสไตล์ Material Design ที่ปรับแต่งได้ตามความต้องการ โดยไม่กระทบโครงสร้าง DOM หรือ UX เดิมของหน้าเว็บปัจจุบัน
+ระบบ Spinner ของ FVL ประกอบด้วย 2 ส่วน:
+1. Material Spinner Variant Engine ใน `fvl-modules/spinner.js` สำหรับใช้งานร่วมกับ FVL Orchestrator
+2. Standalone Spinner Subsystem ใน `assets/js/loading-system/fvl-spinner.js` สำหรับใช้งานแบบ zero-dependency
 
-### 5.1 Variant Sizes
-- **`sm`**: 16px × 16px (`.fvl-spinner--sm`)
-- **`md`**: 24px × 24px (`.fvl-spinner--md`)
-- **`lg`**: 40px × 40px (`.fvl-spinner--lg`)
-- **`xl`**: 64px × 64px (`.fvl-spinner--xl`)
-- **Custom Pixel Size**: ส่งตัวเลข (เช่น `size: 32`) เพื่อกำหนด width/height เป็น pixel โดยตรง
+### 5.1 Standalone Subsystem (`fvl-spinner.js`)
 
-### 5.2 Determinate vs Indeterminate Modes
-- **Indeterminate** (default): หมุนวนต่อเนื่องแบบ CSS keyframe animation (`@_fvl_spin`)
-- **Determinate**: กำหนด `determinate: true` และ `progress: 0..100` ตัว spinner จะสลับเป็น mode กำหนดความก้าวหน้า และปรับ `strokeDashoffset` ตามเปอร์เซ็นต์
-- **`updateProgress(percent)`**: API อัปเดตเปอร์เซ็นต์บน spinner instance ได้ทันที
+`fvl-spinner.js` เป็นไฟล์มอดูลขนาดเล็ก ทำงานอิสระโดยไม่ต้องโหลด `fvl.js` หรือมอดูลย่อยใน `fvl-modules/`
 
-### 5.3 Color Tokens & Customization
-- `--fvl-spinner-color`: กำหนดสีของเส้นวงกลม arc
-- `--fvl-spinner-track-color`: กำหนดสีของเส้นวงกลม track พื้นหลัง
+- **Zero-Dependency**: ไม่ขึ้นกับ `fvl.js` หรือ `LOAD_PHASES`
+- **Auto CSS Injection**: ตรวจสอบว่ามี `<link href="...loading-system.css">` อยู่หรือไม่ หากไม่มี จะสร้าง `<style id="fvl-spinner-styles">` สำหรับ keyframes `@_fvl_spin` และสไตล์หลักของ spinner อัตโนมัติ
+- **Global Export**: ส่งออก `window.FVLSpinner` และสร้างสะพานเชื่อม `window.FVL.spinner` อัตโนมัติ
 
-### 5.4 Standalone Factory API
+### 5.2 Variant Sizes & Adjustments
+- **Sizes**:
+  - Preset string: `'sm'` (18px), `'md'` (32px), `'lg'` (48px), `'xl'` (64px)
+  - Custom pixel: ตัวเลข integer (เช่น `size: 24` กำหนด width/height เป็น `24px`)
+- **Speed**: `'fast'` (0.4s), `'normal'` (0.7s), `'slow'` (1.2s)
+- **Stroke Width**:
+  - Preset string: `'thin'` (2px), `'medium'` (3.5px), `'thick'` (5px)
+  - Custom pixel: ตัวเลข integer (เช่น `strokeWidth: 4` กำหนด `--fvl-spinner-stroke-width: 4px`)
+- **Colors**:
+  - `color`: กำหนด CSS `--fvl-spinner-color` สำหรับ arc
+  - `trackColor`: กำหนด CSS `--fvl-spinner-track-color` สำหรับ track
+- **Determinate / Progress**:
+  - `determinate: true` หรือส่ง `progress: 0..100` จะเปลี่ยนเป็นวงกลมแสดงเปอร์เซ็นต์
+  - `updateProgress(value)` อัปเดต `strokeDashoffset` และ `aria-valuenow` ทันที
+
+### 5.3 Standalone API & Instance Handle
 
 ```javascript
-// สร้าง standalone spinner object
-var spinner = FVL.Spinner.create({
+// 1. Static Factory Create
+var spinner = FVLSpinner.create({
   size: 'md',
-  determinate: true,
-  progress: 50,
-  color: 'var(--fv-color-primary)'
+  color: '#009688',
+  speed: 'fast',
+  strokeWidth: 'medium'
 });
 
-// เพิ่มลงใน DOM
-document.querySelector('#my-container').appendChild(spinner.element);
+// 2. Mount to DOM
+spinner.mount('#my-widget');
 
-// อัปเดตความก้าวหน้า
-spinner.updateProgress(75);
+// 3. Dynamic Controls via Handle
+spinner.setSize('lg');
+spinner.setColor('#ff9800');
+spinner.setSpeed('slow');
+spinner.setStrokeWidth(4);
+spinner.updateProgress(65);
 
-// ทำลายเมื่อใช้งานเสร็จ
-spinner.destroy();
+// 4. Cleanup & Unmount
+spinner.unmount(); // ถอดออกจาก DOM
+spinner.destroy(); // Unmount และทำลาย handle
 ```
 
 ---
 
-## 6. Public API — `window.FVL`
+## 6. Public API — `window.FVL` & `window.FVLSpinner`
 
-`window.FVL` ถูก freeze เพื่อความปลอดภัย (`Object.freeze`) โดยมี API หลักดังนี้:
+### 6.1 `window.FVL`
+
+`window.FVL` ถูก freeze เพื่อความปลอดภัย (`Object.freeze`):
 
 ```javascript
 window.FVL = Object.freeze({
   _initialized: true,
-  VERSION: '3.0.8',
-  show: function(opts) { ... },             // แสดง overlay/spinner
+  VERSION: '3.1.0',
+  show: function(opts) { ... },             // แสดง overlay/spinner (รองรับ spinnerOnly/bare/chromeless/targetSlot)
   hide: function(id) { ... },               // ซ่อน overlay ตาม ID
   scoped: function(target, opts) { ... },   // แสดง scoped loader บน target
   inline: function(target, opts) { ... },   // แทรก inline loader ใน target
@@ -174,10 +209,19 @@ window.FVL = Object.freeze({
   off: function(event, handler) { ... },    // ยกเลิก event listener
   readinessHandshake: function(o) { ... },  // บูตแฮนด์เชกก่อนโหลดหน้า
   boot: function(opts) { ... },             // เรียกการบูตหลัก
-  Spinner: Spinner,                        // Material spinner variant API
+  spinner: FVLSpinner,                     // Standalone/Material Spinner reference
+  Spinner: FVLSpinner,                     // Alias compatibility reference
   _internals: { ... }                      // อ้างอิงภายในสำหรับการทดสอบ
 });
 ```
+
+### 6.2 `window.FVLSpinner` Static Methods
+
+- `FVLSpinner.create(opts)`: สร้าง spinner handle object
+- `FVLSpinner.mount(target, opts)`: สร้างและ mount spinner ลงใน `target` ทันที
+- `FVLSpinner.applyVariant(el, opts)`: ปรับแต่งสไตล์และคลาสของ spinner DOM element
+- `FVLSpinner.updateProgress(el, value)`: อัปเดต progress offset บน SVG arc
+- `FVLSpinner.renderSVG()`: คืนค่า SVG string ของ spinner
 
 ---
 
@@ -205,7 +249,10 @@ FVL อ่าน theme อัตโนมัติจาก `document.documentEl
 - **i18n**: รองรับข้อความหลายภาษา (TH/EN) โดยอ่านจาก `localStorage.selectedLang` หรือ `opts.lang`
 - **Accessibility**:
   - `role="status"` และ `aria-live="polite"` สำหรับ screen readers
+  - `aria-label` บน root container เมื่ออยู่ในโหมด `spinnerOnly` หรือ `bare`
   - `aria-hidden="true"` สำหรับ SVG spinner
+  - `aria-valuenow`, `aria-valuemin`, `aria-valuemax` สำหรับ determinate mode
+  - `aria-busy="true"` บน target container
   - ปฏิบัติตาม `prefers-reduced-motion` โดยปิด transition เมื่อผู้ใช้ตั้งค่าให้ลดการเคลื่อนไหว
 
 ---
@@ -223,7 +270,12 @@ FVL อ่าน theme อัตโนมัติจาก `document.documentEl
 ## 11. CSS Architecture & Naming Standard
 
 - ไฟล์ CSS หลัก: `assets/css/loading-system.css` (auto-injected โดย `fvl.js`)
-- ใช้ prefix `.fvl-` สำหรับทุก class
+- Modifier classes หลัก:
+  - `.fvl-bare`: สไตล์ bare presentation
+  - `.fvl-chromeless`: ปลด backdrop, border, shadow
+  - `.fvl-spinner--sm`, `.md`, `.lg`, `.xl`: ขนาด spinner
+  - `.fvl-spinner--speed-fast`, `.speed-normal`, `.speed-slow`: ความเร็วอนิเมชัน
+  - `.fvl-spinner--stroke-thin`, `.stroke-medium`, `.stroke-thick`: ความหนาเส้น
 - ดูรายละเอียดและ BEM standard ทั้งหมดใน [`assets/js/loading-system/NAMING.md`](../assets/js/loading-system/NAMING.md)
 
 ---
@@ -231,22 +283,61 @@ FVL อ่าน theme อัตโนมัติจาก `document.documentEl
 ## 12. วิธีเพิ่มในหน้าเว็บและตัวอย่างการใช้งาน
 
 ### 12.1 การรวมสคริปต์ใน HTML
+
 ```html
-<script defer src="/assets/js/loading-system/fvl.js?v=3.0.8"></script>
+<!-- กรณีใช้ FVL Orchestrator แบบเต็ม -->
+<script defer src="/assets/js/loading-system/fvl.js?v=3.1.0"></script>
+
+<!-- กรณีใช้ Standalone Spinner แบบ zero-dependency -->
+<script defer src="/assets/js/loading-system/fvl-spinner.js?v=3.1.0"></script>
 ```
 
 ### 12.2 ตัวอย่างการเรียกใช้งาน
+
+#### Fullscreen Loading (แบบมาตรฐาน)
 ```javascript
-// Fullscreen Loading Overlay
 var loaderId = FVL.show({ message: 'กำลังโหลดข้อมูล...' });
+setTimeout(function() { FVL.hide(loaderId); }, 1000);
+```
 
-// Hide after async task
-setTimeout(function() {
-  FVL.hide(loaderId);
-}, 1000);
+#### Spinner-Only Mode (ไม่แสดงข้อความ)
+```javascript
+FVL.scoped('#card-container', {
+  spinnerOnly: true,
+  ariaLabel: 'กำลังอัปเดตการ์ด...'
+});
+```
 
-// Scoped Overlay
-FVL.scoped('#card-container', { message: 'Updating...' });
+#### Bare & Chromeless Mode
+```javascript
+FVL.scoped('#widget', {
+  bare: true, // เท่ากับ { spinnerOnly: true, chromeless: true }
+  size: 'sm'
+});
+```
+
+#### TargetSlot Mode (Mount ในปุ่มหรือ slot ย่อย)
+```javascript
+FVL.scoped('#form-container', {
+  targetSlot: '#submit-btn-spinner-slot',
+  spinnerOnly: true
+});
+```
+
+#### Standalone Spinner Usage Example
+```javascript
+// Direct mount ด้วย FVLSpinner
+var handle = FVLSpinner.mount('#profile-avatar-wrapper', {
+  size: 'sm',
+  color: '#009688',
+  speed: 'fast'
+});
+
+// เปลี่ยนค่าภายหลัง
+handle.setColor('#e91e63');
+
+// Unmount เมื่อเสร็จงาน
+handle.destroy();
 ```
 
 ---
@@ -259,6 +350,7 @@ FVL.scoped('#card-container', { message: 'Updating...' });
 | **Discover Page** | `LoadingService.show()` → `FVL.fullscreen()` |
 | **Router Transitions** | `LoadingService.show()` / `.hide()` |
 | **Search System** | `FVL.scoped({ target: '#search-results' })` |
+| **Standalone Components** | เรียกใช้ `FVLSpinner.mount(target, opts)` ตรงโดยไม่ต้องผ่าน `fvl.js` |
 
 ---
 
@@ -268,6 +360,7 @@ FVL.scoped('#card-container', { message: 'Updating...' });
 | :--- | :--- |
 | **v1.0.0** | เปิดตัว — 4 modes (fullscreen/scoped/inline/topbar), full backward-compat กับ Nav-Core LoadingService |
 | **v3.0.8** | Structural Refactor — ปรับปรุงเป็น modular architecture (`fvl.js` orchestrator + `fvl-modules/` 9 submodules), โหลดผ่าน 4 `LOAD_PHASES`, และเพิ่ม Material Spinner Variant Subsystem (opt-in) |
+| **v3.1.0** | Flexible Spinner & Standalone Subsystem — เพิ่ม standalone `fvl-spinner.js` (zero-dependency, auto CSS injection, instance handle), เพิ่ม options `spinnerOnly`, `bare`, `chromeless`, `targetSlot` ครอบคลุมทั้ง 4 display modes และเพิ่ม unit test contracts |
 
 ---
 
@@ -276,5 +369,5 @@ FVL.scoped('#card-container', { message: 'Updating...' });
 - [`README.md`](../assets/js/loading-system/README.md) — เอกสารสถาปัตยกรรมและสัญญาบริการ
 - [`NAMING.md`](../assets/js/loading-system/NAMING.md) — มาตรฐานชื่อ CSS classes และ DOM elements
 - [`MIGRATION.md`](../assets/js/loading-system/MIGRATION.md) — คู่มือการย้ายระบบและ adopt คุณสมบัติใหม่
+- [`15-Loading-Contract-And-Test-Plan.md`](./15-Loading-Contract-And-Test-Plan.md) — สัญญาและแผนการทดสอบ FVL Subsystem
 - [`00-System-Architecture.md`](./00-System-Architecture.md) — ภาพรวมสถาปัตยกรรมทั้งโปรเจกต์
-- [`03-Navigation-And-Content.md`](./03-Navigation-And-Content.md) — Nav-Core integration

@@ -1,139 +1,63 @@
-# FanHoard Feed System v2.1 — Per-User Persistent Discovery Feed
+# FanHoard FVL Flexible Loading & Standalone Spinner Subsystem v3.1.0
 
 ## What changed
 
-The discover-page feed now randomizes content **per user** (per browser) and
-**persists** the randomized order in `localStorage` for a configurable TTL
-(default 30 minutes). Within the TTL window, every refresh / re-visit shows the
-same feed — so it feels "delivered" rather than "re-rolled every time". After
-TTL expires, a fresh seed is generated → new feed rotation.
-
-The user also resumes scrolling exactly where they left off, even after closing
-the tab and coming back within the TTL window.
+The FVL (FanHoardVerse Loader) system has been upgraded to support flexible display options (`spinnerOnly`, `bare`, `chromeless`, `targetSlot`) across all 4 display modes (`fullscreen`, `scoped`, `inline`, `topbar`) and now includes a standalone, zero-dependency spinner subsystem (`fvl-spinner.js`).
 
 ## Files in this package
 
 | File | Status | Purpose |
 |---|---|---|
-| `feed-cache.js` | **NEW** | FeedCache module — localStorage-backed seed + state with TTL |
-| `feed.js` | MODIFIED | FeedService v2.1 — uses FeedCache for seed + state restore/save |
-| `content.js` | MODIFIED | renderFeed now calls `tryRestoreFromCache()` before `reset()`; saves to cache after every page |
-| `config.js` | MODIFIED | Adds `FEED_SEED_TTL: 30 * 60 * 1000` to `ALL_BUTTON` |
-| `nav-core.js` | MODIFIED | Adds `feed-cache.js` to Phase 2 of the module loader |
+| `assets/js/loading-system/fvl-spinner.js` | **NEW** | Standalone Material Spinner subsystem with zero dependencies on `fvl.js` or `LOAD_PHASES`. Self-injects critical CSS (`#fvl-spinner-styles`). Exports `window.FVLSpinner` and sets `window.FVL.spinner`. |
+| `assets/js/loading-system/fvl-modules/spinner.js` | MODIFIED | Updated to delegate spinner rendering and variant operations to `FVLSpinner`. |
+| `assets/js/loading-system/fvl-modules/renderer.js` | MODIFIED | DOM builders updated across all 4 display modes to support `spinnerOnly`, `bare`, and `chromeless` options, omitting message containers when opted out. |
+| `assets/js/loading-system/fvl-modules/engine.js` | MODIFIED | Added target slot resolution (`targetSlot`) to mount spinners inside nested DOM elements while maintaining parent container `aria-busy` tracking. |
+| `assets/css/loading-system.css` | MODIFIED | Added CSS modifier classes for `.fvl-bare`, `.fvl-chromeless`, `.fvl-spinner--speed-*`, and `.fvl-spinner--stroke-*`. |
+| `tests/loading-spinner-standalone.test.ts` | **NEW** | Vitest suite for zero-dependency standalone spinner mounting, CSS auto-injection, factory methods, variants, progress offsets, and instance cleanup. |
+| `tests/loading-spinner-only.test.ts` | **NEW** | Vitest suite for `spinnerOnly`, `bare`, `chromeless`, and `targetSlot` options across all 4 FVL display modes. |
+| `fanhoard-docs/07-Loading-System.md` | MODIFIED | Comprehensive FVL documentation updated with mode options, standalone spinner guide, updated API section, and Version History v3.1.0. |
+| `fanhoard-docs/15-Loading-Contract-And-Test-Plan.md` | MODIFIED | System contract and test plan updated with flexible options, standalone spinner contracts, test seams (Seams 3 & 4), and Implementation Slice 6. |
 
 ## How to install
 
-### Option A — apply the patch
+### Option A — Apply directly in repository
 
-From the root of your local `fanhoard-page` clone:
+The files are already located in their respective directories under `assets/js/loading-system/`, `assets/css/`, `tests/`, and `fanhoard-docs/`.
 
-```bash
-git apply feed-system-v2.1.patch
-# Then copy the new file (not tracked by patch since it's a new file)
-cp feed-cache.js assets/js/nav-core-modules/feed-cache.js
+### Option B — Script Inclusion
+
+```html
+<!-- Full FVL Orchestrator -->
+<script defer src="/assets/js/loading-system/fvl.js?v=3.1.0"></script>
+
+<!-- Standalone Spinner Subsystem (Zero dependencies) -->
+<script defer src="/assets/js/loading-system/fvl-spinner.js?v=3.1.0"></script>
 ```
-
-### Option B — copy files directly
-
-Copy each file to its corresponding path under `assets/js/`:
-
-```
-feed-cache.js → assets/js/nav-core-modules/feed-cache.js   (NEW)
-feed.js       → assets/js/nav-core-modules/feed.js
-content.js    → assets/js/nav-core-modules/content.js
-config.js     → assets/js/nav-core-modules/config.js
-nav-core.js   → assets/js/nav-core.js
-```
-
-No build step is required — these are plain ES5-compatible modules loaded
-dynamically by `nav-core.js`.
 
 ## How it works (architectural summary)
 
-### Seed strategy
+### 1. Standalone Spinner Subsystem (`fvl-spinner.js`)
 
-```
-Old (v2.0):  _seed = Date.now() ^ Math.random()
-             → new seed every reset()
-             → every page load = brand-new feed order
-             → effectively all users see a "fresh" feed (no real personalization)
+`fvl-spinner.js` operates independently without requiring `fvl.js` or `LOAD_PHASES`.
+- Auto-injects critical `@keyframes _fvl_spin` and spinner styles into `<style id="fvl-spinner-styles">` if `loading-system.css` is not linked.
+- Exposes static factory and lifecycle methods on `window.FVLSpinner`:
+  - `FVLSpinner.create(opts)`
+  - `FVLSpinner.mount(target, opts)`
+  - `FVLSpinner.applyVariant(el, opts)`
+  - `FVLSpinner.updateProgress(el, value)`
+  - `FVLSpinner.renderSVG()`
+- Returns a rich handle object allowing interactive property manipulation (`setSize`, `setColor`, `setTrackColor`, `setSpeed`, `setStrokeWidth`, `updateProgress`, `mount`, `unmount`, `destroy`).
 
-New (v2.1):  _seed = FeedCache.getOrCreateSeed()
-             → seed persisted in localStorage with timestamp
-             → within TTL (30 min): same seed = same feed order
-             → different browsers → different seeds → different feeds
-             → after TTL: new seed generated → fresh rotation
-```
+### 2. Flexible Mode Options (`spinnerOnly`, `bare`, `chromeless`, `targetSlot`)
 
-### State persistence
-
-Feed state (which segments were already emitted, per-category show counts,
-diversity windows, soft-reset progress, slot index) is also persisted to
-`localStorage` so the user resumes exactly where they left off.
-
-What we store (lightweight, < 50 KB typically):
-- `seed`, `softResets`, `isExhausted`, `slotIndex` — cycle progress
-- `catShowCounts` (as entries array) — novelty tracking
-- `recentCats`, `recentTypes` — diversity windows
-- `emittedIds` (ordered list of segment IDs) — lets us rebuild the unseen
-  pool accurately on restore without storing full segment objects
-
-What we **do not** store:
-- Full segment objects (too big — they're deterministically rebuilt from DB +
-  seed)
-- DOM snapshots (content.js handles its own DOM via RouteCache)
-
-### Cache-first flow in `content.js → renderFeed()`
-
-```
-1. Try RouteCache (in-session, 5 min TTL) → if hit, restore DOM + state + scroll
-2. Else → try FeedCache (localStorage, 30 min TTL) → if hit, queue state restore
-3. Else → FeedService.reset() → FeedCache.getOrCreateSeed() (may return same seed if within TTL)
-4. After loadNextPage() → FeedService.saveToCache()  ← persists for next visit
-```
-
-### Storage layout (localStorage keys)
-
-- `fv_feed_seed_v1`: `{ seed:number, createdAt:number }`
-- `fv_feed_state_v1`: `{ seed, softResets, isExhausted, slotIndex, catShowCounts, recentCats, recentTypes, emittedIds, savedAt }`
-
-Both keys are versioned (`_v1` suffix) for future schema migrations.
-
-### Graceful degradation
-
-- If `localStorage` is unavailable (private browsing, quota exceeded) → FeedCache
-  silently degrades; the feed still works, just doesn't persist across reloads.
-- If `FeedCache` module fails to load → `FeedService.reset()` falls back to the
-  original `Date.now() ^ Math.random()` seed behavior.
-- If a cached state's seed doesn't match the current seed (user cleared seed
-  manually, or seed was refreshed) → state is discarded as stale.
-
-## Configuration
-
-In `config.js → ALL_BUTTON`:
-
-```js
-FEED_SEED_TTL: 30 * 60 * 1000,  // 30 minutes — adjust to taste
-```
-
-- Shorter TTL → feed feels fresher, less persistent
-- Longer TTL → feed feels more "delivered", more stable across visits
-
-## Alignment with discovery focus
-
-This change directly serves the project's pivot toward **discovery as the core
-feature**:
-
-1. **Different users see different content** — per-browser seed breaks the
-   "everyone sees the same feed" anti-pattern of v2.0.
-2. **Feed feels delivered, not re-rolled** — within TTL, the same feed greets
-   the user across visits, reinforcing the sense of a personalized discovery
-   surface.
-3. **Resume where you left off** — even after closing the tab, users return to
-   the same point in their feed, supporting long discovery sessions.
-4. **Fresh rotation over time** — TTL-based seed refresh ensures content
-   doesn't go stale over a day, keeping discovery feeling alive.
+- **`spinnerOnly: true`**: Suppresses text wrapper elements (`.fvl-text`, `.fvl-msg`, `.fvl-sub`). Applies accessible `aria-label` on the root container.
+- **`chromeless: true`**: Removes overlay backdrop background, container borders, padding, and shadows (`.fvl-chromeless`).
+- **`bare: true`**: Shorthand equivalent to `{ spinnerOnly: true, chromeless: true }` (`.fvl-bare` and `.fvl-chromeless`).
+- **`targetSlot`**: Selector or `HTMLElement` specifying a child slot inside the target container where the loader is inserted, while the parent container maintains `aria-busy="true"` state.
 
 ## Validation
 
-All 5 files pass `node --check` syntax validation. No build step required.
+- **Vitest Test Suite (`npx vitest run tests/loading-*.test.ts`)**: 5 test files, 35/35 tests passed.
+- **Full Project Vitest Suite (`npx vitest run`)**: 25 test files, 143/143 tests passed.
+- **TypeScript Check (`npm run type-check`)**: 0 errors.
+- **ESLint (`npm run lint`)**: 0 errors.
