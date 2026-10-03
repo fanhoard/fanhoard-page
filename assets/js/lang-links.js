@@ -207,10 +207,15 @@
     // Intercept การคลิก
     interceptLinkClicks();
     
-    // ฟัง event languageChange เพื่ออัพเดทลิงก์ใหม่
+    // ฟัง event languageChange และ fv:langchange เพื่ออัพเดทลิงก์ใหม่
     window.addEventListener('languageChange', function(e) {
       if (e.detail && e.detail.language) {
         updateAllLinks(document, e.detail.language);
+      }
+    });
+    window.addEventListener('fv:langchange', function(e) {
+      if (e.detail && e.detail.lang) {
+        updateAllLinks(document, e.detail.lang);
       }
     });
     

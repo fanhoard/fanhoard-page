@@ -203,22 +203,42 @@
      */
     storeOriginalContent() {
       document.querySelectorAll('[data-translate]').forEach(el => {
+        if (!el.hasAttribute('data-original-html'))
+          el.setAttribute('data-original-html', el.innerHTML);
         if (!el.hasAttribute('data-original-text'))
           el.setAttribute('data-original-text', el.textContent.trim());
         if (!el.hasAttribute('data-original-style'))
           el.setAttribute('data-original-style', el.style.cssText);
+        if (el.hasAttribute('placeholder') && !el.hasAttribute('data-original-placeholder'))
+          el.setAttribute('data-original-placeholder', el.getAttribute('placeholder') || '');
+        if (el.hasAttribute('title') && !el.hasAttribute('data-original-title'))
+          el.setAttribute('data-original-title', el.getAttribute('title') || '');
+        if (el.hasAttribute('aria-label') && !el.hasAttribute('data-original-aria-label'))
+          el.setAttribute('data-original-aria-label', el.getAttribute('aria-label') || '');
       });
     },
 
     /**
-     * คืนค่า original content (English) โดย restore จาก data-original-text
+     * คืนค่า original content (English) โดย restore จาก data-original-html/text
      */
     async resetToEnglishContent() {
       document.querySelectorAll('[data-translate]').forEach(el => {
-        const orig = el.getAttribute('data-original-text');
-        if (orig !== null) el.textContent = orig;
+        const origHtml = el.getAttribute('data-original-html');
+        const origText = el.getAttribute('data-original-text');
+        if (origHtml !== null) el.innerHTML = origHtml;
+        else if (origText !== null) el.textContent = origText;
+
         const origStyle = el.getAttribute('data-original-style');
         if (origStyle !== null) el.style.cssText = origStyle;
+
+        const origPh = el.getAttribute('data-original-placeholder');
+        if (origPh !== null) el.setAttribute('placeholder', origPh);
+
+        const origTitle = el.getAttribute('data-original-title');
+        if (origTitle !== null) el.setAttribute('title', origTitle);
+
+        const origAria = el.getAttribute('data-original-aria-label');
+        if (origAria !== null) el.setAttribute('aria-label', origAria);
       });
     },
 
