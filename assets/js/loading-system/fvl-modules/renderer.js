@@ -8,6 +8,20 @@
 
   var Renderer = (function() {
 
+    
+    function _applyCentering(spinnerEl, opts) {
+      if (!spinnerEl || !opts) return;
+      var align = opts.align;
+      var isCentered = (opts.center === true || ((opts.bare || opts.spinnerOnly) && opts.center !== false)) && align !== "left" && align !== "right";
+      if (isCentered) {
+        spinnerEl.classList.add("fvl-spinner--center");
+      } else if (align === "left") {
+        spinnerEl.classList.add("fvl-spinner--align-left");
+      } else if (align === "right") {
+        spinnerEl.classList.add("fvl-spinner--align-right");
+      }
+    }
+
     function spinnerSVG() {
       if (M.Spinner) {
         return M.Spinner.renderSVG();
@@ -58,11 +72,10 @@
       if (isChromeless) rootClasses += ' fvl-chromeless';
       if (isBare) rootClasses += ' fvl-bare';
 
-      var root = M.Utils.DOM.create('div', rootClasses, {
-        'role': 'status',
-        'aria-live': 'polite',
-        'aria-atomic': 'true',
-      });
+      var role = opts.role || "dialog";
+      var rootAttrs = { "role": role, "aria-live": "polite", "aria-atomic": "true" };
+      if (role === "dialog") rootAttrs["aria-modal"] = "true";
+      var root = M.Utils.DOM.create("div", rootClasses, rootAttrs);
       root.setAttribute(CONFIG.DOM.DATA_MODE, 'fullscreen');
       root.setAttribute(CONFIG.DOM.DATA_ATTR, inst.id);
 
@@ -73,7 +86,7 @@
       var spinner = M.Utils.DOM.create('div', 'fvl-spinner', { 'aria-hidden': 'true' });
       spinner.innerHTML = spinnerSVG();
       _applyVariantIfOpted(spinner, inst);
-
+      _applyCentering(spinner, opts);
       root.appendChild(spinner);
       inst.spinnerEl = spinner;
 
@@ -106,10 +119,11 @@
       if (isBare) rootClasses += ' fvl-bare';
       if (opts.overlay && !isChromeless) rootClasses += ' fvl-scoped-overlay';
 
-      var root = M.Utils.DOM.create('div', rootClasses, {
-        'role': 'status',
-        'aria-live': 'polite',
-        'aria-hidden': 'true',
+      var role = opts.role || "progressbar";
+      var root = M.Utils.DOM.create("div", rootClasses, {
+        "role": role,
+        "aria-live": "polite",
+        "aria-busy": "true",
       });
       root.setAttribute(CONFIG.DOM.DATA_MODE, 'scoped');
       root.setAttribute(CONFIG.DOM.DATA_ATTR, inst.id);
@@ -118,7 +132,7 @@
       var spinner = M.Utils.DOM.create('div', 'fvl-spinner', { 'aria-hidden': 'true' });
       spinner.innerHTML = spinnerSVG();
       _applyVariantIfOpted(spinner, inst);
-
+      _applyCentering(spinner, opts);
       inner.appendChild(spinner);
 
       if (!isSpinnerOnly && opts.message) {
@@ -149,7 +163,8 @@
       if (isChromeless) wrapClasses += ' fvl-chromeless';
       if (isBare) wrapClasses += ' fvl-bare';
 
-      var wrap = M.Utils.DOM.create('span', wrapClasses, { 'aria-hidden': 'true' });
+      var role = opts.role || "progressbar";
+      var wrap = M.Utils.DOM.create("span", wrapClasses, { "role": role, "aria-busy": "true" });
       wrap.setAttribute(CONFIG.DOM.DATA_MODE, 'inline');
       wrap.setAttribute(CONFIG.DOM.DATA_ATTR, inst.id);
 

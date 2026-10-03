@@ -174,6 +174,86 @@
       } catch (_) {}
     }
 
+    
+    function _shouldLockScroll(inst) {
+      var opts = inst.options || {};
+      if (opts.lockScroll === false) return false;
+      if (opts.lockScroll === true) return true;
+      if (inst.mode === "fullscreen") return true;
+      if (inst.mode === "scoped" && inst.targetEl) {
+        var target = inst.targetEl;
+        if (target === document.body || target === document.documentElement) return true;
+        var id = target.id;
+        if (id === "app" || id === "main" || id === "root") return true;
+        if (target.classList && target.classList.contains("fvl-viewport-covering")) return true;
+      }
+      return false;
+    }
+
+    function _hideSiblingsFromScreenReaders(inst) {
+      try {
+        var doc = (typeof window !== "undefined" && window.document) || document;
+        var body = doc.body;
+        if (!body) return;
+        var items = [];
+        for (var i = 0; i < body.children.length; i++) {
+          var child = body.children[i];
+          if (child !== inst.rootEl && child.tagName !== "SCRIPT" && child.tagName !== "STYLE") {
+            var prev = child.getAttribute("aria-hidden");
+            child.setAttribute("aria-hidden", "true");
+            items.push({ el: child, prev: prev });
+          }
+        }
+        inst._ariaHiddenElements = items;
+      } catch (_) {}
+    }
+
+    function _setupFocusAndKeyboard(inst) {
+      try {
+        var doc = (typeof window !== "undefined" && window.document) || document;
+        inst._previouslyFocusedElement = doc.activeElement;
+
+        if (inst.rootEl) {
+          if (!inst.rootEl.hasAttribute("tabindex")) {
+            inst.rootEl.setAttribute("tabindex", "-1");
+          }
+          try { inst.rootEl.focus(); } catch (_) {}
+        }
+
+        var handleKeydown = function(e) {
+          if (!inst || inst.state === "hidden" || inst.state === "destroyed") return;
+          var key = e.key || e.code;
+          if (key === "Escape" || e.keyCode === 27) {
+            if (inst.options && inst.options.closable !== false) {
+              if (typeof inst.options.onClose === "function") {
+                try { inst.options.onClose(); } catch (_) {}
+              } else if (typeof inst.options.onCancel === "function") {
+                try { inst.options.onCancel(); } catch (_) {}
+              }
+              hide(inst.id);
+            }
+          } else if (key === "Tab" || e.keyCode === 9) {
+            if (!inst.rootEl) return;
+            var focusables = inst.rootEl.querySelectorAll("a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex]:not([tabindex=\"-1\"]), [contenteditable]");
+            if (focusables.length > 0) {
+              var first = focusables[0];
+              var last = focusables[focusables.length - 1];
+              if (e.shiftKey && doc.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+              } else if (!e.shiftKey && doc.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+              }
+            }
+          }
+        };
+
+        inst._keydownListener = handleKeydown;
+        doc.addEventListener("keydown", handleKeydown);
+      } catch (_) {}
+    }
+
     function show(userOpts) {
       var opts = M.Utils.mergeOptions(userOpts);
       var mode = opts.mode;
@@ -308,14 +388,16 @@
         inst.autoHideTimer = setTimeout(function() { hide(id); }, opts.autoHideAfterMs);
       }
 
-      if (mode === 'fullscreen' && opts.lockScroll) {
-        try {
-          var prev = window.scrollY || 0;
-          doc.body.style.position = 'fixed';
-          doc.body.style.top = '-' + prev + 'px';
-          doc.body.style.width = '100%';
-          inst._lockedScrollY = prev;
-        } catch (_) {}
+      if (_shouldLockScroll(inst)) {
+        inst._scrollLocked = true;
+        if (M.ScrollLockManager) {
+          M.ScrollLockManager.lock();
+        }
+      }
+
+      if (mode === "fullscreen") {
+        _hideSiblingsFromScreenReaders(inst);
+        _setupFocusAndKeyboard(inst);
       }
 
       return _makeHandle(inst);
@@ -329,15 +411,41 @@
 
       var doc = window.document || document;
 
-      if (inst.mode === 'fullscreen' && inst._lockedScrollY != null) {
+      if (inst._scrollLocked) {
+        inst._scrollLocked = false;
+        if (M.ScrollLockManager) {
+          M.ScrollLockManager.unlock();
+        }
+      }
+
+      if (inst._ariaHiddenElements) {
         try {
-          var y = inst._lockedScrollY;
-          doc.body.style.position = '';
-          doc.body.style.top = '';
-          doc.body.style.width = '';
-          window.scrollTo(0, y);
-          inst._lockedScrollY = null;
+          inst._ariaHiddenElements.forEach(function(item) {
+            if (item.prev === null || item.prev === undefined) {
+              item.el.removeAttribute("aria-hidden");
+            } else {
+              item.el.setAttribute("aria-hidden", item.prev);
+            }
+          });
         } catch (_) {}
+        inst._ariaHiddenElements = null;
+      }
+
+      if (inst._keydownListener) {
+        try {
+          var doc = (typeof window !== "undefined" && window.document) || document;
+          doc.removeEventListener("keydown", inst._keydownListener);
+        } catch (_) {}
+        inst._keydownListener = null;
+      }
+
+      if (inst._previouslyFocusedElement) {
+        try {
+          if (typeof inst._previouslyFocusedElement.focus === "function") {
+            inst._previouslyFocusedElement.focus();
+          }
+        } catch (_) {}
+        inst._previouslyFocusedElement = null;
       }
 
       if (inst.targetEl) {
