@@ -1,6 +1,6 @@
 ---
 version: 3.2.22
-date: 2026-10-03T23:14:50.812Z
+date: 2026-10-04T07:20:00.000Z
 title: Friendlier Community Forms
 subtitle: Report, contact and community pages get the new calm look — rounded fields, soft teal focus, pill buttons and clearer error hints that work in light and dark mode.
 notify: true
@@ -10,19 +10,12 @@ notify: true
 
 ### Improved
 
-- Form fields (report form, page picker, email) now sit on clean card surfaces with 12px rounded corners and subtle borders
-- Focusing a field shows a clear teal ring — the same accessible focus style across the whole site
-- Submit and contact buttons are now pill-shaped in FanHoard teal
-- Empty submissions show friendly error messages, mark fields with `aria-invalid`, describe the error to screen readers, and move focus where you need to fix it
-- Everything follows light and dark mode, including the dropdown chevron and error states
+- **Rounded form fields** — report details, page picker and email sit on clean white card surfaces with 12px corners and subtle borders.
+- **Clear teal focus** — focusing any field shows the site-wide 3px teal ring, in both light and dark mode.
+- **Pill buttons** — submit and contact actions are capsule-shaped in FanHoard teal, resting on the primary brand color.
+- **Accessible errors** — empty submissions show friendly messages, mark fields with `aria-invalid`, describe them to screen readers, and move focus to the first field to fix.
 
 ### Fixed
 
-- Removed leftover old-theme teal values and a non-existent color token that could break button hovers
-- Select dropdown arrow now uses the current brand teal
-
-### Accessibility
-
-- Keyboard focus rings standardized to 3px teal across all form controls
-- Error text is programmatic, visible only when relevant, and tied to its field via `aria-describedby`
-- Reduced-motion users get no animated transitions on form controls
+- **Button hover token** — removed a color token that never existed, which could break button hovers.
+- **Dropdown arrow color** — the select chevron now uses the current brand teal.
