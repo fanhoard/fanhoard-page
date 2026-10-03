@@ -36,7 +36,7 @@ body {
 /* ── FOUC & Hydration Loading Pattern ── */
 body {
   opacity: 0;
-  transition: opacity var(--duration-normal, 250ms) var(--ease-out, ease-out);
+  transition: opacity var(--transition-normal, 250ms ease);
 }
 
 body.is-loaded {
@@ -61,7 +61,7 @@ p {
 a {
   color: var(--color-brand-primary, #0d9488);
   text-decoration: none;
-  transition: color var(--duration-fast, 150ms) var(--ease-out, ease-out);
+  transition: color var(--transition-fast, 150ms ease);
 }
 
 a:hover {

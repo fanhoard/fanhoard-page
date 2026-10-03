@@ -24,7 +24,7 @@
   
   /* ── Inject footer HTML ───────────────────────────── */
   function inject(html) {
-    if (document.querySelector('footer.fv-footer, footer.footer-minimal')) return;
+    if (document.querySelector('footer.fv-footer a, footer.footer-minimal a')) return;
     
     const tmp = document.createElement('div');
     tmp.innerHTML = html.trim();
@@ -41,7 +41,7 @@
   
   /* ── Fallback inline footer ───────────────────────── */
   function fallback() {
-    if (document.querySelector('footer.fv-footer, footer.footer-minimal')) return;
+    if (document.querySelector('footer.fv-footer a, footer.footer-minimal a')) return;
     const el = document.createElement('footer');
     el.className = 'fv-footer footer-minimal';
     el.setAttribute('role', 'contentinfo');
@@ -62,7 +62,7 @@
     
     if (
       document.documentElement.dataset.fvBuilt &&
-      document.querySelector('footer.fv-footer, footer.footer-minimal')
+      document.querySelector('footer.fv-footer a, footer.footer-minimal a')
     ) return;
     
     fetch(FOOTER_TEMPLATE_PATH, { cache: 'force-cache' })

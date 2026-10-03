@@ -29,7 +29,7 @@
         }
       }
     } catch (_) {}
-    return 'dark'; // FanHoard default theme is dark
+    return 'system'; // FanHoard default follows the OS (matches site-wide CSS behavior)
   }
 
   function _resolveEffectiveTheme(theme) {

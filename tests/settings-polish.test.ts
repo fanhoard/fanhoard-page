@@ -15,8 +15,8 @@ describe('Settings System & Theme Core Polish', () => {
     const ThemeCore = (window as any).ThemeCore;
     expect(ThemeCore).toBeDefined();
 
-    // Default theme should be dark
-    expect(ThemeCore.getTheme()).toBe('dark');
+    // Default theme follows the OS (v3 white-first: matches site-wide CSS behavior)
+    expect(ThemeCore.getTheme()).toBe('system');
 
     // Change theme to light
     const effective = ThemeCore.setTheme('light', { transition: false });

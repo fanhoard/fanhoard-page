@@ -1,33 +1,49 @@
-# Platform Pages Polish v3.2.23 (r10)
+# Global Consistency Sweep v3.2.24 (r11) — Final Code Round
 
-## What changed in v3.2.23 (Platform pages on Design Language v3)
+## What changed in v3.2.24
 
-### assets/css/about.css (about/license/privacy share it)
-- Old material teal fallbacks `#009688` ×4 → `#0d9488` (h1/links/accents — resolved via token now)
-- Focus ring 2px → v3 `3px solid rgba(13,148,136,0.35)`; `radius-sm` fallback 4px → 8px; `150ms ease-out` fallback → `150ms ease`; hairline fallback rgba(0,0,0,0.06) → rgba(15,23,42,0.08)
+### Shared components normalized to v3 (uncommitted r11 sweep, committed here)
+- `assets/css/footer.css`: legacy `--ease-in-out`/`--ease-out` transition groups → `var(--transition-fast/normal)`; nested var() fallbacks simplified; 3 focus outlines → 3px solid rgba(13,148,136,0.35)
+- `assets/css/back-to-top.css`: #009688 → #0d9488; hover fallback #00897b → #0F766E; enter/exit curves → transition tokens; outline → 3px teal
+- `assets/css/base.css`: 2 ghost `--ease-out` transitions → transition tokens
+- `assets/css/modern-styles.css`: #757575 → #475569
+- `assets/js/footer-template.js` (from the audit worker): footer injection guard `footer.fv-footer` → `footer.fv-footer a` — an empty (linkless) footer no longer blocks re-injection
 
-### assets/css/roadmap.css
-- Muted fallbacks `#757575` ×5 (timeline dots, labels) → `#475569`; hairlines → rgba(15,23,42,0.08); nested var() doubled fallbacks simplified. Unboxed Read-surface timeline layout kept intentionally (consistent with the site's low-noise content pages)
+### REAL BUG FIXED — settings first-visit theme (found by the 14-page audit)
+- `theme-core.js` `_getStoredTheme()` returned hardcoded `'dark'` when no preference stored ("FanHoard default theme is dark" — a v2-era decision). The other 13 pages follow the OS via CSS (`@media prefers-color-scheme { :root:not([data-theme="light"]) }`), so a fresh OS-light visitor got a DARK settings page while the rest of the site was light. Default changed to `'system'` — now resolves via matchMedia like every other page.
+- `setting-ui.js` radio/effective fallbacks `'dark'` → `'system'` (consistency)
+- `tests/settings-polish.test.ts` default pin updated 'dark' → 'system' per v3 spec (assertion structure unchanged, same class as the r03 timing pin)
 
-### assets/css/new.css (What's New)
-- Old teal `#009688` ×6 → `#0d9488` (banner, badges, current-release divider, focus); muted `#757575` ×5 → `#475569`
-- `.wn-time-chip`: hardcoded `#0f766e` text → `--color-brand-hover`; background `var(--teal-50, #f0fdf4)` (greenish legacy tint) → `rgba(13,148,136,0.09)` teal tint working in both themes; chip border old rgba(0,150,136,0.2) → rgba(13,148,136,0.2)
-- `.wn-history-label` `#0f766e` → `--color-brand-hover`
-- Focus ring 2px → 3px rgba(13,148,136,0.35)
+### Audit false alarms cleared (no product change)
+- 404 "white focus ring": outline-style is `none` (color=currentColor artifact in computed read); the skip-link indicates focus by appearing, standard pattern
+- license "white ring": the first interactive element is a hidden Cookiebot iframe — not user-facing
 
-### Hotfix included (commit 47c2fc4, pre-release)
-- v3.2.22 release notes rewritten in the parser-compatible `- **Title** — desc` bullet format — the in-app update modal's parseMD requires bold-titled bullets; plain bullets produced an empty item list in the user-facing dialog. Registry copies v3.2.22 regenerated; unit tests 234/234 restored.
+## Full-site audit results (14 pages × light+dark, 1280 + 375 overflow spot-check)
+
+All 28 combos: body themed (#FAFAFC light / #0F172A dark), footer present with 12 links (no dupes, no empty footers), 0 horizontal overflow at 1280 and 375, focus rings 3px teal on real interactive elements. Screenshots in `r11-shots/` (28 files, committed). Reduced-motion verified in r07 (0.00001s transitions).
+
+| Page | Light | Dark | Overflow 1280/375 |
+|---|---|---|---|
+| 404 (/) | ✓ #FAFAFC | ✓ #0F172A | none |
+| /home/ | ✓ | ✓ | none |
+| /search/?q=heart | ✓ | ✓ | none |
+| /setting/ | ✓ (fixed) | ✓ | none |
+| /community/ | ✓ | ✓ | none |
+| /community/contact/ | ✓ | ✓ | none |
+| /community/report/ | ✓ | ✓ | none |
+| /platform/about/ | ✓ | ✓ | none |
+| /platform/license/ | ✓ | ✓ | none |
+| /platform/privacy/ | ✓ | ✓ | none |
+| /platform/roadmap/ | ✓ | ✓ | none |
+| /platform/whats_new/ | ✓ | ✓ | none |
+| /data/verse/discover/ | ✓ | ✓ | none |
+| /data/verse/scope/ | ✓ | ✓ | none |
 
 ## Verification
 
-- Unit 234/234 (37 files, incl. version-notification parser suite) | build clean | full e2e 16/16
-- Real browser (Playwright, light+dark × 5 pages): bodies themed (#FAFAFC / #0F172A); headings/links teal themed (light #0D9488 / dark teal-400); What's New version badge pill 9999px teal; time chips teal tint rgba(13,148,136,0.09) + brand-hover text both themes
+- Unit 234/234 (37 files) | build clean | full e2e 16/16 (incl. scroll-lock 3/3, theme-toggle, report-submission)
+- Live fix verification: fresh OS-light context → settings body #FAFAFC, radio=System, data-theme=light; fresh OS-dark → body #0F172A, radio=System, data-theme=dark
 
-## Files changed
+## Notes format
 
-| File | Change |
-|------|--------|
-| `assets/css/about.css`, `roadmap.css`, `new.css` | v3 normalization: old-teal/muted purge, teal-tint chips, v3 focus rings |
-| `assets/md/en/current.md`, `assets/md/th/current.md` | v3.2.23 release notes (parser-compatible format) |
-| `assets/md/{en,th}/releases/v3.2.22.md` | regenerated parseable copies (hotfix 47c2fc4) |
-| release pipeline artifacts | registry/version/HTML asset strings (v3.2.23) |
+Release notes EN/TH use the parser-compatible `- **Bold** — desc` bullet format (in-app update modal renders full item lists).

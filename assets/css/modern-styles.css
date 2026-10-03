@@ -39,7 +39,7 @@
 .svg-wrapper > svg {
   position: absolute; inset: 50% auto auto 50%;
   transform: translate(-50%, -50%); height: 22px; width: 22px;
-  stroke: var(--text-muted, #757575);
+  stroke: var(--text-muted, #475569);
   stroke-width: 1.7; pointer-events: none;
   transition: stroke var(--transition-fast, 150ms ease);
 }

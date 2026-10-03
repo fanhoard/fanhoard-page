@@ -1,23 +1,25 @@
-# แพตช์หน้า Platform ขัดเงา (v3.2.23)
+# แพตช์ Global Consistency Sweep (v3.2.24) — รอบโค้ดสุดท้าย
 
-วางไฟล์ทั้งหมดใน patch นี้ทับลงบน repo ตามโครงสร้างเดิม — แตก ZIP แล้ว copy ทับได้เลย
+วางไฟล์ทั้งหมดใน patch นี้ทับลงบน repo ตามโครงสร้างเดิม — แตก ZIP แล้ว copy ทับได้เลย (โฟลเดอร์ `r11-shots/` คือหลักฐานสกรีนช็อต 28 ภาพ เก็บหรือทิ้งได้)
 
-## สรุปการเปลี่ยนแปลง (v3.2.23 - Platform Pages Polish)
+## สรุปการเปลี่ยนแปลง (v3.2.24 - Global Consistency Sweep)
 
 | ไฟล์ | การเปลี่ยนแปลง |
 |------|----------------|
-| `assets/css/about.css` | เทลเก่า `#009688` 4 จุด → `#0d9488`, focus ring 2px → 3px เทล v3, fallback radius/curve/ขอบปรับตาม v3 |
-| `assets/css/roadmap.css` | เทาเก่า `#757575` 5 จุด (จุดไทม์ไลน์/ป้าย) → `#475569`, เส้นคั่น hairline ปรับ v3, แก้ var ซ้อน — เลย์เอาต์ Read-surface คงไว้ตั้งใจ |
-| `assets/css/new.css` | เทลเก่า 6 จุด + เทา 5 จุด purge, time chip จากพื้นเขียว legacy `--teal-50` → แต้มเทล `rgba(13,148,136,0.09)` ใช้ได้ทั้งสองธีม, ป้าย/label สี → `--color-brand-hover`, focus ring 3px v3 |
-| `assets/md/en/current.md`, `assets/md/th/current.md` | โน้ตรีลีส v3.2.23 (EN/TH) ฟอร์แมต bullet `- **หัวเรื่อง** — คำอธิบาย` |
-| `assets/md/{en,th}/releases/v3.2.22.md` | สำเนาที่แก้ให้ parse ได้ (hotfix `47c2fc4` — รวมใน patch นี้) |
+| `assets/css/footer.css` | transition เก่า (--ease-in-out/--ease-out) → transition tokens v3, var ซ้อนคลาย, focus ring 3px เทล ×3 |
+| `assets/css/back-to-top.css` | เทลเก่า #009688 → #0d9488, hover → #0F766E, curve → tokens, ring 3px |
+| `assets/css/base.css`, `assets/css/modern-styles.css` | ghost ease-out → tokens, #757575 → #475569 |
+| `assets/js/setting-system/theme-core.js` | **บั๊กจริงจาก audit**: default theme เมื่อไม่มี preference เดิม `'dark'` (มรดก v2) → `'system'` ตาม OS — หน้า setting เคยบังคับมืดทั้งที่เว็บอื่นสว่าง |
+| `assets/js/setting-system/setting-ui.js` | fallback `'dark'` → `'system'` ×2 |
+| `assets/js/footer-template.js` | guard การแทรก footer เปลี่ยนเป็นเช็คจากลิงก์จริง (footer ว่างไม่ block การแทรกใหม่) |
+| `tests/settings-polish.test.ts` | default pin 'dark' → 'system' ตามสเปก v3 (โครงสร้าง assertion คงเดิม) |
+| `assets/md/{en,th}/current.md` + releases | โน้ตรีลีส v3.2.24 ฟอร์แมต parser-compatible |
 
-## จุดสำคัญที่ต้องรู้
+## ผลการตรวจทั้งเว็บ (14 หน้า × light+dark)
 
-- **Hotfix สำคัญ (`47c2fc4`)**: โน้ตรีลีส v3.2.22 เดิมใช้ bullet เปล่า ทำให้ parser ของโมดัลอัปเดตในแอป (`parseMD` ต้องการ `- **ตัวหนา**`) อ่านได้ 0 รายการ — ผู้ใช้จะเห็นรายการว่างในกล่อง What's New แก้ครบทั้ง current.md และสำเนา registry แล้ว และต่อจากนี้ทุกโน้ตเขียนในฟอร์แมตที่ parse ได้เสมอ
-- หน้า about/license/privacy/roadmap/whats_new ไม่แตะ HTML เลย — งานทั้งหมดอยู่ที่ CSS ซึ่งพร้อมรีดีไซน์มาก่อนหน้านี้แล้ว (tokenized) รอบนี้เป็นการ purge ค่าเก่าตกค้าง + เทลเนียนธีม
+28/28 combos: พื้นตามธีมครบ, footer 12 ลิงก์ทุกหน้า ไม่ซ้ำไม่ว่าง, ไม่มี horizontal overflow ทั้ง 1280 และ 375, focus ring 3px เทลบน interactive จริงทุกหน้า (false positive ที่เคลียร์แล้ว: outline 404 มี style `none` จริง, license โดน Cookiebot iframe แฝก)
 
-## ผลการทดสอบ
+## ผลทดสอบ
 
-- Unit: 234/234 (37 ไฟล์ รวมชุด parser) | Build: สะอาด | e2e เต็ม: 16/16
-- Effective DOM จริง (Playwright, light+dark × 5 หน้า): body `#FAFAFC`/`#0F172A` ตามธีม, หัวเรื่อง/ลิงก์เทลตามธีม (light `rgb(13,148,136)` / dark `rgb(45,212,191)`), ป้ายเวอร์ชัน pill 9999px, time chip แต้มเทล `rgba(13,148,136,0.09)` ทั้งสองธีม
+- Unit: 234/234 (37 ไฟล์) | Build: สะอาด | e2e เต็ม: 16/16
+- ยืนยันบั๊กแก้จริงบน browser: บริบท OS light สด → setting พื้น #FAFAFC + radio=System + data-theme=light; OS dark → #0F172A + System + dark

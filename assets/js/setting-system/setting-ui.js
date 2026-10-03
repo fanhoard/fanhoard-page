@@ -46,7 +46,7 @@
     if (themeChoices.length) {
       var ThemeCore = global.ThemeCore;
       function syncThemeChoice(theme) {
-        var selected = theme || (ThemeCore ? ThemeCore.getTheme() : 'dark');
+        var selected = theme || (ThemeCore ? ThemeCore.getTheme() : 'system');
         themeChoices.forEach(function(choice) {
           choice.checked = choice.value === selected;
         });
@@ -100,7 +100,7 @@
 
     // Initial sync
     var ThemeCore = global.ThemeCore;
-    var currentEffective = ThemeCore ? ThemeCore.getEffectiveTheme() : 'dark';
+    var currentEffective = ThemeCore ? ThemeCore.getEffectiveTheme() : 'system';
     syncUI(currentEffective, false);
 
     function toggleThemeAction(e) {
