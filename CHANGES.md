@@ -1,30 +1,33 @@
-# Community & Forms Redesign v3.2.22 (r09)
+# Platform Pages Polish v3.2.23 (r10)
 
-## What changed in v3.2.22 (Community pages on Design Language v3)
+## What changed in v3.2.23 (Platform pages on Design Language v3)
 
-### assets/css/report.css (report/contact/community forms)
-- Form fields (`.report-textinput`, `.report-textarea`, selects): surface `--surface-base` → `--surface-card` (true white inputs on the #FAFAFC canvas), border fallback rgba(0,0,0,0.15) → rgba(15,23,42,0.16), radius fallback 0.5rem → 12px (token already 12px)
-- Focus ring: faint old `0 0 0 3px rgba(0,150,136,0.15)` → v3 `0 0 0 3px rgba(13,148,136,0.35)`; focus-visible outline 2px → 3px teal v3 standard
-- GHOST TOKEN fixed: `--color-brand-primary-hover` (never defined in tokens.css — same bug class as r02/r04) → real `--color-brand-hover` (2 uses)
-- Select chevron SVG data-URI: old material teal `%23009688` → `%230d9488`
-- Buttons: `.report-submit` + `.contact-action-btn` → pill `--radius-full`; CTA background normalized to `--color-brand-primary` (was brand-hover as resting CTA), hover → `--color-brand-hover`, active `#0b726b` hardcoded → token
-- 5 legacy `var(--duration-fast, 150ms) ease-out` transitions → `var(--transition-fast, 150ms ease)` (v3 easing)
-- Hairline fallbacks rgba(0,0,0,0.06) → rgba(15,23,42,0.08); muted fallbacks #757575 → #475569; nested var() doubled fallbacks simplified
-- Unboxed hairline-row layout for community links / contact rows kept intentionally (low-noise design method, consistent with settings rows)
+### assets/css/about.css (about/license/privacy share it)
+- Old material teal fallbacks `#009688` ×4 → `#0d9488` (h1/links/accents — resolved via token now)
+- Focus ring 2px → v3 `3px solid rgba(13,148,136,0.35)`; `radius-sm` fallback 4px → 8px; `150ms ease-out` fallback → `150ms ease`; hairline fallback rgba(0,0,0,0.06) → rgba(15,23,42,0.08)
 
-### Pages (no markup changes needed)
-- /community, /community/contact, /community/report render through report.css tokens; S10 form behavior (aria-invalid, aria-describedby, focus restoration, custom page input) untouched
+### assets/css/roadmap.css
+- Muted fallbacks `#757575` ×5 (timeline dots, labels) → `#475569`; hairlines → rgba(15,23,42,0.08); nested var() doubled fallbacks simplified. Unboxed Read-surface timeline layout kept intentionally (consistent with the site's low-noise content pages)
+
+### assets/css/new.css (What's New)
+- Old teal `#009688` ×6 → `#0d9488` (banner, badges, current-release divider, focus); muted `#757575` ×5 → `#475569`
+- `.wn-time-chip`: hardcoded `#0f766e` text → `--color-brand-hover`; background `var(--teal-50, #f0fdf4)` (greenish legacy tint) → `rgba(13,148,136,0.09)` teal tint working in both themes; chip border old rgba(0,150,136,0.2) → rgba(13,148,136,0.2)
+- `.wn-history-label` `#0f766e` → `--color-brand-hover`
+- Focus ring 2px → 3px rgba(13,148,136,0.35)
+
+### Hotfix included (commit 47c2fc4, pre-release)
+- v3.2.22 release notes rewritten in the parser-compatible `- **Title** — desc` bullet format — the in-app update modal's parseMD requires bold-titled bullets; plain bullets produced an empty item list in the user-facing dialog. Registry copies v3.2.22 regenerated; unit tests 234/234 restored.
 
 ## Verification
 
-- Unit 234/234 (37 files) | build clean | **full e2e 16/16** (report-submission journey green)
-- Real browser (Playwright, light+dark): inputs 12px on white/dark card surfaces with subtle themed borders; submit pill 9999px teal (light #0D9488 / dark teal-400); contact-action-btn pill teal; empty submit → 3 visible error texts + 3 aria-invalid + focus moves to first invalid field; keyboard focus on fields → teal border + 3px teal ring (verified after 150ms transition settles; earlier "missing ring" was a probe artifact reading at t=0 of the transition)
-- Version update popup opens and dismisses via the real dismiss button (scroll-lock releases correctly)
+- Unit 234/234 (37 files, incl. version-notification parser suite) | build clean | full e2e 16/16
+- Real browser (Playwright, light+dark × 5 pages): bodies themed (#FAFAFC / #0F172A); headings/links teal themed (light #0D9488 / dark teal-400); What's New version badge pill 9999px teal; time chips teal tint rgba(13,148,136,0.09) + brand-hover text both themes
 
 ## Files changed
 
 | File | Change |
 |------|--------|
-| `assets/css/report.css` | v3 surfaces, focus rings, pill buttons, ghost-token + old-teal purge |
-| `assets/md/en/current.md`, `assets/md/th/current.md` | v3.2.22 release notes |
-| release pipeline artifacts | registry/version/HTML asset strings (v3.2.22) |
+| `assets/css/about.css`, `roadmap.css`, `new.css` | v3 normalization: old-teal/muted purge, teal-tint chips, v3 focus rings |
+| `assets/md/en/current.md`, `assets/md/th/current.md` | v3.2.23 release notes (parser-compatible format) |
+| `assets/md/{en,th}/releases/v3.2.22.md` | regenerated parseable copies (hotfix 47c2fc4) |
+| release pipeline artifacts | registry/version/HTML asset strings (v3.2.23) |
