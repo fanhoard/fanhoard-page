@@ -224,4 +224,125 @@ describe('Central Loader Architecture & Loading Contract (FVL)', () => {
       expect(subNav.style.pointerEvents).not.toBe('none');
     });
   });
+
+  describe("FVL Part 1 Polish: Scroll Lock, Centered Spinners & Accessibility Polish", () => {
+    it("engages scroll-lock during fullscreen overlay and restores exact original state on hide", async () => {
+      document.body.style.position = "relative";
+      document.body.style.color = "rgb(255, 0, 0)";
+
+      const FVL = (window as any).FVL;
+      FVL.show({ instant: true });
+
+      expect(document.body.style.position).toBe("fixed");
+      expect(document.body.style.overflow).toBe("hidden");
+      expect(document.body.style.width).toBe("100%");
+
+      await FVL.hideInstant();
+
+      expect(document.body.style.position).toBe("relative");
+      expect(document.body.style.overflow).toBe("");
+      expect(document.body.style.top).toBe("");
+    });
+
+    it("handles nested overlays and ref-counting for scroll-lock", async () => {
+      const FVL = (window as any).FVL;
+
+      const h1 = FVL.show({ id: "fvl-1", instant: true });
+      expect(document.body.style.position).toBe("fixed");
+
+      const h2 = FVL.show({ id: "fvl-2", instant: true });
+      expect(document.body.style.position).toBe("fixed");
+
+      await h1.hideInstant();
+      expect(document.body.style.position).toBe("fixed"); // still locked by h2
+
+      await h2.hideInstant();
+      expect(document.body.style.position).toBe(""); // unlocked
+    });
+
+    it("centers mounted spinners by default and supports opt-out via options", () => {
+      const FVLSpinner = (window as any).FVLSpinner;
+
+      const c1 = document.createElement("div");
+      c1.id = "c1";
+      document.body.appendChild(c1);
+
+      const h1 = FVLSpinner.mount("#c1");
+      expect(h1.element.classList.contains("fvl-spinner--center")).toBe(true);
+
+      const c2 = document.createElement("div");
+      c2.id = "c2";
+      document.body.appendChild(c2);
+
+      const h2 = FVLSpinner.mount("#c2", { center: false });
+      expect(h2.element.classList.contains("fvl-spinner--center")).toBe(false);
+
+      const c3 = document.createElement("div");
+      c3.id = "c3";
+      document.body.appendChild(c3);
+
+      const h3 = FVLSpinner.mount("#c3", { align: "left" });
+      expect(h3.element.classList.contains("fvl-spinner--align-left")).toBe(true);
+      expect(h3.element.classList.contains("fvl-spinner--center")).toBe(false);
+    });
+
+    it("renders centered spinner for bare scoped loader in #content-loading", () => {
+      const target = document.createElement("div");
+      target.id = "content-loading";
+      document.body.appendChild(target);
+
+      const FVL = (window as any).FVL;
+      FVL.scoped({ target: "#content-loading", bare: true, instant: true });
+
+      const spinner = target.querySelector(".fvl-spinner");
+      expect(spinner?.classList.contains("fvl-spinner--center")).toBe(true);
+    });
+
+    it("sets role=\"dialog\" and aria-modal=\"true\" on fullscreen overlays and hides background siblings", async () => {
+      const mainEl = document.createElement("main");
+      mainEl.id = "main-content";
+      document.body.appendChild(mainEl);
+
+      const FVL = (window as any).FVL;
+      FVL.show({ instant: true });
+
+      const overlay = document.querySelector(".fvl-fullscreen");
+      expect(overlay?.getAttribute("role")).toBe("dialog");
+      expect(overlay?.getAttribute("aria-modal")).toBe("true");
+      expect(mainEl.getAttribute("aria-hidden")).toBe("true");
+
+      await FVL.hideInstant();
+      expect(mainEl.getAttribute("aria-hidden")).toBeNull();
+    });
+
+    it("dismisses closable fullscreen overlay on Escape key press", async () => {
+      const FVL = (window as any).FVL;
+      FVL.show({ instant: true, closable: true });
+
+      expect(FVL.isActive()).toBe(true);
+
+      const event = new KeyboardEvent("keydown", { key: "Escape", keyCode: 27, bubbles: true });
+      document.dispatchEvent(event);
+      await Promise.resolve();
+
+      expect(FVL.isActive()).toBe(false);
+    });
+
+    it("safely handles error paths during show/mount without leaking scroll lock", async () => {
+      const FVL = (window as any).FVL;
+
+      try {
+        FVL.show({
+          instant: true,
+          onMount: () => {
+            throw new Error("mount error");
+          },
+        });
+      } catch (_) {}
+
+      await FVL.hideAll();
+      expect(document.body.style.position).toBe("");
+    });
+  });
+
 });
