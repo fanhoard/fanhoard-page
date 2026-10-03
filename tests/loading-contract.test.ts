@@ -147,6 +147,51 @@ describe('Central Loader Architecture & Loading Contract (FVL)', () => {
       expect(document.getElementById('fv-boot-loader')).toBeNull();
     });
 
+    it('sequence: adopt -> hide -> show (non-boot) -> hide nets lockCount to 0', async () => {
+      const bootLoader = document.createElement('div');
+      bootLoader.id = 'fv-boot-loader';
+      document.body.appendChild(bootLoader);
+
+      const LoadingService = (window as any).NavCoreModules.LoadingService;
+      const ScrollLockManager = (window as any).FVLModules.Utils.ScrollLockManager;
+
+      // 1. Adopt boot loader
+      const h1 = LoadingService.show({ mode: 'fullscreen' });
+      expect(ScrollLockManager.getLockCount()).toBeGreaterThan(0);
+
+      // 2. Hide boot loader (triggers readinessHandshake)
+      await h1.hide();
+      expect(ScrollLockManager.getLockCount()).toBe(0);
+      expect(document.getElementById('fv-boot-loader')).toBeNull();
+
+      // 3. Show non-boot FVL fullscreen loading
+      const h2 = LoadingService.show({ mode: 'fullscreen', instant: true });
+      expect(ScrollLockManager.getLockCount()).toBeGreaterThan(0);
+      expect(document.body.style.position).toBe('fixed');
+
+      // 4. Hide non-boot loading
+      await h2.hideInstant();
+      expect(ScrollLockManager.getLockCount()).toBe(0);
+      expect(document.body.style.position).toBe('');
+      expect(document.documentElement.style.overflow).toBe('');
+    });
+
+    it('sequence: quick show/hide flickers nets lockCount to 0', async () => {
+      const LoadingService = (window as any).NavCoreModules.LoadingService;
+      const ScrollLockManager = (window as any).FVLModules.Utils.ScrollLockManager;
+
+      for (let i = 0; i < 5; i++) {
+        const handle = LoadingService.show({ mode: 'fullscreen', instant: true });
+        expect(ScrollLockManager.getLockCount()).toBeGreaterThan(0);
+        await LoadingService.hideInstant(handle ? handle.id : undefined);
+        expect(ScrollLockManager.getLockCount()).toBe(0);
+      }
+
+      expect(ScrollLockManager.getLockCount()).toBe(0);
+      expect(document.body.style.position).toBe('');
+      expect(document.documentElement.style.overflow).toBe('');
+    });
+
     it('locks DURING normal FVL.show() and unlocks AFTER FVL.hide() when no boot loader is present', async () => {
       const FVL = (window as any).FVL;
       const ScrollLockManager = (window as any).FVLModules.Utils.ScrollLockManager;
