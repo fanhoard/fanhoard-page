@@ -118,7 +118,11 @@
     instance.footerEl = dom.footerEl;
 
     // 7. Apply theme
-    ThemeService.apply(dom.rootEl, opts.theme || 'light');
+    // v3: use the active page theme unless the caller explicitly overrides it.
+    var _themeAttr = (document.documentElement.getAttribute('data-theme') || '').toLowerCase();
+    var _siteDark = _themeAttr === 'dark' ||
+      (_themeAttr !== 'light' && !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches));
+    ThemeService.apply(dom.rootEl, opts.theme || (_siteDark ? 'dark' : 'light'));
 
     // 8. Register instance in state
     State.addInstance(instance);
@@ -625,7 +629,7 @@
    *                                                     Set false for fully custom layouts.
    * @param {string}            [opts.contentLayout='fit'] - 'fit' = body scrolls internally;
    *                                                     'stretch' = body fills 100% height.
-   * @param {string}            [opts.theme='light'] - 'light'|'dark'|'brand'.
+   * @param {string}            [opts.theme] - 'light'|'dark'|'brand'; defaults to the active page theme.
    * @param {boolean}           [opts.hideOnBack=true] - Close on browser back button.
    * @param {Function}          [opts.onOpen]        - (popupId, handle) => void
    * @param {Function}          [opts.onClose]       - (popupId, result) => void
