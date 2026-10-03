@@ -430,6 +430,8 @@ _dataPromise.then(assembled => {
 });
 
 // v5.0: เมื่อภาษาเปลี่ยน → re-render ทั้งหน้า home ทันที
+let _langChangeHandler = null;
+
 try {
   if (window.FvLang) {
     FvLang.onChange(function(newLang) {
@@ -439,11 +441,15 @@ try {
     });
   } else {
     // Fallback: ฟัง fv:langchange event
-    window.addEventListener('fv:langchange', function(e) {
+    if (_langChangeHandler) {
+      window.removeEventListener('fv:langchange', _langChangeHandler);
+    }
+    _langChangeHandler = function(e) {
       if (_cachedAssembled && e.detail && e.detail.lang) {
         renderToApp(_cachedAssembled, e.detail.lang);
       }
-    });
+    };
+    window.addEventListener('fv:langchange', _langChangeHandler);
   }
 } catch(e) {}
 
