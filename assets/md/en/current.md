@@ -1,24 +1,24 @@
 ---
-version: 3.2.4
-date: 2026-10-03T15:41:12.197Z
-title: Hardened Version Notes & Update Notification Pipeline
-subtitle: Optimized version update notifications across all languages with robust fallbacks, proper date rendering, modal accessibility, and complete dynamic script cache-busting.
+version: 3.2.5
+date: 2026-10-03T15:49:28.272Z
+title: Silky Navigation Polish, Keyboard Accessibility & Active State Polish
+subtitle: Enhanced navigation responsiveness with smooth transition curves, ARIA tab semantics, keyboard arrow navigation, active category centering, and language label synchronization.
 notify: true
 ---
 
-**TL;DR** — Bumps version notes pipeline to top-platform standards: notification modal now formats dates properly in both EN and TH, falls back safely to English when an unsupported language is active, features enhanced accessibility (heading hierarchy and aria-labelledby/describedby attributes), and ensures all dynamic loaders receive build cache-busting IDs during releases.
+**TL;DR** — Elevates navigation across the platform to Master's quality bar: introduces ARIA tablist/tab semantics with roving tabindex and keyboard arrow navigation (Left/Right/Home/End), silky smooth 180ms cubic-bezier transitions, high-contrast focus rings, automated smooth scrolling into center view for active main and sub-navigation categories, and fixes language switch label desynchronization.
 
 ### Key Improvements
 
-- **Language Fallback & Unsupported Language Defense**
-  `version-core.js` now strictly validates `FvLang` language selection against supported languages (`en`, `th`) before requesting markdown release notes, gracefully falling back to English if the primary fetch fails or if an unsupported UI language is active.
-- **Date Formatting in Version Modals**
-  Fixed release date evaluation in update popups so ISO timestamps are correctly formatted in human-readable localized dates rather than evaluating to empty text.
-- **Modal Accessibility (A11y)**
-  Upgraded version update modal titles to semantic `<h2>` headings with explicit `ariaLabel`, `ariaDescribedBy`, and `type="button"` attributes on action controls for screen readers.
-- **Dynamic Loader Cache Busting**
-  Corrected release pipeline configuration (`update-version.js`) to target canonical dynamic loaders (`assets/js/search-system/search.js` and `assets/js/loading-system/fvl.js`), ensuring asset version queries are injected across all dynamic module importers.
+- **Keyboard Arrow Navigation & ARIA Semantics**
+  Integrated W3C ARIA tablist/tab roles with roving tabindex (`tabindex="0/-1"`) and `aria-selected` state tracking across main and sub-navigation categories. Users can now navigate smoothly using `ArrowRight`, `ArrowLeft`, `Home`, and `End` keys.
+- **Silky Transitions & Brand Focus Rings**
+  Unified navigation transitions using smooth `180ms cubic-bezier(0.16, 1, 0.3, 1)` easing curves, added crisp `:focus-visible` outlines matching the brand primary palette, and refined active tab indicator sliding animations.
+- **Mobile Touch Targets & Active Category Centering**
+  Guaranteed 44px minimum touch targets across all viewport sizes and added automated smooth horizontal scrolling to center active main and sub-navigation tabs in mobile viewports.
+- **Language Switch Label Sync Fix**
+  Resolved a label desynchronization bug in `updateButtonsLanguage` by using canonical `data-url` key mapping instead of array position indices, ensuring correct multilingual tab labels.
 
 ### Reliability & Verification
 
-- Added automated test suite `tests/version-pipeline.test.ts` covering current/history markdown consistency, `index.json` manifests, dynamic loader patterns, and `version-core.js` defensive routines.
+- Added dedicated unit test suite `tests/navigation-polish.test.ts` (196/196 unit tests green across 30 test files) and verified all Playwright e2e suites (scroll-lock, discover actions, discover boot lifecycle).

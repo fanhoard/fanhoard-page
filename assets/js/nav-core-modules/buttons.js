@@ -4,10 +4,11 @@
  * SubNavService  — ensures #sub-nav and #sub-buttons-container exist in the DOM.
  * ButtonService  — renders and manages main-nav + sub-nav buttons.
  *
- * v2 — "All" system button:
- *   • isDefault สำหรับ main button ถูกยกเลิก — All button (_all) คือ default เสมอ
- *   • isDefault สำหรับ sub button ยังคงทำงานเหมือนเดิม
- *   • All button ถูก inject ที่ index 0 ของ mainButtons ตอน loadConfig()
+ * Polish & Resilience:
+ *   • ARIA tablist/tab semantics + roving tabindex + aria-selected tracking
+ *   • Arrow key / Home / End keyboard navigation across navigation tabs
+ *   • Smooth scroll-into-view for both main-nav and sub-nav active buttons
+ *   • Robust language label updates mapped via data-url rather than array offset
  *
  * @module buttons
  * @depends {config.js, state.js, utils.js, loading.js, content.js}
@@ -18,8 +19,6 @@
   const { CONFIG, State, Utils } = M;
 
   // ── "All" system button config ─────────────────────────────────────────────────
-  // WHY: inject ที่นี่เพียงจุดเดียว ไม่ผ่าน buttons.json
-  //      ผู้ดูแล buttons.json ไม่ต้องรู้เรื่องนี้ — ระบบจัดการเอง
   const _ALL_BTN_CFG = Object.freeze({
     url:             CONFIG.ALL_BUTTON.URL,
     en_label:        CONFIG.ALL_BUTTON.EN_LABEL,
@@ -27,6 +26,53 @@
     _isSystemButton: true,
     className:       'all-feed-button',
   });
+
+  // ── Keyboard Navigation Helper ──────────────────────────────────────────────────
+
+  /**
+   * Attach accessible arrow-key and home/end navigation to a tablist container.
+   * @param {HTMLElement|null} container
+   * @param {boolean} isSub
+   */
+  function setupKeyboardNav(container, isSub) {
+    if (!container || (/** @type {any} */ (container))._kbdNavAttached) return;
+    (/** @type {any} */ (container))._kbdNavAttached = true;
+
+    container.addEventListener('keydown', ev => {
+      const buttons = Array.from(container.querySelectorAll('button:not([disabled])'));
+      if (!buttons.length) return;
+
+      const activeEl = document.activeElement;
+      const currentIndex = buttons.indexOf(/** @type {HTMLButtonElement} */ (activeEl));
+      if (currentIndex === -1) return;
+
+      let targetIndex = -1;
+      if (ev.key === 'ArrowRight' || ev.key === 'ArrowDown') {
+        ev.preventDefault();
+        targetIndex = (currentIndex + 1) % buttons.length;
+      } else if (ev.key === 'ArrowLeft' || ev.key === 'ArrowUp') {
+        ev.preventDefault();
+        targetIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+      } else if (ev.key === 'Home') {
+        ev.preventDefault();
+        targetIndex = 0;
+      } else if (ev.key === 'End') {
+        ev.preventDefault();
+        targetIndex = buttons.length - 1;
+      }
+
+      if (targetIndex !== -1) {
+        const targetBtn = /** @type {HTMLButtonElement} */ (buttons[targetIndex]);
+        targetBtn.focus();
+        targetBtn.click();
+        if (isSub) {
+          ButtonService._scrollSub(targetBtn);
+        } else {
+          ButtonService.scrollActiveMainButtonIntoView(targetBtn);
+        }
+      }
+    });
+  }
 
   // ── SubNavService ──────────────────────────────────────────────────────────────
 
@@ -42,6 +88,8 @@
         if (h?.nextSibling) h.parentNode.insertBefore(sn, h.nextSibling);
         else document.body.prepend(sn);
       }
+      sn.setAttribute('role', 'navigation');
+      sn.setAttribute('aria-label', 'Sub navigation');
 
       let hj = sn.querySelector(`.${CONFIG.DOM.SUB_NAV_CLASS}`);
       if (!hj) {
@@ -63,6 +111,10 @@
         hj.appendChild(sbc);
       }
 
+      sbc.setAttribute('role', 'tablist');
+      sbc.setAttribute('aria-label', 'Sub category options');
+      setupKeyboardNav(sbc, true);
+
       State.elements.subNav              = sn;
       State.elements.subNavInner         = hj;
       State.elements.subButtonsContainer = sbc;
@@ -74,6 +126,7 @@
       const sn = document.getElementById(CONFIG.DOM.SUB_NAV_ID);
       if (!sn) return;
       sn.style.display = 'none';
+      sn.setAttribute('aria-hidden', 'true');
       const c = sn.querySelector(`#${CONFIG.DOM.SUB_BUTTONS_ID}`);
       if (c) c.innerHTML = '';
       if (State.elements.subButtonsContainer)
@@ -83,7 +136,10 @@
     showSubNav() {
       let sn = document.getElementById(CONFIG.DOM.SUB_NAV_ID);
       if (!sn) { this.ensureSubNavContainer(); sn = document.getElementById(CONFIG.DOM.SUB_NAV_ID); }
-      if (sn) sn.style.display = '';
+      if (sn) {
+        sn.style.display = '';
+        sn.setAttribute('aria-hidden', 'false');
+      }
     },
 
     clearSubButtons() { this.ensureSubNavContainer().innerHTML = ''; },
@@ -95,11 +151,6 @@
 
     // ── Config + state loading ─────────────────────────────────────────────────
 
-    /**
-     * Load buttons.json, inject "All" system button, then render main nav.
-     * Idempotent — uses DataService cache on repeat calls.
-     * @returns {Promise<void>}
-     */
     async loadConfig() {
       if (State.buttons.config) { await this.renderMainButtons(); return; }
 
@@ -114,9 +165,6 @@
         M.DataService.setCache('buttonConfig', res);
       }
 
-      // ── Inject "All" system button at index 0 ──────────────────────────────
-      // WHY: ตรวจสอบก่อน inject เพื่อป้องกัน duplicate ถ้า loadConfig ถูกเรียกซ้ำ
-      //      (เช่น กรณี network reconnect trigger loadConfig อีกครั้ง)
       const mbs = State.buttons.config.mainButtons;
       if (!mbs.some(b => b.url === CONFIG.ALL_BUTTON.URL)) {
         mbs.unshift(_ALL_BTN_CFG);
@@ -128,18 +176,16 @@
 
     // ── Main button rendering ──────────────────────────────────────────────────
 
-    /**
-     * Render all main navigation buttons into #nav-list.
-     * Uses DocumentFragment — single DOM write.
-     * "All" button (index 0) เป็น default เสมอ — ไม่มี isDefault tracking แล้ว
-     */
     async renderMainButtons() {
       const lang            = localStorage.getItem('selectedLang') || 'en';
       const { mainButtons } = State.buttons.config;
       const navList         = State.elements.navList;
       navList.innerHTML     = '';
-      State.buttons.buttonMap = new Map();
+      navList.setAttribute('role', 'tablist');
+      navList.setAttribute('aria-label', 'Content categories');
+      setupKeyboardNav(navList, false);
 
+      State.buttons.buttonMap = new Map();
       const frag = document.createDocumentFragment();
 
       for (const cfg of mainButtons) {
@@ -147,23 +193,26 @@
         if (!label) continue;
 
         const li  = document.createElement('li');
+        li.setAttribute('role', 'presentation');
+
         const btn = document.createElement('button');
         btn.textContent = label;
         btn.className   = 'main-button';
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-controls', CONFIG.DOM.CONTENT_LOADING_ID || 'content-loading');
+        btn.setAttribute('aria-selected', 'false');
+        btn.setAttribute('tabindex', '-1');
+
         const url = cfg.url || cfg.jsonFile;
         btn.setAttribute('data-url', url);
         if (cfg.className) btn.classList.add(cfg.className);
 
-        // WHY: isDefault tracking ถูกลบออก
-        //      All button ที่ index 0 เป็น default เสมอ — ดึงจาก buttonMap ด้านล่าง
         State.buttons.buttonMap.set(url, { button: btn, config: cfg });
 
         btn.addEventListener('click', async ev => {
           ev.preventDefault();
-          // v4: ข้ามเมื่อคลิกปุ่มที่ active อยู่แล้ว — ไม่ต้อง re-fetch/re-render ซ้ำ
           if (btn.classList.contains('active')) return;
-          navList.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          this.updateButtonState(btn, false);
           State.buttons.currentMainButton    = btn;
           State.buttons.currentMainButtonUrl = url;
           await M.RouterService.navigateTo(url, {
@@ -177,13 +226,12 @@
 
       navList.appendChild(frag);
 
-      // "All" system button เป็น default เสมอ
       const allEntry = State.buttons.buttonMap.get(CONFIG.ALL_BUTTON.URL) || null;
 
       if (!State.isBootstrapping) {
         await this._handleInitialUrl(window.location.search, allEntry);
       } else if (allEntry) {
-        allEntry.button.classList.add('active');
+        this.updateButtonState(allEntry.button, false);
         State.buttons.currentMainButton    = allEntry.button;
         State.buttons.currentMainButtonUrl = CONFIG.ALL_BUTTON.URL;
       }
@@ -191,7 +239,6 @@
 
     // ── Initial URL handling ───────────────────────────────────────────────────
 
-    // def คือ All button entry เสมอ (ไม่ใช่ isDefault จาก config อีกต่อไป)
     async _handleInitialUrl(url, def) {
       try {
         if (!url || url === '?') {
@@ -226,8 +273,7 @@
     },
 
     async _activateMain(btn, cfg) {
-      State.elements.navList.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      this.updateButtonState(btn, false);
       State.buttons.currentMainButton = btn;
       await M.ContentService.clearContent();
 
@@ -256,9 +302,7 @@
       const scf     = cfg.subButtons.find(b => b.url === sub || b.jsonFile === sub);
 
       if (el && scf) {
-        State.elements.subButtonsContainer?.querySelectorAll('.button-sub')
-          .forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
+        this.updateButtonState(el, true);
         State.buttons.currentSubButton = el;
         if (scf.jsonFile) {
           await M.ContentService.clearContent();
@@ -285,8 +329,7 @@
     async triggerMainButtonClick(btn) {
       if (!btn) return;
       const url = btn.getAttribute('data-url');
-      State.elements.navList.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      this.updateButtonState(btn, false);
       State.buttons.currentMainButton    = btn;
       State.buttons.currentMainButtonUrl = url;
       try {
@@ -296,9 +339,7 @@
 
     async triggerSubButtonClick(btn) {
       if (!btn) return;
-      State.elements.subButtonsContainer?.querySelectorAll('button')
-        .forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      this.updateButtonState(btn, true);
       State.buttons.currentSubButton = btn;
       const url = btn.getAttribute('data-url');
       try {
@@ -308,20 +349,15 @@
 
     // ── Sub-button rendering ───────────────────────────────────────────────────
 
-    /**
-     * Render sub-navigation buttons into #sub-buttons-container.
-     * Uses DocumentFragment — single DOM write.
-     * isDefault ยังคงทำงานสำหรับ sub buttons เหมือนเดิม
-     * @param {SubButtonConfig[]} subBtns
-     * @param {string}            mainUrl
-     * @param {string}            lang
-     */
     async renderSubButtons(subBtns, mainUrl, lang) {
       if (!subBtns?.length) { SubNavService.hideSubNav(); return; }
       SubNavService.showSubNav();
 
       const ctr = SubNavService.ensureSubNavContainer();
       ctr.innerHTML = '';
+      ctr.setAttribute('role', 'tablist');
+      ctr.setAttribute('aria-label', 'Sub category options');
+      setupKeyboardNav(ctr, true);
 
       const p = new URLSearchParams(
         window.location.search.startsWith('?') ? window.location.search : `?${window.location.search}`
@@ -339,19 +375,26 @@
 
         const btn     = document.createElement('button');
         btn.className = 'button-sub sub-button';
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-controls', CONFIG.DOM.CONTENT_LOADING_ID || 'content-loading');
+        btn.setAttribute('aria-selected', 'false');
+        btn.setAttribute('tabindex', '-1');
+
         if (cfg.className) btn.classList.add(cfg.className);
         btn.textContent = label;
 
         const fullUrl = `${mainUrl}-${cfg.url || cfg.jsonFile}`;
         btn.setAttribute('data-url', fullUrl);
         if (cfg.isDefault || (!defBtn && idx === 0)) defBtn = btn;
-        if (fullUrl === activeUrl) btn.classList.add('active');
+        if (fullUrl === activeUrl) {
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+          btn.setAttribute('tabindex', '0');
+        }
 
         btn.addEventListener('click', async () => {
-          // v4: ข้ามเมื่อคลิกปุ่มที่ active อยู่แล้ว — ไม่ต้อง re-fetch/re-render ซ้ำ
           if (btn.classList.contains('active')) return;
-          ctr.querySelectorAll('.button-sub').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          this.updateButtonState(btn, true);
           State.buttons.currentSubButton = btn;
           await M.RouterService.navigateTo(fullUrl, {
             skipUrlUpdate: !!State.isBootstrapping,
@@ -365,7 +408,7 @@
 
       const needDef = !activeUrl || !ctr.querySelector('.button-sub.active');
       if (needDef && defBtn) {
-        defBtn.classList.add('active');
+        this.updateButtonState(defBtn, true);
         State.buttons.currentSubButton = defBtn;
       }
     },
@@ -384,21 +427,47 @@
       requestAnimationFrame(() => {
         try {
           const cl = ctr.getBoundingClientRect().left;
+          const cw = ctr.clientWidth;
           const bl = btn.getBoundingClientRect().left;
-          const t  = ctr.scrollLeft + (bl - cl) - 20;
-          if (Math.abs(ctr.scrollLeft - t) > 1) ctr.scrollTo({ left: t, behavior: 'smooth' });
+          const bw = btn.clientWidth;
+          const t  = ctr.scrollLeft + (bl - cl) - (cw / 2) + (bw / 2);
+          if (Math.abs(ctr.scrollLeft - t) > 1) ctr.scrollTo({ left: Math.max(0, t), behavior: 'smooth' });
         } catch (_) {}
       });
     },
 
-    /** Update button text labels after language change. */
+    /** @param {HTMLElement} btn */
+    scrollActiveMainButtonIntoView(btn) {
+      const navList = State.elements?.navList;
+      if (!navList || !btn) return;
+      requestAnimationFrame(() => {
+        try {
+          const cl = navList.getBoundingClientRect().left;
+          const cw = navList.clientWidth;
+          const bl = btn.getBoundingClientRect().left;
+          const bw = btn.clientWidth;
+          const t  = navList.scrollLeft + (bl - cl) - (cw / 2) + (bw / 2);
+          if (Math.abs(navList.scrollLeft - t) > 1) {
+            navList.scrollTo({ left: Math.max(0, t), behavior: 'smooth' });
+          }
+        } catch (_) {}
+      });
+    },
+
+    /** Update button text labels after language change safely via data-url lookup. */
     updateButtonsLanguage(lang) {
       try {
-        const { mainButtons } = State.buttons.config;
-        State.elements.navList.querySelectorAll('button').forEach((b, i) => {
-          const l = mainButtons[i]?.[`${lang}_label`];
-          if (l) b.textContent = l;
-        });
+        const navList = State.elements?.navList;
+        if (navList) {
+          navList.querySelectorAll('button').forEach(b => {
+            const url = b.getAttribute('data-url');
+            if (!url) return;
+            const entry = State.buttons.buttonMap.get(url);
+            const cfg = entry?.config || this.findMainButtonConfig(url);
+            const l = cfg?.[`${lang}_label`];
+            if (l) b.textContent = l;
+          });
+        }
         if (State.buttons.currentMainButton) {
           const cfg = this.findMainButtonConfig(State.buttons.currentMainButton.getAttribute('data-url'));
           if (cfg?.subButtons?.length) {
@@ -418,10 +487,22 @@
       const g = isSub
         ? State.elements.subButtonsContainer
         : State.elements.navList;
-      g?.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      if (isSub) { State.buttons.currentSubButton = btn; this._scrollSub(btn); }
-      else         State.buttons.currentMainButton = btn;
+      if (!g || !btn) return;
+
+      g.querySelectorAll('button').forEach(b => {
+        const isActive = b === btn;
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        b.setAttribute('tabindex', isActive ? '0' : '-1');
+      });
+
+      if (isSub) {
+        State.buttons.currentSubButton = btn;
+        this._scrollSub(btn);
+      } else {
+        State.buttons.currentMainButton = btn;
+        this.scrollActiveMainButtonIntoView(btn);
+      }
     },
 
     // Backward-compat aliases

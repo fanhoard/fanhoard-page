@@ -225,6 +225,7 @@
       const nav = document.createElement('div');
       nav.className = 'bottom-nav';
       nav.setAttribute('role', 'navigation');
+      nav.setAttribute('aria-label', 'Bottom navigation');
       nav.style.visibility = 'hidden';
       nav.appendChild(fragment);
       return nav;
@@ -655,6 +656,11 @@
             const active = this._isNavLinkActive(navLink, currentPath);
             const was = it.classList.contains('active-1');
             it.classList.toggle('active-1', active);
+            if (active) {
+              it.setAttribute('aria-current', 'page');
+            } else {
+              it.removeAttribute('aria-current');
+            }
             const wrap = it.querySelector('.svg-wrapper');
             if (wrap && active && !was) { wrap.classList.remove('animate'); void wrap.offsetWidth; wrap.classList.add('animate'); }
           } catch (e) {}

@@ -25,11 +25,10 @@
       document.body.prepend(h);
     }
     if (!q('#nav-list')) {
-      const nav = ce('nav', { 'aria-label': 'Content type navigation' });
-      const ul = ce('ul', { id: 'nav-list' });
+      const nav = ce('nav', { 'aria-label': 'Main navigation' });
+      const ul = ce('ul', { id: 'nav-list', role: 'tablist', 'aria-label': 'Content categories' });
       nav.appendChild(ul);
       const header = q('header');
-      // put nav inside header (append)
       header?.appendChild(nav);
     }
     if (!q('#sub-buttons-container')) {
