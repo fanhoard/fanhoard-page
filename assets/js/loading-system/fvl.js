@@ -18,7 +18,10 @@
   function _v() { return FV_BUILD_ID ? '?v=' + FV_BUILD_ID : ''; }
 
   var LOAD_PHASES = [
-    ['namespace.js', 'types.js', 'config.js'],
+    // Phase 0 also loads the shared scroll-lock core so utils.js (phase 1)
+    // can alias window.ScrollLockCore — popup.js / search.js load the same
+    // file on pages where FVL itself is not present.
+    ['namespace.js', 'types.js', 'config.js', 'scroll-lock-core.js'],
     ['utils.js', 'state.js'],
     ['renderer.js', 'animator.js', 'spinner.js'],
     ['engine.js']
@@ -103,7 +106,7 @@
 
         var modDir = _path.resolve(sysDir, 'fvl-modules');
         var modFiles = [
-          'namespace.js', 'types.js', 'config.js',
+          'namespace.js', 'types.js', 'config.js', 'scroll-lock-core.js',
           'utils.js', 'state.js',
           'renderer.js', 'animator.js', 'spinner.js',
           'engine.js'

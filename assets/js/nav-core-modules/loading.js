@@ -30,7 +30,7 @@
   'use strict';
 
   // ── Build ID (replaced at build time by scripts/update-version.js) ──────────
-  var FV_BUILD_ID = '2.3.0-202609220313';
+  var FV_BUILD_ID = '3.2.3-202610031533';
 
   /** คืน query string '?v=<buildId>' ถ้าไม่มี buildId คืน '' */
   function _v() { return FV_BUILD_ID ? '?v=' + FV_BUILD_ID : ''; }
@@ -128,7 +128,7 @@
         var M = window.FVLModules;
         var lockMgr = (M && M.ScrollLockManager) || (M && M.Utils && M.Utils.ScrollLockManager);
         if (lockMgr) {
-          lockMgr.lock();
+          lockMgr.lock('fvl');
         }
         this._wrapRemoveBootLoader();
       }
@@ -140,13 +140,13 @@
       if (this._bootScrollLocked) {
         this._bootScrollLocked = false;
         if (lockMgr && lockMgr.getLockCount() > 0) {
-          lockMgr.unlock();
+          lockMgr.unlock('fvl');
         }
       } else if (lockMgr && lockMgr.getLockCount() > 0 && (!M || !M.State || M.State.getAll().length === 0)) {
         var doc = (typeof window !== 'undefined' && window.document) || document;
         var bootEl = doc ? (doc.getElementById('fv-boot-loader') || doc.getElementById('nc-early-overlay')) : null;
         if (!bootEl || bootEl.classList.contains('fv-boot-hidden') || !bootEl.parentNode) {
-          lockMgr.unlock();
+          lockMgr.unlock('fvl');
         }
       }
     },

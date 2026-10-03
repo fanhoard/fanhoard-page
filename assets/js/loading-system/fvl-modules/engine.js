@@ -392,7 +392,8 @@
         inst._scrollLocked = true;
         var lockMgr = M.ScrollLockManager || (M.Utils && M.Utils.ScrollLockManager);
         if (lockMgr) {
-          lockMgr.lock();
+          // 'fvl' owner tag — shows up in ScrollLockCore.getState().owners
+          lockMgr.lock('fvl');
         }
       }
 
@@ -416,7 +417,7 @@
         inst._scrollLocked = false;
         var lockMgr = M.ScrollLockManager || (M.Utils && M.Utils.ScrollLockManager);
         if (lockMgr) {
-          lockMgr.unlock();
+          lockMgr.unlock('fvl');
         }
       }
 

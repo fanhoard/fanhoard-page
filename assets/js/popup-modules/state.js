@@ -163,6 +163,15 @@
    */
   function lockScroll() {
     _scrollLockCount++;
+    // Delegate to the shared scroll-lock core (FVL ScrollLockCore) so popup
+    // locks compose correctly with loading/search overlays instead of
+    // destroying each other on close. Legacy path only if core unavailable.
+    const _core = window.ScrollLockCore;
+    if (_core) {
+      _core.allowScrollIn('.fp-body');
+      _core.lock('popup');
+      return;
+    }
     if (_scrollLockCount === 1) {
       _savedScrollY = window.scrollY || window.pageYOffset || 0;
       if (_savedScrollY > 0) {
@@ -183,6 +192,11 @@
   function unlockScroll() {
     if (_scrollLockCount <= 0) return;
     _scrollLockCount--;
+    const _core = window.ScrollLockCore;
+    if (_core) {
+      _core.unlock('popup');
+      return;
+    }
     if (_scrollLockCount === 0) {
       document.body.style.position = '';
       document.body.style.top = '';
@@ -266,8 +280,14 @@
     _systemListeners.clear();
     // Force unlock scroll
     if (_scrollLockCount > 0) {
-      _scrollLockCount = 1;
-      unlockScroll();
+      const _core = window.ScrollLockCore;
+      if (_core) {
+        _core.releaseAll('popup');
+        _scrollLockCount = 0;
+      } else {
+        _scrollLockCount = 1;
+        unlockScroll();
+      }
     }
   }
 

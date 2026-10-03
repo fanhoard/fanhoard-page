@@ -181,7 +181,22 @@
   // loaded by the page HTML — this file only adds new badge styles.
   _injectCSS(base);
 
-  loadPhases(LOAD_PHASES, base)
+  // ── Shared scroll-lock core (single source of truth for all overlays) ──
+  // search overlay delegates scroll locking to window.ScrollLockCore so
+  // search locks compose with FVL/popup overlays instead of destroying
+  // each other. On pages without FVL we load the core ourselves first.
+  function ensureScrollLockCore() {
+    if (window.ScrollLockCore) return Promise.resolve();
+    return loadScript('/assets/js/loading-system/fvl-modules/scroll-lock-core.js')
+      .catch(function (err) {
+        // Core unavailable (network hiccup / test env) — modules fall
+        // back to their legacy inline lock, so keep booting anyway.
+        console.warn('[Search] ScrollLockCore load failed, falling back to legacy lock:', err);
+      });
+  }
+
+  ensureScrollLockCore()
+    .then(() => loadPhases(LOAD_PHASES, base))
     .then(() => _boot())
     .catch(err => console.error('[Search] Module loading failed:', err));
 

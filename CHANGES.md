@@ -1,3 +1,33 @@
+# FanHoard Unified Scroll-Lock Core v3.2.3
+
+## What changed
+
+Unified all overlay scroll-locking mechanisms (loading screens, popups, and search overlay) into a single reference-counted scroll-lock authority (`ScrollLockCore` / `ScrollLockManager`):
+
+1. **Shared Scroll-Lock Core**: Extracted canonical scroll-lock logic into `assets/js/loading-system/fvl-modules/scroll-lock-core.js`, exposing `window.ScrollLockCore`. Supports owner-tagged reference counting, `data-scroll-locked` DOM attribute management on `<html>`, `allowScrollIn` selector registration, `releaseAll` owner teardown, and DOM style restoration on `reset()`.
+2. **Unified Overlay Integration**: Updated loader (`fvl.js`, `engine.js`, `nav-core-modules/loading.js`), `popup.js` / `popup-modules/state.js`, and `search.js` / `search-modules/overlay.js` to route all lock/unlock operations through `ScrollLockCore` with owner tags ('fvl', 'popup', 'search') and fail-soft fallback.
+3. **Stacked Overlay Protection**: Prevents stacked overlays (e.g., popup over fullscreen loading screen) from breaking each other's scroll lock when one overlay is closed. Background scroll remains locked until all active overlays release their reference counts.
+4. **Contract & Browser E2E Tests**: Added 8 unit contract tests in `tests/scroll-lock-core.test.ts` for reference counting, owner tags, and DOM reset behavior. Added 3 Playwright real-browser e2e tests in `e2e/scroll-lock.spec.ts` covering fullscreen loading, stacked overlay composition, and search overlay lock/unlock cycles.
+
+## Files in this release
+
+| File | Status | Purpose |
+|---|---|---|
+| `assets/js/loading-system/fvl-modules/scroll-lock-core.js` | NEW | Shared core: owner tags, ref-count, `data-scroll-locked`, `allowScrollIn`, `releaseAll`, `reset()` w/ DOM restore. |
+| `assets/js/loading-system/fvl-modules/utils.js` | MODIFIED | Aliases shared core as `ScrollLockManager`. |
+| `assets/js/loading-system/fvl-modules/engine.js` | MODIFIED | Uses owner tag 'fvl' for loading scroll locks. |
+| `assets/js/loading-system/fvl.js` | MODIFIED | Loads `scroll-lock-core.js` in phase 0 and Node modFiles chain. |
+| `assets/js/popup.js` | MODIFIED | Ensures `ScrollLockCore` availability with fail-soft fallback. |
+| `assets/js/popup-modules/state.js` | MODIFIED | Delegates scroll lock/unlock to `ScrollLockCore` with legacy fallback. |
+| `assets/js/search-system/search.js` | MODIFIED | Ensures `ScrollLockCore` availability with fail-soft fallback. |
+| `assets/js/search-system/search-modules/overlay.js` | MODIFIED | Delegates scroll lock/unlock to `ScrollLockCore` with legacy fallback. |
+| `assets/js/nav-core-modules/loading.js` | MODIFIED | Uses owner tag 'fvl' for nav loading scroll locks. |
+| `tests/core-search-defects.test.ts` | MODIFIED | Stubs `ScrollLockCore` for core search defect tests. |
+| `tests/scroll-lock-core.test.ts` | NEW | 8 unit contract tests covering scroll lock core logic and reset behavior. |
+| `e2e/scroll-lock.spec.ts` | NEW | 3 real-browser Playwright e2e tests for fullscreen loading, stacked overlays, and search overlay. |
+
+---
+
 # FanHoard Fullscreen Scroll-Lock Inversion Fix & Release Notes Update v3.2.2
 
 ## What changed

@@ -183,10 +183,18 @@
           window.scrollTo({ top: 0, behavior: 'instant' });
         }
 
-        // Lock scroll — body fixed keeps it visually in place, no scrollbar jump
-        document.body.style.position = 'fixed';
-        document.body.style.top      = `-${_savedScrollY}px`;
-        document.body.style.width    = '100%';
+        // Lock scroll — body fixed keeps it visually in place, no scrollbar jump.
+        // Delegates to the shared ScrollLockCore (same authority as FVL/popup)
+        // so stacked overlays compose; legacy direct lock only as fallback.
+        const _lockCore = window.ScrollLockCore;
+        if (_lockCore) {
+          _lockCore.allowScrollIn('.search-overlay-scrollable-content');
+          _lockCore.lock('search');
+        } else {
+          document.body.style.position = 'fixed';
+          document.body.style.top      = `-${_savedScrollY}px`;
+          document.body.style.width    = '100%';
+        }
 
         // Escape → close (routed through OverlayService.close, the one authority)
         Handlers.documentKeydownOverlay = (e) => { if (e.key === 'Escape') OverlayService.close('escape'); };
@@ -290,9 +298,14 @@
         const _sr = DOMService.get(CONFIG.DOM.searchResultsId || 'searchResults');
         if (_sr && savedScrollY > 0 && !_didSearch) _sr.style.visibility = 'hidden';
 
-        document.body.style.position = '';
-        document.body.style.top      = '';
-        document.body.style.width    = '';
+        const _lockCore = window.ScrollLockCore;
+        if (_lockCore) {
+          _lockCore.unlock('search');
+        } else {
+          document.body.style.position = '';
+          document.body.style.top      = '';
+          document.body.style.width    = '';
+        }
         State.setSavedScrollY(0);
 
         if (savedScrollY > 0 && !_didSearch) {

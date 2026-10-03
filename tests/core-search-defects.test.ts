@@ -189,6 +189,16 @@ describe('Core Search Defects Regression Suite (DS-01, DS-06, DS-07, DS-09, DS-0
       SearchEngine: {},
     };
 
+    // (v3.2.3) search.js ensures window.ScrollLockCore before loading its
+    // modules — stub it so no real script fetch happens in happy-dom and
+    // the existing loadPhases stub anchor keeps working.
+    (window as any).ScrollLockCore = {
+      lock: vi.fn(), unlock: vi.fn(), allowScrollIn: vi.fn(), releaseAll: vi.fn(),
+      getLockCount: vi.fn().mockReturnValue(0),
+      getState: vi.fn().mockReturnValue({ locked: false, count: 0, owners: [] }),
+      reset: vi.fn(),
+    };
+
     const searchJsPath = path.resolve(__dirname, '../assets/js/search-system/search.js');
     let searchJsCode = fs.readFileSync(searchJsPath, 'utf8');
 

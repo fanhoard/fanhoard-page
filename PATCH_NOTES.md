@@ -1,3 +1,39 @@
+# แพตช์รวมศูนย์ระบบสกอร์ล็อก (v3.2.3)
+
+วางไฟล์ทั้งหมดใน patch นี้ทับลงบน repo ตามโครงสร้างเดิม — แตก ZIP แล้ว copy ทับได้เลย
+
+## สรุปการเปลี่ยนแปลง (v3.2.3)
+
+| ไฟล์ | การเปลี่ยนแปลง |
+|------|----------------|
+| `assets/js/loading-system/fvl-modules/scroll-lock-core.js` | มอดูลศูนย์กลางการล็อกสกอร์ (NEW): จัดการ owner tags, ref-count, `data-scroll-locked`, `allowScrollIn`, `releaseAll`, `reset()` พร้อมคืนค่า DOM style |
+| `assets/js/loading-system/fvl-modules/utils.js` | ทำ Alias ชี้ไปยังมอดูลศูนย์กลางผ่าน `ScrollLockManager` |
+| `assets/js/loading-system/fvl-modules/engine.js` | ระบุ owner tag 'fvl' สำหรับการล็อกสกอร์ของระบบหน้าโหลด |
+| `assets/js/loading-system/fvl.js` | โหลด `scroll-lock-core.js` ใน Phase 0 และ Node modFiles chain |
+| `assets/js/popup.js` | โหลดและตรวจสอบ `ScrollLockCore` พร้อมระบบสำรองแบบ Fail-soft |
+| `assets/js/popup-modules/state.js` | ส่งต่อการสั่งล็อก/ปลดล็อกไปยัง `ScrollLockCore` พร้อมตัวเลือกสำรอง legacy |
+| `assets/js/search-system/search.js` | โหลดและตรวจสอบ `ScrollLockCore` พร้อมระบบสำรองแบบ Fail-soft |
+| `assets/js/search-system/search-modules/overlay.js` | ส่งต่อการสั่งล็อก/ปลดล็อกไปยัง `ScrollLockCore` พร้อมตัวเลือกสำรอง legacy |
+| `assets/js/nav-core-modules/loading.js` | ระบุ owner tag 'fvl' สำหรับการล็อกสกอร์ของ nav loading |
+| `tests/core-search-defects.test.ts` | เพิ่ม Stub สำหรับ `ScrollLockCore` สำหรับชุดทดสอบระบบค้นหา |
+| `tests/scroll-lock-core.test.ts` | ชุดทดสอบ Unit Contract Tests 8 เคส (NEW) ครอบคลุมการทำงานของศูนย์กลางสกอร์ล็อกและการคืนค่า DOM |
+| `e2e/scroll-lock.spec.ts` | ชุดทดสอบ Real-Browser E2E 3 เคส (NEW) สำหรับหน้าโหลดเต็มจอ, Overlay ซ้อนกัน และหน้าต่างค้นหา |
+
+## รายละเอียดแพตช์รวมศูนย์ระบบสกอร์ล็อก (v3.2.3)
+
+1. **รวมศูนย์ระบบสกอร์ล็อก (Unified Scroll-Lock Core)**:
+   - รวมการจัดการสกอร์ล็อกของหน้าโหลด (Loading), ป๊อปอัพ (Popup) และหน้าต่างค้นหา (Search) เข้าสู่แกนกลางเดียวกัน `window.ScrollLockCore`
+   - ระบบนับจำนวนอ้างอิง (Reference Counting) และระบุเจ้าของ (Owner Tags) ป้องกันไม่ให้การปิด Overlay ตัวหนึ่งไปปลดล็อกหน้าเว็บด้านหลังที่ยังถูก Overlay ตัวอื่นล็อกไว้
+   - แสดง Attribute `data-scroll-locked` บนองค์ประกอบ `<html>` สำหรับตรวจสอบการทำงานใน DOM
+2. **การคืนค่า DOM และความเสถียร (DOM Restore & Fail-Soft)**:
+   - เมื่อเรียก `reset()` ระบบจะคืนค่า Style ดั้งเดิมของ `body` และ `documentElement` อย่างสมบูรณ์
+   - หากสภาพแวดล้อมไม่พร้อม มีระบบสำรอง Fail-Soft ให้มอดูลทำงานต่อได้โดยไม่ขัดข้อง
+3. **ชุดทดสอบแบบครอบคลุม**:
+   - `tests/scroll-lock-core.test.ts` (8 unit contract tests) ผ่าน 100%
+   - `e2e/scroll-lock.spec.ts` (3 real-browser tests) ผ่าน 100%
+
+---
+
 # FanHoard Fullscreen Scroll-Lock Inversion Bug Fix Patch (v3.2.2)
 
 วางไฟล์ทั้งหมดใน patch นี้ทับลงบน repo ตามโครงสร้างเดิม — แตก ZIP แล้ว copy ทับได้เลย
