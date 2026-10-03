@@ -46,10 +46,11 @@ describe('Version Pipeline Audit & Standard Verification', () => {
         expect(indexData.versions.length).toBeGreaterThan(0);
         expect(indexData.versions.length).toBeLessThanOrEqual(7);
 
-        // v3.2.2 should be in history
-        const v322 = indexData.versions.find((v: any) => v.version === '3.2.2');
-        expect(v322).toBeDefined();
-        expect(v322.hasDetails).toBe(true);
+        // Latest history entry should have valid version and hasDetails
+        const latestHistory = indexData.versions[0];
+        expect(latestHistory).toBeDefined();
+        expect(latestHistory.version).toBeTruthy();
+        expect(latestHistory.hasDetails).toBe(true);
       }
     });
 

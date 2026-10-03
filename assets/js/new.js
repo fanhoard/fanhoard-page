@@ -126,7 +126,15 @@
   //  1. Per-language: title/subtitle เป็น string ธรรมดา → wrap เป็น {lang: value}
   //  2. Legacy i18n: title/subtitle เป็น {en:..., th:...} → ใช้ตรงนั้น
 
-  function parseMD(mdText, lang) {
+  function classifySection(headingText) {
+  var h = (headingText || '').toLowerCase();
+  if (h.indexOf('new') >= 0 || h.indexOf('ใหม่') >= 0) return 'new';
+  if (h.indexOf('fix') >= 0 || h.indexOf('แก้') >= 0 || h.indexOf('reliab') >= 0 || h.indexOf('ความเสถียร') >= 0) return 'fixed';
+  if (h.indexOf('remove') >= 0 || h.indexOf('ลบ') >= 0) return 'removed';
+  return 'improved';
+}
+
+function parseMD(mdText, lang) {
     var result = { version: '', date: null, title: null, subtitle: null, notify: true, sections: [] };
     try {
       var body = mdText;
@@ -172,10 +180,10 @@
       var currentSection = null, currentItem = null;
       for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
-        var headingMatch = line.match(/^###\s+(New|Improved|Fixed|Removed)\s*$/i);
+        var headingMatch = line.match(/^###\s+(.+)$/);
         if (headingMatch) {
           if (currentSection) result.sections.push(currentSection);
-          currentSection = { type: headingMatch[1].toLowerCase(), items: [] };
+          currentSection = { type: classifySection(headingMatch[1].trim()), items: [] };
           currentItem = null; continue;
         }
         if (line.match(/^\s*-\s+\*\*/)) {
@@ -366,7 +374,13 @@
       var container = document.getElementById('whats-new-container');
       if (!container) return;
       container.innerHTML = '';
-      if (current) { _lastVersion = current.version; container.appendChild(buildRelease(current, true)); }
+      if (current) {
+        _lastVersion = current.version;
+        if (current.version) {
+          try { localStorage.setItem('fv_dismissed_v' + String(current.version).replace(/^v/i, ''), '1'); } catch(e) {}
+        }
+        container.appendChild(buildRelease(current, true));
+      }
       var releases = (historyData && historyData.releases) || [];
       if (releases.length) {
         var div = document.createElement('div');

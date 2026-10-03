@@ -1,6 +1,6 @@
 /**
  * version-core.js — FanHoard Verse
- * @version 5.3
+ * @version 5.4
  * @description ระบบแจ้งเตือนอัพเดทเวอร์ชันใหม่
  *
  * อ่าน `/assets/md/{lang}/current.md` เพื่อตรวจสอบเวอร์ชันล่าสุด,
@@ -34,10 +34,12 @@
   function ssSet(k, v) { try { sessionStorage.setItem(k, v);     } catch(e) {} }
   function isDisabled()      { return ls(CFG.KEY_DISABLE) === '1'; }
   function setDisabled(v)    { lsSet(CFG.KEY_DISABLE, v ? '1' : '0'); }
-  function isDismissed(ver)  { return ls(CFG.KEY_DISMISSED + ver) === '1'; }
-  function setDismissed(ver) { lsSet(CFG.KEY_DISMISSED + ver, '1'); }
-  function isSessionFresh(b) { if (ss(CFG.SS_SHOWN+b) !== '1') return true; var l = parseInt(ss(CFG.SS_LAST_ACTIVE)||'0',10); return !l || (Date.now()-l) >= CFG.IDLE_MS; }
-  function markSession(b)    { ssSet(CFG.SS_SHOWN+b, '1'); ssSet(CFG.SS_LAST_ACTIVE, String(Date.now())); }
+
+  function normVer(v) { return String(v||'').trim().replace(/^v/i, ''); }
+  function isDismissed(ver)  { return ls(CFG.KEY_DISMISSED + normVer(ver)) === '1'; }
+  function setDismissed(ver) { lsSet(CFG.KEY_DISMISSED + normVer(ver), '1'); }
+  function isSessionFresh(b) { var nv = normVer(b); if (ss(CFG.SS_SHOWN+nv) !== '1') return true; var l = parseInt(ss(CFG.SS_LAST_ACTIVE)||'0',10); return !l || (Date.now()-l) >= CFG.IDLE_MS; }
+  function markSession(b)    { var nv = normVer(b); ssSet(CFG.SS_SHOWN+nv, '1'); ssSet(CFG.SS_LAST_ACTIVE, String(Date.now())); }
   function updateLastActive(){ ssSet(CFG.SS_LAST_ACTIVE, String(Date.now())); }
 
   function getLang() {
@@ -54,8 +56,16 @@
 
   function fetchText(url) { return fetch(url + '?_=' + Date.now(), { cache: 'no-store' }).then(function(r) { return r.ok ? r.text() : null; }).catch(function() { return null; }); }
 
+  function classifySection(headingText) {
+    var h = (headingText || '').toLowerCase();
+    if (h.indexOf('new') >= 0 || h.indexOf('ใหม่') >= 0) return 'new';
+    if (h.indexOf('fix') >= 0 || h.indexOf('แก้') >= 0 || h.indexOf('reliab') >= 0 || h.indexOf('ความเสถียร') >= 0) return 'fixed';
+    if (h.indexOf('remove') >= 0 || h.indexOf('ลบ') >= 0) return 'removed';
+    return 'improved';
+  }
+
   function parseMD(mdText, lang) {
-    var result = { version: '', date: null, title: null, subtitle: null, notify: true, sections: [] };
+    var result = { version: '', date: null, title: null, subtitle: null, notify: true, blocking: false, sections: [] };
     try {
       var body = mdText;
       var fmMatch = mdText.match(/^---\s*\n([\s\S]*?)\n---\s*\n/);
@@ -65,6 +75,7 @@
         var vM = fm.match(/^version:\s*(.+)$/m); if (vM) result.version = String(vM[1]).trim();
         var dM = fm.match(/^date:\s*(.+)$/m); if (dM) { var p = Date.parse(String(dM[1]).trim()); if (!isNaN(p)) result.date = new Date(p).toISOString(); }
         var nM = fm.match(/^notify:\s*["']?(false|true)["']?/im); if (nM) result.notify = nM[1].toLowerCase() !== 'false';
+        var bM = fm.match(/^blocking:\s*["']?(false|true)["']?/im); if (bM) result.blocking = bM[1].toLowerCase() === 'true';
         var tB = fm.match(/^(title:)\s*\n((?:  \w+:\s*.+\n?)+)/m);
         if (tB) result.title = _parseI18n(tB[2]);
         else { var tL = fm.match(/^title:\s*(.+)$/m); if (tL) { var tv = String(tL[1]).trim(); result.title = lang ? _w(tv,lang) : {en:tv}; } }
@@ -74,12 +85,24 @@
       }
       var lines = body.split('\n'), cs = null, ci = null;
       for (var i = 0; i < lines.length; i++) {
-        var line = lines[i], hm = line.match(/^###\s+(New|Improved|Fixed)\s*$/i);
-        if (hm) { if (cs) result.sections.push(cs); cs = { type: hm[1].toLowerCase(), items: [] }; ci = null; continue; }
-        if (line.match(/^\s*-\s+\*\*/)) { if (ci && cs) cs.items.push(ci); ci = _parseItem(line, lang); continue; }
+        var line = lines[i];
+        var hm = line.match(/^###\s+(.+)$/);
+        if (hm) {
+          if (ci && cs) cs.items.push(ci);
+          if (cs) result.sections.push(cs);
+          cs = { type: classifySection(hm[1].trim()), items: [] };
+          ci = null;
+          continue;
+        }
+        if (line.match(/^\s*-\s+\*\*/)) {
+          if (ci && cs) cs.items.push(ci);
+          ci = _parseItem(line, lang);
+          continue;
+        }
         if (ci && line.trim() && !line.match(/^---/) && !line.match(/^###/)) {
           if (!ci.desc) ci.desc = lang ? _w('',lang) : {en:''};
-          var k = lang || 'en'; ci.desc[k] += (ci.desc[k] ? ' ' : '') + line.trim();
+          var k = lang || 'en';
+          ci.desc[k] += (ci.desc[k] ? ' ' : '') + line.trim();
         }
       }
       if (ci && cs) cs.items.push(ci);
@@ -152,37 +175,70 @@
   var _si = false;
   function injectStyles() {
     if (_si) return; _si = true;
-    var css='.fv-update-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}.fv-update-icon{width:40px;height:40px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,#13b47f,#0d8f65);display:flex;align-items:center;justify-content:center}.fv-update-info{min-width:0}.fv-update-badge{font-size:.95em;font-weight:600;color:var(--fv-text-primary,#111)}.fv-update-version{font-size:.88em;color:#13b47f;font-weight:600;margin:1px 0 0;padding:0;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fv-update-date{font-size:.72em;color:var(--fv-text-tertiary,#aaa);margin-top:2px}.fv-update-sub{font-size:.85em;color:var(--fv-text-secondary,#666);margin:0 0 14px;line-height:1.55}.fv-update-list{list-style:none;margin:0 0 16px;padding:0}.fv-update-item{display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:.85em;color:var(--fv-text-secondary,#555);line-height:1.5}.fv-update-dot{flex-shrink:0;margin-top:5px;width:6px;height:6px;border-radius:50%;background:#13b47f;display:inline-block}.fv-update-cta{display:block;width:100%;padding:11px 0;background:linear-gradient(135deg,#13b47f,#0d8f65);color:#fff!important;border-radius:11px;font-size:.95em;font-weight:600;text-align:center;text-decoration:none!important;box-shadow:0 2px 12px rgba(19,180,127,.35);margin-bottom:10px;transition:transform .15s ease,box-shadow .15s ease}.fv-update-cta:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(19,180,127,.45)}.fv-update-dismiss-wrap{text-align:center}.fv-update-dismiss-btn{border:none;background:none;cursor:pointer;font-size:.78em;color:var(--fv-text-tertiary,#aaa);font-family:inherit;padding:4px 8px;border-radius:5px;transition:color .15s}.fv-update-dismiss-btn:hover{color:var(--fv-text-secondary,#666)}';
-    css+='.fp-theme-dark .fv-update-badge{color:var(--fv-text-primary,#f5f5f7)}.fp-theme-dark .fv-update-sub{color:var(--fv-text-secondary,#aeaeb2)}.fp-theme-dark .fv-update-item{color:var(--fv-text-secondary,#aeaeb2)}.fp-theme-dark .fv-update-date{color:var(--fv-text-tertiary,#636366)}.fp-theme-dark .fv-update-dismiss-btn{color:var(--fv-text-tertiary,#636366)}.fp-theme-dark .fv-update-dismiss-btn:hover{color:var(--fv-text-secondary,#aeaeb2)}';
+    var css='.fv-update-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}'
+      +'.fv-update-icon{width:40px;height:40px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,#13b47f,#0d8f65);display:flex;align-items:center;justify-content:center}'
+      +'.fv-update-info{min-width:0}'
+      +'.fv-update-badge{font-size:.95em;font-weight:600;color:var(--fv-text-primary,#111)}'
+      +'.fv-update-version{font-size:.88em;color:#13b47f;font-weight:600;margin:1px 0 0;padding:0;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+      +'.fv-update-date{font-size:.72em;color:var(--fv-text-tertiary,#aaa);margin-top:2px}'
+      +'.fv-update-sub{font-size:.85em;color:var(--fv-text-secondary,#666);margin:0 0 14px;line-height:1.55}'
+      +'.fv-update-list{list-style:none;margin:0 0 16px;padding:0}'
+      +'.fv-update-item{display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:.85em;color:var(--fv-text-secondary,#555);line-height:1.5}'
+      +'.fv-update-dot{flex-shrink:0;margin-top:5px;width:6px;height:6px;border-radius:50%;background:#13b47f;display:inline-block}'
+      +'.fv-update-cta{display:block;width:100%;padding:11px 0;background:linear-gradient(135deg,#13b47f,#0d8f65);color:#fff!important;border-radius:11px;font-size:.95em;font-weight:600;text-align:center;text-decoration:none!important;box-shadow:0 2px 12px rgba(19,180,127,.35);margin-bottom:10px;transition:all .18s cubic-bezier(0.16,1,0.3,1)}'
+      +'.fv-update-cta:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(19,180,127,.45)}'
+      +'.fv-update-cta:focus-visible{outline:2px solid #13b47f;outline-offset:2px}'
+      +'.fv-update-dismiss-wrap{text-align:center}'
+      +'.fv-update-dismiss-btn{border:none;background:none;cursor:pointer;font-size:.78em;color:var(--fv-text-tertiary,#aaa);font-family:inherit;padding:6px 12px;border-radius:6px;transition:all .18s cubic-bezier(0.16,1,0.3,1)}'
+      +'.fv-update-dismiss-btn:hover{color:var(--fv-text-secondary,#666);background:rgba(19,180,127,.08)}'
+      +'.fv-update-dismiss-btn:focus-visible{outline:2px solid #13b47f;outline-offset:2px}';
+    css+='.fp-theme-dark .fv-update-badge{color:var(--fv-text-primary,#f5f5f7)}'
+      +'.fp-theme-dark .fv-update-sub{color:var(--fv-text-secondary,#aeaeb2)}'
+      +'.fp-theme-dark .fv-update-item{color:var(--fv-text-secondary,#aeaeb2)}'
+      +'.fp-theme-dark .fv-update-date{color:var(--fv-text-tertiary,#636366)}'
+      +'.fp-theme-dark .fv-update-dismiss-btn{color:var(--fv-text-tertiary,#636366)}'
+      +'.fp-theme-dark .fv-update-dismiss-btn:hover{color:var(--fv-text-secondary,#aeaeb2);background:rgba(19,180,127,.15)}'
+      +'.fp-theme-dark .fv-update-cta:focus-visible,.fp-theme-dark .fv-update-dismiss-btn:focus-visible{outline:2px solid #00FFAA}';
     var s=document.createElement('style');s.id='fv-update-styles';s.textContent=css;document.head.appendChild(s);
   }
 
+  var _currentRelease = null;
+
   function showPopup(wn,buildId) {
-    if(typeof window.PopupSystem==='undefined'||!window.PopupSystem._initialized){window.addEventListener('fp:ready',function(){_doShow(wn,buildId);},{once:true});setTimeout(function(){if(typeof window.PopupSystem==='undefined')console.warn('[version-core] PopupSystem not available');},5000);return;}
+    if(typeof window.PopupSystem==='undefined'||!window.PopupSystem._initialized){
+      window.addEventListener('fp:ready',function(){_doShow(wn,buildId);},{once:true});
+      setTimeout(function(){if(typeof window.PopupSystem==='undefined')console.warn('[version-core] PopupSystem not available');},5000);
+      return;
+    }
     _doShow(wn,buildId);
   }
+
   function _doShow(wn,buildId) {
-    lsSet(CFG.KEY_SHOWN_BUILD,buildId); markSession(buildId); injectStyles();
+    _currentRelease = wn;
+    lsSet(CFG.KEY_SHOWN_BUILD, normVer(buildId));
+    markSession(buildId);
+    injectStyles();
     var c=buildContent(wn);
     var isTh = getLang() === 'th';
+    var isBlocking = wn.blocking === true;
     PopupSystem.open({
-      id:'fv-update-'+wn.version,
+      id:'fv-update-'+normVer(wn.version),
       type:'dialog',
       title:null,
       body:c.html,
       size:'sm',
       position:'center',
       group:CFG.POPUP_GROUP,
-      blocking:true,
+      blocking:isBlocking,
       closable:true,
       theme:'light',
       ariaLabel: isTh ? 'แจ้งเตือนอัพเดทเวอร์ชัน ' + wn.version : 'Version ' + wn.version + ' Update Notification',
       ariaDescribedBy: 'fv-update-title',
       onMount:function(el,h){
         var a=el.querySelector('.fv-update-cta');
-        if(a)a.addEventListener('click',function(){h.close({action:'navigate'});});
+        if(a)a.addEventListener('click',function(){ setDismissed(wn.version); h.close({action:'navigate'}); });
         var d=el.querySelector('[data-fp-action="dismiss"]');
-        if(d)d.addEventListener('click',function(){setDismissed(wn.version);h.close({action:'dismissed'});});
+        if(d)d.addEventListener('click',function(){ setDismissed(wn.version); h.close({action:'dismissed'}); });
       },
       onClose:function(){}
     });
@@ -210,13 +266,16 @@
   function initWithRelease(wn) {
     if(!wn||!wn.version)return;
     var bid=wn.version;
-    if(wn.notify===false)return; if(isDismissed(bid))return;
+    if(wn.notify===false)return;
+    if(isDismissed(bid))return;
     var sb=ls(CFG.KEY_SHOWN_BUILD);
-    if(sb!==bid||isSessionFresh(bid)) showPopup(wn,bid);
+    if(sb!==normVer(bid)||isSessionFresh(bid)) showPopup(wn,bid);
   }
 
   function init() {
-    updateLastActive(); if(isOnWhatsNewPage())return; if(isDisabled())return;
+    updateLastActive();
+    if(isOnWhatsNewPage())return;
+    if(isDisabled())return;
     var lang = getLang();
     var perLangUrl = CFG.CURRENT_MD_PERLANG.replace('{lang}', lang);
 
@@ -237,6 +296,19 @@
       }
     });
   }
+
+  // Listen for language changes to keep modal or trigger state updated
+  function onLangChange() {
+    if (_currentRelease && typeof window.PopupSystem !== 'undefined') {
+      var popupId = 'fv-update-' + normVer(_currentRelease.version);
+      if (PopupSystem.get && PopupSystem.get(popupId)) {
+        init();
+      }
+    }
+  }
+
+  try { window.addEventListener('languageChange', onLangChange); } catch(e) {}
+  try { window.addEventListener('fv:langchange', onLangChange); } catch(e) {}
 
   trySetupToggle();
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();

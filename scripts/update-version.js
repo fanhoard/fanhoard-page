@@ -88,6 +88,14 @@ function compareSemver(a, b) {
 }
 
 // ── Markdown parser (single-language) ────────────────────────────────────────
+function classifySection(headingText) {
+  var h = (headingText || '').toLowerCase();
+  if (h.indexOf('new') >= 0 || h.indexOf('ใหม่') >= 0) return 'new';
+  if (h.indexOf('fix') >= 0 || h.indexOf('แก้') >= 0 || h.indexOf('reliab') >= 0 || h.indexOf('ความเสถียร') >= 0) return 'fixed';
+  if (h.indexOf('remove') >= 0 || h.indexOf('ลบ') >= 0) return 'removed';
+  return 'improved';
+}
+
 function parseMD(mdText, lang) {
   var result = { version:'', date:null, title:null, subtitle:null, notify:true, sections:[] };
   try {
@@ -109,7 +117,7 @@ function parseMD(mdText, lang) {
     for (var i = 0; i < lines.length; i++) {
       var line = lines[i];
       var hm = line.match(/^###\s+(New|Improved|Fixed|Removed)\s*$/i);
-      if (hm) { if(cs) result.sections.push(cs); cs={type:hm[1].toLowerCase(),items:[]}; ci=null; continue; }
+      if (hm) { if(cs) result.sections.push(cs); cs={type:classifySection(hm[1].trim()),items:[]}; ci=null; continue; }
       if (line.match(/^\s*-\s+\*\*/)) { if(ci&&cs) cs.items.push(ci); ci=parseItemLine(line,lang); continue; }
       if (ci && line.trim() && !line.match(/^---/) && !line.match(/^###/)) {
         if (!ci.desc) { ci.desc = {}; ci.desc[lang||'en'] = ''; }
