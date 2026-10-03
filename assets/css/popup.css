@@ -482,10 +482,10 @@
 /* ── Toast ─────────────────────────────────────────────────────────────── */
 
 .fp-toast {
-  border-radius: 12px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: none;
+  border-radius: var(--radius-full, 9999px);
+  background: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
+  box-shadow: var(--shadow-md, 0 4px 16px -2px rgba(0, 0, 0, 0.08));
   padding: 0;
 }
 
@@ -494,33 +494,45 @@
 }
 
 .fp-toast .fp-body {
-  padding: 12px 16px;
+  padding: 10px 20px;
   font-size: 14px;
+  font-weight: 500;
+  color: var(--text-main, #0f172a);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   white-space: nowrap;
+}
+
+/* v3 variant status dot (decorative; text carries the message) */
+.fp-toast .fp-body::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full, 9999px);
+  background: var(--fp-toast-dot, var(--color-brand-primary, #0d9488));
 }
 
 .fp-toast-success,
 .fp-variant-success.fp-toast {
-  border-left: 4px solid #10b981;
+  --fp-toast-dot: var(--color-brand-accent, #059669);
 }
 
 .fp-toast-error,
 .fp-variant-error.fp-toast,
 .fp-variant-danger.fp-toast {
-  border-left: 4px solid #ef4444;
+  --fp-toast-dot: var(--color-danger, #dc2626);
 }
 
 .fp-toast-warning,
 .fp-variant-warning.fp-toast {
-  border-left: 4px solid #f59e0b;
+  --fp-toast-dot: var(--color-warning, #d97706);
 }
 
 .fp-toast-info,
 .fp-variant-info.fp-toast {
-  border-left: 4px solid var(--color-brand-primary, #0d9488);
+  --fp-toast-dot: var(--color-brand-primary, #0d9488);
 }
 
 /* ── Tooltip ───────────────────────────────────────────────────────────── */

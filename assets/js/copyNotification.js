@@ -8,7 +8,7 @@
   'use strict';
   
   // ── Timing constants ──────────────────────────────────────
-  const FADE_IN_MS = 260;
+  const FADE_IN_MS = 250;
   const DISPLAY_MS = 1800;
   const FADE_OUT_MS = 300;
   
@@ -39,18 +39,18 @@
         display: inline-flex;
         align-items: center;
         
-        padding: 12px 20px !important;
-        border-radius: 12px;
+        padding: 12px 22px !important;
+        border-radius: var(--radius-full, 9999px);
 
-        /* Pure white canvas surface with hairline border */
-        background: #ffffff;
-        border: 1px solid rgba(0, 0, 0, 0.06);
-        box-shadow: none;
+        /* v3 themed capsule surface */
+        background: var(--surface-card, #ffffff);
+        border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
+        box-shadow: var(--shadow-md, 0 4px 16px -2px rgba(0, 0, 0, 0.08));
 
         /* Typography */
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
         font-size: 14px !important;
-        color: #0f172a;
+        color: var(--text-main, #0f172a);
         white-space: nowrap;
         pointer-events: none;
         user-select: none;
@@ -73,7 +73,7 @@
         font-weight: 600;
         font-size: 0.95em !important;
         letter-spacing: 0.01em;
-        color: #0f766e;
+        color: var(--color-brand-text, #0f766e);
         flex-shrink: 0;
       }
 
@@ -81,7 +81,7 @@
       .cn-divider {
         width: 1px;
         height: 14px;
-        background: rgba(0, 0, 0, 0.06);
+        background: var(--border-subtle, rgba(0, 0, 0, 0.08));
         flex-shrink: 0;
         margin: 0 12px;
       }
@@ -90,7 +90,7 @@
       .cn-name {
         font-size: 0.9em !important;
         font-weight: 500;
-        color: #64748b;
+        color: var(--text-muted, #64748b);
         letter-spacing: 0.01em;
         max-width: 200px;
         overflow: hidden;
@@ -155,7 +155,7 @@
       _holdTimer = null;
     }
     
-    el.style.transition = `opacity ${FADE_OUT_MS}ms ease-in`;
+    el.style.transition = `opacity ${FADE_OUT_MS}ms cubic-bezier(0.2, 0, 0, 1)`;
     el.style.opacity = '0';
     
     setTimeout(() => el.parentNode?.removeChild(el), FADE_OUT_MS + 40);
@@ -192,7 +192,7 @@
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (_activeEl !== el) return;
-        el.style.transition = `opacity ${FADE_IN_MS}ms ease-out`;
+        el.style.transition = `opacity ${FADE_IN_MS}ms cubic-bezier(0.2, 0, 0, 1)`;
         el.style.opacity = '1';
       });
     });

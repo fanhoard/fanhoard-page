@@ -32,7 +32,7 @@ describe('Popup System Polish (S5)', () => {
       expect(drawerOpts._exitDuration).toBe(250);
 
       const toastOpts = Utils.mergeOptions({ type: 'toast' }, Utils.getPreset('toast'));
-      expect(toastOpts._enterDuration).toBe(320);
+      expect(toastOpts._enterDuration).toBe(250);
       expect(toastOpts._exitDuration).toBe(280);
 
       const sheetOpts = Utils.mergeOptions({ type: 'sheet' }, Utils.getPreset('sheet'));

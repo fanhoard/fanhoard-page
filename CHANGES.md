@@ -1,30 +1,31 @@
-# Navigation Redesign v3.2.15 (r02)
+# Toasts & Feedback Redesign v3.2.16 (r03)
 
-## What changed in v3.2.15 (Navigation on Design Language v3)
+## What changed in v3.2.16 (Toast & feedback system on Design Language v3)
 
-1. **Dark-mode top bar fix (9 pages)** — `assets/css/top-navigation-bar.css` referenced `--fv-surface-nav`, a token that was never defined anywhere, silently falling back to `#ffffff` in every theme. About, License, Privacy, Roadmap, What's New, Community, Contact, Report and Data Verse Scope therefore rendered a hard white bar in dark mode. Now uses `--fv-surface-page` (theme-aware).
-2. **Top bar border tokenized** — hard-coded `rgba(0,0,0,0.06)` divider (invisible in dark) → `var(--border-subtle)`.
-3. **Back button pill** — radius `--fv-radius-sm` → `--radius-full` (circular touch target); `:active` background `rgba(0,0,0,0.07)` → `var(--surface-hover)` (theme-aware).
-4. **One motion language** — all previously hard-coded `180ms cubic-bezier(0.16,1,0.3,1)` transition curves in `nav-core.css` (main pill tabs), `nav-core-ext.css` (sub-nav pills, content tiles, feed cards — 10 curves) and `top-navigation-bar.css` (back button + icon — 4 curves) normalized to `var(--transition-fast)` = 150ms `--ease-standard`.
-5. **Iron rule preserved** — the springy `.active` underline animation (`transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1)` overshoot, restored in v3.2.13) is untouched; asserted in code before writing and verified in the browser afterwards.
-6. Everything else (active pill tint, teal accents, radius bumps to 12/16/24px, subtle borders, #FAFAFC header canvas) shifted automatically through the v3 tokens from r01 — verified rather than assumed.
+1. **`assets/css/popup.css` — fp-toast → v3 capsule**: radius 12px → `--radius-full` (pill), background hardcoded `#ffffff` → `--surface-card`, border → `--border-subtle`, box-shadow none → `--shadow-md`. Body padding rebalanced for pill (10px 20px) with medium-weight themed text. Variant color coding moved from the old 4px left border (broken look on a pill) to a decorative status dot via `.fp-body::before` using a per-variant `--fp-toast-dot` custom property: success emerald `--color-brand-accent` (#059669), error `--color-danger` (#dc2626), warning `--color-warning` (#d97706), info `--color-brand-primary` (teal, auto-themes to teal-400 in dark).
+2. **`assets/js/copyNotification.js` — cn-capsule → v3**: radius 12px → `--radius-full`, all hardcoded colors tokenized (`--surface-card`, `--border-subtle`, `--shadow-md`, `--text-main`, `--color-brand-text`, `--text-muted`, `--font-sans`); fade-in 260→250ms; both inline transition curves → `cubic-bezier(0.2, 0, 0, 1)` (v3 standard). Previously this capsule was pure white with an invisible border in dark mode.
+3. **`assets/js/popup-modules/config.js`**: `TOAST_ENTER` 320 → 250ms (v3 normal motion).
+4. **`assets/js/popup-modules/renderer.js`**: warning toasts now announce `aria-live="assertive"` (matching error/danger); success/info stay `polite`. role/aria-atomic already existed.
+5. **`tests/popup/popup-polish.test.ts`**: the timing-consistency test pinned the old 320ms toast enter; updated to the v3 spec value 250ms (same assertion structure, new spec).
 
 ## Verification
 
-- `npx vitest run`: 234/234 green (37 files) | `npm run build`: clean | `npx playwright test e2e/scroll-lock.spec.ts`: 3/3
-- Effective-DOM check (Playwright, discover page, light+dark × 375/768/1280 = 6 combos):
-  - header bg light `rgb(250,250,252)` / dark `rgb(15,23,42)` ✓
-  - nav button transition `0.15s cubic-bezier(0.2, 0, 0, 1)` ✓ (all 6 combos)
-  - active pill: teal text + tinted bg + teal border, themed ✓
-  - `.active::after` = `transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)` — spring intact in all 6 combos ✓
-- Top bar dark fix on `/platform/about/`: nav bg `rgb(15,23,42)`, border `rgb(51,65,85)`, back button radius `9999px` ✓
+- `npx vitest run`: 234/234 green (37 files) | `npm run build`: clean
+- Real-browser verification (Playwright on vite preview, discover page, light + dark):
+  - All 4 variants × 2 themes: radius `9999px`, themed bg (light `rgb(255,255,255)` / dark `rgb(30,41,59)`), themed border (`rgb(51,65,85)` in dark), shadow present
+  - aria-live: success/info `polite`, error/warning `assertive`, role `status`
+  - Status dots render per variant (emerald/red/amber/teal, auto-themed)
+  - Copy capsule: pill `9999px`, dark bg `rgb(30,41,59)` (the hard-white-in-dark bug is gone), themed text colors, `polite`
+- Backup: `/app/.agents/archive/backup_r03_20261004.tar.gz` before edits.
 
 ## Files changed
 
 | File | Change |
 |------|--------|
-| `assets/css/top-navigation-bar.css` | themed surface + border, pill back button, 150ms motion |
-| `assets/css/nav-core.css` | main tab motion → --transition-fast (springy underline untouched) |
-| `assets/css/nav-core-ext.css` | sub-nav/content-tile/feed-card motion → --transition-fast (10 curves) |
-| `assets/md/en/current.md`, `assets/md/th/current.md` | v3.2.15 release notes |
+| `assets/css/popup.css` | fp-toast → pill capsule, themed surface, shadow, variant status dots |
+| `assets/js/copyNotification.js` | cn-capsule → themed pill, tokenized colors, 250ms standard motion |
+| `assets/js/popup-modules/config.js` | TOAST_ENTER 320 → 250ms |
+| `assets/js/popup-modules/renderer.js` | warning toasts aria-live assertive |
+| `tests/popup/popup-polish.test.ts` | toast enter timing pin updated to v3 spec (250ms) |
+| `assets/md/en/current.md`, `assets/md/th/current.md` | v3.2.16 release notes |
 | `assets/md/{en,th}/releases/*`, `assets/json/version.json`, loaders, HTML | release pipeline artifacts |

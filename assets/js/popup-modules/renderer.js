@@ -121,7 +121,7 @@
     }
 
     if (opts.type === 'toast') {
-      rootEl.setAttribute('aria-live', (opts.variant === 'error' || opts.variant === 'danger') ? 'assertive' : 'polite');
+      rootEl.setAttribute('aria-live', (opts.variant === 'error' || opts.variant === 'danger' || opts.variant === 'warning') ? 'assertive' : 'polite');
       rootEl.setAttribute('aria-atomic', 'true');
     } else if (opts.type === 'alert' || opts.type === 'confirm') {
       rootEl.setAttribute('aria-live', 'assertive');

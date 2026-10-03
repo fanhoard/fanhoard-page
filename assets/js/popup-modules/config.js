@@ -31,7 +31,7 @@
     EXIT_DURATION     : 200,
     OVERLAY_FADE_IN   : 200,
     OVERLAY_FADE_OUT  : 160,
-    TOAST_ENTER       : 320,
+    TOAST_ENTER       : 250,
     TOAST_EXIT        : 280,
     TOAST_DISPLAY     : 3000,
     DRAWER_ENTER      : 300,
