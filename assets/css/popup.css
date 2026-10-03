@@ -119,6 +119,7 @@
   padding: 20px 24px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   flex: 1;
   min-height: 0;
   color: var(--fp-text, var(--text-main, #0f172a));
@@ -501,6 +502,27 @@
   white-space: nowrap;
 }
 
+.fp-toast-success,
+.fp-variant-success.fp-toast {
+  border-left: 4px solid #10b981;
+}
+
+.fp-toast-error,
+.fp-variant-error.fp-toast,
+.fp-variant-danger.fp-toast {
+  border-left: 4px solid #ef4444;
+}
+
+.fp-toast-warning,
+.fp-variant-warning.fp-toast {
+  border-left: 4px solid #f59e0b;
+}
+
+.fp-toast-info,
+.fp-variant-info.fp-toast {
+  border-left: 4px solid var(--color-brand-primary, #0d9488);
+}
+
 /* ── Tooltip ───────────────────────────────────────────────────────────── */
 
 .fp-tooltip {
@@ -684,7 +706,10 @@
 @media (prefers-reduced-motion: reduce) {
   .fp-popup,
   .fp-popup *,
-  .fp-overlay {
+  .fp-overlay,
+  .fp-close-btn,
+  .fp-btn,
+  [class*="fp-pos-"] {
     transition: none !important;
     animation: none !important;
   }

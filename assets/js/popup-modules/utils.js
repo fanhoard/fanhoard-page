@@ -206,17 +206,37 @@
       'en';
 
     // Easing resolution
-    const easingMap = { ease: CONFIG.EASING.EASE, spring: CONFIG.EASING.SPRING, bounce: CONFIG.EASING.BOUNCE, linear: CONFIG.EASING.LINEAR };
-    o._easing = easingMap[o.easing] || CONFIG.EASING.EASE;
+    const easingMap = {
+      ease: CONFIG.EASING.EASE,
+      spring: CONFIG.EASING.SPRING,
+      bounce: CONFIG.EASING.BOUNCE,
+      linear: CONFIG.EASING.LINEAR,
+      exit: CONFIG.EASING.EXIT,
+    };
+    o._easing = easingMap[o.easing] || (typeof o.easing === 'string' && o.easing.includes('cubic-bezier') ? o.easing : CONFIG.EASING.EASE);
 
     // Shadow resolution
     o._shadow = CONFIG.SHADOWS[o.shadow] || CONFIG.SHADOWS.md;
 
-    // Animation duration
-    o._enterDuration = o.animationDuration ||
-      (o.type === 'fullscreen' ? CONFIG.TIMING.FULLSCREEN_ENTER : CONFIG.TIMING.ENTER_DURATION);
-    o._exitDuration = o.animationDuration ||
-      (o.type === 'fullscreen' ? CONFIG.TIMING.FULLSCREEN_EXIT : CONFIG.TIMING.EXIT_DURATION);
+    // Animation duration resolution per type
+    let defaultEnter = CONFIG.TIMING.ENTER_DURATION;
+    let defaultExit = CONFIG.TIMING.EXIT_DURATION;
+    if (o.type === 'drawer') {
+      defaultEnter = CONFIG.TIMING.DRAWER_ENTER;
+      defaultExit = CONFIG.TIMING.DRAWER_EXIT;
+    } else if (o.type === 'sheet') {
+      defaultEnter = CONFIG.TIMING.SHEET_ENTER;
+      defaultExit = CONFIG.TIMING.SHEET_EXIT;
+    } else if (o.type === 'toast') {
+      defaultEnter = CONFIG.TIMING.TOAST_ENTER;
+      defaultExit = CONFIG.TIMING.TOAST_EXIT;
+    } else if (o.type === 'fullscreen') {
+      defaultEnter = CONFIG.TIMING.FULLSCREEN_ENTER;
+      defaultExit = CONFIG.TIMING.FULLSCREEN_EXIT;
+    }
+
+    o._enterDuration = o.animationDuration || defaultEnter;
+    o._exitDuration = o.animationDuration || defaultExit;
 
     return o;
   }

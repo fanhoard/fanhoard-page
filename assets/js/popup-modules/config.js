@@ -21,7 +21,7 @@
     BLOCKING      : 600,
     FULLSCREEN    : 600,
     BASE_OFFSET   : 500,  // starting point for auto-stacking
-    STACK_STEP    : 1,    // each stacked popup increments by this
+    STACK_STEP    : 2,    // each stacked popup increments by this so overlays stack cleanly
   });
 
   // ── Animation timings (ms) ────────────────────────────────────────────────
@@ -320,14 +320,17 @@
 
   // ── Queue settings ─────────────────────────────────────────────────────────
   const QUEUE = Object.freeze({
+    MAX_CONCURRENT        : 5,
     MAX_CONCURRENT_TOASTS : 3,
     TOAST_GAP_PX          : 12,
   });
 
   // ── Accessibility defaults ────────────────────────────────────────────────
   const A11Y = Object.freeze({
-    FOCUS_RING_COLOR : '#009688',
-    FOCUS_RING_WIDTH : '2px',
+    FOCUS_RING_COLOR    : '#0d9488',
+    FOCUS_RING_WIDTH    : '2px',
+    AUTO_FOCUS_SELECTOR : 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    FOCUS_DELAY_MS      : 30,
   });
 
   // Export

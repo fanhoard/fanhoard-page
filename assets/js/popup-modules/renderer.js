@@ -93,7 +93,11 @@
     if (opts.persistent) classes.push(D.CLASS_PERSISTENT);
     if (opts.glassmorphism) classes.push(D.CLASS_Glass);
     if (opts.borderless) classes.push(D.CLASS_BORDERLESS);
-    if (opts.variant) classes.push(opts.variant);
+    if (opts.variant) {
+      classes.push(opts.variant);
+      classes.push('fp-variant-' + opts.variant);
+      classes.push('fp-' + opts.type + '-' + opts.variant);
+    }
     if (opts.anchor) classes.push(D.ANCHOR_CLASS);
 
     // Fullscreen-specific sub-classes
@@ -111,6 +115,18 @@
     rootEl.setAttribute('role', opts.role || preset.defaultRole);
     rootEl.setAttribute('aria-label', opts.ariaLabel || opts.title || opts.id || 'Dialog');
     if (opts.ariaDescribedBy) rootEl.setAttribute('aria-describedby', opts.ariaDescribedBy);
+
+    if (opts.focusTrap !== false || preset.hasOverlay) {
+      rootEl.setAttribute('aria-modal', 'true');
+    }
+
+    if (opts.type === 'toast') {
+      rootEl.setAttribute('aria-live', (opts.variant === 'error' || opts.variant === 'danger') ? 'assertive' : 'polite');
+      rootEl.setAttribute('aria-atomic', 'true');
+    } else if (opts.type === 'alert' || opts.type === 'confirm') {
+      rootEl.setAttribute('aria-live', 'assertive');
+      rootEl.setAttribute('aria-atomic', 'true');
+    }
 
     // ── Inner container ────────────────────────────────────────────────────
     var inner = Utils.DOM.create('div', null, 'fp-inner');

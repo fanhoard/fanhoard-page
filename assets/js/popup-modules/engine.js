@@ -599,6 +599,19 @@
     }, opts));
   }
 
+  toast.success = function(content, opts) {
+    return toast(content, Object.assign({ variant: 'success' }, opts));
+  };
+  toast.error = function(content, opts) {
+    return toast(content, Object.assign({ variant: 'error' }, opts));
+  };
+  toast.warning = function(content, opts) {
+    return toast(content, Object.assign({ variant: 'warning' }, opts));
+  };
+  toast.info = function(content, opts) {
+    return toast(content, Object.assign({ variant: 'info' }, opts));
+  };
+
   /**
    * Open a fullscreen popup — covers the entire viewport like a page.
    * Similar to the search suggestions overlay. Ideal for rich content

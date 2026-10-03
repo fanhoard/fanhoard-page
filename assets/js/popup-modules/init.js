@@ -11,6 +11,12 @@
  
  // ── Public API ────────────────────────────────────────────────────────────
  
+ const toastFn = function(content, opts) { return Engine.toast(content, opts); };
+ toastFn.success = function(content, opts) { return Engine.toast.success(content, opts); };
+ toastFn.error = function(content, opts) { return Engine.toast.error(content, opts); };
+ toastFn.warning = function(content, opts) { return Engine.toast.warning(content, opts); };
+ toastFn.info = function(content, opts) { return Engine.toast.info(content, opts); };
+
  window.PopupSystem = Object.freeze({
   _initialized: true,
   version: '1.1.0',
@@ -66,11 +72,12 @@
   
   /**
    * Show a toast notification.
+   * Supports toast.success(), toast.error(), toast.warning(), toast.info()
    * @param {string|HTMLElement} content
    * @param {Object} [opts]
    * @returns {Promise<PopupHandle>}
    */
-  toast: function(content, opts) { return Engine.toast(content, opts); },
+  toast: toastFn,
   
   /**
    * Open a fullscreen popup — covers the entire viewport like a page.

@@ -30,7 +30,7 @@
   'use strict';
 
   // ── Build ID (replaced at build time by scripts/update-version.js) ──────────
-  var FV_BUILD_ID = '3.2.6-202610031615';
+  var FV_BUILD_ID = '3.2.7-202610031633';
 
   /** คืน query string '?v=<buildId>' ถ้าไม่มี buildId คืน '' */
   function _v() { return FV_BUILD_ID ? '?v=' + FV_BUILD_ID : ''; }
