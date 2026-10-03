@@ -2126,3 +2126,11 @@ Test cases ครอบคลุม:
 5. **Canonical HTML Escaping**: รวมการ escape HTML ใน `engine.js` ให้ผ่าน `StringService.escapeHtml` ใน `utils.js`
 6. **Guarded Lifecycle Listeners**: เพิ่ม guard ใน `search.js` สำหรับ cleanup/bind `beforeunload` listener เพื่อป้องกัน listener leak เมื่อ re-init
 7. **Structured Log Safety**: เปลี่ยน empty catch blocks ทั้งหมดเป็น `console.warn('[SearchModule:<name>]', e)` โดยคงค่า fallback return contract เดิม
+
+
+### 19.18 Polish & Stability Foundation (Search Subsystem)
+
+ในรอบ Polish & Stability Foundation ระบบ Search ได้รับการปรับปรุงเพื่อเพิ่มเสถียรภาพและรองรับ Accessibility:
+
+1. **HTTP Response Validation in Data Loader (`data-loader.js`)**: เพิ่มการตรวจสอบ `r.ok` ก่อนเรียก `r.json()` ใน `loadDataWithRetry` ป้องกัน `SyntaxError: Unexpected token < in JSON` เมื่อเซิร์ฟเวอร์ตอบกลับเป็นหน้า 404/500 HTML
+2. **Reduced Motion Overrides (`search.css`)**: เพิ่มบล็อก `@media (prefers-reduced-motion: reduce)` ปิดอนิเมชันและทรานซิชันทั้งหมดสำหรับ Search Modal, Backdrop, และ Result Item Animations เพื่อรองรับมาตรฐาน WCAG AA สำหรับผู้ใช้ที่เปิดโหมดลดการเคลื่อนไหว

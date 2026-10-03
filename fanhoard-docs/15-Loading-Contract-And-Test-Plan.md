@@ -123,6 +123,25 @@ Every FVL mode supports flexible options for text suppression, chromeless framin
   - `RenderingService.renderResults()` (when `!window.URE`) must set `aria-busy="true"` and mount a bare FVL spinner inside `#searchResults` until `window.URE` loads.
   - Upon rendering search results, `aria-busy` must be updated to `"false"` and active spinners unmounted.
 
+### 2.9 Polish Round: Scroll-Lock, Centering, & Accessibility Contracts
+
+- **Scroll Lock Contract (`ScrollLockManager`)**:
+  - Automatically locks scrolling when `fullscreen` overlay is active, `lockScroll: true` is configured, or scoped overlay is mounted on a viewport-covering element (`body`, `documentElement`, `#app`, `#main`, `#root`, `.fvl-viewport-covering`).
+  - Utilizes a module-level reference counter (`lockCount`) to support nested overlays and rapid show-hide cycles without losing scroll position or prematurely unlocking.
+  - Dynamically calculates scrollbar width (`window.innerWidth - document.documentElement.clientWidth`), sets `--fvl-scrollbar-width` CSS variable on `documentElement`, and applies `paddingRight` compensation to `body` to prevent horizontal layout shift.
+  - Preserves exact original `body` inline styles (`position`, `top`, `width`, `overflow`, `paddingRight`, `hasStyleAttr`).
+  - Unconditionally restores exact original inline styles and original scroll Y position (`window.scrollTo(0, savedScrollY)`) when `lockCount` returns to `0`.
+  - Registers a non-passive `touchmove` listener preventing default touch dragging on non-`.fvl-scrollable` targets on mobile/iOS devices.
+- **Mounted Spinner Centering & Alignment Contract**:
+  - Mounted spinners (`FVLSpinner.mount`, `FVLSpinner.create`, and FVL renderer) default to container centering (`opts.center = true`), rendering centered rather than pinned to the top-left.
+  - Supports alignment option (`align: 'left' | 'center' | 'right'`) and explicit opt-out via `{ center: false }`.
+- **Overlay ARIA, Focus Trap, & Motion Controls Contract**:
+  - Fullscreen overlays receive `role="dialog"` and `aria-modal="true"`; sibling DOM nodes receive `aria-hidden="true"` during display and are restored on hide.
+  - Scoped overlays receive `role="progressbar"` and `aria-busy="true"`.
+  - Focus management captures `activeElement` before display, sets `tabindex="-1"` on overlay container and focuses it, traps `Tab` / `Shift+Tab` cycling within active overlay, and restores focus to original element on hide.
+  - Keyboard dismissal listens for `Escape` keypress when `closable !== false`, triggering `onClose` / `onCancel` callbacks and hiding overlay.
+  - `@media (prefers-reduced-motion: reduce)` in `loading-system.css` disables stroke rotation animations (`animation: none !important`) and enforces fixed dash array.
+
 ---
 
 ## 3. Test Seams & Test Suites
@@ -155,6 +174,15 @@ Every FVL mode supports flexible options for text suppression, chromeless framin
   - Asserts 10-second safety fallback timer auto-clean if fetch stalls.
   - Asserts standalone `FVLSpinner` mounting on sentinel during infinite scroll and cleanup in `finally` block even if fetch throws error.
   - Asserts mounting of bare FVL spinner in `#searchResults` while waiting for `window.URE` in `renderResults()`.
+
+- **Seam 8: `tests/loading-contract.test.ts`**
+  - Asserts `ScrollLockManager` engages scroll lock on fullscreen & viewport-covering overlays and increments `lockCount`.
+  - Asserts scrollbar width calculation and `--fvl-scrollbar-width` CSS variable setting.
+  - Asserts exact restoration of original `body` inline styles and scroll position when `lockCount` returns to 0.
+  - Asserts default centering (`opts.center !== false`) applies `.fvl-spinner--center` class and alignment option overrides.
+  - Asserts ARIA attributes (`role="dialog"`, `aria-modal="true"`, `role="progressbar"`, `aria-busy="true"`).
+  - Asserts focus trapping within active overlay and focus restoration on overlay hide.
+  - Asserts `Escape` key handler triggers overlay dismissal when `closable !== false`.
 ### 3.2 End-to-End Browser Test Seams (Playwright)
 
 - **Seam 5: `e2e/discover-loading-contract.spec.ts`**
@@ -180,6 +208,7 @@ Every FVL mode supports flexible options for text suppression, chromeless framin
 ---
 
 | **Slice 7** | **Discover Page & Search FVL Spinner Integration**: Wire FVL bare spinner and standalone `FVLSpinner` across Discover transition points A-D with safety guards | `assets/js/nav-core-modules/content.js`<br>`assets/js/nav-core-modules/loading.js`<br>`assets/js/nav-core-modules/router.js`<br>`assets/js/search-system/search-modules/rendering.js`<br>`assets/js/search-system/search-modules/search-controller.js` | `vitest run tests/discover-loading-integration.test.ts` |
+| **Slice 8** | **FVL Polish Foundation & Scroll-Lock Engine**: Implement `ScrollLockManager` with scrollbar compensation, ref-counting, exact style restoration, centered spinner layout defaults, ARIA dialog/progressbar, focus trap/restore, Escape key listener, and reduced motion overrides | `assets/js/loading-system/fvl-modules/utils.js`<br>`assets/js/loading-system/fvl-modules/engine.js`<br>`assets/js/loading-system/fvl-modules/renderer.js`<br>`assets/js/loading-system/fvl-spinner.js`<br>`assets/css/loading-system.css` | `vitest run tests/loading-contract.test.ts` |
 
 ---
 

@@ -88,7 +88,7 @@ In v3.0.0, the search page layout was redesigned for optimal vertical viewing:
 
 ## 4. Accessibility & Motion Standards (WCAG AA)
 
-1. **Reduced Motion Compliance**: Respects `@media (prefers-reduced-motion: reduce)` by disabling non-essential CSS keyframe animations and transition delays.
+1. **Reduced Motion Compliance**: Respects `@media (prefers-reduced-motion: reduce)` across all system stylesheets (`loading-system.css`, `search.css`, `about.css`, `layout.css`) by disabling non-essential CSS keyframe animations, card hover transform effects, modal transitions, and forcing `scroll-behavior: auto !important` for smooth scrolling.
 2. **Keyboard Navigation**: Interactive elements (`<button>`, `<a href>`) must have visible `:focus-visible` focus rings (`outline: 2px solid var(--fv-brand-teal)`).
 3. **Contrast Compliance**: Text contrast meets WCAG AA standards (minimum 4.5:1 ratio against background surfaces).
 
