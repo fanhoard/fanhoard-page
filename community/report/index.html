@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <script src="assets/js/lang-proxy.js?v=3.2.11-202610031711"></script>
+  <script src="assets/js/lang-proxy.js?v=3.2.12-202610031719"></script>
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title data-translate="page-report">Report an Issue</title>
@@ -16,12 +16,12 @@
   <link rel="stylesheet" href="/assets/css/tokens.css">
 
   <!-- 2. CSS -->
-  <link rel="preload" href="/assets/css/setting.css?v=3.2.11-202610031711" as="style" onload="this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href="/assets/css/setting.css?v=3.2.11-202610031711" /></noscript>
-  <link rel="preload" href="/assets/css/bg.css?v=3.2.11-202610031711" as="style" onload="this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href="/assets/css/bg.css?v=3.2.11-202610031711" /></noscript>
-  <link rel="stylesheet" href="/assets/css/top-navigation-bar.css?v=3.2.11-202610031711" media="all" />
-  <link rel="stylesheet" href="/assets/css/report.css?v=3.2.11-202610031711" media="all" />
+  <link rel="preload" href="/assets/css/setting.css?v=3.2.12-202610031719" as="style" onload="this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="/assets/css/setting.css?v=3.2.12-202610031719" /></noscript>
+  <link rel="preload" href="/assets/css/bg.css?v=3.2.12-202610031719" as="style" onload="this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="/assets/css/bg.css?v=3.2.12-202610031719" /></noscript>
+  <link rel="stylesheet" href="/assets/css/top-navigation-bar.css?v=3.2.12-202610031719" media="all" />
+  <link rel="stylesheet" href="/assets/css/report.css?v=3.2.12-202610031719" media="all" />
 </head>
 
 <body>
@@ -127,14 +127,14 @@
 
   </div><!-- /#fv-app -->
 
-  <script src="/assets/js/back-button.js?v=3.2.11-202610031711"></script>
-  <script src="/assets/js/lang-core.js?v=3.2.11-202610031711"></script>
-  <script src="/assets/js/language.js?v=3.2.11-202610031711"></script>
-  <script defer src="/assets/js/footer-template.js?v=3.2.11-202610031711"></script>
-  <script defer src="/assets/js/popup.js?v=3.2.11-202610031711"></script>
-  <script defer src="/assets/js/version-core.js?v=3.2.11-202610031711"></script>
-  <script defer src="/assets/js/reload-top.js?v=3.2.11-202610031711"></script>
-  <script defer src="/assets/js/lang-links.js?v=3.2.11-202610031711"></script>
+  <script src="/assets/js/back-button.js?v=3.2.12-202610031719"></script>
+  <script src="/assets/js/lang-core.js?v=3.2.12-202610031719"></script>
+  <script src="/assets/js/language.js?v=3.2.12-202610031719"></script>
+  <script defer src="/assets/js/footer-template.js?v=3.2.12-202610031719"></script>
+  <script defer src="/assets/js/popup.js?v=3.2.12-202610031719"></script>
+  <script defer src="/assets/js/version-core.js?v=3.2.12-202610031719"></script>
+  <script defer src="/assets/js/reload-top.js?v=3.2.12-202610031719"></script>
+  <script defer src="/assets/js/lang-links.js?v=3.2.12-202610031719"></script>
 
   <script>
   (function() {
@@ -238,6 +238,8 @@
       var fieldEls = document.querySelectorAll('.report-field-error');
       fieldEls.forEach(function(el) {
         el.classList.remove('report-field-error');
+        el.setAttribute('aria-invalid', 'false');
+        el.removeAttribute('aria-describedby');
       });
     }
 
@@ -246,7 +248,11 @@
       var msg = lang === 'th' ? msgTh : msgEn;
       var field = document.getElementById(fieldId);
       var errEl = document.getElementById(errorId);
-      if (field) field.classList.add('report-field-error');
+      if (field) {
+        field.classList.add('report-field-error');
+        field.setAttribute('aria-invalid', 'true');
+        field.setAttribute('aria-describedby', errorId);
+      }
       if (errEl) {
         errEl.textContent = msg;
         errEl.classList.add('visible');
@@ -256,6 +262,7 @@
     function validateForm() {
       clearErrors();
       var valid = true;
+      var firstInvalidEl = null;
 
       var category = document.getElementById('report-category').value;
       if (!category) {
@@ -287,6 +294,10 @@
             '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E23\u0E30\u0E1A\u0E38 URL \u0E2B\u0E23\u0E37\u0E2D\u0E0A\u0E37\u0E48\u0E2D\u0E2B\u0E19\u0E49\u0E32');
           valid = false;
         }
+      }
+
+      if (firstInvalidEl) {
+        firstInvalidEl.focus();
       }
 
       return valid;
@@ -415,6 +426,29 @@
       populateSelect(categorySelect, CATEGORIES);
       populateSelect(pageSelect, PAGES);
       populateSelect(browserSelect, BROWSERS);
+
+      function refreshSelects() {
+        if (categorySelect) {
+          var curCat = categorySelect.value;
+          categorySelect.innerHTML = '<option value="" disabled data-translate="report-select-placeholder">Select a category…</option>';
+          populateSelect(categorySelect, CATEGORIES);
+          categorySelect.value = curCat;
+        }
+        if (pageSelect) {
+          var curPage = pageSelect.value;
+          pageSelect.innerHTML = '<option value="" disabled data-translate="report-select-placeholder">Select a page…</option>';
+          populateSelect(pageSelect, PAGES);
+          pageSelect.value = curPage;
+        }
+        if (browserSelect) {
+          var curBrowser = browserSelect.value;
+          browserSelect.innerHTML = '<option value="" disabled data-translate="report-select-placeholder">Select a browser…</option>';
+          populateSelect(browserSelect, BROWSERS);
+          browserSelect.value = curBrowser;
+        }
+      }
+      window.addEventListener('fv:langchange', refreshSelects);
+      window.addEventListener('languageChange', refreshSelects);
 
       /* Auto-select browser */
       var detectedBrowser = detectUserAgent();
