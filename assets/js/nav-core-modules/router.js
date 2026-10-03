@@ -30,6 +30,8 @@
 
   const RouterService = {
 
+    _navSequenceId: 0,
+
     state: {
       isNavigating:       false,
       currentMainRoute:   '',
@@ -512,10 +514,14 @@
 
       // Default browser behavior is 'auto'. Do not set history.scrollRestoration = 'manual' site-wide.
       window.addEventListener('popstate', async () => {
+        this._navSequenceId = (this._navSequenceId || 0) + 1;
+        const seq = this._navSequenceId;
         try {
           const search = window.location.search || '';
           const { main } = this.parseUrl(search);
           const isRenderRoute = main === CONFIG.ALL_BUTTON.URL || await this.validateUrl(search);
+
+          if (seq !== this._navSequenceId) return;
 
           if (!isRenderRoute) {
             // Normal page / non-render route: let browser handle scroll restoration natively
