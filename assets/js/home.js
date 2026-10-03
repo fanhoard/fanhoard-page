@@ -167,10 +167,11 @@ function injectStyles() {
 async function fetchIdOrder(url) {
   try {
     const r = await fetch(url);
-    if (!r.ok) return null;
-    const j = await r.json();
+    if (!r.ok) return [];
+    const j = await r.json().catch(() => null);
+    if (!j) return [];
     return (j.categories || j.category || []).map(c => c.id);
-  } catch { return null; }
+  } catch (_) { return []; }
 }
 
 async function reorderAssembled(assembled) {
