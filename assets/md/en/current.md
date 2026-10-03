@@ -1,26 +1,24 @@
 ---
-version: 3.2.19
-date: 2026-10-03T22:35:19.101Z
-title: Data Verse Redesigned — Cleaner Discover Cards and Scope Pages
-subtitle: The Data Verse pages now speak the new design language: discover tiles and feed cards get consistent 16px rounded surfaces with a soft hover lift, skeleton loading shimmers on the correct neutral surface, and the scope pages' card surfaces are confirmed consistent with the site-wide card standard.
+version: 3.2.20
+date: 2026-10-03T22:41:13.473Z
+title: A Brighter, Friendlier FanHoard Home
+subtitle: The home experience gets a calmer white-first canvas, rounded feature cards, clearer teal actions and theme-aware carousel controls, while keeping FanHoard's own display identity.
 notify: true
 ---
 
-**TL;DR** — Data Verse (the discover feed and scope pages) is the next system brought onto the new design foundation. Emoji tiles and feed cards now share one consistent rounded card language with a soft shadow lift on hover, skeleton loading states shimmer on a properly neutral surface in both themes, and the last old-era colors (Material teal, old fallback grays) are gone from the whole Data Verse layer.
+**TL;DR** — FanHoard's landing experience now feels more cohesive with the new design language: airy spacing, soft rounded feature cards, clearer calls to action and surfaces that follow light or dark mode.
 
 ### Improved
 
-- **Discover tiles & feed cards** — content tiles confirmed at 16px rounded corners with subtle borders in both themes; feed cards now lift with a soft shadow on hover instead of a bare border flip, with the shadow properly animated.
-- **Unified focus rings** — tiles, cards and the sub-nav pills use the new 3px teal focus ring standard across the whole feed.
-- **Skeleton shimmer** — loading placeholders now use the correct neutral surface and rounded 12px corners, looking right in both light and dark.
-- **Scope pages** — card surfaces verified against the site-wide card standard (24px rounded single-layer cards with subtle borders); typography colors moved onto the current text palette.
-- **Motion consistency** — content appear animations (groups and pages) now use the site-wide easing curve; reduced-motion behavior unchanged and fully respected.
-- **Error states** — the render-error surface uses the current danger palette in both themes.
+- **Feature cards** — formerly unboxed feature rows now use rounded 24px surfaces, subtle borders and a restrained hover shadow.
+- **Home carousel controls** — arrow controls and their circular icon surfaces now follow the active theme instead of staying bright white in dark mode.
+- **Interaction polish** — brand buttons, content tiles and focus indicators use the current FanHoard teal, standard motion timing and the 3px accessible focus ring.
+- **404 experience** — the custom not-found page now follows the white-first/dark theme tokens, includes visible keyboard focus and uses the updated FanHoard teal palette.
 
 ### Fixed
 
-- **Old palette leftovers** — the remaining Material-era teal (#009688) and flat-gray fallbacks in the bottom navigation, active pill surfaces and scrollbar thumbs replaced with current tokens across light and dark.
+- **Dark-mode contrast** — removed hard-coded white carousel controls that appeared as bright spots against dark surfaces; updated stale teal and muted-color fallbacks.
 
 ### Notes
 
-- The virtual list engine's positioning is untouched: card entry animations remain opacity-only on positioned wrappers (the stacking guard), and the discover e2e suite plus scroll-lock tests stay green. Responsive grid verified in a real browser at 375/768/1280px in both themes (4→6 column adaptation).
+- FanHoard's Foglihten display identity and existing responsive layout remain intact. Landing pages were checked at 375, 768 and 1280px in light and dark themes, including reduced-motion behavior.
