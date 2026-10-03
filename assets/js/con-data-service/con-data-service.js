@@ -32,7 +32,7 @@
 //
 // =========================================================
 
-import ConDataRegistry from './con-data-registry.js?v=3.2.20-202610032241';
+import ConDataRegistry from './con-data-registry.js?v=3.2.21-202610032246';
 
 // =========================================================
 // INTERNAL — Fetch Engine

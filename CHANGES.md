@@ -1,42 +1,37 @@
-# Data Verse Redesign v3.2.19 (r06)
+# Settings Redesign v3.2.21 (r08)
 
-## What changed in v3.2.19 (Data Verse on Design Language v3)
+## What changed in v3.2.21 (Settings on Design Language v3)
 
-### assets/css/nav-core-ext.css (discover feed)
-- Feed cards: radius token changed `--radius-xl`→`--radius-lg` (16px per spec, since v3 tokens raised xl to 24px); hover gets `--shadow-sm` lift (was flat border-flip); box-shadow added to the card transition so the lift animates smoothly
-- Focus rings (tiles, cards, sub-nav pills): 2px → v3 standard `3px solid rgba(13,148,136,0.35)` (3 controls)
-- Active pill/tile surfaces: old material-teal fallback rgba(0,150,136,0.08) → rgba(13,148,136,0.08) (2 spots)
-- Stale border fallbacks rgba(0,0,0,0.06) → rgba(15,23,42,0.08) (3 spots); tile radius fallback 12→16
-- Nested var() weirdness simplified (text-main, border-strong, color-brand-primary); scrollbar thumb fallbacks fixed
-- .card-image top corners follow the card radius (lg)
+### setting/index.html
+- New Appearance block at the top of the settings group: accessible `fieldset` (aria-label + sr-only legend) with 3 radio choice cards — System ◐ / Light ☀ / Dark ☾ — sr-only inputs, visual card labels (44px+ touch targets preserved)
+- theme-core.js now loads early (head) on the settings page for correct ThemeCore wiring
 
-### assets/js/ure/ure.css (engine visual layer — positioning untouched)
-- Skeleton shimmer gradient fallbacks: rgba(0,0,0,0.05)/0.12 → rgba(15,23,42,0.04)/0.10 (neutral v3 surface); skeleton radius fallback 8→12px
-- ure-appear / ure-appear-fade curves: cubic-bezier(0.16,1,0.3,1) → v3 standard cubic-bezier(0.2,0,0,1) (2 spots)
-- Render-error surface: old palette (#c0392b/#ffeaea/#ffd0d0/#fff5f5) → rgba(220,38,38) danger family (theme-agnostic tint)
-- IRON RULE intact: `.ure-visible` wrappers still animate opacity ONLY (ure-appear-fade); the transform reveal stays on .cm-group/.feed-page content INSIDE positioned wrappers (by design, CLS-safe)
+### assets/css/setting.css
+- `.fv-setting-group`: white/dark surface card, --radius-lg 16px, subtle border, shadow-sm
+- `.theme-choice-card`: 12px rounded choice cards; selected state = teal border + brand tint via color-mix 9% + brand-hover text; hover --surface-hover; transitions on --transition-fast; reduced-motion off
+- Focus rings v3: 3px rgba(13,148,136,0.35) on choice cards (via input:focus-visible), selects, language button, buttons, toggle slider
+- Selects/buttons hover: --surface-hover + subtle border; section labels on type scale (18px semibold); mobile 480px tightening
 
-### assets/css/modern-styles.css (scope + bottom nav)
-- Scope cards: fallbacks modernized (radius-lg 16, border-subtle v3, shadow-sm); note: pages use `.scope-card fv-card` — the global fv-card atom (24px radius-xl, zero resting shadow = S-series single-layer card standard) takes precedence, which IS the site-wide card language — verified and accepted
-- Scope code block + kv colors: fallbacks → v3 palette (slate text, #fafafc base)
-- Bottom nav: --nav-radius fallback 24px, item radius 8px; old material teal #009688 fallbacks → #0d9488 (stroke + ring border); active label → var(--color-brand-hover); teal-hover surface fallback → brand teal; border fallbacks → rgba(15,23,42,0.08)
+### assets/js/setting-system/setting-ui.js
+- `setupThemeControl()` gains a radio-based path: syncs checked state from ThemeCore.getTheme(), on change calls ThemeCore.setTheme(value, {transition:true}) + success toast, listens `fv:themechange` to stay in sync; legacy switch path kept as fallback when radios absent
+
+## Behavior notes
+- System choice resolves via ThemeCore to OS preference (stored `fv_theme: "system"`, effective theme applied to DOM)
+- Choice persists across reload (fv_theme); language button + selects restyled but untouched logically
+- Save feedback toast uses the r03 toast system
 
 ## Verification
 
-- `npx vitest run`: 234/234 green (37 files) | `npm run build`: clean
-- Discover e2e suite + scroll-lock: 9 passed (discover-boot-lifecycle, discover-actions, card-markup-check, scroll-lock)
-- Full e2e: 16/16
-- Real-browser verification (Playwright, discover × light+dark × 375/768/1280 + scope × light+dark):
-  - Discover: 180 tiles + 2 feed cards rendered; tiles/cards radius 16px, light rgb(255,255,255) / dark rgb(30,41,59), subtle borders; responsive grid 4 cols @375 → 6 cols @768/1280
-  - Scope: fv-card atom standard confirmed (24px, themed bg, subtle border, zero resting shadow) in both themes
-- Backup: `/app/.agents/archive/backup_r06_20261004.tar.gz` before edits.
+- Unit 234/234 (37 files) | build clean | full e2e 16/16 (incl. theme-toggle journey)
+- Real browser (dark OS context): groups 16px white/#1E293B surfaces, choice cards 12px; picked Light → data-theme=light + fv_theme=light + toast; reload → still light, radio=light, body #FAFAFC; picked System → fv_theme=system, effective dark (OS); focus-visible on choice = 3px solid rgba(13,148,136,0.35) teal
+- Version update popup (notify:true) renders on first load and dismisses cleanly
 
 ## Files changed
 
 | File | Change |
 |------|--------|
-| `assets/css/nav-core-ext.css` | feed cards/tiles: radius-lg + shadow-sm hover, v3 focus rings, old teal purge |
-| `assets/js/ure/ure.css` | skeleton neutral surface, v3 appear curves, danger palette error state |
-| `assets/css/modern-styles.css` | scope-card fallbacks, bottom-nav old-teal purge |
-| `assets/md/en/current.md`, `assets/md/th/current.md` | v3.2.19 release notes |
-| `assets/md/{en,th}/releases/*`, `assets/json/version.json`, HTML/loaders | release pipeline artifacts |
+| `setting/index.html` | Appearance fieldset UI, early theme-core load, v3.2.21 asset strings |
+| `assets/css/setting.css` | card groups, theme choice cards, v3 focus rings, hover states |
+| `assets/js/setting-system/setting-ui.js` | radio theme control wired to ThemeCore |
+| `assets/md/en/current.md`, `assets/md/th/current.md` | v3.2.21 release notes |
+| `assets/md/{en,th}/releases/v3.2.20.md, v3.2.21.md`, `assets/json/version.json`, HTML assets strings, `assets/md/{en,th}/releases/index.json` | release pipeline registry (incl. previously untracked v3.2.20 entries) |

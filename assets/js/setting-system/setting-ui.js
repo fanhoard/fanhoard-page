@@ -42,6 +42,31 @@
 
   // ── Theme Switch ──────────────────────────────────────────
   function setupThemeControl() {
+    var themeChoices = document.querySelectorAll('input[name="theme-choice"]');
+    if (themeChoices.length) {
+      var ThemeCore = global.ThemeCore;
+      function syncThemeChoice(theme) {
+        var selected = theme || (ThemeCore ? ThemeCore.getTheme() : 'dark');
+        themeChoices.forEach(function(choice) {
+          choice.checked = choice.value === selected;
+        });
+      }
+      syncThemeChoice();
+      themeChoices.forEach(function(choice) {
+        choice.addEventListener('change', function() {
+          if (!choice.checked) return;
+          if (ThemeCore && typeof ThemeCore.setTheme === 'function') {
+            ThemeCore.setTheme(choice.value, { transition: true, toast: false });
+          }
+          _showToast('Appearance preference saved', 'success');
+        });
+      });
+      window.addEventListener('fv:themechange', function(e) {
+        if (e && e.detail && e.detail.theme) syncThemeChoice(e.detail.theme);
+      });
+      return;
+    }
+
     var row = document.getElementById(CFG.THEME_TOGGLE_ID);
     var switchEl = document.getElementById(CFG.THEME_SWITCH_ID);
     var descEl = document.getElementById(CFG.THEME_DESC_ID);

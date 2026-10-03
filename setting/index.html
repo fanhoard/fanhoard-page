@@ -5,7 +5,8 @@
   <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="16a70d79-a7a7-4b66-89da-afb49e453c67" data-blockingmode="auto" type="text/javascript"></script>
 
   <meta charset="UTF-8" />
-  <script src="assets/js/lang-proxy.js?v=3.2.20-202610032241"></script>
+  <script src="assets/js/lang-proxy.js?v=3.2.21-202610032246"></script>
+  <script src="/assets/js/setting-system/theme-core.js?v=3.2.21-202610032246"></script>
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Settings — FanHoard</title>
@@ -21,10 +22,10 @@
   <link rel="stylesheet" href="/assets/css/tokens.css">
 
   <!-- 2. CSS -->
-  <link rel="preload" href="/assets/css/setting.css?v=3.2.20-202610032241" as="style" onload="this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href="/assets/css/setting.css?v=3.2.20-202610032241" /></noscript>
-  <link rel="preload" href="/assets/css/bg.css?v=3.2.20-202610032241" as="style" onload="this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href="/assets/css/bg.css?v=3.2.20-202610032241" /></noscript>
+  <link rel="preload" href="/assets/css/setting.css?v=3.2.21-202610032246" as="style" onload="this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="/assets/css/setting.css?v=3.2.21-202610032246" /></noscript>
+  <link rel="preload" href="/assets/css/bg.css?v=3.2.21-202610032246" as="style" onload="this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="/assets/css/bg.css?v=3.2.21-202610032246" /></noscript>
   
   <script data-cookieconsent="ignore">
     window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
@@ -55,6 +56,27 @@
           <p class="fv-section-label" data-translate="page-setting"></p>
 
           <div class="fv-setting-group">
+            <div class="fv-setting-row fv-theme-setting-row">
+              <div class="theme-setting-copy">
+                <span class="theme-setting-title">Appearance</span>
+                <span class="theme-setting-description">Choose how FanHoard looks</span>
+              </div>
+              <fieldset class="theme-choice-group" aria-label="Appearance theme">
+                <legend class="fv-sr-only">Appearance theme</legend>
+                <label class="theme-choice">
+                  <input class="fv-sr-only" type="radio" name="theme-choice" value="system" />
+                  <span class="theme-choice-card"><span class="theme-choice-icon" aria-hidden="true">◐</span><span>System</span></span>
+                </label>
+                <label class="theme-choice">
+                  <input class="fv-sr-only" type="radio" name="theme-choice" value="light" />
+                  <span class="theme-choice-card"><span class="theme-choice-icon" aria-hidden="true">☀</span><span>Light</span></span>
+                </label>
+                <label class="theme-choice">
+                  <input class="fv-sr-only" type="radio" name="theme-choice" value="dark" />
+                  <span class="theme-choice-card"><span class="theme-choice-icon" aria-hidden="true">☾</span><span>Dark</span></span>
+                </label>
+              </fieldset>
+            </div>
             <div class="fv-setting-row">
               <div id="language-selector-container">
                 <button id="language-button" class="tap" type="button" aria-label="Select Interface Language"></button>
@@ -177,13 +199,14 @@
 
   </div><!-- /#fv-app -->
 
-  <script src="/assets/js/lang-core.js?v=3.2.20-202610032241"></script>
-  <script src="/assets/js/language.js?v=3.2.20-202610032241"></script>
-  <script defer src="/assets/js/footer-template.js?v=3.2.20-202610032241"></script>
-  <script defer src="/assets/js/modern-navigation.js?v=3.2.20-202610032241"></script>
-  <script defer src="/assets/js/popup.js?v=3.2.20-202610032241"></script>
-  <script defer src="/assets/js/version-core.js?v=3.2.20-202610032241"></script>
-  <script defer src="/assets/js/reload-top.js?v=3.2.20-202610032241"></script>
-  <script defer src="/assets/js/lang-links.js?v=3.2.20-202610032241"></script>
+  <script src="/assets/js/lang-core.js?v=3.2.21-202610032246"></script>
+  <script src="/assets/js/language.js?v=3.2.21-202610032246"></script>
+  <script defer src="/assets/js/footer-template.js?v=3.2.21-202610032246"></script>
+  <script defer src="/assets/js/modern-navigation.js?v=3.2.21-202610032246"></script>
+  <script defer src="/assets/js/popup.js?v=3.2.21-202610032246"></script>
+  <script defer src="/assets/js/setting-system/setting-ui.js?v=3.2.21-202610032246"></script>
+  <script defer src="/assets/js/version-core.js?v=3.2.21-202610032246"></script>
+  <script defer src="/assets/js/reload-top.js?v=3.2.21-202610032246"></script>
+  <script defer src="/assets/js/lang-links.js?v=3.2.21-202610032246"></script>
 </body>
 </html>

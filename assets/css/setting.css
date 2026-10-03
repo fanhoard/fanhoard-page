@@ -432,3 +432,103 @@ section.con h1 {
     transition: none !important;
   }
 }
+
+/* FanHoard v3 settings surfaces and theme choice cards */
+.fv-setting-group {
+  padding: 8px 16px;
+  background: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-subtle, rgba(15,23,42,0.08));
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+}
+
+.fv-setting-row {
+  min-height: 60px;
+  border-bottom-color: var(--border-subtle, rgba(15,23,42,0.08));
+}
+
+.fv-section-label {
+  margin-bottom: 12px;
+  padding-left: 4px;
+  font-size: 18px;
+  font-weight: var(--font-semibold, 600);
+  color: var(--text-main, #0f172a);
+}
+
+.setting-item label, label {
+  color: var(--text-muted, #475569);
+}
+
+.setting-item select,
+#language-button,
+.buttons {
+  border-radius: var(--radius-md, 12px);
+  transition: background-color var(--transition-fast, 150ms ease), color var(--transition-fast, 150ms ease), border-color var(--transition-fast, 150ms ease);
+}
+
+.buttons:hover,
+.setting-item.select:hover,
+#language-button:hover,
+.buttons.auto-update-toggle:hover {
+  background-color: var(--surface-hover, #f1f5f9);
+  border-color: var(--border-subtle, rgba(15,23,42,0.08));
+}
+
+.fv-theme-setting-row {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 4px;
+}
+
+.theme-setting-copy { display: grid; gap: 4px; }
+.theme-setting-title { color: var(--text-main, #0f172a); font-size: 15px; font-weight: 600; }
+.theme-setting-description { color: var(--text-muted, #475569); font-size: 13px; }
+.theme-choice-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.theme-choice { position: relative; margin: 0; cursor: pointer; }
+.theme-choice-card {
+  display: flex;
+  min-height: 64px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1px solid var(--border-subtle, rgba(15,23,42,0.08));
+  border-radius: var(--radius-md, 12px);
+  background: var(--surface-card, #ffffff);
+  color: var(--text-muted, #475569);
+  font-size: 13px;
+  transition: background-color var(--transition-fast, 150ms ease), border-color var(--transition-fast, 150ms ease), color var(--transition-fast, 150ms ease);
+}
+.theme-choice-icon { font-size: 18px; line-height: 1; }
+.theme-choice input:checked + .theme-choice-card {
+  color: var(--color-brand-hover, #0f766e);
+  border-color: var(--color-brand-primary, #0d9488);
+  background: color-mix(in srgb, var(--color-brand-primary, #0d9488) 9%, var(--surface-card, #ffffff));
+}
+.theme-choice:hover .theme-choice-card { background-color: var(--surface-hover, #f1f5f9); }
+.theme-choice input:focus-visible + .theme-choice-card,
+.setting-item select:focus-visible,
+#language-button:focus-visible,
+.buttons:focus-visible,
+#auto-update-switch:focus-visible + .slider {
+  outline: 3px solid rgba(13,148,136,0.35);
+  outline-offset: 2px;
+}
+.slider::before { background: var(--surface-card, #ffffff); }
+@media (max-width: 480px) {
+  .fv-setting-group { padding-inline: 12px; }
+  .theme-choice-group { gap: 6px; }
+  .theme-choice-card { min-height: 60px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-choice-card { transition: none !important; }
+}
