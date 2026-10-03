@@ -431,7 +431,9 @@
           const bl = btn.getBoundingClientRect().left;
           const bw = btn.clientWidth;
           const t  = ctr.scrollLeft + (bl - cl) - (cw / 2) + (bw / 2);
-          if (Math.abs(ctr.scrollLeft - t) > 1) ctr.scrollTo({ left: Math.max(0, t), behavior: 'smooth' });
+          const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          const behavior = prefersReduced ? 'auto' : 'smooth';
+          if (Math.abs(ctr.scrollLeft - t) > 1) ctr.scrollTo({ left: Math.max(0, t), behavior });
         } catch (_) {}
       });
     },
@@ -447,8 +449,10 @@
           const bl = btn.getBoundingClientRect().left;
           const bw = btn.clientWidth;
           const t  = navList.scrollLeft + (bl - cl) - (cw / 2) + (bw / 2);
+          const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          const behavior = prefersReduced ? 'auto' : 'smooth';
           if (Math.abs(navList.scrollLeft - t) > 1) {
-            navList.scrollTo({ left: Math.max(0, t), behavior: 'smooth' });
+            navList.scrollTo({ left: Math.max(0, t), behavior });
           }
         } catch (_) {}
       });

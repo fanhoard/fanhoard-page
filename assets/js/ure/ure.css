@@ -1,16 +1,17 @@
 /*
  * Path:    assets/js/ure/ure.css
- * Purpose: Minimal styles required by the URE virtual scroll engine.
- *          No visual opinions — only structural styles needed for
- *          correct positioning, compositing, and CLS prevention.
- *          Pages add their own card/button CSS on top of this.
+ * Purpose: Minimal styles required by the URE virtual scroll engine & skeleton loading.
+ *          No visual opinions — structural styles needed for correct positioning,
+ *          compositing, CLS prevention, and silky shimmer/appear transitions.
  *
- * v1.5.0:
+ * v1.8.0:
  *   [data-ure-container] — overflow-anchor: none (required — browser scroll
  *     anchoring conflicts with URE's manual anchor protocol and causes
  *     double-correction jumps; all known virtual-scroll libraries disable it).
  *   scroll-behavior: auto — prevents CSS smooth-scroll interfering with
  *     virtual scroll's synchronous scrollBy/scrollTo corrections.
+ *   skeleton shimmer — 1.5s cubic-bezier curve with theme-aware gradient tokens.
+ *   appear transition — CLS-safe 220ms subtle translateY reveal for new content.
  */
 
 /* ── Container ─────────────────────────────────────────────────────────────── */
@@ -75,16 +76,34 @@
   contain: layout style;
 }
 
-/* ── Lazy image states ─────────────────────────────────────────────────────── */
+/* ── Shimmer loading animation ─────────────────────────────────────────────── */
 
-img.ure-img-loading {
-  /* Reserve space while image loads — prevents CLS */
-  background: var(--surface-hover, #f0f0f0);
+@keyframes ure-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* ── Element-level Skeleton Shimmer & Lazy Image Loading ───────────────────── */
+
+img.ure-img-loading,
+.ure-skeleton,
+[data-ure-skeleton] {
+  /* Reserve space while element/image loads — prevents CLS */
+  background: linear-gradient(
+    90deg,
+    var(--surface-hover, rgba(0, 0, 0, 0.05)) 25%,
+    var(--border-subtle, rgba(0, 0, 0, 0.12)) 50%,
+    var(--surface-hover, rgba(0, 0, 0, 0.05)) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--radius-md, 8px);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  img.ure-img-loading {
-    animation: ure-shimmer 1.4s linear infinite;
+  img.ure-img-loading,
+  .ure-skeleton,
+  [data-ure-skeleton] {
+    animation: ure-shimmer 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 }
 
@@ -97,22 +116,25 @@ img.ure-img-error {
   border: 1px solid var(--color-danger, #f5c6c6);
 }
 
-/* ── Shimmer loading animation ─────────────────────────────────────────────── */
+/* ── CLS-Safe Content Appear Transition ─────────────────────────────────── */
 
-@keyframes ure-shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position:  200% 0; }
+@keyframes ure-appear {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-img.ure-img-loading {
-  background: linear-gradient(
-    90deg,
-    var(--surface-hover, #f0f0f0) 25%,
-    var(--border-subtle, #e0e0e0) 50%,
-    var(--surface-hover, #f0f0f0) 75%
-  );
-  background-size: 200% 100%;
-  animation: ure-shimmer 1.4s linear infinite;
+@media (prefers-reduced-motion: no-preference) {
+  .ure-visible:not(.ure-settled),
+  .cm-group,
+  .feed-page {
+    animation: ure-appear 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
 }
 
 /* ── Render error state ─────────────────────────────────────────────────────── */
@@ -130,7 +152,11 @@ img.ure-img-loading {
 
 @media (prefers-reduced-motion: reduce) {
   .ure-visible,
-  .ure-img-loading {
+  .ure-img-loading,
+  .ure-skeleton,
+  [data-ure-skeleton],
+  .cm-group,
+  .feed-page {
     animation: none !important;
     transition: none !important;
     will-change: auto !important;
