@@ -19,7 +19,13 @@
    * @param {HTMLElement} rootEl - The popup root
    * @returns {Function} Cleanup function
    */
+  var _activeTraps = new Map();
+
   function installFocusTrap(instanceId, rootEl) {
+    if (instanceId && _activeTraps.has(instanceId)) {
+      try { _activeTraps.get(instanceId)(); } catch (_) {}
+      _activeTraps.delete(instanceId);
+    }
     var handler = function(e) {
       if (e.key !== 'Tab') return;
 
@@ -51,10 +57,15 @@
 
     document.addEventListener('keydown', handler, false);
 
-    // Return cleanup function
-    return function() {
+    var cleanup = function() {
       document.removeEventListener('keydown', handler, false);
+      if (instanceId) _activeTraps.delete(instanceId);
     };
+    if (instanceId) {
+      _activeTraps.set(instanceId, cleanup);
+    }
+
+    return cleanup;
   }
 
   // ── Auto-focus ─────────────────────────────────────────────────────────────
