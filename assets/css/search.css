@@ -806,3 +806,15 @@ body {
     cursor: default;
   }
 }
+
+/* ── Reduced Motion Support ── */
+@media (prefers-reduced-motion: reduce) {
+  .search-overlay,
+  .search-modal,
+  .search-pill,
+  .search-result-item,
+  .search-spinner {
+    animation: none !important;
+    transition: none !important;
+  }
+}
