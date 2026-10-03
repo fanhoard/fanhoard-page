@@ -127,11 +127,14 @@ Every FVL mode supports flexible options for text suppression, chromeless framin
 
 - **Scroll Lock Contract (`ScrollLockManager`)**:
   - Automatically locks scrolling when `fullscreen` overlay is active, `lockScroll: true` is configured, or scoped overlay is mounted on a viewport-covering element (`body`, `documentElement`, `#app`, `#main`, `#root`, `.fvl-viewport-covering`).
+  - Enforces dual-container locking on both `document.documentElement` (`html`) and `document.body` with `overflow: hidden` and `overscroll-behavior: none` (plus `position: fixed`, `top: -${scrollY}px`, `width: 100%` on body), resolving viewport scrolling leaks on modern HTML5 layouts.
+  - Intercepts non-passive `wheel`, `touchmove`, and navigation `keydown` events (Space, PageUp, PageDown, End, Home, Arrow keys) on `document`, preventing default scrolling gestures outside `.fvl-scrollable` containers and editable form fields (`INPUT`, `TEXTAREA`, `SELECT`, `isContentEditable`).
+  - Fullscreen overlays specify `touch-action: none` and `overscroll-behavior: none` via stylesheet classes and inline styles.
+  - Synchronizes scroll lock engagement when Nav-Core/LoadingService adopts early boot loader DOM elements, safely releasing lock state upon readiness handshake.
   - Utilizes a module-level reference counter (`lockCount`) to support nested overlays and rapid show-hide cycles without losing scroll position or prematurely unlocking.
   - Dynamically calculates scrollbar width (`window.innerWidth - document.documentElement.clientWidth`), sets `--fvl-scrollbar-width` CSS variable on `documentElement`, and applies `paddingRight` compensation to `body` to prevent horizontal layout shift.
-  - Preserves exact original `body` inline styles (`position`, `top`, `width`, `overflow`, `paddingRight`, `hasStyleAttr`).
-  - Unconditionally restores exact original inline styles and original scroll Y position (`window.scrollTo(0, savedScrollY)`) when `lockCount` returns to `0`.
-  - Registers a non-passive `touchmove` listener preventing default touch dragging on non-`.fvl-scrollable` targets on mobile/iOS devices.
+  - Preserves exact original inline styles for both `documentElement` (`overflow`, `overscrollBehavior`) and `body` (`position`, `top`, `width`, `overflow`, `paddingRight`, `overscrollBehavior`, `hasStyleAttr`).
+  - Unconditionally detaches event listeners, restores original inline styles on both elements, and restores original scroll Y position (`window.scrollTo(0, savedScrollY)`) when `lockCount` returns to `0`.
 - **Mounted Spinner Centering & Alignment Contract**:
   - Mounted spinners (`FVLSpinner.mount`, `FVLSpinner.create`, and FVL renderer) default to container centering (`opts.center = true`), rendering centered rather than pinned to the top-left.
   - Supports alignment option (`align: 'left' | 'center' | 'right'`) and explicit opt-out via `{ center: false }`.
@@ -176,9 +179,11 @@ Every FVL mode supports flexible options for text suppression, chromeless framin
   - Asserts mounting of bare FVL spinner in `#searchResults` while waiting for `window.URE` in `renderResults()`.
 
 - **Seam 8: `tests/loading-contract.test.ts`**
-  - Asserts `ScrollLockManager` engages scroll lock on fullscreen & viewport-covering overlays and increments `lockCount`.
+  - Asserts `ScrollLockManager` engages dual-container scroll lock on both `html` (`documentElement.style.overflow === hidden`) and `body` (`body.style.position === fixed`) across all `fullscreen` and viewport-covering show entry paths, incrementing `lockCount`.
+  - Asserts non-passive event listeners (`wheel`, `touchmove`, `keydown`) call `e.preventDefault()` on scroll gestures outside `.fvl-scrollable` containers and editable input fields.
+  - Asserts early boot loader adoption sync and release behavior.
   - Asserts scrollbar width calculation and `--fvl-scrollbar-width` CSS variable setting.
-  - Asserts exact restoration of original `body` inline styles and scroll position when `lockCount` returns to 0.
+  - Asserts exact restoration of original `documentElement` and `body` inline styles and scroll position when `lockCount` returns to 0.
   - Asserts default centering (`opts.center !== false`) applies `.fvl-spinner--center` class and alignment option overrides.
   - Asserts ARIA attributes (`role="dialog"`, `aria-modal="true"`, `role="progressbar"`, `aria-busy="true"`).
   - Asserts focus trapping within active overlay and focus restoration on overlay hide.

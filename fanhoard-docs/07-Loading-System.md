@@ -8,7 +8,7 @@
 >
 > **Namespace:** `window.FVL` (public API, frozen), `window.FVLSpinner` (standalone spinner), `window.FVLModules` (internal registry)
 >
-> **เวอร์ชัน:** v3.1.0
+> **เวอร์ชัน:** v3.2.1
 
 ---
 
@@ -249,11 +249,13 @@ FVL อ่าน theme อัตโนมัติจาก `document.documentEl
 - **i18n**: รองรับข้อความหลายภาษา (TH/EN) โดยอ่านจาก `localStorage.selectedLang` หรือ `opts.lang`
 - **Scroll-Lock Behavior (`ScrollLockManager`)**:
   - บริหารจัดการผ่าน `ScrollLockManager` ใน `fvl-modules/utils.js` ด้วยระบบ Reference Counter (`lockCount`)
-  - คำนวณความกว้าง scrollbar (`window.innerWidth - document.documentElement.clientWidth`) และตั้งค่า CSS variable `--fvl-scrollbar-width` บน `document.documentElement` พร้อมเพิ่ม `paddingRight` ชดเชยบน `document.body` ป้องกันปัญหาหน้าจอกระตุก/layout shift
-  - บันทึก inline style เดิมของ `body` (`position`, `top`, `width`, `overflow`, `paddingRight`, `hasStyleAttr`) ก่อนประยุกต์ใช้ `position: fixed`, `top: -${scrollY}px`, `width: 100%`, `overflow: hidden`
-  - คืนค่า inline style ต้นฉบับและคืนตำแหน่ง scroll Y เดิม (`window.scrollTo(0, savedScrollY)`) เมื่อ `lockCount` ลดลงเหลือ `0`
-  - ป้องกันการไถหน้าจอบน iOS ด้วย non-passive `touchmove` listener (`_preventTouchMove`) ซึ่งบล็อกการลากนิ้วบนพื้นที่ภายนอก `.fvl-scrollable`
-  - ล็อค scroll อัตโนมัติเมื่อแสดงผลโหมด `fullscreen`, กำหนด `lockScroll: true`, หรือแสดง scoped overlay บน viewport-covering elements (`body`, `documentElement`, `#app`, `#main`, `#root`, `.fvl-viewport-covering`)
+  - **Dual-Container Viewport Lock (`html` + `body`)**: ล็อคทั้ง `document.documentElement` (`html`) และ `document.body` ด้วย `overflow: hidden` และ `overscroll-behavior: none` เนื่องจากโครงสร้างเว็บยุคใหม่ใช้ `html` เป็นหลักในการไถหน้าจอ viewport
+  - **Scrollbar Compensation & Offset**: คำนวณความกว้าง scrollbar (`window.innerWidth - document.documentElement.clientWidth`), กำหนด CSS variable `--fvl-scrollbar-width` บน `html`, และเพิ่ม `paddingRight` ชดเชยบน `body` ป้องกันปัญหา layout shift
+  - **Comprehensive Event Prevention**: ผูก non-passive event listeners บน `document` เพื่อ intercept การไถหน้าจอจาก mouse wheel (`wheel`), คีย์บอร์ดนำทาง (`keydown` สำหรับ Space, PageUp, PageDown, End, Home, Arrow keys), และการลากนิ้วบนมือถือ (`touchmove`) โดยเว้นเฉพาะองค์ประกอบภายใน `.fvl-scrollable` และฟิลด์ป้อนข้อมูล (`INPUT`, `TEXTAREA`, `SELECT`, `isContentEditable`)
+  - **Overlay Styling Constraints**: กำหนด `touch-action: none` และ `overscroll-behavior: none` บน fullscreen overlay ทั้งจาก stylesheet (`.fvl-overlay--fullscreen`) และ inline style
+  - **Boot Loader Synchronization**: รองรับการ sync สภาวะ scroll lock เมื่อ Loading Service สดหรือสืบทอด early boot loader (เช่น ใน `loading.js`) และปลดล็อคอย่างปลอดภัยเมื่อ handshake เสร็จสมบูรณ์
+  - **Exact Dual-Element Restoration**: บันทึก inline style เดิมของทั้ง `documentElement` และ `body` (`position`, `top`, `width`, `overflow`, `paddingRight`, `overscrollBehavior`, `hasStyleAttr`) ก่อนประยุกต์ใช้ `position: fixed`, `top: -${scrollY}px`, `width: 100%`; เมื่อ `lockCount` ลดลงเหลือ `0` จะถอด event listeners ออกทั้งหมด, คืนค่า inline style ต้นฉบับ 100% ทั้งสองส่วน, และคืนตำแหน่ง scroll Y เดิม (`window.scrollTo(0, savedScrollY)`)
+  - **Automatic Activation**: ล็อค scroll อัตโนมัติเมื่อแสดงผลโหมด `fullscreen`, กำหนด `lockScroll: true`, หรือแสดง scoped overlay บน viewport-covering elements (`body`, `documentElement`, `#app`, `#main`, `#root`, `.fvl-viewport-covering`)
 - **Mounted Spinner Centering & Layout Alignment**:
   - กำหนดคลาสจัดตำแหน่ง `.fvl-spinner--center`, `.fvl-spinner--align-left`, `.fvl-spinner--align-right`, และ `.fvl-spinner-wrapper`
   - กำหนดให้ mounted spinner (`FVLSpinner.mount`, `FVLSpinner.create`, และ FVL renderer) จัดกึ่งกลางคอนเทนเนอร์เป็นค่าเริ่มต้น (`opts.center = true`) ไม่ค้างมุมซ้ายบน
@@ -377,6 +379,7 @@ handle.destroy();
 | **v3.1.0** | Flexible Spinner & Standalone Subsystem — เพิ่ม standalone `fvl-spinner.js` (zero-dependency, auto CSS injection, instance handle), เพิ่ม options `spinnerOnly`, `bare`, `chromeless`, `targetSlot` ครอบคลุมทั้ง 4 display modes และเพิ่ม unit test contracts |
 | **v3.1.1** | Discover Page Spinner Integration — เชื่อมต่อ flexible FVL bare spinner และ standalone `FVLSpinner` ครอบคลุม 4 content transition points บน Discover Page (tab switch, feed refresh, infinite scroll, และ search pending/URE rendering) พร้อม double-spinner protection, 10s safety fallback timer, `aria-busy` toggles, และ integration test suite (`tests/discover-loading-integration.test.ts`) |
 | **v3.2.0** | Polish & Stability Foundation — เพิ่ม `ScrollLockManager` จัดการล็อค scroll แบบ ref-counting พร้อมคำนวณชดเชย scrollbar width (`--fvl-scrollbar-width`) และคืนค่า inline style ต้นฉบับ 100%; ตั้งค่า mounted spinner จัดกึ่งกลางคอนเทนเนอร์เป็นค่าเริ่มต้น (`opts.center = true`); เพิ่ม focus trap & focus restore, ARIA dialog/progressbar roles, `Escape` key handler, และ `prefers-reduced-motion` overrides |
+| **v3.2.1** | Fullscreen Scroll-Lock Fix — สถาปัตยกรรม scroll lock สองชั้นบน `html` และ `body` (`overflow: hidden`, `overscroll-behavior: none`, `position: fixed`), การดักจับเหตุการณ์ `wheel`, `touchmove`, และ `keydown` แบบ non-passive บน `document`, กฎ CSS `touch-action: none` บน overlay, การ sync สภาวะเมื่อรับช่วง boot loader, และการคืนค่า inline style + scroll offset สององค์ประกอบแบบสมบูรณ์ |
 
 ---
 

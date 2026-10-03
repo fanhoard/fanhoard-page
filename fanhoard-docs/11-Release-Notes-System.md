@@ -9,7 +9,7 @@
 
 ## 1. System Overview
 
-The FanHoard Release Notes System operates under a **Closed-System Architecture**. Developers edit only two canonical frontmatter files (`assets/md/en/current.md` and `assets/md/th/current.md`). All historical releases, per-language manifests, asset query hashes, and version descriptors are automatically snapshot and generated during the release build.
+The FanHoard Release Notes System operates under a **Closed-System Architecture**. **EVERY user-facing release MUST update user-facing release notes.** Developers edit ONLY two canonical frontmatter files (`assets/md/en/current.md` and `assets/md/th/current.md`). All historical releases (`assets/md/{lang}/releases/v*.md`), per-language manifests (`assets/md/{lang}/releases/index.json`), date registries (`assets/json/release-dates.json`), asset query hashes, and version descriptors (`assets/json/version.json`) are auto-built in CI (`scripts/update-version.js`) and MUST NEVER be edited or staged manually.
 
 ### 1.1 Closed System Workflow Diagram
 
@@ -70,11 +70,13 @@ assets/
 
 ## 3. Developer File Rules & Allowlist
 
-### 3.1 Developer Allowlist (Editable)
+### 3.1 Mandatory Release Notes Rule & Developer Allowlist (Editable)
 
-Developers are restricted to editing only two files when preparing user-facing updates:
-- `assets/md/en/current.md`
-- `assets/md/th/current.md`
+> ⚠️ **INVIOLABLE RULE:** EVERY release shipping user-facing changes MUST update user-facing release notes. Developers update **ONLY** two canonical files:
+> - `assets/md/en/current.md`
+> - `assets/md/th/current.md`
+>
+> All generated releases, snapshots (`assets/md/{lang}/releases/*`), date registries (`assets/json/release-dates.json`), and version polling descriptors (`assets/json/version.json`) are auto-built in CI (`scripts/update-version.js`) and **NEVER edited manually**.
 
 #### Required Frontmatter Standard
 ```markdown
