@@ -1,6 +1,6 @@
 /**
  * version-core.js — FanHoard Verse
- * @version 5.2
+ * @version 5.3
  * @description ระบบแจ้งเตือนอัพเดทเวอร์ชันใหม่
  *
  * อ่าน `/assets/md/{lang}/current.md` เพื่อตรวจสอบเวอร์ชันล่าสุด,
@@ -41,9 +41,14 @@
   function updateLastActive(){ ssSet(CFG.SS_LAST_ACTIVE, String(Date.now())); }
 
   function getLang() {
-    try { 
-      if (window.FvLang && FvLang.lang) return FvLang.lang;
-      var l = ls('selectedLang') || 'en'; return SUPPORTED_LANGS.indexOf(l) >= 0 ? l : 'en'; 
+    try {
+      var l = null;
+      if (window.FvLang && FvLang.lang) {
+        l = FvLang.lang;
+      } else {
+        l = ls('selectedLang');
+      }
+      return (l && SUPPORTED_LANGS.indexOf(l) >= 0) ? l : 'en';
     } catch(e) { return 'en'; }
   }
 
@@ -59,7 +64,7 @@
         var fm = fmMatch[1];
         var vM = fm.match(/^version:\s*(.+)$/m); if (vM) result.version = String(vM[1]).trim();
         var dM = fm.match(/^date:\s*(.+)$/m); if (dM) { var p = Date.parse(String(dM[1]).trim()); if (!isNaN(p)) result.date = new Date(p).toISOString(); }
-        var nM = fm.match(/^notify:\s*(false|true)$/m); if (nM) result.notify = nM[1] !== 'false';
+        var nM = fm.match(/^notify:\s*["']?(false|true)["']?/im); if (nM) result.notify = nM[1].toLowerCase() !== 'false';
         var tB = fm.match(/^(title:)\s*\n((?:  \w+:\s*.+\n?)+)/m);
         if (tB) result.title = _parseI18n(tB[2]);
         else { var tL = fm.match(/^title:\s*(.+)$/m); if (tL) { var tv = String(tL[1]).trim(); result.title = lang ? _w(tv,lang) : {en:tv}; } }
@@ -95,28 +100,59 @@
   }
 
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function t(obj) { if(!obj) return ''; if(typeof obj==='string') return obj; var lang=getLang(); return esc(obj[lang]||obj['en']||''); }
+  function t(obj) {
+    if(!obj) return '';
+    if(typeof obj==='string') return esc(obj);
+    var lang=getLang();
+    var val = obj[lang] || obj['en'] || obj['th'] || (typeof obj === 'object' ? Object.values(obj)[0] : '') || '';
+    return esc(val);
+  }
 
   function buildContent(wn) {
     var isTh = getLang() === 'th', ver = esc(wn.version||'');
-    var dateStr = wn.date ? (isTh ? esc(wn.date.th) : esc(wn.date.en)) : '';
+    var dateStr = '';
+    if (wn.date) {
+      if (typeof wn.date === 'string') {
+        var ts = Date.parse(wn.date);
+        if (!isNaN(ts)) {
+          var d = new Date(ts);
+          var h = String(d.getUTCHours()).padStart(2, '0');
+          var min = String(d.getUTCMinutes()).padStart(2, '0');
+          if (isTh) {
+            var TH_M = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+            dateStr = d.getUTCDate() + ' ' + TH_M[d.getUTCMonth()] + ' ' + d.getUTCFullYear() + ' ' + h + ':' + min + ' UTC';
+          } else {
+            var EN_M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            dateStr = EN_M[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear() + ' at ' + h + ':' + min + ' UTC';
+          }
+        } else {
+          dateStr = esc(wn.date);
+        }
+      } else {
+        dateStr = t(wn.date);
+      }
+    }
     var title = t(wn.title);
     var sub = t(wn.subtitle) || (isTh ? 'มีการปรับปรุงและอัปเดตระบบ' : 'System improvements and updates.');
     var items = [];
     (wn.sections||[]).forEach(function(s) { (s.items||[]).slice(0,4).forEach(function(item) { var txt=t(item.title); if(txt) items.push(txt); }); });
     var L = { badge: isTh?'อัพเดทใหม่':'New update', ver: isTh?'เวอร์ชัน ':'Version ', more: isTh?'ดูรายละเอียด':"See what's new", dismiss: isTh?'ไม่แสดงอีกสำหรับการอัพเดทนี้':"Don't show again for this update" };
     var itemsHTML = '';
-    if (items.length) { itemsHTML='<ul class="fv-update-list">'; items.forEach(function(i){itemsHTML+='<li class="fv-update-item"><span class="fv-update-dot"></span>'+i+'</li>';}); itemsHTML+='</ul>'; }
-    var html = '<div class="fv-update-header"><div class="fv-update-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div><div class="fv-update-info"><div class="fv-update-badge">'+L.badge+'</div><div class="fv-update-version">'+L.ver+ver+(title?' \u2014 '+title:'')+'</div>'+(dateStr?'<div class="fv-update-date">'+dateStr+'</div>':'')+'</div></div>'
+    if (items.length) {
+      itemsHTML='<ul class="fv-update-list" aria-label="' + (isTh ? 'ไฮไลต์การอัปเดต' : 'Update highlights') + '">';
+      items.forEach(function(i){itemsHTML+='<li class="fv-update-item"><span class="fv-update-dot" aria-hidden="true"></span>'+i+'</li>';});
+      itemsHTML+='</ul>';
+    }
+    var html = '<div class="fv-update-header"><div class="fv-update-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div><div class="fv-update-info"><div class="fv-update-badge">'+L.badge+'</div><h2 id="fv-update-title" class="fv-update-version">'+L.ver+ver+(title?' \u2014 '+title:'')+'</h2>'+(dateStr?'<div class="fv-update-date">'+dateStr+'</div>':'')+'</div></div>'
       +(sub?'<p class="fv-update-sub">'+sub+'</p>':'')+itemsHTML
-      +'<a href="'+CFG.WHATS_NEW_PAGE+'" class="fv-update-cta">'+L.more+'</a><div class="fv-update-dismiss-wrap"><button class="fv-update-dismiss-btn" data-fp-action="dismiss">'+L.dismiss+'</button></div>';
+      +'<a href="'+CFG.WHATS_NEW_PAGE+'" class="fv-update-cta">'+L.more+'</a><div class="fv-update-dismiss-wrap"><button type="button" class="fv-update-dismiss-btn" data-fp-action="dismiss">'+L.dismiss+'</button></div>';
     return {html:html, version:wn.version};
   }
 
   var _si = false;
   function injectStyles() {
     if (_si) return; _si = true;
-    var css='.fv-update-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}.fv-update-icon{width:40px;height:40px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,#13b47f,#0d8f65);display:flex;align-items:center;justify-content:center}.fv-update-info{min-width:0}.fv-update-badge{font-size:.95em;font-weight:600;color:var(--fv-text-primary,#111)}.fv-update-version{font-size:.78em;color:#13b47f;font-weight:500;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fv-update-date{font-size:.72em;color:var(--fv-text-tertiary,#aaa);margin-top:2px}.fv-update-sub{font-size:.85em;color:var(--fv-text-secondary,#666);margin:0 0 14px;line-height:1.55}.fv-update-list{list-style:none;margin:0 0 16px;padding:0}.fv-update-item{display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:.85em;color:var(--fv-text-secondary,#555);line-height:1.5}.fv-update-dot{flex-shrink:0;margin-top:5px;width:6px;height:6px;border-radius:50%;background:#13b47f;display:inline-block}.fv-update-cta{display:block;width:100%;padding:11px 0;background:linear-gradient(135deg,#13b47f,#0d8f65);color:#fff!important;border-radius:11px;font-size:.95em;font-weight:600;text-align:center;text-decoration:none!important;box-shadow:0 2px 12px rgba(19,180,127,.35);margin-bottom:10px;transition:transform .15s ease,box-shadow .15s ease}.fv-update-cta:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(19,180,127,.45)}.fv-update-dismiss-wrap{text-align:center}.fv-update-dismiss-btn{border:none;background:none;cursor:pointer;font-size:.78em;color:var(--fv-text-tertiary,#aaa);font-family:inherit;padding:4px 8px;border-radius:5px;transition:color .15s}.fv-update-dismiss-btn:hover{color:var(--fv-text-secondary,#666)}';
+    var css='.fv-update-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}.fv-update-icon{width:40px;height:40px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,#13b47f,#0d8f65);display:flex;align-items:center;justify-content:center}.fv-update-info{min-width:0}.fv-update-badge{font-size:.95em;font-weight:600;color:var(--fv-text-primary,#111)}.fv-update-version{font-size:.88em;color:#13b47f;font-weight:600;margin:1px 0 0;padding:0;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fv-update-date{font-size:.72em;color:var(--fv-text-tertiary,#aaa);margin-top:2px}.fv-update-sub{font-size:.85em;color:var(--fv-text-secondary,#666);margin:0 0 14px;line-height:1.55}.fv-update-list{list-style:none;margin:0 0 16px;padding:0}.fv-update-item{display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:.85em;color:var(--fv-text-secondary,#555);line-height:1.5}.fv-update-dot{flex-shrink:0;margin-top:5px;width:6px;height:6px;border-radius:50%;background:#13b47f;display:inline-block}.fv-update-cta{display:block;width:100%;padding:11px 0;background:linear-gradient(135deg,#13b47f,#0d8f65);color:#fff!important;border-radius:11px;font-size:.95em;font-weight:600;text-align:center;text-decoration:none!important;box-shadow:0 2px 12px rgba(19,180,127,.35);margin-bottom:10px;transition:transform .15s ease,box-shadow .15s ease}.fv-update-cta:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(19,180,127,.45)}.fv-update-dismiss-wrap{text-align:center}.fv-update-dismiss-btn{border:none;background:none;cursor:pointer;font-size:.78em;color:var(--fv-text-tertiary,#aaa);font-family:inherit;padding:4px 8px;border-radius:5px;transition:color .15s}.fv-update-dismiss-btn:hover{color:var(--fv-text-secondary,#666)}';
     css+='.fp-theme-dark .fv-update-badge{color:var(--fv-text-primary,#f5f5f7)}.fp-theme-dark .fv-update-sub{color:var(--fv-text-secondary,#aeaeb2)}.fp-theme-dark .fv-update-item{color:var(--fv-text-secondary,#aeaeb2)}.fp-theme-dark .fv-update-date{color:var(--fv-text-tertiary,#636366)}.fp-theme-dark .fv-update-dismiss-btn{color:var(--fv-text-tertiary,#636366)}.fp-theme-dark .fv-update-dismiss-btn:hover{color:var(--fv-text-secondary,#aeaeb2)}';
     var s=document.createElement('style');s.id='fv-update-styles';s.textContent=css;document.head.appendChild(s);
   }
@@ -128,8 +164,26 @@
   function _doShow(wn,buildId) {
     lsSet(CFG.KEY_SHOWN_BUILD,buildId); markSession(buildId); injectStyles();
     var c=buildContent(wn);
-    PopupSystem.open({id:'fv-update-'+wn.version,type:'dialog',title:null,body:c.html,size:'sm',position:'center',group:CFG.POPUP_GROUP,blocking:true,closable:true,theme:'light',
-      onMount:function(el,h){var a=el.querySelector('.fv-update-cta');if(a)a.addEventListener('click',function(){h.close({action:'navigate'});});var d=el.querySelector('[data-fp-action="dismiss"]');if(d)d.addEventListener('click',function(){setDismissed(wn.version);h.close({action:'dismissed'});});},
+    var isTh = getLang() === 'th';
+    PopupSystem.open({
+      id:'fv-update-'+wn.version,
+      type:'dialog',
+      title:null,
+      body:c.html,
+      size:'sm',
+      position:'center',
+      group:CFG.POPUP_GROUP,
+      blocking:true,
+      closable:true,
+      theme:'light',
+      ariaLabel: isTh ? 'แจ้งเตือนอัพเดทเวอร์ชัน ' + wn.version : 'Version ' + wn.version + ' Update Notification',
+      ariaDescribedBy: 'fv-update-title',
+      onMount:function(el,h){
+        var a=el.querySelector('.fv-update-cta');
+        if(a)a.addEventListener('click',function(){h.close({action:'navigate'});});
+        var d=el.querySelector('[data-fp-action="dismiss"]');
+        if(d)d.addEventListener('click',function(){setDismissed(wn.version);h.close({action:'dismissed'});});
+      },
       onClose:function(){}
     });
   }
@@ -155,8 +209,9 @@
 
   function initWithRelease(wn) {
     if(!wn||!wn.version)return;
-    var bid=wn.version,sb=ls(CFG.KEY_SHOWN_BUILD);
+    var bid=wn.version;
     if(wn.notify===false)return; if(isDismissed(bid))return;
+    var sb=ls(CFG.KEY_SHOWN_BUILD);
     if(sb!==bid||isSessionFresh(bid)) showPopup(wn,bid);
   }
 
@@ -166,7 +221,20 @@
     var perLangUrl = CFG.CURRENT_MD_PERLANG.replace('{lang}', lang);
 
     fetchText(perLangUrl).then(function(mdText) {
-      if(mdText && mdText.trim()) { var p=parseMD(mdText,lang); if(p.version){initWithRelease(p);} }
+      if (mdText && mdText.trim()) {
+        var p = parseMD(mdText, lang);
+        if (p.version) { initWithRelease(p); return; }
+      }
+      // Fallback to 'en' if non-english fetch failed or returned empty
+      if (lang !== 'en') {
+        var enUrl = CFG.CURRENT_MD_PERLANG.replace('{lang}', 'en');
+        fetchText(enUrl).then(function(enText) {
+          if (enText && enText.trim()) {
+            var pEn = parseMD(enText, 'en');
+            if (pEn.version) { initWithRelease(pEn); }
+          }
+        });
+      }
     });
   }
 

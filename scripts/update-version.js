@@ -413,7 +413,8 @@ var DYNAMIC_LOADERS = [
   'assets/js/nav-core.js',
   'assets/js/ure/ure.js',
   'assets/js/popup.js',
-  'assets/js/search-ui.js',
+  'assets/js/search-system/search.js',
+  'assets/js/loading-system/fvl.js',
   'assets/js/language.js',
   'assets/js/nav-core-modules/loading.js',
 ];
