@@ -50,11 +50,17 @@
       if (svc) {
         return svc.getAssembled().catch(function (err) {
           console.warn('[Search] ConDataService failed, using fallback:', err);
-          return fetch(dbPath).then(r => r.json()).catch(() => ({}));
+          return fetch(dbPath).then(r => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          }).catch(() => ({}));
         });
       }
       console.warn('[Search] ConDataService not ready — using fallback db');
-      return fetch(dbPath).then(r => r.json()).catch(() => ({}));
+      return fetch(dbPath).then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }).catch(() => ({}));
     });
   }
 
