@@ -115,12 +115,64 @@
     /**
      * Initialize. Idempotent.
      */
+    _bootScrollLocked: false,
+
+    _ensureBootLock: function () {
+      if (this._bootScrollLocked) return;
+      var doc = (typeof window !== 'undefined' && window.document) || document;
+      if (!doc) return;
+      var bootEl = doc.getElementById('fv-boot-loader') || doc.getElementById('nc-early-overlay');
+      var isBootVisible = bootEl && !bootEl.classList.contains('fv-boot-hidden') && (typeof window.getComputedStyle !== 'function' || window.getComputedStyle(bootEl).display !== 'none');
+      if (isBootVisible) {
+        this._bootScrollLocked = true;
+        var M = window.FVLModules;
+        var lockMgr = (M && M.ScrollLockManager) || (M && M.Utils && M.Utils.ScrollLockManager);
+        if (lockMgr) {
+          lockMgr.lock();
+        }
+        this._wrapRemoveBootLoader();
+      }
+    },
+
+    _releaseBootLock: function () {
+      var M = window.FVLModules;
+      var lockMgr = (M && M.ScrollLockManager) || (M && M.Utils && M.Utils.ScrollLockManager);
+      if (this._bootScrollLocked) {
+        this._bootScrollLocked = false;
+        if (lockMgr && lockMgr.getLockCount() > 0) {
+          lockMgr.unlock();
+        }
+      } else if (lockMgr && lockMgr.getLockCount() > 0 && (!M || !M.State || M.State.getAll().length === 0)) {
+        var doc = (typeof window !== 'undefined' && window.document) || document;
+        var bootEl = doc ? (doc.getElementById('fv-boot-loader') || doc.getElementById('nc-early-overlay')) : null;
+        if (!bootEl || bootEl.classList.contains('fv-boot-hidden') || !bootEl.parentNode) {
+          lockMgr.unlock();
+        }
+      }
+    },
+
+    _wrapRemoveBootLoader: function () {
+      try {
+        if (typeof window !== 'undefined' && window.__removeBootLoader && !window.__removeBootLoader._wrappedForLock) {
+          var orig = window.__removeBootLoader;
+          var self = this;
+          var wrapped = function () {
+            self._releaseBootLock();
+            return orig.apply(this, arguments);
+          };
+          wrapped._wrappedForLock = true;
+          window.__removeBootLoader = wrapped;
+        }
+      } catch (_) {}
+    },
+
     init: function () {
       _ensureFVL();
       var fvl = _fvl();
       if (fvl) {
         try { fvl.modules(); } catch (_) {}
       }
+      this._ensureBootLock();
     },
 
     // ── Phase API (kept for back-compat but no-op visually) ─────────────────
@@ -155,18 +207,13 @@
       if (isBootVisible && o.mode === 'fullscreen') {
         this._visibleSince = Date.now();
         this._el = bootEl;
-        this._bootScrollLocked = true;
-        var M = window.FVLModules;
-        var lockMgr = (M && M.ScrollLockManager) || (M && M.Utils && M.Utils.ScrollLockManager);
-        if (lockMgr) {
-          lockMgr.lock();
-        }
+        this._ensureBootLock();
         var self = this;
         return {
           id: DEFAULT_ID,
           mode: 'fullscreen',
           element: bootEl,
-          hide: function () { return self.readinessHandshake(); },
+          hide: function () { return self.hide(DEFAULT_ID); },
           update: function () {},
           setMessage: function () {},
           setProgress: function () {},
@@ -247,6 +294,7 @@
      */
     readinessHandshake: function (opts) {
       this._sessionCount = 0;
+      this._releaseBootLock();
       var fvl = _fvl();
       if (fvl && typeof fvl.readinessHandshake === 'function') {
         return fvl.readinessHandshake(opts);
@@ -389,6 +437,7 @@
      */
     hideInstant: function (id) {
       this._sessionCount = 0;
+      this._releaseBootLock();
       if (this._pendingHideTimer) {
         clearTimeout(this._pendingHideTimer);
         this._pendingHideTimer = null;
@@ -417,6 +466,7 @@
 
     // ── Emergency reset ───────────────────────────────────────────────────
     _forceReset: function () {
+      this._releaseBootLock();
       this._sessionCount = 0;
       this._pulseInProgress = false;
       this._visibleSince = 0;
@@ -453,6 +503,8 @@
     _autoInit();
 
   // ── Export into NavCoreModules namespace ──────────────────────────────────
+
+  try { LoadingService._ensureBootLock(); } catch (_) {}
 
   M.LoadingService = LoadingService;
 

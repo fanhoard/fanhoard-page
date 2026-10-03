@@ -574,6 +574,17 @@
       return Promise.resolve(false);
     }
 
+    function _cleanBootLock() {
+      if (window.NavCoreModules && window.NavCoreModules.LoadingService && typeof window.NavCoreModules.LoadingService._releaseBootLock === 'function') {
+        window.NavCoreModules.LoadingService._releaseBootLock();
+      } else {
+        var lockMgr = M.ScrollLockManager || (M.Utils && M.Utils.ScrollLockManager);
+        if (lockMgr && lockMgr.getLockCount() > 0 && M.State.getAll().length === 0) {
+          lockMgr.unlock();
+        }
+      }
+    }
+
     function readinessHandshake(opts) {
       opts = opts || {};
       var targetId = opts.activeId || M.CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
@@ -597,6 +608,8 @@
           }
         } catch (_) {}
       });
+
+      _cleanBootLock();
 
       var activeInst = M.State.getInstance(targetId);
       if (activeInst && activeInst.id === targetId) {
@@ -645,4 +658,22 @@
   })();
 
   M.Engine = Engine;
+
+  try {
+    var doc = typeof window !== 'undefined' ? window.document : null;
+    if (doc) {
+      var bootEl = doc.getElementById('fv-boot-loader') || doc.getElementById('nc-early-overlay');
+      var isBootVisible = bootEl && !bootEl.classList.contains('fv-boot-hidden') && (typeof window.getComputedStyle !== 'function' || window.getComputedStyle(bootEl).display !== 'none');
+      if (isBootVisible) {
+        if (window.NavCoreModules && window.NavCoreModules.LoadingService && typeof window.NavCoreModules.LoadingService._ensureBootLock === 'function') {
+          window.NavCoreModules.LoadingService._ensureBootLock();
+        } else {
+          var lockMgr = M.ScrollLockManager || (M.Utils && M.Utils.ScrollLockManager);
+          if (lockMgr && lockMgr.getLockCount() === 0) {
+            lockMgr.lock();
+          }
+        }
+      }
+    }
+  } catch (_) {}
 })(typeof window !== 'undefined' ? window : this);

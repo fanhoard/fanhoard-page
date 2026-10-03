@@ -61,6 +61,111 @@ describe('Central Loader Architecture & Loading Contract (FVL)', () => {
     });
   });
 
+
+  describe('Boot Loader Adoption & Scroll Lock Contract (Inverted Bug Fix)', () => {
+    it('locks page DURING boot loader adoption and UNLOCKS page after readinessHandshake', async () => {
+      // 1. Setup boot loader in DOM before show() adoption
+      const bootLoader = document.createElement('div');
+      bootLoader.id = 'fv-boot-loader';
+      document.body.appendChild(bootLoader);
+
+      const LoadingService = (window as any).NavCoreModules.LoadingService;
+      const ScrollLockManager = (window as any).FVLModules.Utils.ScrollLockManager;
+
+      // Adopt boot loader via LoadingService.show()
+      const handle = LoadingService.show({ mode: 'fullscreen' });
+      expect(handle).toBeDefined();
+
+      // Assert locked DURING loading phase
+      expect(ScrollLockManager.getLockCount()).toBeGreaterThan(0);
+      expect(document.body.style.position).toBe('fixed');
+      expect(document.documentElement.style.overflow).toBe('hidden');
+
+      // Call readinessHandshake to finish loading
+      await LoadingService.readinessHandshake();
+
+      // Assert UNLOCKED AFTER loading phase disappears
+      expect(ScrollLockManager.getLockCount()).toBe(0);
+      expect(document.body.style.position).toBe('');
+      expect(document.documentElement.style.overflow).toBe('');
+      expect(document.getElementById('fv-boot-loader')).toBeNull();
+    });
+
+    it('handles double-show adoption with a single handshake without leaking scroll lock', async () => {
+      const bootLoader = document.createElement('div');
+      bootLoader.id = 'fv-boot-loader';
+      document.body.appendChild(bootLoader);
+
+      const LoadingService = (window as any).NavCoreModules.LoadingService;
+      const ScrollLockManager = (window as any).FVLModules.Utils.ScrollLockManager;
+
+      // Two show calls adopting boot loader
+      const h1 = LoadingService.show({ mode: 'fullscreen' });
+      const h2 = LoadingService.show({ mode: 'fullscreen' });
+
+      expect(ScrollLockManager.getLockCount()).toBeGreaterThan(0);
+      expect(document.body.style.position).toBe('fixed');
+
+      // First hide decrements session count, boot remains active
+      await h1.hide();
+      expect(ScrollLockManager.getLockCount()).toBeGreaterThan(0);
+      expect(document.body.style.position).toBe('fixed');
+
+      // Second hide triggers readinessHandshake and unlocks
+      await h2.hide();
+      expect(ScrollLockManager.getLockCount()).toBe(0);
+      expect(document.body.style.position).toBe('');
+      expect(document.documentElement.style.overflow).toBe('');
+      expect(document.getElementById('fv-boot-loader')).toBeNull();
+    });
+
+    it('locks page as early as module init when boot loader is visible without any show() call, then unlocks on handshake', async () => {
+      // Clear DOM and add boot loader BEFORE module load
+      document.body.innerHTML = '';
+      const bootLoader = document.createElement('div');
+      bootLoader.id = 'fv-boot-loader';
+      document.body.appendChild(bootLoader);
+
+      const LoadingService = (window as any).NavCoreModules.LoadingService;
+      const ScrollLockManager = (window as any).FVLModules.Utils.ScrollLockManager;
+
+      // Trigger early lock (simulating module load lock check)
+      LoadingService._ensureBootLock();
+
+      // Assert locked DURING boot phase
+      expect(ScrollLockManager.getLockCount()).toBeGreaterThan(0);
+      expect(document.body.style.position).toBe('fixed');
+      expect(document.documentElement.style.overflow).toBe('hidden');
+
+      // Handshake without any show() call
+      await LoadingService.readinessHandshake();
+
+      // Assert page is unlocked after
+      expect(ScrollLockManager.getLockCount()).toBe(0);
+      expect(document.body.style.position).toBe('');
+      expect(document.documentElement.style.overflow).toBe('');
+      expect(document.getElementById('fv-boot-loader')).toBeNull();
+    });
+
+    it('locks DURING normal FVL.show() and unlocks AFTER FVL.hide() when no boot loader is present', async () => {
+      const FVL = (window as any).FVL;
+      const ScrollLockManager = (window as any).FVLModules.Utils.ScrollLockManager;
+
+      // Ensure no boot loader in DOM
+      expect(document.getElementById('fv-boot-loader')).toBeNull();
+
+      const handle = FVL.show({ instant: true });
+      expect(ScrollLockManager.getLockCount()).toBeGreaterThan(0);
+      expect(document.body.style.position).toBe('fixed');
+      expect(document.documentElement.style.overflow).toBe('hidden');
+
+      await handle.hideInstant();
+      expect(ScrollLockManager.getLockCount()).toBe(0);
+      expect(document.body.style.position).toBe('');
+      expect(document.documentElement.style.overflow).toBe('');
+    });
+  });
+
   describe('Readiness Handshake Contract', () => {
     it('cleans up competing boot overlays in a single phase handshake', async () => {
       // Set up competing boot elements in DOM
