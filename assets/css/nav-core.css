@@ -42,7 +42,7 @@ nav ul li button {
   color:var(--text-muted, #757575); cursor:pointer; white-space:nowrap;
   user-select:none; 
   touch-action: manipulation; 
-  transition: background 180ms cubic-bezier(0.16, 1, 0.3, 1), border-color 180ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms cubic-bezier(0.16, 1, 0.3, 1), transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 nav ul li button:hover { color: var(--text-main, #0f172a); }
 nav ul li button:active { background: var(--fv-surface-hover, #f0f0f0); transform: scale(0.97); }

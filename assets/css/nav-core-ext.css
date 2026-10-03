@@ -9,7 +9,7 @@
   font-size: var(--step--1, 0.875rem); font-weight: 500; cursor: pointer;
   user-select: none;
   touch-action: manipulation;
-  transition: background 180ms cubic-bezier(0.16, 1, 0.3, 1), border-color 180ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms cubic-bezier(0.16, 1, 0.3, 1), transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 .button-sub:hover {
   color: var(--text-main, var(--text-main, #0f172a));
@@ -51,7 +51,7 @@
   cursor: pointer; text-align: center; word-break: break-word;
   overflow: hidden; text-overflow: ellipsis;
   touch-action: manipulation;
-  transition: border-color 180ms cubic-bezier(0.16, 1, 0.3, 1), background 180ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms cubic-bezier(0.16, 1, 0.3, 1), transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 :where(.button-content:hover) {
   border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
@@ -79,7 +79,7 @@
   box-shadow: none;
   touch-action: manipulation;
   contain: layout style; 
-  transition: border-color 180ms cubic-bezier(0.16, 1, 0.3, 1), transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
 }
 :where(.card:hover) {
   border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
