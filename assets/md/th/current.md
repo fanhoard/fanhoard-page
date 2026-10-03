@@ -1,6 +1,6 @@
 ---
 version: 3.2.9
-date: 2026-10-03T16:50:37.121Z
+date: 2026-10-03T16:52:06.623Z
 title: ยกระดับระบบภาษาและการแปล (Accessible Language Picker, Central FvLang API & Link Sync)
 subtitle: ปรับปรุง Pop-up เลือกภาษาให้เข้าถึงง่ายผ่านคีย์บอร์ดและ ARIA Roles, กำจัดโค้ดซ้ำซ้อนใน Central FvLang API, ซิงก์ Prefix ภาษาบนลิงก์ภายในกับ fv:langchange Event และปรับปรุงการ Restore เนื้อหาภาษาอังกฤษให้สมบูรณ์
 notify: true

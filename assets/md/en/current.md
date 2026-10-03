@@ -1,6 +1,6 @@
 ---
 version: 3.2.9
-date: 2026-10-03T16:50:37.121Z
+date: 2026-10-03T16:52:06.623Z
 title: Localization System Polish: Accessible Language Picker, Central FvLang API & Link Sync
 subtitle: Polished language selection overlay UX with ARIA listbox roles and keyboard navigation, removed core API code duplication, synchronized internal link language prefixes with fv:langchange events, and hardened English content restoration.
 notify: true
