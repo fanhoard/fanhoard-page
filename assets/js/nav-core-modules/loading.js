@@ -401,6 +401,7 @@
       var o = (typeof opts === 'string') ? { message: opts } : (opts || {});
       o.mode = o.mode || 'scoped';
       o.target = o.target || '#content-loading';
+      if (o.bare === undefined && o.spinnerOnly === undefined) { o.bare = true; }
       return this.show(o);
     },
 

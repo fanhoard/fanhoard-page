@@ -213,9 +213,11 @@
       // Show content-scoped loading overlay for Discover main/sub action transitions
       try {
         if (M.LoadingService?.showInContent) {
-          M.LoadingService.showInContent();
+          M.LoadingService.showInContent({ bare: true, size: 'md' });
+        } else if (window.FVL?.scoped) {
+          window.FVL.scoped({ target: '#content-loading', bare: true, size: 'md' });
         } else {
-          M.LoadingService?.show?.({ mode: 'scoped', target: '#content-loading' });
+          M.LoadingService?.show?.({ mode: 'scoped', target: '#content-loading', bare: true, size: 'md' });
         }
       } catch (_) {}
 
