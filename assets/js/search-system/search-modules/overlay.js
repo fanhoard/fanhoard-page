@@ -106,6 +106,7 @@
         let ov = DOMService.get(CONFIG.DOM.overlayContainerId);
         if (ov) {
           ov.innerHTML = '';
+          ov.className = 'search-overlay search-overlay-open search-overlay-active';
         } else {
           ov = DOMService.create('div', CONFIG.DOM.overlayContainerId, 'search-overlay search-overlay-open', {
             position       : 'fixed',
@@ -115,9 +116,16 @@
             flexDirection  : 'column',
             alignItems     : 'stretch',
             overflow       : 'hidden',
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--surface-base, #ffffff)',
           });
           document.body.appendChild(ov);
+          if (typeof requestAnimationFrame === 'function') {
+            requestAnimationFrame(() => {
+              if (ov) ov.classList.add('search-overlay-active');
+            });
+          } else {
+            ov.classList.add('search-overlay-active');
+          }
         }
 
         // Move .search-pill into the overlay header bar
@@ -129,8 +137,8 @@
             display      : 'flex',
             alignItems   : 'center',
             padding      : '8px 10px',
-            background   : '#fff',
-            borderBottom : '1px solid rgba(0,0,0,.08)',
+            background   : 'var(--surface-base, #ffffff)',
+            borderBottom : '1px solid var(--border-subtle, rgba(0,0,0,.08))',
             flexShrink   : '0',
             width        : '100%',
             boxSizing    : 'border-box',
@@ -164,17 +172,6 @@
         DOMService.on(sg, 'mouseleave', () => { State.suggestionsLocked = false; });
 
         // ── Scroll-lock: no layout shift technique ─────────────────────────
-        // BAD: document.documentElement.overflow='hidden' removes the scrollbar
-        //      → page widens by ~15px → all fixed elements shift → results jump.
-        //
-        // CORRECT (Bootstrap/MUI/Headless UI pattern):
-        //   Save scrollY → body position:fixed + top:-scrollY + width:100%
-        //   Body stays visually in place, scrollbar stays visible → zero shift.
-        //
-        // BUG 2 fix (overlay clipped when keyboard open + scrolled):
-        //   When keyboard is open, visualViewport.offsetTop can be > 0.
-        //   Scroll window to top FIRST, then lock. overlay inset:0 then
-        //   correctly anchors to the actual viewport top edge.
         const _savedScrollY = window.scrollY || window.pageYOffset || 0;
         State.setSavedScrollY(_savedScrollY);
 
@@ -213,13 +210,9 @@
         URLService.pushOverlayEntry(State.preOverlayState);
 
         // Clear transitioning flag BEFORE rendering suggestions.
-        // renderQuerySuggestions() guards on overlayTransitioning — if still true
-        // when called, it returns early and suggestions never appear.
-        // Sequence: mark open → clear flag → render → focus.
         State.overlayTransitioning = false;
 
         // Show suggestions for the current input value immediately.
-        // Must happen AFTER overlayTransitioning=false (see above).
         const currentQ = (inp?.value || '').trim();
         if (currentQ) SuggestionService.renderQuerySuggestions(currentQ);
         else          ReadyModeService.renderReadyModeSuggestions();
@@ -246,8 +239,6 @@
      * Close the overlay. This is the ONLY function allowed to close it.
      *
      * @param {'escape'|'back-btn'|'popstate'|'manual'|string} src
-     *   'popstate' = browser already popped the entry — skip collapseOverlayEntry.
-     *   All other values = we must collapse the overlay history entry ourselves.
      */
     close(src = 'manual') {
       try {
@@ -282,19 +273,18 @@
         State._wrapperParent = null;
         State._wrapperNext   = null;
 
-        // ④ Remove overlay DOM
-        DOMService.remove(DOMService.get(CONFIG.DOM.overlayContainerId));
+        // ④ Remove overlay DOM with active animation class cleanup
+        const ovEl = DOMService.get(CONFIG.DOM.overlayContainerId);
+        if (ovEl) {
+          ovEl.classList.remove('search-overlay-active');
+        }
+        DOMService.remove(ovEl);
 
         // ⑤ Restore scroll-lock — reverse of the body-fixed technique
-        // Remove fixed lock first, then restore scroll position atomically.
         const savedScrollY = State.getSavedScrollY() || 0;
         const _didSearch = !!window.__overlayDidSearch;
         window.__overlayDidSearch = false;
 
-        // Hide #searchResults during body restoration to prevent VS flash.
-        // When body position:fixed is removed, scrollY briefly appears as 0.
-        // VS sees this and re-renders items from top before scrollTo fires.
-        // visibility:hidden hides that transient re-render without layout cost.
         const _sr = DOMService.get(CONFIG.DOM.searchResultsId || 'searchResults');
         if (_sr && savedScrollY > 0 && !_didSearch) _sr.style.visibility = 'hidden';
 
@@ -310,7 +300,6 @@
 
         if (savedScrollY > 0 && !_didSearch) {
           window.scrollTo({ top: savedScrollY, behavior: 'instant' });
-          // Restore visibility after scroll settles (next paint frame)
           requestAnimationFrame(() => {
             if (_sr) _sr.style.visibility = '';
           });
@@ -318,11 +307,6 @@
           _sr.style.visibility = '';
         }
 
-        // Restore scroll restoration to its original mode now that our
-        // manual scrollTo has fired. The browser's auto-restore for this
-        // popstate entry is already suppressed by the 'manual' override
-        // set in open(). Restoring here keeps normal back-navigation
-        // (between search entries, no overlay) working as before.
         if (_scrollRestorationOrig !== null && 'scrollRestoration' in history) {
           history.scrollRestoration = _scrollRestorationOrig;
           _scrollRestorationOrig = null;
@@ -346,7 +330,7 @@
           }
         }
         
-        // ⑧ Update icon slot (may show ← if query is still present, or 🔍)
+        // ⑧ Update icon slot
         IconSlotService.update();
         ClearBtnService.sync();
 

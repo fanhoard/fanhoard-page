@@ -1,3 +1,56 @@
+# FanHoard Search System Polish & Navigation Polish v3.2.6
+
+## What changed in v3.2.6 (Search System Polish)
+
+Elevated the search system (overlay, input bar, suggestion list, keyboard navigation, and virtual scroll rendering) to top-platform standards:
+
+1. **Overlay Transitions & Dark-Mode Compatibility**: Added smooth 180ms `cubic-bezier(0.16, 1, 0.3, 1)` opacity and transform transitions when opening and closing the search overlay (`.search-overlay-active`), and updated overlay styling to consume CSS variables (`var(--surface-base, #ffffff)`).
+2. **Suggestion List Keyboard Navigation & Focus Polish**: Refined suggestion row interactions with `:focus-visible` highlight indicators (`border-left` brand primary accent) and hover states. Pressing `ArrowUp` on the first suggestion item gracefully returns focus to the search input, while `ArrowDown` from the search input enters the suggestion list seamlessly.
+3. **Screen Reader Live Announcements & Accessibility**: Guaranteed live result feedback for screen readers by dynamically creating a polite `#searchLiveAnnouncer` element if missing, announcing filtered result counts and empty search states automatically.
+4. **Cleaner Event Delegation & Input Handling**: Eliminated inline `onkeydown` handler overwrites on search inputs during suggestion renders, consolidating input keyboard events inside the central `input-bar` service.
+5. **Automated Search Polish Test Suite**: Added `tests/search-polish.test.ts` covering search overlay behavior, suggestion list keyboard navigation, live announcer element creation, and event delegation.
+
+## Files in v3.2.6
+
+| File | Status | Purpose |
+|---|---|---|
+| `assets/js/search-system/search-modules/input-bar.js` | MODIFIED | Consolidated input keyboard events and input handling delegation. |
+| `assets/js/search-system/search-modules/overlay.js` | MODIFIED | Smooth overlay open/close transitions and surface-base dark mode compatibility. |
+| `assets/js/search-system/search-modules/rendering.js` | MODIFIED | Live accessibility announcer integration and rendering performance polish. |
+| `assets/js/search-system/search-modules/suggestions.js` | MODIFIED | Focus-visible indicators, ArrowUp/ArrowDown suggestion list navigation. |
+| `assets/js/search-system/search-system.css` | MODIFIED | Transition curves, focus rings, hover states, and live announcer CSS styling. |
+| `tests/search-polish.test.ts` | NEW | Unit test suite for search overlay, suggestions, keyboard navigation, and live announcer. |
+| `assets/md/en/current.md` | MODIFIED | Release notes for v3.2.6 in English. |
+| `assets/md/th/current.md` | MODIFIED | Release notes for v3.2.6 in Thai. |
+| `CHANGES.md` | MODIFIED | Release changelog covering v3.2.6 search polish and v3.2.5 navigation polish in English. |
+| `PATCH_NOTES.md` | MODIFIED | Release patch summary covering v3.2.6 search polish and v3.2.5 navigation polish in Thai. |
+
+---
+
+## Retrospective Documentation: v3.2.5 Navigation Polish
+
+*Note: v3.2.5 release notes were published to history (`assets/md/*/releases/v3.2.5.md`), but its `CHANGES.md` and `PATCH_NOTES.md` file entries were omitted during that release. They are formally documented below as part of v3.2.6.*
+
+### What changed in v3.2.5 (Navigation Polish)
+
+1. **Keyboard Arrow Navigation & ARIA Semantics**: Integrated W3C ARIA tablist/tab roles with roving tabindex (`tabindex="0/-1"`) and `aria-selected` state tracking across main and sub-navigation categories. Supported `ArrowRight`, `ArrowLeft`, `Home`, and `End` keys for keyboard navigation.
+2. **Silky Transitions & Brand Focus Rings**: Unified navigation transitions using smooth `180ms cubic-bezier(0.16, 1, 0.3, 1)` easing curves, added crisp `:focus-visible` outlines matching the brand primary palette, and refined active tab indicator sliding animations.
+3. **Mobile Touch Targets & Active Category Centering**: Guaranteed 44px minimum touch targets across all viewport sizes and added automated smooth horizontal scrolling to center active main and sub-navigation tabs in mobile viewports.
+4. **Language Switch Label Sync Fix**: Resolved a label desynchronization bug in `updateButtonsLanguage` by using canonical `data-url` key mapping instead of array position indices, ensuring correct multilingual tab labels.
+
+### Files in v3.2.5
+
+| File | Status | Purpose |
+|---|---|---|
+| `assets/js/nav-core-modules/buttons.js` | MODIFIED | Canonical `data-url` key mapping fix for `updateButtonsLanguage`. |
+| `assets/js/modern-navigation.js` | MODIFIED | ARIA tablist/tab, roving tabindex, keyboard arrow navigation, and active category scroll-centering. |
+| `assets/css/nav-core.css` | MODIFIED | Navigation transitions, focus rings, and active category styles. |
+| `assets/css/nav-core-ext.css` | MODIFIED | Extended navigation menu layout and animation refinements. |
+| `assets/css/top-navigation-bar.css` | MODIFIED | Header navigation bar styling and transition timing. |
+| `tests/navigation-polish.test.ts` | NEW | Unit tests for ARIA navigation, keyboard movement, and language label synchronization. |
+
+---
+
 # FanHoard Hardened Version Notes & Update Notification Pipeline v3.2.4
 
 ## What changed

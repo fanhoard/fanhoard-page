@@ -88,7 +88,7 @@
         btn.setAttribute('aria-label', LanguageService.t('clear'));
         Object.assign(btn.style, {
           flexShrink            : '0',
-          display               : 'none',   // shown via sync()
+          display               : 'none',
           alignItems            : 'center',
           justifyContent        : 'center',
           width                 : '44px',
@@ -189,7 +189,7 @@
         };
         inp.addEventListener('input', Handlers.inputInput);
 
-        // Enter → run search & cancel pending suggestion timers immediately
+        // Enter → run search, ArrowDown → focus suggestion list, Escape → close overlay
         Handlers.inputKeydown = (e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
@@ -200,7 +200,17 @@
             M.SearchController.doSearch();
             this.closeKB();
           } else if (e.key === 'ArrowDown') {
-            DOMService.get(CONFIG.DOM.suggestionContainerId)?.querySelector('.search-suggestion-item')?.focus?.();
+            const container = DOMService.get(CONFIG.DOM.suggestionContainerId);
+            const first = container?.querySelector('.search-suggestion-item');
+            if (first) {
+              e.preventDefault();
+              /** @type {HTMLElement} */ (first).focus();
+            }
+          } else if (e.key === 'Escape') {
+            if (State.overlayOpen) {
+              e.preventDefault();
+              M.OverlayService.close('escape');
+            }
           }
         };
         inp.addEventListener('keydown', Handlers.inputKeydown);

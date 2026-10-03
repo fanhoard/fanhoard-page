@@ -10,8 +10,6 @@
  *     First search → URE.mount(). Subsequent searches → handle.setData()
  *     so URE's diff engine only re-renders what actually changed.
  *   - disconnectRenderObserver() → destroys the URE instance + clears handle.
- *   - No other behavioral changes: copy handler, data-name, FilterService
- *     are identical to v5.1.
  *
  * URE dependency:
  *   ure.js must be loaded before search-ui.js on search/index.html.
@@ -30,13 +28,6 @@
   } = M;
 
   // ── URE instance (one per search session, reused across queries) ──────────
-  //
-  // WHY one instance:
-  //   URE.mount() sets up ResizeObserver, scroll listener, pool, etc.
-  //   Tearing that down and re-creating it on every keystroke is wasteful.
-  //   handle.setData(newResults) runs URE's diff engine instead —
-  //   only nodes whose content changed get a new innerHTML.
-  //
   /** @type {object|null} */
   let _searchHandle = null;
 
@@ -73,11 +64,6 @@
 
     /**
      * Build card HTML string — passed to URE as the template function.
-     *
-     * data-name carries the human-readable item name (URI-encoded) so
-     * _attachCopyHandler can pass it to showCopyNotification without
-     * re-querying the data layer.
-     *
      * @param {SearchResult} item
      * @param {string} lang
      * @returns {string}
@@ -124,10 +110,6 @@
 
     /**
      * Destroy the active URE instance.
-     * Called before a full reset (empty query, destroy lifecycle).
-     *
-     * v4.0 — Also tears down the DiscoveryService URE handle so that
-     *        a full reset cleans up both primary results and discovery.
      */
     disconnectRenderObserver() {
       if (_searchHandle) {
@@ -142,7 +124,6 @@
         _searchHandle = null;
       }
       DOMService.remove(DOMService.get(CONFIG.DOM.sentinelId));
-      // v4.0 — Tear down discovery section too so it doesn't leak.
       if (M.DiscoveryService?.clearDiscovery) {
         try {
           M.DiscoveryService.clearDiscovery();
@@ -171,27 +152,10 @@
 
     /**
      * Render results via URE.
-     *
-     * First call: URE.mount() — creates VS instance, attaches copy handler.
-     * Subsequent calls: handle.setData() — diff-aware, only changed nodes repaint.
-     * Empty results: destroy URE instance, show plain empty state HTML.
-     *
-     * v4.0 — After rendering primary results, also triggers DiscoveryService
-     *        to render the discovery section below. The discovery section
-     *        shows related items so the user can keep exploring after the
-     *        primary results. On empty results, discovery replaces the old
-     *        random-5-suggestions block with a larger scrollable list.
-     *
      * @param {SearchResult[]} results
      * @param {boolean}        [showSuggestionsIfNoResult=false]
      */
     renderResults(results, showSuggestionsIfNoResult = false) {
-      // BUG FIX (refresh with ?q= shows the count but no result cards):
-      // After a refresh, the first render can fire while ure.js is still
-      // loading. window.URE.mount() then threw into this function's silent
-      // catch, so the results label showed "Found N results" but no cards
-      // ever rendered until the user searched again. Wait for URE and
-      // re-render instead of dropping the render on the floor.
       if (!window.URE) {
         const container = DOMService.get(CONFIG.DOM.searchResultsId);
         if (container) {
@@ -206,7 +170,7 @@
           }
         }
         const pending = this._urePending || (this._urePending = { tries: 0 });
-        if (pending.tries < 40) { // ~10s budget (40 × 250ms)
+        if (pending.tries < 40) { // ~10s budget
           pending.tries++;
           pending.results = results;
           pending.showSuggestionsIfNoResult = showSuggestionsIfNoResult;
@@ -217,7 +181,6 @@
           }, 250);
           return;
         }
-        // URE never arrived — fall through so the original path logs the error.
       } else {
         this._urePending = null;
       }
@@ -240,12 +203,19 @@
         if (typeof window.announceToScreenReader === "function") {
           window.announceToScreenReader(_announceMsg, "polite");
         } else {
-          const _annEl = document.getElementById("searchLiveAnnouncer");
+          let _annEl = document.getElementById("searchLiveAnnouncer");
+          if (!_annEl && document.body) {
+            _annEl = document.createElement("div");
+            _annEl.id = "searchLiveAnnouncer";
+            _annEl.className = "fv-sr-only";
+            _annEl.setAttribute("aria-live", "polite");
+            _annEl.setAttribute("aria-atomic", "true");
+            document.body.appendChild(_annEl);
+          }
           if (_annEl) _annEl.textContent = _announceMsg;
         }
 
         if (!filtered.length) {
-          // Tear down URE — empty state needs plain HTML, not a VS container
           this.disconnectRenderObserver();
           DOMService.setHTML(container, '');
           this._renderEmpty(container, lang, showSuggestionsIfNoResult);
@@ -254,10 +224,6 @@
             window.scrollTo({ top: 0, behavior: 'instant' });
             if (window._revealStickyHeader) window._revealStickyHeader();
           }
-          // v4.0 — Empty-state discovery: surface related items so the
-          // user has something to explore even when search returns nothing.
-          // DiscoveryService.renderDiscovery handles the empty-state case
-          // by showing the first N items from the dataset.
           this._triggerDiscovery('');
           return;
         }
@@ -265,11 +231,9 @@
         _refreshLabels();
 
         if (_searchHandle) {
-          // Reuse existing URE — diff engine handles what changed
           _searchHandle.setLang(lang);
           _searchHandle.setData(filtered);
         } else {
-          // First render: mount URE fresh
           DOMService.setHTML(container, '');
           this._attachCopyHandler(container);
 
@@ -290,8 +254,6 @@
           if (window._revealStickyHeader) window._revealStickyHeader();
         }
 
-        // v4.0 — Trigger discovery rendering after primary results.
-        // Reads the query from the input so we don't need an extra param.
         this._triggerDiscovery(this._currentQuery());
 
         if (typeof M.UIService.updateUILanguage === 'function') M.UIService.updateUILanguage();
@@ -300,13 +262,6 @@
       }
     },
 
-    /**
-     * Read the current query from the search input.
-     * Used by renderResults() to pass the query to DiscoveryService
-     * without changing the public method signature.
-     * @returns {string}
-     * @private
-     */
     _currentQuery() {
       try {
         const inp = DOMService.get(CONFIG.DOM.searchInputId);
@@ -314,17 +269,6 @@
       } catch { return ''; }
     },
 
-    /**
-     * Trigger discovery rendering via DiscoveryService.
-     *
-     * This is a thin wrapper that defends against DiscoveryService not
-     * being loaded yet (e.g., during early boot). If DiscoveryService
-     * is unavailable, the call is silently skipped — primary results
-     * still render normally.
-     *
-     * @param {string} query
-     * @private
-     */
     _triggerDiscovery(query) {
       try {
         if (!M.DiscoveryService?.renderDiscovery) return;
@@ -334,26 +278,7 @@
       }
     },
 
-    /**
-     * Render the empty-state UI.
-     *
-     * v4.0 — Friendlier, smaller copy. The old empty state showed a
-     *        large "ไม่พบข้อมูลที่ตรงหรือใกล้เคียง" message followed by
-     *        5 random suggestions. The new empty state shows a smaller,
-     *        friendlier message ("ไม่พบผลลัพธ์สำหรับคำค้นนี้ — ลองดูสิ่งเหล่านี้แทน")
-     *        and lets DiscoveryService handle the suggestion list below.
-     *
-     *        The random 5 suggestions were removed because DiscoveryService
-     *        now renders a larger, scrollable discovery list (12 items in
-     *        empty state, 60 items in normal state) that gives the user
-     *        more to explore.
-     *
-     * @private
-     */
     _renderEmpty(container, lang, showSuggestions) {
-      // v4.0 — Smaller, friendlier empty-state message.
-      // The discovery section below (rendered by DiscoveryService) shows
-      // related items the user can explore, so we keep this header minimal.
       const notFound = LanguageService.t('not_found');
       const hint     = LanguageService.t('not_found_hint');
       let html = '<div class="no-result no-result--compact">';
@@ -366,15 +291,6 @@
       if (typeof M.UIService.updateUILanguage === 'function') M.UIService.updateUILanguage();
     },
 
-    /**
-     * Delegated copy handler on the results container.
-     * Keyboard: Enter / Space on focused card also copies.
-     *
-     * Attached once on first URE mount — the container element persists
-     * across setData() calls so this listener stays valid for the session.
-     *
-     * @private
-     */
     _attachCopyHandler(container) {
       if (!container || container._hasCopyHandler) return;
 
@@ -477,25 +393,13 @@
       } catch {}
     },
 
-    setupCategoryFilter(cats, selected = 'all') {
+    setupCategoryFilter(cats = [], selected = 'all') {
       try {
         const el = DOMService.get(CONFIG.DOM.categoryFilterId);
         if (!el) return;
+        if (!cats.length) { el.innerHTML = ''; el.style.display = 'none'; return; }
 
-        // v6.1 — Category row is always present in the DOM (sibling of
-        // #search-sticky, not inside it). When there are no categories,
-        // we just clear its contents; the CSS rule
-        // `.filter-pills-row--cat:empty { display: none }` collapses
-        // the row automatically so there's no leftover gap.
-        //
-        // The old filterCatToggle / filterCatWrap / cat-open / cat-spacer
-        // machinery has been removed entirely — categories are always
-        // visible when they exist (Google-like UX).
-        if (!cats || cats.length === 0) {
-          el.innerHTML = '';
-          return;
-        }
-
+        const lang   = LanguageService.getLang();
         const active = selected || 'all';
         const pills  = [];
 
@@ -505,32 +409,36 @@
           + `</button>`
         );
 
-        for (const { key, displayName } of cats) {
-          if (!key) continue;
-          const esc = StringService.escapeHtml(key);
-          const lbl = StringService.escapeHtml(displayName || key);
+        for (const c of cats) {
+          const lbl = c.displayName || c.key || '';
+          if (!lbl) continue;
+          const esc = StringService.escapeHtml(lbl);
           pills.push(
-            `<button class="filter-pill filter-pill--cat${active === key ? ' active' : ''}" data-filter-cat="${esc}" aria-pressed="${active === key}">`
-            + lbl
+            `<button class="filter-pill filter-pill--cat${active === c.key ? ' active' : ''}" data-filter-cat="${StringService.escapeHtml(c.key)}" aria-pressed="${active === c.key}">`
+            + esc
             + `</button>`
           );
         }
 
-        el.innerHTML = pills.join('');
+        el.innerHTML     = pills.join('');
+        el.style.display = 'flex';
+        State.selectedCategory = active;
 
         el._pillHandler && el.removeEventListener('click', el._pillHandler);
         el._pillHandler = (e) => {
-          const p = e.target.closest('.filter-pill--cat');
-          if (!p) return;
-          const val = p.getAttribute('data-filter-cat') || 'all';
+          const btn = e.target.closest('.filter-pill--cat');
+          if (!btn) return;
+          const val = btn.getAttribute('data-filter-cat') || 'all';
           if (val === State.selectedCategory) return;
           State.selectedCategory = val;
-          el.querySelectorAll('.filter-pill--cat').forEach(chip => {
-            const isActive = chip.getAttribute('data-filter-cat') === val;
-            chip.classList.toggle('active', isActive);
-            chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+          el.querySelectorAll('.filter-pill--cat').forEach(p => {
+            const isActive = p.getAttribute('data-filter-cat') === val;
+            p.classList.toggle('active', isActive);
+            p.setAttribute('aria-pressed', isActive ? 'true' : 'false');
           });
-          RenderingService.renderResults(State.currentResults);
+          if (window.SearchModules?.SearchController) {
+            window.SearchModules.SearchController.doSearch(null, false);
+          }
         };
         el.addEventListener('click', el._pillHandler);
       } catch {}
