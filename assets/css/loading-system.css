@@ -84,12 +84,12 @@
   }
   .fvl-spinner .fvl-track {
     stroke: var(--fvl-spinner-track-color, var(--fvl-spinner-track));
-    stroke-width: 3.5;
+    stroke-width: var(--fvl-spinner-stroke-width, 3.5);
     fill: none;
   }
   .fvl-spinner .fvl-arc {
     stroke: var(--fvl-spinner-color, var(--fvl-spinner-arc));
-    stroke-width: 3.5;
+    stroke-width: var(--fvl-spinner-stroke-width, 3.5);
     stroke-linecap: round;
     stroke-dasharray: 88 132;
     fill: none;
@@ -102,7 +102,7 @@
 
   .fvl-spinner-inline .fvl-track,
   .fvl-spinner-inline .fvl-arc {
-    stroke-width: 5;
+    stroke-width: var(--fvl-spinner-stroke-width, 5);
   }
 
   /* ── Opt-in Material Spinner Variants ── */
@@ -111,11 +111,58 @@
   .fvl-spinner--lg { width: 48px; height: 48px; }
   .fvl-spinner--xl { width: 64px; height: 64px; }
 
+  .fvl-spinner--speed-fast .fvl-arc { animation-duration: 0.4s !important; }
+  .fvl-spinner--speed-normal .fvl-arc { animation-duration: 0.7s !important; }
+  .fvl-spinner--speed-slow .fvl-arc { animation-duration: 1.2s !important; }
+
+  .fvl-spinner--stroke-thin .fvl-track,
+  .fvl-spinner--stroke-thin .fvl-arc { stroke-width: 2px !important; }
+
+  .fvl-spinner--stroke-medium .fvl-track,
+  .fvl-spinner--stroke-medium .fvl-arc { stroke-width: 3.5px !important; }
+
+  .fvl-spinner--stroke-thick .fvl-track,
+  .fvl-spinner--stroke-thick .fvl-arc { stroke-width: 5px !important; }
+
   .fvl-spinner--determinate .fvl-arc {
     animation: none !important;
     stroke-dasharray: 138.23px;
     stroke-dashoffset: 138.23px;
     transition: stroke-dashoffset 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Bare & Chromeless modifiers */
+  .fvl-fullscreen.fvl-chromeless,
+  .fvl-fullscreen.fvl-bare {
+    background: transparent !important;
+    pointer-events: none;
+  }
+  .fvl-fullscreen.fvl-chromeless .fvl-spinner,
+  .fvl-fullscreen.fvl-bare .fvl-spinner {
+    pointer-events: auto;
+  }
+
+  .fvl-scoped.fvl-chromeless,
+  .fvl-scoped.fvl-bare {
+    background: transparent !important;
+  }
+  .fvl-scoped.fvl-chromeless .fvl-scoped-inner,
+  .fvl-scoped.fvl-bare .fvl-scoped-inner {
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+
+  .fvl-inline.fvl-bare,
+  .fvl-inline.fvl-chromeless {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .fvl-topbar.fvl-bare,
+  .fvl-topbar.fvl-chromeless {
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
   .fvl-fullscreen {

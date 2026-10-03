@@ -22,8 +22,17 @@
       if (!spinnerEl || !M.Spinner) return;
       var opts = inst.options || {};
       var vOpts = opts.variant || opts.spinner;
-      if (!vOpts && (opts.determinate || opts.progress != null)) {
-        vOpts = { determinate: opts.determinate, progress: opts.progress };
+      if (!vOpts && (opts.determinate || opts.progress != null || opts.size || opts.color || opts.trackColor || opts.speed || opts.strokeWidth)) {
+        vOpts = {
+          size: opts.size,
+          color: opts.color,
+          trackColor: opts.trackColor,
+          speed: opts.speed,
+          strokeWidth: opts.strokeWidth,
+          determinate: opts.determinate,
+          progress: opts.progress,
+          class: opts.class || opts.className
+        };
       }
       if (vOpts) {
         M.Spinner.applyVariant(spinnerEl, vOpts);
@@ -40,7 +49,16 @@
 
     function buildFullscreen(inst) {
       var CONFIG = M.CONFIG;
-      var root = M.Utils.DOM.create('div', 'fvl fvl-fullscreen', {
+      var opts = inst.options || {};
+      var isBare = !!opts.bare;
+      var isSpinnerOnly = isBare || !!opts.spinnerOnly;
+      var isChromeless = isBare || !!opts.chromeless;
+
+      var rootClasses = 'fvl fvl-fullscreen';
+      if (isChromeless) rootClasses += ' fvl-chromeless';
+      if (isBare) rootClasses += ' fvl-bare';
+
+      var root = M.Utils.DOM.create('div', rootClasses, {
         'role': 'status',
         'aria-live': 'polite',
         'aria-atomic': 'true',
@@ -48,7 +66,7 @@
       root.setAttribute(CONFIG.DOM.DATA_MODE, 'fullscreen');
       root.setAttribute(CONFIG.DOM.DATA_ATTR, inst.id);
 
-      if (inst.options.coverAll) {
+      if (opts.coverAll) {
         root.classList.add('fvl-cover-all');
       }
 
@@ -56,25 +74,39 @@
       spinner.innerHTML = spinnerSVG();
       _applyVariantIfOpted(spinner, inst);
 
-      var text = M.Utils.DOM.create('div', 'fvl-text');
-      var msg  = M.Utils.DOM.create('div', 'fvl-msg');
-      var sub  = M.Utils.DOM.create('div', 'fvl-sub');
-      text.appendChild(msg);
-      text.appendChild(sub);
-
       root.appendChild(spinner);
-      root.appendChild(text);
-
       inst.spinnerEl = spinner;
-      inst.msgEl = msg;
-      inst.subEl = sub;
+
+      if (isSpinnerOnly) {
+        root.setAttribute('aria-label', opts.ariaLabel || opts.message || 'Loading');
+      } else {
+        var text = M.Utils.DOM.create('div', 'fvl-text');
+        var msg  = M.Utils.DOM.create('div', 'fvl-msg');
+        var sub  = M.Utils.DOM.create('div', 'fvl-sub');
+        text.appendChild(msg);
+        text.appendChild(sub);
+        root.appendChild(text);
+
+        inst.msgEl = msg;
+        inst.subEl = sub;
+      }
 
       return root;
     }
 
     function buildScoped(inst) {
       var CONFIG = M.CONFIG;
-      var root = M.Utils.DOM.create('div', 'fvl fvl-scoped', {
+      var opts = inst.options || {};
+      var isBare = !!opts.bare;
+      var isSpinnerOnly = isBare || !!opts.spinnerOnly;
+      var isChromeless = isBare || !!opts.chromeless;
+
+      var rootClasses = 'fvl fvl-scoped';
+      if (isChromeless) rootClasses += ' fvl-chromeless';
+      if (isBare) rootClasses += ' fvl-bare';
+      if (opts.overlay && !isChromeless) rootClasses += ' fvl-scoped-overlay';
+
+      var root = M.Utils.DOM.create('div', rootClasses, {
         'role': 'status',
         'aria-live': 'polite',
         'aria-hidden': 'true',
@@ -88,18 +120,19 @@
       _applyVariantIfOpted(spinner, inst);
 
       inner.appendChild(spinner);
-      if (inst.options.message) {
+
+      if (!isSpinnerOnly && opts.message) {
         var msg = M.Utils.DOM.create('div', 'fvl-msg');
-        msg.textContent = inst.options.message;
+        msg.textContent = opts.message;
         inner.appendChild(msg);
         inst.msgEl = msg;
       }
-      root.appendChild(inner);
 
+      root.appendChild(inner);
       inst.spinnerEl = spinner;
 
-      if (inst.options.overlay) {
-        root.classList.add('fvl-scoped-overlay');
+      if (isSpinnerOnly) {
+        root.setAttribute('aria-label', opts.ariaLabel || opts.message || 'Loading');
       }
 
       return root;
@@ -107,7 +140,16 @@
 
     function buildInline(inst) {
       var CONFIG = M.CONFIG;
-      var wrap = M.Utils.DOM.create('span', 'fvl fvl-inline', { 'aria-hidden': 'true' });
+      var opts = inst.options || {};
+      var isBare = !!opts.bare;
+      var isSpinnerOnly = isBare || !!opts.spinnerOnly;
+      var isChromeless = isBare || !!opts.chromeless;
+
+      var wrapClasses = 'fvl fvl-inline';
+      if (isChromeless) wrapClasses += ' fvl-chromeless';
+      if (isBare) wrapClasses += ' fvl-bare';
+
+      var wrap = M.Utils.DOM.create('span', wrapClasses, { 'aria-hidden': 'true' });
       wrap.setAttribute(CONFIG.DOM.DATA_MODE, 'inline');
       wrap.setAttribute(CONFIG.DOM.DATA_ATTR, inst.id);
 
@@ -117,9 +159,9 @@
 
       wrap.appendChild(spinner);
 
-      if (inst.options.message) {
+      if (!isSpinnerOnly && opts.message) {
         var msg = M.Utils.DOM.create('span', 'fvl-inline-msg');
-        msg.textContent = inst.options.message;
+        msg.textContent = opts.message;
         wrap.appendChild(msg);
         inst.msgEl = msg;
       }
@@ -130,14 +172,22 @@
 
     function buildTopbar(inst) {
       var CONFIG = M.CONFIG;
-      var root = M.Utils.DOM.create('div', 'fvl fvl-topbar', { 'role': 'status', 'aria-live': 'polite' });
+      var opts = inst.options || {};
+      var isBare = !!opts.bare;
+      var isChromeless = isBare || !!opts.chromeless;
+
+      var rootClasses = 'fvl fvl-topbar';
+      if (isChromeless) rootClasses += ' fvl-chromeless';
+      if (isBare) rootClasses += ' fvl-bare';
+
+      var root = M.Utils.DOM.create('div', rootClasses, { 'role': 'status', 'aria-live': 'polite' });
       root.setAttribute(CONFIG.DOM.DATA_MODE, 'topbar');
       root.setAttribute(CONFIG.DOM.DATA_ATTR, inst.id);
 
       var bar = M.Utils.DOM.create('div', 'fvl-topbar-bar');
-      if (inst.options.progress != null) {
+      if (opts.progress != null) {
         bar.classList.add('fvl-topbar-determinate');
-        bar.style.width = Math.max(0, Math.min(1, inst.options.progress)) * 100 + '%';
+        bar.style.width = Math.max(0, Math.min(1, opts.progress)) * 100 + '%';
       } else {
         bar.classList.add('fvl-topbar-indeterminate');
       }

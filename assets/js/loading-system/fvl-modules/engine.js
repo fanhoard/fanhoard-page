@@ -9,8 +9,14 @@
   var Engine = (function() {
 
     function _setTexts(inst) {
+      var opts = inst.options || {};
+      if (opts.spinnerOnly || opts.bare) {
+        if (inst.rootEl) {
+          inst.rootEl.setAttribute('aria-label', opts.ariaLabel || opts.message || 'Loading');
+        }
+        return;
+      }
       if (!inst.msgEl) return;
-      var opts = inst.options;
       var lang = M.Utils.detectLang(opts.lang);
 
       if (opts.message) {
@@ -78,6 +84,26 @@
       } catch (_) {}
     }
 
+    function _resolveTargetSlot(targetEl, slot) {
+      if (!slot) return targetEl;
+      if (typeof HTMLElement !== 'undefined' && slot instanceof HTMLElement) {
+        return slot;
+      }
+      if (slot && slot.nodeType === 1) {
+        return slot;
+      }
+      if (typeof slot === 'string' && targetEl && targetEl.querySelector) {
+        var found = targetEl.querySelector(slot);
+        if (found) return found;
+      }
+      var doc = (typeof window !== 'undefined' && window.document) || document;
+      if (typeof slot === 'string' && doc && doc.querySelector) {
+        var globalFound = doc.querySelector(slot);
+        if (globalFound) return globalFound;
+      }
+      return targetEl;
+    }
+
     function _attachScoped(inst) {
       var target = inst.targetEl;
       if (!target) {
@@ -85,8 +111,6 @@
         return false;
       }
       try {
-        // ownerDocument.defaultView: works in browser AND sandboxed/test
-        // contexts where the ambient `window` is not the target's window.
         var view = target.ownerDocument && target.ownerDocument.defaultView;
         if (view && typeof view.getComputedStyle === 'function') {
           inst.origTargetPos = view.getComputedStyle(target).position;
@@ -95,11 +119,7 @@
           target.style.position = 'relative';
         }
       } catch (_) {}
-      // Empty-target fallback: keep the spinner visible when the target
-      // collapses (content cleared while loading, e.g. route swap).
-      // If another scoped instance already holds this target, inherit its
-      // ORIGINAL backup so the last instance to hide restores the true
-      // pre-fallback value instead of our own fallback height.
+
       try {
         var fb = M.CONFIG.SCOPED_EMPTY_MIN_HEIGHT;
         if (fb && target.offsetHeight < fb.THRESHOLD_PX) {
@@ -118,7 +138,8 @@
         }
       } catch (_) {}
       target.setAttribute('aria-busy', 'true');
-      target.appendChild(inst.rootEl);
+      var mountSlot = _resolveTargetSlot(target, inst.options.targetSlot);
+      mountSlot.appendChild(inst.rootEl);
       return true;
     }
 
@@ -129,12 +150,13 @@
         return false;
       }
       target.setAttribute('aria-busy', 'true');
+      var mountSlot = _resolveTargetSlot(target, inst.options.targetSlot);
       if (inst.options.replaceContent) {
-        inst.origTargetHTML = target.innerHTML;
-        target.textContent = '';
-        target.appendChild(inst.rootEl);
+        inst.origTargetHTML = mountSlot.innerHTML;
+        mountSlot.textContent = '';
+        mountSlot.appendChild(inst.rootEl);
       } else {
-        target.insertBefore(inst.rootEl, target.firstChild);
+        mountSlot.insertBefore(inst.rootEl, mountSlot.firstChild);
       }
       return true;
     }
@@ -299,29 +321,102 @@
       return _makeHandle(inst);
     }
 
-    function hide(id) {
-      var inst = M.State.getInstance(id);
-      if (!inst || inst.state === 'hidden' || inst.state === 'destroyed') return Promise.resolve();
-      if (inst.state === 'hiding') return Promise.resolve();
-
-      inst.state = 'hiding';
+    function _cleanup(inst) {
+      if (!inst) return;
       if (inst.autoHideTimer) { clearTimeout(inst.autoHideTimer); inst.autoHideTimer = null; }
       if (inst.leaveTimer) { clearTimeout(inst.leaveTimer); inst.leaveTimer = null; }
-      M.State.emit('hiding', { id: id, mode: inst.mode });
+      if (inst.rafId) { cancelAnimationFrame(inst.rafId); inst.rafId = null; }
 
-      return new Promise(function(resolve) {
-        M.Animator.leave(inst, function() {
-          if (inst.state === 'hidden' || inst.state === 'destroyed') {
-            resolve();
-            return;
+      var doc = window.document || document;
+
+      if (inst.mode === 'fullscreen' && inst._lockedScrollY != null) {
+        try {
+          var y = inst._lockedScrollY;
+          doc.body.style.position = '';
+          doc.body.style.top = '';
+          doc.body.style.width = '';
+          window.scrollTo(0, y);
+          inst._lockedScrollY = null;
+        } catch (_) {}
+      }
+
+      if (inst.targetEl) {
+        try {
+          inst.targetEl.setAttribute('aria-busy', 'false');
+          if (inst.origTargetPos === 'static') {
+            inst.targetEl.style.position = '';
           }
+          if (inst._setScopedFallbackMinHeight) {
+            var fb = M.CONFIG.SCOPED_EMPTY_MIN_HEIGHT;
+            var otherHolders = (M.State.getByMode('scoped') || []).filter(function(other) {
+              return other !== inst && other.targetEl === inst.targetEl
+                && other._setScopedFallbackMinHeight
+                && other.state !== 'hidden' && other.state !== 'destroyed';
+            });
+            if (!otherHolders.length) {
+              if (inst.origTargetMinHeight != null && inst.origTargetMinHeight !== undefined) {
+                inst.targetEl.style.minHeight = inst.origTargetMinHeight;
+              } else {
+                inst.targetEl.style.minHeight = '';
+              }
+            }
+          }
+          if (inst.origTargetHTML) {
+            inst.targetEl.innerHTML = inst.origTargetHTML;
+          }
+        } catch (_) {}
+      }
+
+      if (inst.rootEl && inst.rootEl.parentNode) {
+        try { inst.rootEl.parentNode.removeChild(inst.rootEl); } catch (_) {}
+      }
+
+      inst.state = 'hidden';
+      M.State.emit('hidden', { id: inst.id, mode: inst.mode });
+
+      if (typeof inst.options.onHide === 'function') {
+        try { inst.options.onHide(inst.id); } catch (e) { console.error('[FVL] onHide error:', e); }
+      }
+
+      inst.listeners.forEach(function(fn) {
+        try { fn('hidden', { id: inst.id }); } catch (_) {}
+      });
+
+      M.State.removeInstance(inst.id);
+    }
+
+    function hide(id, options) {
+      var opts = options || {};
+      if (!id) id = M.CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
+      var inst = M.State.getInstance(id);
+      if (!inst) return Promise.resolve(false);
+      if (inst.state === 'hiding' || inst.state === 'hidden' || inst.state === 'destroyed') {
+        return Promise.resolve(false);
+      }
+
+      var minTimerPromise = Promise.resolve();
+      if (inst.options.minDurationMs > 0) {
+        var elapsed = Date.now() - inst.shownAt;
+        var remain = inst.options.minDurationMs - elapsed;
+        if (remain > 0) {
+          minTimerPromise = new Promise(function(res) { setTimeout(res, remain); });
+        }
+      }
+
+      return minTimerPromise.then(function() {
+        inst.state = 'hiding';
+        M.State.emit('hiding', { id: inst.id, mode: inst.mode });
+
+        if (opts.instant || inst.options.instant) {
           _cleanup(inst);
-          inst.state = 'hidden';
-          M.State.emit('hidden', { id: id, mode: inst.mode });
-          if (typeof inst.options.onHide === 'function') {
-            try { inst.options.onHide(id); } catch (e) { console.error('[FVL] onHide error:', e); }
-          }
-          resolve();
+          return true;
+        }
+
+        return new Promise(function(resolve) {
+          M.Animator.leave(inst, function() {
+            _cleanup(inst);
+            resolve(true);
+          });
         });
       });
     }
@@ -329,186 +424,115 @@
     function hideInstant(id) {
       if (!id) id = M.CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
       var inst = M.State.getInstance(id);
-      if (!inst || inst.state === 'hidden' || inst.state === 'destroyed') return Promise.resolve();
-
-      if (inst.autoHideTimer) { clearTimeout(inst.autoHideTimer); inst.autoHideTimer = null; }
-      if (inst.state !== 'hiding') {
-        M.State.emit('hiding', { id: id, mode: inst.mode });
+      if (!inst) return Promise.resolve(false);
+      if (inst.state === 'hidden' || inst.state === 'destroyed') {
+        return Promise.resolve(false);
       }
-
+      inst.state = 'hiding';
       _cleanup(inst);
-      inst.state = 'hidden';
-      M.State.emit('hidden', { id: id, mode: inst.mode });
-      if (typeof inst.options.onHide === 'function') {
-        try { inst.options.onHide(id); } catch (e) { console.error('[FVL] onHide error:', e); }
-      }
-      return Promise.resolve();
+      return Promise.resolve(true);
     }
 
-    function _cleanup(inst) {
-      var doc = window.document || document;
-      if (inst.mode === 'fullscreen' && inst._lockedScrollY != null) {
-        try {
-          doc.body.style.position = '';
-          doc.body.style.top = '';
-          doc.body.style.width = '';
-          window.scrollTo(0, inst._lockedScrollY);
-          inst._lockedScrollY = null;
-        } catch (_) {}
-      }
-      if (inst.mode === 'scoped' && inst.targetEl && inst.origTargetPos) {
-        if (inst.origTargetPos === 'static') {
-          inst.targetEl.style.position = '';
-        } else {
-          inst.targetEl.style.position = inst.origTargetPos;
-        }
-      }
-      if (inst.mode === 'scoped' && inst.targetEl && inst._setScopedFallbackMinHeight) {
-        // Restore min-height only when no other scoped instance still
-        // holds the same target (avoid clobbering a follow-up loader).
-        var stillHeld = (M.State.getByMode('scoped') || []).some(function(other) {
-          return other !== inst && other.targetEl === inst.targetEl
-            && other.state !== 'hidden' && other.state !== 'destroyed';
-        });
-        if (!stillHeld) {
-          inst.targetEl.style.minHeight = inst.origTargetMinHeight || '';
-        }
-        inst._setScopedFallbackMinHeight = false;
-      }
-      if (inst.mode === 'inline' && inst.targetEl && inst.options.replaceContent && inst.origTargetHTML != null) {
-        inst.targetEl.innerHTML = inst.origTargetHTML;
-        inst.origTargetHTML = '';
-      }
-      if (inst.rootEl && inst.rootEl.parentNode) {
-        inst.rootEl.parentNode.removeChild(inst.rootEl);
-      }
-      if (inst.targetEl) {
-        inst.targetEl.setAttribute('aria-busy', 'false');
-      }
-      M.State.removeInstance(inst.id);
-    }
-
-    function update(id, newOpts) {
+    function update(id, userOpts) {
+      if (!id) id = M.CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
       var inst = M.State.getInstance(id);
       if (!inst) return;
-      newOpts = newOpts || {};
-      Object.assign(inst.options, newOpts);
-
-      if (newOpts.message !== undefined || newOpts.lang !== undefined) {
-        _setTexts(inst);
+      var opts = userOpts || {};
+      if (opts.message !== undefined) inst.options.message = opts.message;
+      if (opts.subMessage !== undefined) inst.options.subMessage = opts.subMessage;
+      if (opts.progress != null && inst.barEl) {
+        inst.barEl.classList.remove('fvl-topbar-indeterminate');
+        inst.barEl.classList.add('fvl-topbar-determinate');
+        inst.barEl.style.width = Math.max(0, Math.min(1, opts.progress)) * 100 + '%';
       }
-      if (newOpts.progress !== undefined) {
-        if (inst.barEl) {
-          if (newOpts.progress == null) {
-            inst.barEl.classList.remove('fvl-topbar-determinate');
-            inst.barEl.classList.add('fvl-topbar-indeterminate');
-            inst.barEl.style.width = '';
-          } else {
-            inst.barEl.classList.remove('fvl-topbar-indeterminate');
-            inst.barEl.classList.add('fvl-topbar-determinate');
-            inst.barEl.style.width = Math.max(0, Math.min(1, newOpts.progress)) * 100 + '%';
-          }
-        }
-        if (inst.spinnerEl && M.Spinner) {
-          M.Spinner.updateProgress(inst.spinnerEl, newOpts.progress);
-        }
+      if (opts.progress != null && inst.spinnerEl && M.Spinner) {
+        var pVal = (opts.progress <= 1 && opts.progress > 0) ? opts.progress * 100 : opts.progress;
+        M.Spinner.updateProgress(inst.spinnerEl, pVal);
       }
-      M.State.emit('updated', { id: id, mode: inst.mode });
+      _setTexts(inst);
     }
 
     function hideAll() {
-      var all = M.State.getAllInstances().filter(function(i) {
-        return i.state === 'showing' || i.state === 'shown';
-      });
-      return Promise.all(all.map(function(i) { return hide(i.id); }));
+      var all = M.State.getAll();
+      var ids = all.map(function(i) { return i.id; });
+      return Promise.all(ids.map(function(id) { return hideInstant(id); }));
     }
 
     function hideByGroup(group) {
       var inst = M.State.getByGroup(group);
-      return inst ? hide(inst.id) : Promise.resolve();
-    }
-
-    function stats() {
-      var all = M.State.getAllInstances();
-      return {
-        active: all.length,
-        modes: {
-          fullscreen: all.filter(function(i) { return i.mode === 'fullscreen'; }).length,
-          scoped:     all.filter(function(i) { return i.mode === 'scoped'; }).length,
-          inline:     all.filter(function(i) { return i.mode === 'inline'; }).length,
-          topbar:     all.filter(function(i) { return i.mode === 'topbar'; }).length,
-        },
-        instances: all.map(function(i) {
-          return { id: i.id, mode: i.mode, state: i.state, shownAt: i.shownAt };
-        }),
-      };
-    }
-
-    function _makeHandle(inst) {
-      return Object.freeze({
-        id: inst.id,
-        mode: inst.mode,
-        options: inst.options,
-        element: inst.rootEl,
-        hide: function() { return hide(inst.id); },
-        hideInstant: function() { return hideInstant(inst.id); },
-        update: function(o) { update(inst.id, o); },
-        setMessage: function(msg) { update(inst.id, { message: msg }); },
-        setProgress: function(p) { update(inst.id, { progress: p }); },
-        updateProgress: function(p) { update(inst.id, { progress: p }); },
-        getState: function() { return inst.state; },
-        on: function(event, fn) {
-          return M.State.on('instance:' + inst.id + ':' + event, fn);
-        },
-      });
+      if (inst) return hideInstant(inst.id);
+      return Promise.resolve(false);
     }
 
     function readinessHandshake(opts) {
       opts = opts || {};
-      var bootIds = opts.bootElementIds || ['fv-boot-loader', 'nc-early-overlay', 'nc-early-msg'];
-      try {
-        var doc = window.document || document;
-        bootIds.forEach(function(id) {
-          var el = doc.getElementById(id);
-          if (el && !el.classList.contains('fv-boot-hidden')) {
-            if (typeof window.__removeBootLoader === 'function' && id === 'fv-boot-loader') {
-              window.__removeBootLoader();
-            } else if (el.parentNode) {
-              el.parentNode.removeChild(el);
+      var targetId = opts.activeId || M.CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
+
+      var bootSelectors = [
+        '#fv-boot-loader',
+        '#nc-early-overlay',
+        '#nc-early-msg',
+        '[data-fv-boot]',
+        '.fv-boot-spinner'
+      ];
+
+      var doc = window.document || document;
+      bootSelectors.forEach(function(sel) {
+        try {
+          var els = doc.querySelectorAll(sel);
+          for (var i = 0; i < els.length; i++) {
+            if (els[i] && els[i].parentNode) {
+              els[i].parentNode.removeChild(els[i]);
             }
           }
-        });
-      } catch (_) {}
+        } catch (_) {}
+      });
 
-      var defaultId = (M.CONFIG && M.CONFIG.DOM && M.CONFIG.DOM.DEFAULT_FULLSCREEN_ID) || 'fvl-default-fullscreen';
-      var fullscreenId = opts.id || defaultId;
-      var inst = M.State.getInstance(fullscreenId);
-      if (inst && (inst.state === 'showing' || inst.state === 'shown')) {
-        return hide(fullscreenId).then(function() {
-          return { success: true, timestamp: Date.now() };
+      var activeInst = M.State.getInstance(targetId);
+      if (activeInst && activeInst.id === targetId) {
+        return hideInstant(targetId).then(function() {
+          return { success: true, handshakedAt: Date.now() };
         });
       }
-      return Promise.resolve({ success: true, timestamp: Date.now() });
+
+      return Promise.resolve({ success: true, handshakedAt: Date.now() });
+    }
+
+    function _makeHandle(inst) {
+      return {
+        id: inst.id,
+        mode: inst.mode,
+        get element() { return inst.rootEl; },
+        hide: function(o) { return hide(inst.id, o); },
+        hideInstant: function() { return hideInstant(inst.id); },
+        updateMessage: function(msg) { update(inst.id, { message: msg }); },
+        updateProgress: function(pct) { update(inst.id, { progress: pct }); },
+        on: function(fn) { inst.listeners.add(fn); },
+      };
+    }
+
+    function stats() {
+      var all = M.State.getAll();
+      return {
+        activeCount: all.length,
+        instances: all.map(function(i) { return { id: i.id, mode: i.mode, state: i.state }; })
+      };
     }
 
     return Object.freeze({
       show: show,
       hide: hide,
       hideInstant: hideInstant,
+      update: update,
       hideAll: hideAll,
       hideByGroup: hideByGroup,
-      getByMode: function(mode) { return M.State.getByMode(mode); },
       readinessHandshake: readinessHandshake,
-      update: update,
       stats: stats,
       _updateTopVar: _updateTopVar,
-      _setTexts: function(id) {
-        var inst = M.State.getInstance(id);
-        if (inst) _setTexts(inst);
-      },
-      _makeHandle: function(inst) { return _makeHandle(inst); },
+      _setTexts: _setTexts,
+      _makeHandle: _makeHandle,
     });
   })();
 
   M.Engine = Engine;
-})(typeof window !== 'undefined' ? window : globalThis);
+})(typeof window !== 'undefined' ? window : this);

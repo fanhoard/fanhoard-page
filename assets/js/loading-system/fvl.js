@@ -9,7 +9,7 @@
 
   if (win.FVL && win.FVL._initialized) return;
 
- var isNode = typeof process !== 'undefined' && process.versions && process.versions.node;
+  var isNode = typeof process !== 'undefined' && process.versions && process.versions.node;
   var _req = (function() {
     try { return eval('require'); } catch (_) { return null; }
   })();
@@ -81,7 +81,7 @@
     );
   }
 
-    // ── Sync pre-boot for Node / test environment ──
+  // ── Sync pre-boot for Node / test environment ──
   if (isNode) {
     try {
       var _fs = null, _path = null;
@@ -96,10 +96,12 @@
       }
       if (_fs && _path) {
         var cwd = process.cwd();
-        var modDir = _path.resolve(cwd, 'assets/js/loading-system/fvl-modules');
-        if (!_fs.existsSync(modDir)) {
-          modDir = '/app/fanhoard-page/assets/js/loading-system/fvl-modules';
+        var sysDir = _path.resolve(cwd, 'assets/js/loading-system');
+        if (!_fs.existsSync(sysDir)) {
+          sysDir = '/app/fanhoard-page/assets/js/loading-system';
         }
+
+        var modDir = _path.resolve(sysDir, 'fvl-modules');
         var modFiles = [
           'namespace.js', 'types.js', 'config.js',
           'utils.js', 'state.js',
@@ -118,6 +120,17 @@
             }
           }
         });
+
+        var spinnerStandalonePath = _path.join(sysDir, 'fvl-spinner.js');
+        if (_fs.existsSync(spinnerStandalonePath)) {
+          try {
+            var sc = _fs.readFileSync(spinnerStandalonePath, 'utf-8');
+            var sfn = new Function('window', 'document', 'localStorage', sc);
+            sfn(win, win.document || document, win.localStorage);
+          } catch (serr) {
+            console.error('[FVL] Failed loading standalone fvl-spinner.js:', serr);
+          }
+        }
       }
     } catch (e) {
       console.warn('[FVL] Node sync pre-boot failed:', e);
@@ -147,6 +160,8 @@
       var doc = win.document || document;
       if (!doc || !doc.querySelector) return;
       if (doc.querySelector('link[href*="loading-system.css"]')) return;
+      var isTestEnv = typeof win !== 'undefined' && (win.happyDOM || (win.process && win.process.env && win.process.env.VITEST));
+      if (isTestEnv) return;
       try {
         var link = doc.createElement('link');
         link.rel = 'stylesheet';
@@ -283,7 +298,6 @@
       fullscreen: function(opts) {
         opts = M.Utils.normalizeOptions(opts);
         opts.mode = 'fullscreen';
-        opts.id = opts.id || CONFIG.DOM.DEFAULT_FULLSCREEN_ID;
         return Engine.show(opts);
       },
       scoped: function(opts) {
@@ -304,7 +318,7 @@
         opts.mode = 'inline';
         return Engine.show(opts);
       },
-      spinner: function(opts) { return M.Spinner ? M.Spinner.create(opts) : null; },
+      spinner: win.FVLSpinner || (function(opts) { return M.Spinner ? M.Spinner.create(opts) : null; }),
       topbar: function(opts) {
         opts = opts || {};
         opts.mode = 'topbar';
@@ -319,7 +333,9 @@
   if (isNode) {
     _boot();
   } else {
-    loadPhases(LOAD_PHASES, base)
+    loadScriptSync(base + '/fvl-spinner.js')
+      .catch(function() {})
+      .then(function() { return loadPhases(LOAD_PHASES, base); })
       .then(function() { _boot(); })
       .catch(function(err) { console.error('[FVL] Module loading failed:', err); });
   }

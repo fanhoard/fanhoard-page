@@ -88,6 +88,7 @@
       removeInstance: removeInstance,
       getInstance: getInstance,
       getAllInstances: getAllInstances,
+      getAll: getAllInstances,
       getActiveCount: getActiveCount,
       getByGroup: getByGroup,
       getByMode: getByMode,
