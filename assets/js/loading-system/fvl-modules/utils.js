@@ -146,5 +146,123 @@
     });
   })();
 
+  
+    // ── ScrollLockManager ──
+    var ScrollLockManager = (function() {
+      var lockCount = 0;
+      var savedScrollY = 0;
+      var origBodyStyle = null;
+      var touchMoveHandler = null;
+
+      function lock() {
+        var doc = (typeof window !== "undefined" && window.document) || document;
+        if (!doc || !doc.body) {
+          lockCount++;
+          return;
+        }
+
+        if (lockCount === 0) {
+          var win = typeof window !== "undefined" ? window : {};
+          var scrollbarWidth = Math.max(0, (win.innerWidth || 0) - (doc.documentElement ? doc.documentElement.clientWidth : (win.innerWidth || 0)));
+          savedScrollY = win.scrollY || win.pageYOffset || (doc.documentElement && doc.documentElement.scrollTop) || (doc.body && doc.body.scrollTop) || 0;
+
+          var body = doc.body;
+          origBodyStyle = {
+            position: body.style.position || "",
+            top: body.style.top || "",
+            width: body.style.width || "",
+            overflow: body.style.overflow || "",
+            paddingRight: body.style.paddingRight || "",
+            hasStyleAttr: body.hasAttribute("style"),
+          };
+
+          body.style.position = "fixed";
+          body.style.top = "-" + savedScrollY + "px";
+          body.style.width = "100%";
+          body.style.overflow = "hidden";
+
+          if (scrollbarWidth > 0) {
+            var computedPR = 0;
+            try {
+              var view = body.ownerDocument && body.ownerDocument.defaultView;
+              if (view && typeof view.getComputedStyle === "function") {
+                computedPR = parseFloat(view.getComputedStyle(body).paddingRight || "0") || 0;
+              }
+            } catch (_) {}
+            body.style.paddingRight = (computedPR + scrollbarWidth) + "px";
+          }
+
+          if (doc.documentElement) {
+            doc.documentElement.style.setProperty("--fvl-scrollbar-width", scrollbarWidth + "px");
+          }
+
+          if (!touchMoveHandler && doc.addEventListener) {
+            touchMoveHandler = function(e) {
+              if (e.target && e.target.closest && e.target.closest(".fvl-scrollable")) return;
+              if (e.cancelable) e.preventDefault();
+            };
+            doc.addEventListener("touchmove", touchMoveHandler, { passive: false });
+          }
+        }
+
+        lockCount++;
+      }
+
+      function unlock() {
+        if (lockCount <= 0) return;
+        lockCount--;
+
+        if (lockCount === 0) {
+          var doc = (typeof window !== "undefined" && window.document) || document;
+          var win = typeof window !== "undefined" ? window : {};
+
+          if (doc && doc.body && origBodyStyle) {
+            var body = doc.body;
+            body.style.position = origBodyStyle.position;
+            body.style.top = origBodyStyle.top;
+            body.style.width = origBodyStyle.width;
+            body.style.overflow = origBodyStyle.overflow;
+            body.style.paddingRight = origBodyStyle.paddingRight;
+
+            if (!origBodyStyle.hasStyleAttr && body.getAttribute("style") === "") {
+              body.removeAttribute("style");
+            }
+            origBodyStyle = null;
+          }
+
+          if (doc && doc.documentElement) {
+            doc.documentElement.style.removeProperty("--fvl-scrollbar-width");
+          }
+
+          if (win.scrollTo) {
+            win.scrollTo(0, savedScrollY);
+          }
+
+          if (touchMoveHandler && doc && doc.removeEventListener) {
+            doc.removeEventListener("touchmove", touchMoveHandler, { passive: false });
+            touchMoveHandler = null;
+          }
+        }
+      }
+
+      function getLockCount() { return lockCount; }
+
+      function reset() {
+        lockCount = 0;
+        savedScrollY = 0;
+        origBodyStyle = null;
+        touchMoveHandler = null;
+      }
+
+      return {
+        lock: lock,
+        unlock: unlock,
+        getLockCount: getLockCount,
+        reset: reset,
+      };
+    })();
+
+    M.ScrollLockManager = ScrollLockManager;
+
   M.Utils = Utils;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -72,7 +72,7 @@
     PRESETS: Object.freeze({
       fullscreen: Object.freeze({
         overlay: true,
-        lockScroll: false,
+        lockScroll: true,
         theme: 'light',
         visual: 'ring',
       }),
