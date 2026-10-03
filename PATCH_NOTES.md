@@ -1,4 +1,4 @@
-# FanHoard FVL — Flexible Loading & Standalone Spinner Subsystem Patch
+# FanHoard FVL — Flexible Loading & Discover Page Spinner Integration Patch
 
 วางไฟล์ทั้งหมดใน patch นี้ทับลงบน repo ตามโครงสร้างเดิม — แตก ZIP แล้ว copy ทับได้เลย
 
@@ -6,34 +6,42 @@
 
 | ไฟล์ | การเปลี่ยนแปลง |
 |------|----------------|
-| `assets/js/loading-system/fvl-spinner.js` | **สร้างไฟล์ใหม่** — Standalone Material Spinner subsystem ที่ทำงานแบบ zero-dependency โดยไม่ขึ้นกับ `fvl.js` หรือ `LOAD_PHASES`, ฉีดสไตล์ CSS อัตโนมัติ (`#fvl-spinner-styles`), และส่งออก `window.FVLSpinner` พร้อมสะพานเชื่อม `window.FVL.spinner` |
-| `assets/js/loading-system/fvl-modules/spinner.js` | อัปเดตให้ delegate การประมวลผลไปยัง standalone `FVLSpinner` มอดูลเมื่อมีการเรียกใช้งาน |
-| `assets/js/loading-system/fvl-modules/renderer.js` | อัปเดต DOM builders ในทุก display modes (`fullscreen`, `scoped`, `inline`, `topbar`) รองรับตัวเลือก `spinnerOnly`, `bare`, และ `chromeless` เพื่อข้ามการสร้างโหนดข้อความ และใส่ modifier classes |
-| `assets/js/loading-system/fvl-modules/engine.js` | เพิ่มระบบรองรับ `targetSlot` เพื่อ mount spinner เข้าไปยัง child DOM element/selector ย่อยภายใน container หลัก พร้อมคงการจัดการ `aria-busy` บน container |
-| `assets/css/loading-system.css` | เพิ่ม modifier classes สำหรับ `.fvl-bare`, `.fvl-chromeless`, `.fvl-spinner--speed-*`, และ `.fvl-spinner--stroke-*` ใน CSS layer `@layer fvl` |
-| `tests/loading-spinner-standalone.test.ts` | **สร้างไฟล์ใหม่** — Unit test suite ครอบคลุม standalone `fvl-spinner.js` (lifecycle, CSS injection, factory API, adjustments, unmount & destroy) |
-| `tests/loading-spinner-only.test.ts` | **สร้างไฟล์ใหม่** — Unit test suite ครอบคลุมตัวเลือก `spinnerOnly`, `bare`, `chromeless`, และ `targetSlot` บน FVL ทั้ง 4 display modes |
-| `fanhoard-docs/07-Loading-System.md` | อัปเดตเอกสารคู่มือระบบ FVL — เพิ่มรายละเอียด mode options ใหม่ (`spinnerOnly`, `bare`, `chromeless`, `targetSlot`), คู่มือการใช้งาน standalone spinner, สารบัญ API ใหม่ และ Version History v3.1.0 |
-| `fanhoard-docs/15-Loading-Contract-And-Test-Plan.md` | อัปเดตสัญญาบริการและแผนการทดสอบ — เพิ่มสัญญา flexible display options, standalone spinner contracts, test seams (Seam 3 & 4), และ Implementation Slice 6 |
+| `assets/js/nav-core-modules/content.js` | Mount bare FVL spinner ใน `clearContent()`, จัดการ 10s fallback safety timer (`_fvlSafetyTimer`), ควบคุม `aria-busy` บน `#content-loading`, และ mount standalone small `FVLSpinner` บน infinite scroll sentinels พร้อม `finally` block cleanup |
+| `assets/js/nav-core-modules/loading.js` | อัปเดต `showInContent()` ให้ใช้พารามิเตอร์เริ่มต้นเป็น `{ bare: true, size: 'md' }` |
+| `assets/js/nav-core-modules/router.js` | ส่งผ่าน `{ bare: true, size: 'md' }` เมื่อเรียก `showInContent()` หรือ `FVL.scoped()` ใน `navigateTo()` |
+| `assets/js/search-system/search-modules/search-controller.js` | Mount bare FVL spinner ใน `#searchResults` พร้อม `aria-busy="true"` เมื่อส่งคำค้นหาขณะเอกสารดัชนียังไม่พร้อม (`!docsReady`) |
+| `assets/js/search-system/search-modules/rendering.js` | Mount bare FVL spinner ใน `#searchResults` พร้อม `aria-busy="true"` ขณะรอ `window.URE` และรีเซ็ต `aria-busy="false"` เมื่อเรนเดอร์สำเร็จ |
+| `tests/discover-loading-integration.test.ts` | **สร้างไฟล์ใหม่** — Integration test suite ครอบคลุม Discover page content transitions (Point A, B, C, D), double-spinner protection, 10s fallback timer, `finally` exception safety, และ search pending spinner states |
+| `assets/js/loading-system/fvl-spinner.js` | Standalone Material Spinner subsystem ที่ทำงานแบบ zero-dependency โดยไม่ขึ้นกับ `fvl.js` หรือ `LOAD_PHASES`, ฉีดสไตล์ CSS อัตโนมัติ (`#fvl-spinner-styles`), และส่งออก `window.FVLSpinner` |
+| `assets/js/loading-system/fvl-modules/spinner.js` | Delegate การประมวลผลไปยัง standalone `FVLSpinner` มอดูล |
+| `assets/js/loading-system/fvl-modules/renderer.js` | DOM builders ในทุก display modes รองรับตัวเลือก `spinnerOnly`, `bare`, และ `chromeless` |
+| `assets/js/loading-system/fvl-modules/engine.js` | เพิ่มระบบรองรับ `targetSlot` สำหรับ mount spinner เข้าไปยัง child DOM element/selector ย่อย |
+| `assets/css/loading-system.css` | เพิ่ม modifier classes สำหรับ `.fvl-bare`, `.fvl-chromeless`, `.fvl-spinner--speed-*`, และ `.fvl-spinner--stroke-*` |
+| `fanhoard-docs/02-Search-System.md` | อัปเดตคู่มือระบบค้นหา — เพิ่มรายละเอียด FVL bare spinner ใน `#searchResults` ขณะรอเอกสารและรอ URE |
+| `fanhoard-docs/03-Navigation-And-Content.md` | อัปเดตคู่มือ Navigation & Content — เพิ่มรายละเอียด `showInContent` bare mode, `clearContent` FVL spinner lifecycle, 10s safety fallback timer, และ infinite scroll sentinel spinner |
+| `fanhoard-docs/07-Loading-System.md` | อัปเดตเอกสารคู่มือระบบ FVL — เพิ่มรายละเอียด mode options, standalone spinner, การผสานกับ Discover Page (Point A-D), และ Version History v3.1.1 |
+| `fanhoard-docs/15-Loading-Contract-And-Test-Plan.md` | อัปเดตสัญญาบริการและแผนการทดสอบ — เพิ่มสัญญา Discover page content transitions (Section 2.8), test seam (Seam 7), และ Implementation Slice 7 |
 
-## พฤติกรรมใหม่
+## พฤติกรรมใหม่บน Discover Page & Search Subsystem
 
-### ก่อนหน้า
-- การแสดง loader ผ่าน FVL บังคับสร้างโหนดข้อความ (`.fvl-msg`, `.fvl-sub`, `.fvl-text`) เสมอ แม้ไม่ได้ส่ง `message`
-- ไม่สามารถปลด backdrop, borders หรือ padding ออกจาก overlay ได้อย่างยืดหยุ่นใน scoped หรือ inline modes
-- การใช้งาน spinner ในปุ่มหรือ widget ย่อยจำเป็นต้องโหลด FVL orchestrator เต็มรูปแบบผ่าน `fvl.js` และ 4 `LOAD_PHASES`
-- การ mount spinner จะกระทำที่ root ของ target container เสมอ ไม่สามารถระบุ slot ย่อยภายใน container ได้
-
-### ตอนนี้ (FVL Flexible Loading & Standalone Subsystem)
-- **`spinnerOnly: true`**: ซ่อนข้อความ message/submessage และโหนดข้อความทั้งหมด เหลือเพียงตัว spinner พร้อมตั้งค่า `aria-label` บน root container อัตโนมัติ
-- **`chromeless: true`**: ถอด backdrop overlay, border, padding และ shadow ออก (ใส่ class `.fvl-chromeless`)
-- **`bare: true`**: Shorthand ผสาน `{ spinnerOnly: true, chromeless: true }` (ใส่ class `.fvl-bare` และ `.fvl-chromeless`)
-- **`targetSlot`**: สามารถระบุ selector หรือ `HTMLElement` เพื่อ mount spinner ลงใน slot ย่อยภายใน container หลัก โดยที่ container หลักยังคงรับ `aria-busy="true"` ตาม lifecycle
-- **Standalone `fvl-spinner.js`**: มอดูล spinner อิสระ zero-dependency ไม่ต้องรอ `fvl.js` โหลด มีระบบ auto CSS injection และส่งออก instance handle ควบคุมได้เต็มรูปแบบ (`setSize`, `setColor`, `setTrackColor`, `setSpeed`, `setStrokeWidth`, `updateProgress`, `mount`, `unmount`, `destroy`)
+1. **Point A: Category / Tab Switch Navigation**:
+   - เมื่อกดเปลี่ยนแท็บหรือเปลี่ยนหมวดหมู่ `router.navigateTo()` เรียก `LoadingService.showInContent({ bare: true, size: 'md' })`
+   - `ContentService.clearContent()` mount bare FVL spinner ลงใน `#content-loading` พร้อมตั้งค่า `aria-busy="true"`
+   - มีระบบ 10s safety fallback timer (`_fvlSafetyTimer`) ออโต้เคลียร์ spinner หาก request ค้าง
+2. **Point B: Feed / Category Refresh**:
+   - `ContentService.renderFeed()` เรียก `clearContent()` mount bare FVL spinner แบบซิงโครนัส โดยมี double-spinner guard ป้องกันการ mount ซ้ำ
+   - ลบ spinner และรีเซ็ต `aria-busy="false"` เมื่อ feed batch แรกเรนเดอร์สำเร็จ (`_appendFeedGroups`)
+3. **Point C: Infinite Scroll Pagination**:
+   - เมื่อ scroll ถึง sentinel (`#nc-feed-sentinel` / `#nc-lazy-sentinel`) ตั้งค่า `aria-busy="true"` และ mount standalone small fast spinner (`FVLSpinner.mount(sentinel, { size: 'sm', speed: 'fast' })`)
+   - รับประกันการลบ spinner และรีเซ็ต `aria-busy="false"` ใน `finally` block เสมอ แม้เกิด fetch error
+4. **Point D: Search & Content Re-render**:
+   - ขณะรอเอกสารดัชนี (`!docsReady`) ใน `SearchController.doSearch()` แสดง bare FVL spinner ใน `#searchResults` พร้อม `aria-busy="true"`
+   - ขณะรอ `window.URE` ใน `RenderingService.renderResults()` แสดง bare FVL spinner ใน `#searchResults`
+   - เมื่อเรนเดอร์ผลลัพธ์สำเร็จ รีเซ็ต `aria-busy="false"` และเรนเดอร์ DOM ทับ cleanly
 
 ## การทดสอบ
 
 ทดสอบระบบผ่าน Vitest และ TypeScript Type Check:
-1. `npm run test` หรือ `npx vitest run tests/loading-*.test.ts` → ยืนยันการผ่าน 35/35 tests
+1. `npx vitest run` → ยืนยันการผ่าน 26/26 test files (150/150 tests passed)
 2. `npm run type-check` (`tsc --noEmit`) → ยืนยัน 0 errors
 3. `npm run lint` → ยืนยัน 0 errors

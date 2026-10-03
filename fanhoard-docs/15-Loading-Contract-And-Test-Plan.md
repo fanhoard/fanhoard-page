@@ -112,6 +112,19 @@ Every FVL mode supports flexible options for text suppression, chromeless framin
 
 ---
 
+### 2.8 Discover Page Content Transition Contracts
+
+- **Point A (Tab/Category Switch Navigation)**: `router.navigateTo()` and `ContentService.clearContent()` must mount a bare FVL spinner (`{ bare: true, size: 'md' }`) into `#content-loading` and set `aria-busy="true"` on the container.
+- **Point B (Feed / Category Refresh)**: `ContentService.renderFeed()` must invoke `clearContent()`, which cleans the container and mounts the bare FVL spinner, checking for existing spinner elements (`!ctr.querySelector('.fvl-spinner')`) before mounting to prevent double-spinner duplication.
+- **10s Safety Fallback Timer**: The `#content-loading` container must utilize a 10-second safety timeout (`_fvlSafetyTimer`) to auto-clear active spinners and reset `aria-busy` to `"false"` if network requests or content transitions stall indefinitely.
+- **Point C (Infinite Scroll Pagination)**: Infinite scroll triggers on `#nc-feed-sentinel` and `#nc-lazy-sentinel` must set `aria-busy="true"` and mount a standalone fast small spinner (`FVLSpinner.mount(sentinel, { size: 'sm', speed: 'fast' })`). The spinner handle must be unconditionally cleaned up in a `finally` block using `spinnerHandle.destroy()` to guarantee exception safety.
+- **Point D (Search & URE Pending State)**:
+  - `SearchController.doSearch()` (when `!docsReady`) must set `aria-busy="true"` and mount a bare FVL spinner inside `#searchResults` instead of static placeholder text.
+  - `RenderingService.renderResults()` (when `!window.URE`) must set `aria-busy="true"` and mount a bare FVL spinner inside `#searchResults` until `window.URE` loads.
+  - Upon rendering search results, `aria-busy` must be updated to `"false"` and active spinners unmounted.
+
+---
+
 ## 3. Test Seams & Test Suites
 
 ### 3.1 Unit & Integration Test Seams (Vitest)
@@ -135,6 +148,13 @@ Every FVL mode supports flexible options for text suppression, chromeless framin
   - Verifies modifier class application (`.fvl-bare`, `.fvl-chromeless`).
   - Verifies `targetSlot` resolution inside target DOM containers.
 
+- **Seam 7: `tests/discover-loading-integration.test.ts`**
+  - Asserts mounting of bare FVL spinner in `#content-loading` and setting `aria-busy="true"` on `clearContent()`.
+  - Asserts double-spinner protection on duplicate `clearContent()` calls.
+  - Asserts active spinner removal and setting `aria-busy="false"` when `_appendFeedGroups` completes rendering.
+  - Asserts 10-second safety fallback timer auto-clean if fetch stalls.
+  - Asserts standalone `FVLSpinner` mounting on sentinel during infinite scroll and cleanup in `finally` block even if fetch throws error.
+  - Asserts mounting of bare FVL spinner in `#searchResults` while waiting for `window.URE` in `renderResults()`.
 ### 3.2 End-to-End Browser Test Seams (Playwright)
 
 - **Seam 5: `e2e/discover-loading-contract.spec.ts`**
@@ -156,6 +176,10 @@ Every FVL mode supports flexible options for text suppression, chromeless framin
 | **Slice 4** | **Search Race Conditions & Category Preservation**: Resolve closure bug in `_scheduleFuseUpgrade` and preserve `category` in `__pendingSearch` | `assets/js/search-system/search-modules/search-controller.js`<br>`assets/js/search-system/search.js` | `vitest run tests/search-races.test.ts`<br>`npx playwright test e2e/search-consumer-races.spec.ts` |
 | **Slice 5** | **Popup Backdrop Pointer Isolation**: Apply `pointer-events: none` on inactive `.fp-overlay` containers | `assets/css/popup.css` | `vitest run tests/popup-backdrop.test.ts` |
 | **Slice 6** | **Flexible Spinner & Standalone Subsystem**: Add standalone `fvl-spinner.js` subsystem and support `spinnerOnly`, `bare`, `chromeless`, `targetSlot` options across display modes | `assets/js/loading-system/fvl-spinner.js`<br>`assets/js/loading-system/fvl-modules/renderer.js`<br>`assets/js/loading-system/fvl-modules/engine.js`<br>`assets/css/loading-system.css` | `vitest run tests/loading-spinner-standalone.test.ts`<br>`vitest run tests/loading-spinner-only.test.ts` |
+
+---
+
+| **Slice 7** | **Discover Page & Search FVL Spinner Integration**: Wire FVL bare spinner and standalone `FVLSpinner` across Discover transition points A-D with safety guards | `assets/js/nav-core-modules/content.js`<br>`assets/js/nav-core-modules/loading.js`<br>`assets/js/nav-core-modules/router.js`<br>`assets/js/search-system/search-modules/rendering.js`<br>`assets/js/search-system/search-modules/search-controller.js` | `vitest run tests/discover-loading-integration.test.ts` |
 
 ---
 

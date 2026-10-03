@@ -728,6 +728,16 @@ _graphemeClusters(text) {
 
 ## 7. การเรนเดอร์ผลลัพธ์และการผสาน URE
 
+### 7.0 Search Pending State & FVL Spinner Integration
+
+ระบบค้นหาใช้ FVL bare spinner ในการแสดงสถานะกำลังโหลดสำหรับ 2 กรณี:
+
+1. **Pending Index Documents (`SearchController.doSearch`)**:
+   - เมื่อผู้ใช้ส่งคำค้นหาขณะที่เอกสารดัชนียังโหลดไม่เสร็จ (`!docsReady`) ระบบจะตั้งค่า `aria-busy="true"` บน `#searchResults` และ mount bare FVL spinner ลงใน `#searchResults` พร้อมเก็บบันทึกคำค้นหาไว้ใน `window.__pendingSearch`
+2. **Pending URE Engine (`RenderingService.renderResults`)**:
+   - เมื่อเรนเดอร์ผลลัพธ์ขณะที่ `window.URE` ยังโหลดไม่เสร็จ ระบบจะตั้งค่า `aria-busy="true"` บน `#searchResults` และ mount bare FVL spinner ลงใน `#searchResults`
+   - เมื่อ `window.URE` พร้อมและเรนเดอร์ผลลัพธ์หรือ empty state สำเร็จ ระบบจะรีเซ็ต `aria-busy="false"` และเรนเดอร์ DOM ผลลัพธ์ทับ spinner cleanly
+
 ### 7.1 การผสานกับ URE (Universal Render Engine)
 
 `rendering.js` ใช้ **URE** (`window.URE`) สำหรับเรนเดอร์ผลลัพธ์แทน VirtualScrollEngine แบบเดิม

@@ -344,12 +344,13 @@ handle.destroy();
 
 ## 13. Integration กับระบบอื่น
 
-| ระบบ | วิธีใช้ FVL |
+| ระบบ | วิธีใช้ FVL / FVLSpinner |
 | :--- | :--- |
-| **Nav-Core** | ผ่าน `LoadingService` proxy |
-| **Discover Page** | `LoadingService.show()` → `FVL.fullscreen()` |
-| **Router Transitions** | `LoadingService.show()` / `.hide()` |
-| **Search System** | `FVL.scoped({ target: '#search-results' })` |
+| **Nav-Core LoadingService** | `LoadingService.showInContent()` ส่งพารามิเตอร์เริ่มต้นเป็น `{ bare: true, size: 'md' }` เพื่อ mount bare spinner ลงใน `#content-loading` |
+| **Discover Page: Tab Switch & Category Navigation** | `router.navigateTo()` และ `ContentService.clearContent()` mount bare FVL spinner ลงใน `#content-loading` ตั้งค่า `aria-busy="true"` และเริ่ม 10s fallback safety timer (`_fvlSafetyTimer`); unmount และรีเซ็ต `aria-busy="false"` เมื่อ `_appendFeedGroups` โหลดข้อมูลเสร็จ |
+| **Discover Page: Feed Refresh** | `ContentService.renderFeed()` เรียก `clearContent()` mount bare FVL spinner แบบซิงโครนัส พร้อมระบบป้องกันการสร้าง spinner ซ้ำ (`!ctr.querySelector('.fvl-spinner')`); unmount เมื่อ feed batch แรกเรนเดอร์สำเร็จ |
+| **Discover Page: Infinite Scroll Pagination** | IntersectionObserver บน sentinel (`#nc-feed-sentinel` / `#nc-lazy-sentinel`) mount standalone small spinner `FVLSpinner.mount(sentinel, { size: 'sm', speed: 'fast' })` พร้อม `aria-busy="true"` และถูกทำลายเสมอใน `finally` block (`spinnerHandle.destroy()`) |
+| **Search System: Document Loading & URE Waiting** | `SearchController.doSearch()` (ขณะรอเอกสาร `!docsReady`) และ `RenderingService.renderResults()` (ขณะรอ `window.URE`) mount bare FVL spinner ลงใน `#searchResults` ตั้งค่า `aria-busy="true"`; รีเซ็ต `aria-busy="false"` และเคลียร์ spinner เมื่อเรนเดอร์ผลลัพธ์หรือ empty state |
 | **Standalone Components** | เรียกใช้ `FVLSpinner.mount(target, opts)` ตรงโดยไม่ต้องผ่าน `fvl.js` |
 
 ---
@@ -361,6 +362,7 @@ handle.destroy();
 | **v1.0.0** | เปิดตัว — 4 modes (fullscreen/scoped/inline/topbar), full backward-compat กับ Nav-Core LoadingService |
 | **v3.0.8** | Structural Refactor — ปรับปรุงเป็น modular architecture (`fvl.js` orchestrator + `fvl-modules/` 9 submodules), โหลดผ่าน 4 `LOAD_PHASES`, และเพิ่ม Material Spinner Variant Subsystem (opt-in) |
 | **v3.1.0** | Flexible Spinner & Standalone Subsystem — เพิ่ม standalone `fvl-spinner.js` (zero-dependency, auto CSS injection, instance handle), เพิ่ม options `spinnerOnly`, `bare`, `chromeless`, `targetSlot` ครอบคลุมทั้ง 4 display modes และเพิ่ม unit test contracts |
+| **v3.1.1** | Discover Page Spinner Integration — เชื่อมต่อ flexible FVL bare spinner และ standalone `FVLSpinner` ครอบคลุม 4 content transition points บน Discover Page (tab switch, feed refresh, infinite scroll, และ search pending/URE rendering) พร้อม double-spinner protection, 10s safety fallback timer, `aria-busy` toggles, และ integration test suite (`tests/discover-loading-integration.test.ts`) |
 
 ---
 

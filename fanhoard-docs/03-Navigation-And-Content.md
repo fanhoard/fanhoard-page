@@ -258,6 +258,14 @@ async function _diagnose(base, names) {
 </div>
 ```
 
+### Content-Scoped Bare Spinner Integration (`showInContent`)
+
+`LoadingService.showInContent(opts)` ถูกปรับปรุงให้ใช้ดีฟอลต์เป็น `{ bare: true, size: 'md' }` เพื่อ mount FVL bare spinner เข้าไปยังคอนเทนเนอร์ `#content-loading` สำหรับ transition ระหว่างการเปลี่ยนแท็บและเปลี่ยนหมวดหมู่ โดยตั้งค่า `aria-busy="true"` บนคอนเทนเนอร์โดยอัตโนมัติ
+
+```javascript
+LoadingService.showInContent({ bare: true, size: 'md' });
+```
+
 ### API หลัก
 
 ```javascript
@@ -527,6 +535,20 @@ await ContentService.renderContent(data);
 // 4. _resolveAll(data, lang) — แปลง raw data → renderable groups
 // 5. URE.mount({ container, data, template, onItemClick })
 ```
+
+### Content Transition & Infinite Scroll Spinner Lifecycle
+
+1. **Category & Tab Navigation (`clearContent`)**:
+   - ล้างข้อมูลเดิมใน `#content-loading`
+   - ตรวจสอบ guard ป้องกัน spinner ซ้ำ (`!ctr.querySelector('.fvl-spinner')`)
+   - Mount bare FVL spinner (`FVLSpinner.mount(ctr, { size: 'md' })` หรือ `FVL.scoped({ target: ctr, bare: true })`)
+   - ตั้งค่า `aria-busy="true"`
+   - ตั้งค่า 10s fallback safety timer (`_fvlSafetyTimer`) เพื่อเคลียร์ spinner และ `aria-busy` โดยอัตโนมัติหากการโหลดค้าง
+2. **Batch Paint Completion (`_appendFeedGroups`)**:
+   - เมื่อ feed batch แรกเรนเดอร์สำเร็จ ทำการลบ spinner, ยกเลิก `_fvlSafetyTimer`, และรีเซ็ต `aria-busy="false"`
+3. **Infinite Scroll Pagination Sentinels (`_attachFeedSentinel` / `_attachLazySentinel`)**:
+   - เมื่อ intersection observer ทำงานบน `#nc-feed-sentinel` หรือ `#nc-lazy-sentinel` ตั้งค่า `aria-busy="true"` และ mount standalone small fast spinner (`FVLSpinner.mount(sentinel, { size: 'sm', speed: 'fast' })`)
+   - ทำงานภายใต้ `try...finally` block โดยใน `finally` block จะเรียก `spinnerHandle.destroy()` และตั้งค่า `aria-busy="false"` เพื่อรับประกันการเคลียร์ spinner แม้เกิด network/fetch error
 
 ### Feed Rendering Path
 
