@@ -1,30 +1,23 @@
-# แพตช์ยกระดับระบบภาษาและการแปลภาษา (v3.2.9)
+# แพตช์แก้ไขการเรนเดอร์ผลลัพธ์ค้นหา และคืนอนิเมชั่น Active ต้นฉบับ (v3.2.13)
 
 วางไฟล์ทั้งหมดใน patch นี้ทับลงบน repo ตามโครงสร้างเดิม — แตก ZIP แล้ว copy ทับได้เลย
 
-## สรุปการเปลี่ยนแปลง (v3.2.9 - ระบบภาษาและการแปลภาษา)
+## สรุปการเปลี่ยนแปลง (v3.2.13 - แก้การเรนเดอร์ Search + คืนอนิเมชั่น .active)
 
 | ไฟล์ | การเปลี่ยนแปลง |
 |------|----------------|
-| `assets/js/lang-core.js` | กำจัดโค้ด IIFE ซ้ำซ้อนจำนวน 257 บรรทัด ลดขนาดไฟล์สคริปต์แต่คงประสิทธิภาพ FvLang API |
-| `assets/js/lang-modules/ui.js` | ปรับปรุง Pop-up เลือกภาษาด้วย ARIA Listbox Roles, การควบคุมด้วยคีย์บอร์ด และสัญลักษณ์เครื่องหมายถูก |
-| `assets/js/lang-links.js` | เพิ่มการรับฟัง `fv:langchange` Custom Event สำหรับซิงก์ Prefix ภาษาบนลิงก์ภายใน |
-| `assets/js/lang-modules/translator.js` | ปรับปรุงการจัดเก็บ `data-original-html` และ Attribute เพื่อคืนค่าเนื้อหาภาษาอังกฤษได้สมบูรณ์ |
-| `tests/localization-polish.test.ts` | ชุดทดสอบหน่วยสำหรับตรวจสอบระบบภาษา, ARIA Roles, คีย์บอร์ด และการคืนค่าเนื้อหา (NEW) |
-| `assets/md/en/current.md` | บันทึกการอัปเดตเวอร์ชัน 3.2.9 ภาษาอังกฤษ |
-| `assets/md/th/current.md` | บันทึกการอัปเดตเวอร์ชัน 3.2.9 ภาษาไทย |
-| `CHANGES.md` | บันทึกการเปลี่ยนแปลงเวอร์ชัน 3.2.9 ภาษาอังกฤษ |
-| `PATCH_NOTES.md` | บันทึกแพตช์สรุปภาษาไทยเวอร์ชัน 3.2.9 |
+| `assets/js/ure/ure.css` | เพิ่ม keyframe `ure-appear-fade` (fade เฉพาะ opacity) สำหรับ wrapper `.ure-visible:not(.ure-settled)` ไม่แตะ transform ของ engine อีกต่อไป — แก้การ์ดซ้อนกันบนหน้าค้นหา; `.cm-group` / `.feed-page` ยังใช้ `ure-appear` เดิม |
+| `assets/css/nav-core.css` | คืนอนิเมชั่น underline ต้นฉบับ: inactive = `transform 200ms ease-in`, `.active` = `transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1)` (spring overshoot) |
+| `assets/css/nav-core-ext.css` | ตัด `transform: scale(0.97)` ถาวรออกจาก `.button-sub.active` — เหลือเฉพาะตอนกด (`:active`) |
+| `e2e/search-refresh-regression.spec.ts` | เพิ่มเทส guard กันการ์ดซ้อน (ตรวจตำแหน่งไม่ซ้ำกันหลัง render) |
+| `assets/md/en/current.md`, `assets/md/th/current.md` | โน้ตรีลีส v3.2.13 (EN/TH) |
+| `assets/md/{en,th}/releases/*`, `assets/json/version.json`, HTML/loaders | ของที่ release pipeline สร้างให้อัตโนมัติ |
 
-## รายละเอียดแพตช์ (v3.2.9)
+## รายละเอียดบั๊กที่แก้
 
-1. **Pop-up เลือกภาษาที่ใช้งานง่ายและเข้าถึงได้ครอบคลุม (A11y)**:
-   - อัปเกรดตัวเลือกภาษาใน `ui.js` ให้ใช้ `<button type="button">` ภายใต้ `role="listbox"` พร้อม `role="option"`, `aria-selected`, สัญลักษณ์เครื่องหมายถูก (`✓`), กรอบ Focus เส้นเด่นชัด (`outline: 2px solid #00FFAA`), Transition ขนาด 180ms และระบบนำทางด้วยปุ่มลูกศรกับ Enter/Space.
-2. **กำจัดโค้ดซ้ำซ้อนใน Central Language Core API (`lang-core.js`)**:
-   - ลบโค้ด IIFE ซ้ำซ้อนจำนวน 257 บรรทัดใน `lang-core.js` ออก ช่วยเพิ่มความเร็วในการโหลดสคริปต์โดยที่ `window.FvLang` ยังคงทำงานได้อย่างแม่นยำ.
-3. **ซิงก์ระบบจัดการ Prefix ภาษาบนลิงก์ภายใน (`lang-links.js`)**:
-   - เพิ่มการรับฟัง `fv:langchange` Custom Event นอกเหนือจาก `languageChange` เพื่อให้อัปเดต Prefix บนลิงก์ภายในทันทีเมื่อเปลี่ยนภาษา.
-4. **การจัดเก็บและคืนค่าโครงสร้าง HTML และ Attributes (`translator.js`)**:
-   - ปรับปรุง `storeOriginalContent` และ `resetToEnglishContent` ให้จัดเก็บและคืนค่า `data-original-html`, `data-original-placeholder`, `data-original-title` และ `data-original-aria-label` อย่างครบถ้วน.
-5. **ชุดทดสอบยูนิตเทสต์ระบบภาษา (`tests/localization-polish.test.ts`)**:
-   - เพิ่มไฟล์ทดสอบครอบคลุมการประมวลผลภาษา, ARIA Roles, การรับฟัง Event และการคืนค่าองค์ประกอบ HTML (ผ่านการทดสอบ 215/215 เคสใน 34 ไฟล์).
+บนหน้า Search การ์ดผลลัพธ์เคยซ้อนกันที่ตำแหน่งเดียว เห็นเฉพาะใบบนสุด: URE virtual scroll วาง wrapper ด้วย inline `transform` แต่อนิเมชั่น appear ของ v3.2.8 animate `transform` บน `.ure-visible` ด้วย ซึ่ง CSS animation override inline style ทุกใบเลยกลายเป็น `translateY(0)` ตอนนี้ wrapper ของ URE fade opacity เท่านั้น และมี E2E guard กันเกิดซ้ำ
+
+## ผลการทดสอบ
+
+- Unit: 234/234 ผ่าน (37 ไฟล์) | E2E เต็มชุด: 16/16 ผ่าน (รวม scroll-lock 3/3)
+- ตรวจในเบราว์เซอร์จริง: การ์ดหน้าต่างแรก 12/12 อยู่คนละตำแหน่ง มองเห็นครบ หน้า discover เรนเดอร์ตาม flow ปกติ

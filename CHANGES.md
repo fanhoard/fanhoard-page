@@ -1,30 +1,34 @@
-# FanHoard Localization System Polish v3.2.9
+# FanHoard Search Rendering Fix & Animation Restore v3.2.13
 
-## What changed in v3.2.9 (Localization System Polish)
+## What changed in v3.2.13 (Search Results Rendering Fix + Original Active-Button Animation)
 
-Elevated the FanHoard localization system, language picker overlay UX, central FvLang core API, link prefix manager, and translation engine to top-platform standards:
+Fixed the search page result-card stacking bug found in real-browser testing, restored the original premium `.active` button animation, and added an E2E regression guard.
 
-1. **Accessible Language Picker Overlay UX (`assets/js/lang-modules/ui.js`)**:
-   Upgraded language picker options to semantic `<button type="button">` elements in a `role="listbox"` container with `role="option"`, `aria-selected`, active checkmark indicators (`✓`), high-contrast focus rings (`outline: 2px solid #00FFAA`), smooth 180ms cubic-bezier transition curves, and keyboard arrow/enter navigation within the dialog.
-2. **Deduplicated Central Language Core API (`assets/js/lang-core.js`)**:
-   Surgically removed 257 lines of duplicate IIFE code in `assets/js/lang-core.js`, reducing script bundle size while preserving instant synchronous language resolution (`window.FvLang`), event listener dispatching (`fv:langchange`), and `localStorage` synchronization.
-3. **Synchronized Smart Link Language Prefix Manager (`assets/js/lang-links.js`)**:
-   Updated `lang-links.js` to listen to both `languageChange` and `fv:langchange` global events, ensuring internal link hrefs and dynamic DOM mutations maintain accurate language prefixes across all interaction pathways.
-4. **Preserved HTML Structure & Attribute Restoration (`assets/js/lang-modules/translator.js`)**:
-   Enhanced `TranslatorService` (`storeOriginalContent` and `resetToEnglishContent`) to store `data-original-html`, `data-original-placeholder`, `data-original-title`, and `data-original-aria-label`. Resetting to English now accurately restores child elements, icons, SVG slots, and translatable input attributes without layout degradation or content loss.
-5. **Automated Localization Test Suite (`tests/localization-polish.test.ts`)**:
-   Created dedicated unit test suite validating central API event dispatching, option markup semantics, keyboard focus, and content restoration (215/215 unit tests green across 34 test files).
+1. **Search result cards no longer stack on one spot (`assets/js/ure/ure.css`)**:
+   The URE virtual scroll engine positions every wrapper with an inline `transform` (`virtual-list.js`). The content-appear animation added in v3.2.8 also animated `transform` on `.ure-visible` wrappers, and CSS animations override inline styles — so every card in the first window stacked at `translateY(0)` with only the topmost card visible. Added a dedicated opacity-only `ure-appear-fade` keyframe for `.ure-visible:not(.ure-settled)` wrappers so the engine's positioning is never overridden; in-flow `.cm-group` / `.feed-page` groups keep the existing `ure-appear` reveal.
 
-## Files in v3.2.9
+2. **Original active-button animation restored (`assets/css/nav-core.css`)**:
+   The main navigation underline indicator returns to its designed dynamics: ease-in `transform 200ms` when inactive, springy overshoot `transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1)` on `.active` (replacing the flattened uniform 250ms curve from v3.2.5).
 
-| File | Status | Purpose |
-|---|---|---|
-| `assets/js/lang-core.js` | MODIFIED | Removed duplicated IIFE code block, reducing bundle size while keeping FvLang API synchronous. |
-| `assets/js/lang-modules/ui.js` | MODIFIED | Polished language overlay options with ARIA listbox roles, keyboard navigation, and checkmark indicators. |
-| `assets/js/lang-links.js` | MODIFIED | Added `fv:langchange` event listener for link prefix synchronization. |
-| `assets/js/lang-modules/translator.js` | MODIFIED | Enhanced original content storage to capture innerHTML, placeholders, titles, and aria-labels. |
-| `tests/localization-polish.test.ts` | NEW | Unit test suite for localization polish, FvLang API, option semantics, and content restoration. |
-| `assets/md/en/current.md` | MODIFIED | Release notes for v3.2.9 in English. |
-| `assets/md/th/current.md` | MODIFIED | Release notes for v3.2.9 in Thai. |
-| `CHANGES.md` | MODIFIED | Release changelog covering v3.2.9 localization system polish in English. |
-| `PATCH_NOTES.md` | MODIFIED | Release patch notes covering v3.2.9 localization system polish in Thai. |
+3. **Category pills no longer shrink while selected (`assets/css/nav-core-ext.css`)**:
+   Removed the permanent `transform: scale(0.97)` from `.button-sub.active` (introduced in v3.2.5); the shrink now applies only to the momentary `:active` press state, keeping the selected pill at full size as originally designed.
+
+4. **E2E regression guard (`e2e/search-refresh-regression.spec.ts`)**:
+   New test `result cards render at distinct positions (no transform-override stacking)` — asserts result cards occupy unique positions after render; fails on the broken state, passes after the fix.
+
+## Verification
+
+- `npx vitest run`: 234/234 tests green across 37 test files.
+- `npx playwright test`: full E2E suite 16/16 passing (scroll-lock 3/3 included).
+- Real-browser effective-DOM verification: 12/12 first-window search cards render at unique positions and are visible; discover feed groups render in normal flow at correct offsets.
+
+## Files changed in v3.2.13
+
+| File | Change |
+|------|--------|
+| `assets/js/ure/ure.css` | Opacity-only `ure-appear-fade` for URE wrappers; transform appear reserved for in-flow groups |
+| `assets/css/nav-core.css` | Restore original underline spring animation on `.active` |
+| `assets/css/nav-core-ext.css` | Remove permanent shrink on `.button-sub.active` |
+| `e2e/search-refresh-regression.spec.ts` | New no-stacking regression test |
+| `assets/md/en/current.md`, `assets/md/th/current.md` | v3.2.13 release notes |
+| `assets/md/{en,th}/releases/*`, `assets/json/version.json`, loaders, HTML | Release pipeline artifacts (v3.2.13) |

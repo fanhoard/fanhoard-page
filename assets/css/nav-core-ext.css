@@ -19,11 +19,13 @@
   outline: 2px solid var(--color-brand-primary, #0d9488);
   outline-offset: 2px;
 }
-.button-sub:active, .button-sub.active {
+.button-sub:active {
+  transform: scale(0.97);
+}
+.button-sub.active {
   color: var(--color-brand-text, var(--color-brand-primary, #0d9488));
   background: var(--fv-surface-teal-hover, rgba(0, 150, 136, 0.08));
   border-color: var(--border-brand, var(--color-brand-primary, #0d9488));
-  transform: scale(0.97);
 }
 
 .hi { padding: 0; }

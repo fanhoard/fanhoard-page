@@ -8,7 +8,7 @@
  *   FV_BUILD_ID ถูกแทนที่ด้วย build ID จริงโดย scripts/update-version.js
  *   ทุก module ที่ nav-core.js โหลดแบบ dynamic จะได้ ?v=<buildId> ต่อท้าย URL
  *   → browser ไม่ใช้ cache เดิมเมื่อ module ถูกอัพเดท
- *   ใน dev mode (ไม่ผ่าน build) FV_BUILD_ID = '3.2.12-202610031719' → _v() คืน '' → ไม่มี ?v=
+ *   ใน dev mode (ไม่ผ่าน build) FV_BUILD_ID = '3.2.13-202610032141' → _v() คืน '' → ไม่มี ?v=
  */
 (function() {
   'use strict';
