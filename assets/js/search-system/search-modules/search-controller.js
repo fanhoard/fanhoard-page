@@ -130,8 +130,18 @@
           if (!docsReady) {
             window.__pendingSearch = { q: q.trim(), type: State.selectedType || 'all' };
             const rc = DOMService.get(CONFIG.DOM.searchResultsId);
-            if (rc && !rc.querySelector('.search-result-placeholder')) {
-              rc.innerHTML = `<div class="search-result-placeholder" style="opacity:.5">${LanguageService.t('search_result_here')}</div>`;
+            if (rc) {
+              rc.setAttribute('aria-busy', 'true');
+              if (!rc.querySelector('.fvl-spinner') && !rc.querySelector('.fvl-scoped')) {
+                rc.innerHTML = '';
+                if (window.FVLSpinner) {
+                  window.FVLSpinner.mount(rc, { size: 'md' });
+                } else if (window.FVL?.scoped) {
+                  window.FVL.scoped({ target: rc, bare: true, size: 'md' });
+                } else {
+                  rc.innerHTML = '<div class="search-result-placeholder" style="opacity:.5">' + LanguageService.t('search_result_here') + '</div>';
+                }
+              }
             }
             window.__isRestoringScroll = false;
             return;

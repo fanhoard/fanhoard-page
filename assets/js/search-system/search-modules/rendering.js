@@ -193,6 +193,18 @@
       // ever rendered until the user searched again. Wait for URE and
       // re-render instead of dropping the render on the floor.
       if (!window.URE) {
+        const container = DOMService.get(CONFIG.DOM.searchResultsId);
+        if (container) {
+          container.setAttribute('aria-busy', 'true');
+          if (!container.querySelector('.fvl-spinner') && !container.querySelector('.fvl-scoped')) {
+            container.innerHTML = '';
+            if (window.FVLSpinner) {
+              window.FVLSpinner.mount(container, { size: 'md' });
+            } else if (window.FVL?.scoped) {
+              window.FVL.scoped({ target: container, bare: true, size: 'md' });
+            }
+          }
+        }
         const pending = this._urePending || (this._urePending = { tries: 0 });
         if (pending.tries < 40) { // ~10s budget (40 × 250ms)
           pending.tries++;
@@ -213,6 +225,7 @@
       try {
         const container = DOMService.get(CONFIG.DOM.searchResultsId);
         if (!container) return;
+        container.setAttribute('aria-busy', 'false');
 
         const lang     = LanguageService.getLang();
         const filtered = State.selectedCategory !== 'all'
