@@ -1,22 +1,26 @@
 ---
-version: 3.0.9
-date: 2026-10-01T22:31:05.341Z
-title: Loading spinner no longer vanishes during content switches
-subtitle: Fixed a brief blank gap that appeared in the content area whenever the site swapped content (navigation, refresh) on a slow connection.
+version: 3.2.1
+date: 2026-10-03T13:00:00.000Z
+title: Seamless Discover Spinner, System Polish, & Fullscreen Scroll Lock
+subtitle: Integrated centered loading spinners across Discover and Search, introduced comprehensive accessibility and navigation stability polish, and enforced background scroll locking during fullscreen overlays.
 notify: true
 ---
 
-**TL;DR** — While new content was being fetched, the spinner lived inside a container that had just been emptied. When that container's height collapsed to zero, the spinner disappeared with it and you saw a blank area until the content arrived. The loader now keeps the container from collapsing, so the spinner stays visible the whole time.
+**TL;DR** — We integrated smooth, inline loading feedback across Discover and Search without disruptive screen flashes, implemented site-wide navigation and stability polish, and completely locked background page scrolling whenever a fullscreen loading overlay is open.
+
+### New
+
+- **Seamless inline spinners for Discover and Search transitions**
+  When browsing categories in Discover or executing new search queries, lightweight centered loading spinners now appear directly inside the active content section instead of showing full-screen loading overlays or blank gaps. Search pending states and content rendering update smoothly with clear visual feedback.
+
+### Improved
+
+- **Comprehensive site polish, accessibility, and motion controls**
+  Enhanced loading overlays with centered spinner options and dynamic scrollbar compensation to prevent layout shifts. Added keyboard navigation controls (ESC key support), screen reader ARIA roles, focus management, and `prefers-reduced-motion` support across all main site style sheets.
+- **Navigational and data loader stability**
+  Guarded history back/forward button transitions against out-of-order page state updates, added graceful fallback handling for network request errors on the home feed, and introduced passive scroll listeners and resize throttling to reduce browser CPU overhead.
 
 ### Fixed
 
-- **Spinner stays visible while content loads during a swap**
-  The content-scoped loading overlay is positioned inside the content container. Swapping content empties that container first, which collapsed the overlay and left a blank content area for the duration of the fetch. The loading system now holds a minimum height on the container while it is empty and a loader is active, then restores the original value once loading finishes.
-  - Applies only when the content container is actually empty; pages with content render exactly as before.
-  - Multiple concurrent loaders on the same area coordinate so the height is restored only after the last one finishes.
-
-### For developers
-
-- New frozen config block `CONFIG.SCOPED_EMPTY_MIN_HEIGHT` (`THRESHOLD_PX: 240`, `MIN_HEIGHT: '60vh'`) in `fvl-modules/config.js`.
-- Scoped attach/restore in `fvl-modules/engine.js` now resolves the target's window via `ownerDocument.defaultView` (fixes restore inside sandboxed/test windows).
-- New test suite `tests/loading-scoped-fallback.test.ts` (5 cases). Full battery green: vitest 130/130, lint, build, Playwright 12/12.
+- **Background page scrolling locked during fullscreen overlays**
+  Opening a fullscreen loading overlay now reliably freezes all background scrolling across desktop and mobile devices. Scroll locks are now applied to both the HTML document root and body elements with touch and wheel gesture suppression, preventing background drift while restoring your exact scroll position when loading completes.
