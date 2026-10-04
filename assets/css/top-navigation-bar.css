@@ -27,17 +27,17 @@ nav {
   min-width: 44px; min-height: 44px;
 }
 .back-button:focus-visible {
-  outline: 2px solid var(--color-brand-primary, #0d9488);
+  outline: 2px solid var(--color-brand-primary, #4f46e5);
   outline-offset: 2px;
 }
 .back-button:active { background: var(--surface-hover, rgba(0,0,0,0.07)); }
 .back-button:active svg { transform:scale(0.9); }
-.back-button svg { width:auto; height:26px; color:var(--color-brand-primary, #0d9488); transition: color var(--transition-fast), transform var(--transition-fast); }
+.back-button svg { width:auto; height:26px; color:var(--color-brand-primary, #4f46e5); transition: color var(--transition-fast), transform var(--transition-fast); }
 
 .page-title {
   grid-column: 2;
   font-size: 1.06rem; font-weight: bold;
-  color: var(--color-brand-text, #0f766e);
+  color: var(--color-brand-text, #4338ca);
   text-align:center; font-family:inherit;
   padding:0 10px; width:100%; box-sizing:border-box;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;

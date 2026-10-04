@@ -13,7 +13,7 @@ header {
 .logo {
   font-family:'FoglihtenNo07calt',monospace;
   font-size: var(--step-3, 1.75rem); padding: var(--space-5, 20px) 0 0;
-  color:var(--color-brand-primary, #009688);
+  color:var(--color-brand-primary, #4f46e5);
   white-space:nowrap; display:flex; align-items:center;
   margin-left: var(--space-3, 12px); pointer-events:none;
 }
@@ -48,20 +48,20 @@ nav ul li button:hover { color: var(--text-main, #0f172a); }
 nav ul li button:active { background: var(--fv-surface-hover, #f0f0f0); transform: scale(0.97); }
 
 nav ul li button:focus-visible {
-  outline: 2px solid var(--color-brand-primary, #0d9488);
+  outline: 2px solid var(--color-brand-primary, #4f46e5);
   outline-offset: 2px;
 }
 
 nav ul li button.active {
-  color:var(--color-brand-text, #0f766e);
+  color:var(--color-brand-text, #4338ca);
   background:var(--fv-surface-teal-hover, rgba(0, 150, 136, 0.08));
-  border-color: var(--border-brand, #009688);
+  border-color: var(--border-brand, #4f46e5);
   transform: none;
 }
 
 nav ul li button::after {
   content:''; position:absolute; left:50%; bottom:0;
-  width:40%; height:3px; background:var(--color-brand-primary, #009688);
+  width:40%; height:3px; background:var(--color-brand-primary, #4f46e5);
   border-radius: var(--radius-sm, 6px) var(--radius-sm, 6px) 0 0; 
   transform: translateX(-50%) scaleX(0);
   will-change: transform;

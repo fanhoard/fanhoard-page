@@ -28,7 +28,7 @@ h2, .h2,
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   font-size: var(--step-2, 1.375rem);
   font-weight: var(--font-bold, 700);
-  color: var(--color-brand-primary, #0d9488);
+  color: var(--color-brand-primary, #4f46e5);
   margin: 0 0 var(--space-4, 1rem) 0;
   letter-spacing: 0.01em;
 }
@@ -52,7 +52,7 @@ h3, .h3 {
 }
 
 strong, b {
-  color: var(--color-brand-primary, #0d9488);
+  color: var(--color-brand-primary, #4f46e5);
   font-weight: var(--font-bold, 700);
 }
 
@@ -175,14 +175,14 @@ section.mn {
 
 .button:hover, .btn:hover {
   background-color: var(--surface-hover, rgba(0,0,0,0.03));
-  border-color: var(--color-brand-primary, #0d9488);
-  color: var(--color-brand-primary, #0d9488);
+  border-color: var(--color-brand-primary, #4f46e5);
+  color: var(--color-brand-primary, #4f46e5);
 }
 
 .button-primary, .btn-primary {
-  background-color: var(--color-brand-primary, #0d9488);
+  background-color: var(--color-brand-primary, #4f46e5);
   color: #ffffff;
-  border: 1px solid var(--color-brand-primary, #0d9488);
+  border: 1px solid var(--color-brand-primary, #4f46e5);
 }
 
 .button-primary:hover, .btn-primary:hover {
@@ -199,8 +199,8 @@ section.mn {
 
 .button-secondary:hover, .btn-secondary:hover {
   background-color: var(--surface-hover, rgba(0,0,0,0.03));
-  color: var(--color-brand-primary, #0d9488);
-  border-color: var(--color-brand-primary, #0d9488);
+  color: var(--color-brand-primary, #4f46e5);
+  border-color: var(--color-brand-primary, #4f46e5);
 }
 
 /* Fixed icon bounding box & single axis vertical alignment */
@@ -251,7 +251,7 @@ section.mn {
 }
 
 .feature-card:hover {
-  border-color: var(--color-brand-primary, #0d9488);
+  border-color: var(--color-brand-primary, #4f46e5);
   box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
 }
 
@@ -343,7 +343,7 @@ section.mn {
 }
 
 .faq-question:hover {
-  color: var(--color-brand-primary, #0d9488);
+  color: var(--color-brand-primary, #4f46e5);
 }
 
 .faq-question::after {
@@ -358,13 +358,13 @@ section.mn {
 }
 
 .faq-question:hover::after {
-  color: var(--color-brand-primary, #0d9488);
+  color: var(--color-brand-primary, #4f46e5);
 }
 
 details[open] > .faq-question::after,
 details.faq-item[open] .faq-question::after {
   transform: translateY(-50%) rotate(-180deg);
-  color: var(--color-brand-primary, #0d9488);
+  color: var(--color-brand-primary, #4f46e5);
 }
 
 .faq-answer {
@@ -402,7 +402,7 @@ details[open] .faq-answer {
 .text-h h2 {
   font-size: var(--step-2, 1.375rem);
   font-weight: var(--font-bold, 700);
-  color: var(--color-brand-primary, #0d9488);
+  color: var(--color-brand-primary, #4f46e5);
   margin: 0;
 }
 
@@ -461,7 +461,7 @@ details[open] .faq-answer {
 }
 
 .item-card:hover, .item-card.fv-card:hover {
-  border-color: var(--color-brand-primary, #0d9488);
+  border-color: var(--color-brand-primary, #4f46e5);
   background-color: var(--surface-hover, rgba(0,0,0,0.02));
   transform: none;
   box-shadow: none;
@@ -495,7 +495,7 @@ details[open] .faq-answer {
 
 .item-card--view-all:hover {
   background: var(--surface-hover, rgba(0,0,0,0.02));
-  border-color: var(--color-brand-primary, #0d9488);
+  border-color: var(--color-brand-primary, #4f46e5);
 }
 
 .view-all-icon {
@@ -507,7 +507,7 @@ details[open] .faq-answer {
   border-radius: var(--radius-full, 9999px);
   background: transparent;
   border: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
-  color: var(--color-brand-primary, #0d9488);
+  color: var(--color-brand-primary, #4f46e5);
   flex-shrink: 0;
 }
 
@@ -575,8 +575,8 @@ details[open] .faq-answer {
 
 .carousel-arrow:hover .ca-icon-wrap {
   background: var(--surface-card, #ffffff);
-  color: var(--color-brand-primary, #0d9488);
-  border-color: var(--color-brand-primary, #0d9488);
+  color: var(--color-brand-primary, #4f46e5);
+  border-color: var(--color-brand-primary, #4f46e5);
   transform: none;
 }
 
@@ -668,7 +668,7 @@ details[open] .faq-answer {
   clip: auto;
   overflow: visible;
   white-space: normal;
-  background: var(--color-brand-primary, #0d9488);
+  background: var(--color-brand-primary, #4f46e5);
   color: #ffffff;
   font-weight: var(--font-bold, 700);
   font-size: var(--step--1, 0.875rem);
@@ -680,7 +680,7 @@ details[open] .faq-answer {
 .btn:focus-visible,
 .item-card:focus-visible,
 .faq-question:focus-visible {
-  outline: 3px solid rgba(13, 148, 136, 0.35);
+  outline: 3px solid rgba(99, 102, 241, 0.35);
   outline-offset: 2px;
 }
 

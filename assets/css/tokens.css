@@ -21,7 +21,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   FANHOARD DESIGN TOKENS v3.0 (White-First High-Radius Design Language)
+   FANHOARD DESIGN TOKENS v4.0 (Calm SaaS — Soft Indigo, High-Radius, Glass)
    assets/css/tokens.css
    Single Source of Truth for Design Custom Properties
    ═══════════════════════════════════════════════════════════════ */
@@ -33,15 +33,20 @@
   --fv-scroll-offset: calc(var(--fv-nav-height) + var(--space-4));
   --fv-nav-top-h: var(--fv-nav-height);
 
-  /* ── Brand Core Palette ── */
-  --color-teal-50:  #f0fdf4;
-  --color-teal-100: #ccfbf1;
-  --color-teal-400: #2dd4bf;
-  --color-teal-500: #14b8a6;
-  --color-teal-600: #0d9488; /* Primary interactive AA (4.88:1 on light) */
-  --color-teal-700: #0f766e;
-  --color-teal-800: #115e59;
-  --color-teal-900: #134e4a;
+  /* ── Brand Core Palette (v4: calm soft-indigo accent) ──
+     --color-teal-* names are kept as legacy aliases — they now resolve to the
+     indigo ramp so every historical consumer flows to the new brand hue. */
+  --color-teal-50:  #eef2ff;
+  --color-teal-100: #e0e7ff;
+  --color-teal-400: #818cf8;
+  --color-teal-500: #6366f1;
+  --color-teal-600: #4f46e5; /* Primary interactive AA (6.3:1 on light) */
+  --color-teal-700: #4338ca;
+  --color-teal-800: #3730a3;
+  --color-teal-900: #312e81;
+
+  --color-indigo-soft: #6366f1;   /* accent for glows & gradients */
+  --color-indigo-glow: rgba(99, 102, 241, 0.15);
 
   --color-emerald-500: #10b981;
   --color-emerald-600: #059669;
@@ -64,9 +69,9 @@
   --color-brand-text:    var(--color-teal-700);
   --color-brand-accent:  var(--color-emerald-600);
 
-  --surface-base:   #FAFAFC; /* v3 white-first page canvas */
-  --surface-card:   #ffffff;
-  --surface-hover:  var(--color-slate-100);
+  --surface-base:   #F8FAFC; /* v4 calm neutral canvas */
+  --surface-card:   #ffffff; /* surface-1 */
+  --surface-hover:  var(--color-slate-100); /* surface-2 */
   --surface-active: var(--color-slate-200);
 
   --text-main:      var(--color-slate-900);
@@ -78,11 +83,16 @@
   --border-strong:  rgba(15, 23, 42, 0.16);
   --border-brand:   var(--color-teal-600);
 
-  --color-success:  #16a34a;
-  --color-warning:  #d97706;
-  --color-danger:   #dc2626;
-  --color-info:     #2563eb;
+  --color-success:  #10b981;
+  --color-warning:  #f59e0b;
+  --color-danger:   #ef4444;
+  --color-info:     #6366f1;
 
+
+  /* ── Glass diffusion (nav bar / modals / floating surfaces) ── */
+  --glass-bg:    rgba(255, 255, 255, 0.82);
+  --glass-blur:  16px;
+  --glass-border: rgba(0, 0, 0, 0.06);
   /* ── Legacy Backward-Compatibility Mappings ── */
   --fv-brand-teal:       var(--color-brand-primary);
   --fv-brand-teal-light: var(--color-brand-primary);
@@ -148,13 +158,13 @@
   --fv-space-7: var(--space-7);
 
   /* ── Corner Radii Harmonized Scale ── */
-  --radius-xs:   4px;
-  --radius-sm:   8px;
-  --radius-md:   12px;
-  --radius-lg:   16px;
-  --radius-xl:   24px;
-  --radius-2xl:  28px;
-  --radius-full: 9999px;
+  --radius-xs:   8px;   /* badge */
+  --radius-sm:   12px;  /* input / button */
+  --radius-md:   16px;  /* card */
+  --radius-lg:   24px;  /* hero */
+  --radius-xl:   32px;  /* modal / sheet */
+  --radius-2xl:  32px;
+  --radius-full: 9999px; /* pill */
 
   --fv-radius-xs:   var(--radius-xs);
   --fv-radius-sm:   var(--radius-sm);
@@ -164,23 +174,25 @@
   --fv-radius-2xl:  var(--radius-2xl);
   --fv-radius-pill: var(--radius-full);
   --r-btn:  var(--radius-full);
-  --r-card: var(--radius-xl);
+  --r-card: var(--radius-lg);
 
   /* ── Elevation Tokens (Lighter, Clean Native Layering) ── */
-  --shadow-sm:    0 1px 3px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md:    0 4px 16px -2px rgba(0, 0, 0, 0.08);
-  --shadow-lg:    0 12px 32px -4px rgba(0, 0, 0, 0.12);
-  --focus-ring-color: rgba(13, 148, 136, 0.35);
+  --ring-subtle:  0 0 0 1px var(--border-subtle);
+  --shadow-sm:    0 1px 2px rgba(0, 0, 0, 0.04), var(--ring-subtle);
+  --shadow-md:    0 6px 16px -2px rgba(0, 0, 0, 0.06), var(--ring-subtle);
+  --shadow-lg:    0 16px 32px -4px rgba(0, 0, 0, 0.08), var(--ring-subtle);
+  --shadow-modal: 0 24px 48px -12px rgba(0, 0, 0, 0.18), var(--ring-subtle);
+  --focus-ring-color: rgba(99, 102, 241, 0.35);
   --shadow-focus: 0 0 0 3px var(--focus-ring-color);
-  --fv-shadow-teal: 0 4px 14px 0 rgba(13, 148, 136, 0.20);
+  --fv-shadow-teal: 0 4px 16px 0 rgba(99, 102, 241, 0.18);
 
   /* ── Motion & Transitions ── */
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1); /* soft physics ease-out */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-  --duration-fast:   150ms;
-  --duration-normal: 250ms;
-  --duration-slow:   350ms;
+  --duration-fast:   150ms; /* controls */
+  --duration-normal: 220ms; /* card / modal */
+  --duration-slow:   350ms; /* page */
 
   --transition-fast:   150ms var(--ease-standard);
   --transition-normal: 250ms var(--ease-standard);
@@ -222,10 +234,10 @@
     --color-brand-hover:   var(--color-teal-500);
     --color-brand-text:    var(--color-teal-400);
 
-    --surface-base:   var(--color-slate-900);
-    --surface-card:   var(--color-slate-800);
-    --surface-hover:  var(--color-slate-700);
-    --surface-active: var(--color-slate-600);
+    --surface-base:   #0B0D10; /* v4 calm deep canvas */
+    --surface-card:   #13161C; /* surface-1 */
+    --surface-hover:  #1B1E26; /* surface-2 */
+    --surface-active: #232833;
 
     --text-main:    var(--color-slate-50);
     --text-muted:   var(--color-slate-300);
@@ -237,7 +249,7 @@
     --fv-surface-page:       var(--surface-base);
     --fv-surface-soft:       var(--surface-hover);
     --fv-surface-hover:      var(--surface-hover);
-    --fv-surface-teal-hover: rgba(45, 212, 191, 0.15);
+    --fv-surface-teal-hover: rgba(129, 140, 248, 0.15);
 
     --fv-text-primary:   var(--text-main);
     --fv-text-secondary: var(--text-muted);
@@ -247,9 +259,12 @@
     --c-heading:     var(--text-main);
     --c-body:        var(--text-muted);
 
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.5);
+    --glass-bg:    rgba(19, 22, 28, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.08);
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 0 0 1px var(--border-subtle);
+    --shadow-md: 0 6px 16px -2px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-subtle);
+    --shadow-lg: 0 16px 32px -4px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border-subtle);
   }
 }
 
@@ -257,10 +272,10 @@
   --color-brand-primary: var(--color-teal-400);
   --color-brand-hover:   var(--color-teal-500);
 
-  --surface-base:   var(--color-slate-900);
-  --surface-card:   var(--color-slate-800);
-  --surface-hover:  var(--color-slate-700);
-  --surface-active: var(--color-slate-600);
+  --surface-base:   #0B0D10; /* v4 calm deep canvas */
+  --surface-card:   #13161C; /* surface-1 */
+  --surface-hover:  #1B1E26; /* surface-2 */
+  --surface-active: #232833;
 
   --text-main:    var(--color-slate-50);
   --text-muted:   var(--color-slate-300);
@@ -272,7 +287,7 @@
   --fv-surface-page:       var(--surface-base);
   --fv-surface-soft:       var(--surface-hover);
   --fv-surface-hover:      var(--surface-hover);
-  --fv-surface-teal-hover: rgba(45, 212, 191, 0.15);
+  --fv-surface-teal-hover: rgba(129, 140, 248, 0.15);
 
   --fv-text-primary:   var(--text-main);
   --fv-text-secondary: var(--text-muted);
@@ -282,7 +297,10 @@
   --c-heading:     var(--text-main);
   --c-body:        var(--text-muted);
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.5);
+  --glass-bg:    rgba(19, 22, 28, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 0 0 1px var(--border-subtle);
+  --shadow-md: 0 6px 16px -2px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-subtle);
+  --shadow-lg: 0 16px 32px -4px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border-subtle);
 }

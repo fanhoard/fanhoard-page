@@ -1,16 +1,18 @@
 ---
-version: 3.2.26
-date: 2026-10-04T06:21:58.665Z
-title: Loading That Truly Locks the Page
-subtitle: The background can no longer scroll behind the fullscreen loading overlay — fixed at the root, plus a CSS safety net.
+version: 3.3.0
+date: 2026-10-04T07:20:17.691Z
+title: A Calmer, More Modern Look
+subtitle: A new calm design language — soft indigo accent, deeper rounded corners, softer layered shadows, and a quieter neutral base.
 notify: true
 ---
 
-**TL;DR** — The page behind the fullscreen loading overlay is now truly frozen while the overlay is visible, and unlocks cleanly when it disappears. Fixed at the root cause, with a CSS backstop so it stays fixed.
+**TL;DR** — FanHoard gets a refreshed design core: the accent color shifts from teal to a calm soft indigo, corners are rounder, shadows are softer with a subtle border ring, and dark mode uses a deeper, calmer neutral canvas.
 
-### Fixed
+### Changed
 
-- **Real scroll lock** — the background no longer scrolls behind the fullscreen loading overlay while it is still visible, including during the short delay before the overlay fades out.
-- **Single scroll-lock authority** — navigation no longer force-clears the page's inline lock styles; every lock and unlock now goes through the shared ScrollLockCore, so popups, search and loading overlays can never unlock each other.
-- **CSS safety net** — a backstop rule freezes the page whenever the lock state is active, even if a script error ever loses the inline styles.
-- **Error recovery** — if a page fails to load, the error screen now always releases the scroll lock first, so the page never stays frozen behind an overlay.
+- **Calm soft-indigo accent** — the single accent color across the whole site moves from teal to a soft indigo, for a quieter, more professional feel.
+- **Higher rounded corners** — badges, inputs, cards and modals now use a higher corner-radius scale for a softer, modern SaaS appearance.
+- **Softer layered shadows** — shadows gain a gentle multi-layer depth with a subtle 1px border ring, so cards feel light instead of heavy.
+- **Calmer dark mode** — dark mode now sits on a deep, near-black neutral canvas with softer elevated surfaces instead of blue-grey.
+- **Smoother motion** — interface transitions now use a soft ease-out curve with tuned timings, so hover and focus feel calm rather than abrupt.
+- **Refreshed status colors** — success, warning and error tones are updated to match the new palette.

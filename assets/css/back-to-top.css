@@ -17,7 +17,7 @@
   padding: 0;
   cursor: pointer;
 
-  background: var(--color-brand-primary, #0d9488);
+  background: var(--color-brand-primary, #4f46e5);
   border: none;
   box-shadow: none;
 
@@ -87,7 +87,7 @@
 }
 
 #back-to-top:focus-visible {
-  outline: 3px solid rgba(13, 148, 136, 0.35);
+  outline: 3px solid rgba(99, 102, 241, 0.35);
   outline-offset: 2px;
 }
 

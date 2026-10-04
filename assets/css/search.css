@@ -79,8 +79,8 @@ body {
 
 .search-pill:focus-within {
   background: var(--surface-card, #ffffff);
-  border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
-  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.35);
+  border-color: var(--color-brand-primary, var(--color-brand-primary, #4f46e5));
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.35);
 }
 
 .search-pill__icon {
@@ -130,7 +130,7 @@ body {
   color: var(--text-main, #152a2f);
   font-family: inherit;
   letter-spacing: 0.1px;
-  caret-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  caret-color: var(--color-brand-primary, var(--color-brand-primary, #4f46e5));
   font-synthesis: none;
 }
 
@@ -164,8 +164,8 @@ body {
 
 #search-clear-btn:hover,
 #search-clear-btn:focus-visible {
-  background: var(--surface-hover, rgba(13, 148, 136, 0.08));
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  background: var(--surface-hover, rgba(99, 102, 241, 0.08));
+  color: var(--color-brand-primary, var(--color-brand-primary, #4f46e5));
 }
 
 #search-clear-btn:active {
@@ -239,10 +239,10 @@ body {
 }
 
 .filter-pill.active {
-  box-shadow: 0 0 0 1px rgba(13, 148, 136, 0.51);
-  background: var(--surface-hover, rgba(13, 148, 136, 0.08));
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.51);
+  background: var(--surface-hover, rgba(99, 102, 241, 0.08));
   opacity: 1;
-  color: var(--color-brand-text, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, var(--color-brand-primary, #4f46e5));
   font-weight: 600;
 }
 
@@ -258,9 +258,9 @@ body {
 }
 
 .filter-pill--cat.active {
-  background: rgba(13, 148, 136, 0.07);
-  border-color: rgba(13, 148, 136, 0.42);
-  color: var(--color-brand-text, var(--color-brand-primary, #0d9488));
+  background: rgba(99, 102, 241, 0.07);
+  border-color: rgba(99, 102, 241, 0.42);
+  color: var(--color-brand-text, var(--color-brand-primary, #4f46e5));
   font-weight: 600;
   opacity: 1;
   box-shadow: none;
@@ -306,14 +306,14 @@ body {
 }
 
 .result-card:hover {
-  border-color: rgba(13, 148, 136, 0.24);
+  border-color: rgba(99, 102, 241, 0.24);
   background: var(--surface-hover, #f1f5f9);
   box-shadow: var(--shadow-md, 0 4px 16px -2px rgba(0, 0, 0, 0.08));
 }
 
 .result-card:active {
-  background: rgba(13, 148, 136, 0.05);
-  border-color: rgba(13, 148, 136, 0.18);
+  background: rgba(99, 102, 241, 0.05);
+  border-color: rgba(99, 102, 241, 0.18);
 }
 
 .result-card .result-card__glyph {
@@ -325,8 +325,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(13, 148, 136, 0.10);
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  background: rgba(99, 102, 241, 0.10);
+  color: var(--color-brand-primary, var(--color-brand-primary, #4f46e5));
   border: none;
   flex-shrink: 0;
 }
@@ -370,13 +370,13 @@ body {
 }
 
 .result-card .result-card__tag {
-  background: rgba(13, 148, 136, 0.06);
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  background: rgba(99, 102, 241, 0.06);
+  color: var(--color-brand-primary, var(--color-brand-primary, #4f46e5));
   padding: 3px 10px;
   font-size: 12px;
   border-radius: var(--radius-full, 999px);
   font-weight: 500;
-  border: 1px solid rgba(13, 148, 136, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.15);
   line-height: 1.5;
   white-space: nowrap;
   flex-shrink: 0;
@@ -500,7 +500,7 @@ body {
 }
 
 .search-suggestion-body mark {
-  background: rgba(13, 148, 136, 0.18);
+  background: rgba(99, 102, 241, 0.18);
   color: var(--text-main, #152a2f);
   font-weight: 600;
   display: inline;
@@ -605,9 +605,9 @@ body {
 
 
 @keyframes _demo-pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.40); }
-  60%  { box-shadow: 0 0 0 12px rgba(13, 148, 136, 0); }
-  100% { box-shadow: 0 0 0 16px rgba(13, 148, 136, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.40); }
+  60%  { box-shadow: 0 0 0 12px rgba(99, 102, 241, 0); }
+  100% { box-shadow: 0 0 0 16px rgba(99, 102, 241, 0); }
 }
 
 
@@ -645,7 +645,7 @@ body {
 .filter-pill:focus-visible,
 .result-card:focus-visible,
 .search-suggestion-item:focus-visible {
-  outline: 3px solid rgba(13, 148, 136, 0.35);
+  outline: 3px solid rgba(99, 102, 241, 0.35);
   outline-offset: 2px;
 }
 
@@ -664,14 +664,14 @@ body {
     background: var(--surface-hover, #f1f5f9);
   }
   #search-clear-btn:hover {
-    background: rgba(13, 148, 136, 0.12);
+    background: rgba(99, 102, 241, 0.12);
   }
   .search-suggestion-item:hover {
     background: var(--surface-hover, #f1f5f9);
   }
   .result-card:hover {
-    background: rgba(13, 148, 136, 0.03);
-    border-color: rgba(13, 148, 136, 0.25);
+    background: rgba(99, 102, 241, 0.03);
+    border-color: rgba(99, 102, 241, 0.25);
     box-shadow: none;
   }
   .filter-pill:not(.active):hover {
