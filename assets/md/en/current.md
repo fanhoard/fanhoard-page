@@ -1,14 +1,13 @@
 ---
-version: 3.3.3
-date: 2026-10-04T08:04:29.595Z
-title: Root Now Takes You Home
-subtitle: The site root now redirects straight to the home page — a small detail that makes getting in (and checking the site) smoother.
+version: 3.3.4
+date: 2026-10-04T08:15:36.782Z
+title: Root Redirect Fix
+subtitle: The root-to-home redirect announced in 3.3.3 now actually ships in the build output — a build-pipeline miss, now corrected.
 notify: true
 ---
 
-**TL;DR** — Visiting the site root ("/") now redirects directly to the home page instead of showing the 404 page. All other unknown addresses keep the friendly 404 page exactly as before.
+**TL;DR** — The root redirect from the previous release didn't reach the deployed site because the rules file is generated at build time. The generator now includes it, so "/" will redirect to /home/ once this build goes live.
 
-### Changed
+### Fixed
 
-- **Root redirect** — "/" now redirects to /home/ (temporary 302), so opening the site always lands on the real home page.
-- **404 behavior preserved** — every other unknown address still shows the friendly 404 page with the link home, exactly as before.
+- **Root redirect now ships** — the "/" → /home/ 302 rule was added to the wrong file (a dev-only copy); it is now generated into the build output the site actually serves.

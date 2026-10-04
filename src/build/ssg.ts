@@ -128,6 +128,10 @@ export function generateRedirects(langs: string[], passThroughDirs: string[]): s
 
   lines.push(
     '',
+    '# ── Root -> home (302 convenience entry; 2026-10-04) ────────────────',
+    '# Server-level only — the 404 page itself stays redirect-free (GSC fix).',
+    '/ /home/ 302',
+    '',
     '# ── Catch-all 404 ───────────────────────────────────────────────────',
     '/* /index.html 404',
     '',
