@@ -17,7 +17,7 @@
   padding: 0;
   cursor: pointer;
 
-  background: var(--color-brand-primary, #4f46e5);
+  background: var(--color-brand-primary, #2E9188);
   border: none;
   box-shadow: none;
 
@@ -39,7 +39,7 @@
 }
 
 #back-to-top:hover {
-  background: var(--color-brand-hover, #4338ca);
+  background: var(--color-brand-hover, #1F746D);
 }
 
 #back-to-top svg {
@@ -87,7 +87,7 @@
 }
 
 #back-to-top:focus-visible {
-  outline: 3px solid rgba(99, 102, 241, 0.35);
+  outline: 3px solid rgba(64, 169, 157, 0.35);
   outline-offset: 2px;
 }
 

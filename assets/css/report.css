@@ -30,7 +30,7 @@ section.con .fv-section-label,
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   font-size: var(--step-2, 1.5rem);
   font-weight: var(--font-bold, 700);
-  color: var(--color-brand-text, #4f46e5);
+  color: var(--color-brand-text, #2E9188);
   margin-bottom: var(--space-2, 0.5rem);
   display: block;
 }
@@ -142,7 +142,7 @@ section.con .fv-section-desc,
   font-size: var(--step-0, 0.9375rem);
   font-weight: var(--font-semibold, 600);
   color: #ffffff;
-  background-color: var(--color-brand-primary, #4f46e5);
+  background-color: var(--color-brand-primary, #2E9188);
   border: none;
   border-radius: var(--radius-full, 9999px);
   cursor: pointer;
@@ -151,7 +151,7 @@ section.con .fv-section-desc,
 }
 
 .contact-action-btn:hover {
-  background-color: var(--color-brand-hover, #4338ca);
+  background-color: var(--color-brand-hover, #1F746D);
 }
 
 .contact-action-btn svg {
@@ -225,8 +225,8 @@ select.setting-item.select {
 .report-textarea:focus,
 .report-textinput:focus,
 select.setting-item.select:focus {
-  border-color: var(--color-brand-primary, #4f46e5);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.35);
+  border-color: var(--color-brand-primary, #2E9188);
+  box-shadow: 0 0 0 3px rgba(64, 169, 157, 0.35);
   outline: none;
 }
 
@@ -251,7 +251,7 @@ select.setting-item.select:focus {
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   font-weight: var(--font-semibold, 600);
   color: #ffffff;
-  background-color: var(--color-brand-primary, #4f46e5);
+  background-color: var(--color-brand-primary, #2E9188);
   border: none;
   border-radius: var(--radius-full, 9999px);
   cursor: pointer;
@@ -261,14 +261,14 @@ select.setting-item.select:focus {
 }
 
 .report-submit:hover {
-  background-color: var(--color-brand-hover, #4338ca);
+  background-color: var(--color-brand-hover, #1F746D);
   transform: none;
   box-shadow: none;
 }
 
 .report-submit:active {
   transform: none;
-  background-color: var(--color-brand-hover, #4338ca);
+  background-color: var(--color-brand-hover, #1F746D);
 }
 
 .report-submit:disabled {
@@ -314,8 +314,8 @@ select.setting-item.select:focus-visible,
 .report-submit:focus-visible,
 .contact-action-btn:focus-visible,
 .community-link-row:focus-visible {
-  border-color: var(--color-brand-primary, #4f46e5);
-  outline: 3px solid rgba(99, 102, 241, 0.35);
+  border-color: var(--color-brand-primary, #2E9188);
+  outline: 3px solid rgba(64, 169, 157, 0.35);
   outline-offset: 2px;
 }
 

@@ -1,6 +1,6 @@
 ---
-version: 4.0.0
-date: 2026-10-04T08:38:19.574Z
+version: 4.0.1
+date: 2026-10-04T08:41:39.353Z
 title: Clean Pastel — A True Redesign
 subtitle: A genuinely new look: pure white everywhere, the site's original teal back as a soft pastel accent, a clean top navigation bar, and crisp modern surfaces.
 notify: true
@@ -15,3 +15,9 @@ notify: true
 - **Clean top navigation** — the floating glass pill is replaced by a crisp full-width top bar with a small pastel chip marking the active tab.
 - **Crisper corners, lighter shadows** — cards and buttons use tighter radii with minimal shadows for a sharper, more modern feel.
 - **Crisp dialogs & toasts** — popups and toasts drop the frosted blur in favor of clean white surfaces with soft shadows.
+
+### Home & site-wide polish
+
+- **New home hero and feature layout** — a larger editorial headline, a quiet pastel badge, clearer CTA grouping, and a three-column set of crisp feature cards.
+- **Refined FAQ and footer** — FAQs now sit in compact outlined panels; the footer uses a hairline top rule and unboxed links.
+- **Consistent teal throughout** — legacy indigo fallback values across site stylesheets now use the new teal ramp, while the protected discover filter stylesheet remains untouched.

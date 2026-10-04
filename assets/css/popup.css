@@ -3,7 +3,7 @@
    assets/css/popup.css
    Redesigned to FanHoard Design Method & Systems Quality Standard.
    Pure white canvas, hairline 1px dividers/borders, solid teal primary,
-   WCAG AA small-text teal (var(--color-brand-hover, #4338ca)), 12-16px radii, 2px focus ring.
+   WCAG AA small-text teal (var(--color-brand-hover, #1F746D)), 12-16px radii, 2px focus ring.
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── Reset & Base ───────────────────────────────────────────────────────── */
@@ -38,9 +38,9 @@
 .fp-popup select:focus-visible,
 .fp-popup textarea:focus-visible,
 .fp-popup [tabindex]:focus-visible {
-  outline: 3px solid var(--focus-ring-color, rgba(99, 102, 241, 0.35));
+  outline: 3px solid var(--focus-ring-color, rgba(64, 169, 157, 0.35));
   outline-offset: 2px !important;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+  box-shadow: 0 0 0 3px rgba(64, 169, 157, 0.18);
 }
 
 /* ── Inner Container ────────────────────────────────────────────────────── */
@@ -187,12 +187,12 @@
 }
 
 .fp-btn-primary {
-  background: var(--color-brand-primary, #4f46e5);
+  background: var(--color-brand-primary, #2E9188);
   color: #ffffff;
 }
 
 .fp-btn-primary:hover {
-  background: var(--color-brand-hover, #4338ca);
+  background: var(--color-brand-hover, #1F746D);
   box-shadow: none;
 }
 
@@ -214,7 +214,7 @@
 .fp-popup .fp-tag,
 .fp-popup .fp-text-small,
 .fp-popup .fp-meta-teal {
-  color: var(--color-brand-hover, #4338ca);
+  color: var(--color-brand-hover, #1F746D);
 }
 
 /* ── Alert & Confirm body styles ────────────────────────────────────────── */
@@ -512,7 +512,7 @@
   height: 8px;
   flex-shrink: 0;
   border-radius: var(--radius-full, 9999px);
-  background: var(--fp-toast-dot, var(--color-brand-primary, #4f46e5));
+  background: var(--fp-toast-dot, var(--color-brand-primary, #2E9188));
 }
 
 .fp-toast-success,
@@ -533,7 +533,7 @@
 
 .fp-toast-info,
 .fp-variant-info.fp-toast {
-  --fp-toast-dot: var(--color-brand-primary, #4f46e5);
+  --fp-toast-dot: var(--color-brand-primary, #2E9188);
 }
 
 /* ── Tooltip ───────────────────────────────────────────────────────────── */

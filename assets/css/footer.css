@@ -81,7 +81,7 @@
   font-family: var(--font-sans);
   font-size: 1.7rem;
   font-weight: 700;
-  color: var(--color-brand-primary, #4f46e5);
+  color: var(--color-brand-primary, #2E9188);
   letter-spacing: -0.02em;
   line-height: 1;
 }
@@ -147,14 +147,14 @@
 
 .footer-minimal .footer-link:hover {
   background: var(--surface-hover, #F1F5F9);
-  box-shadow: 0 0 0 1px var(--color-brand-primary, #4f46e5), 0 4px 12px rgba(99, 102, 241, 0.1);
-  color: var(--color-brand-primary, #4f46e5);
+  box-shadow: 0 0 0 1px var(--color-brand-primary, #2E9188), 0 4px 12px rgba(64, 169, 157, 0.1);
+  color: var(--color-brand-primary, #2E9188);
   text-decoration: none;
   transform: translateX(4px);
 }
 
 .footer-minimal .footer-link:focus-visible {
-  outline: 3px solid rgba(99, 102, 241, 0.35);
+  outline: 3px solid rgba(64, 169, 157, 0.35);
   outline-offset: 2px;
 }
 
@@ -207,14 +207,14 @@
 }
 
 .footer-minimal .footer-social:hover {
-  box-shadow: 0 0 0 1.5px var(--color-brand-primary, #4f46e5), 0 6px 15px rgba(99, 102, 241, 0.12);
-  color: var(--color-brand-primary, #4f46e5);
+  box-shadow: 0 0 0 1.5px var(--color-brand-primary, #2E9188), 0 6px 15px rgba(64, 169, 157, 0.12);
+  color: var(--color-brand-primary, #2E9188);
   background: var(--surface-hover, #F1F5F9);
   transform: translateY(-3px);
 }
 
 .footer-minimal .footer-social:focus-visible {
-  outline: 3px solid rgba(99, 102, 241, 0.35);
+  outline: 3px solid rgba(64, 169, 157, 0.35);
   outline-offset: 2px;
 }
 
@@ -247,13 +247,13 @@
 }
 
 .footer-minimal .footer-bottom a:hover {
-  color: var(--color-brand-primary, #4f46e5);
-  border-bottom-color: var(--color-brand-primary, #4f46e5);
+  color: var(--color-brand-primary, #2E9188);
+  border-bottom-color: var(--color-brand-primary, #2E9188);
   text-decoration: none;
 }
 
 .footer-minimal .footer-bottom a:focus-visible {
-  outline: 3px solid rgba(99, 102, 241, 0.35);
+  outline: 3px solid rgba(64, 169, 157, 0.35);
   outline-offset: 2px;
 }
 
@@ -346,3 +346,16 @@
   background: var(--surface-base, var(--fv-surface-page, #0B0D10));
   box-shadow: 0 -1px 0 color-mix(in srgb, var(--border-subtle, #ffffff1a) 80%, transparent);
 }
+
+
+/* ── v5 Clean Pastel Footer ── */
+.footer-minimal { background: #FFFFFF; box-shadow: none; border-top: 1px solid var(--border-subtle); }
+.footer-minimal .footer-inner { padding-top: 48px; }
+.footer-minimal .footer-grid { gap: 28px 40px; padding-bottom: 36px; }
+.footer-minimal .footer-link {
+  padding: 6px 0; margin-left: 0; border-radius: var(--radius-xs);
+  box-shadow: none; background: transparent;
+}
+.footer-minimal .footer-link:hover { transform: none; box-shadow: none; color: var(--color-teal-700); }
+.footer-minimal .footer-link:focus-visible { outline-color: var(--focus-ring-color); }
+.footer-minimal .logo-text { color: var(--color-teal-700); }

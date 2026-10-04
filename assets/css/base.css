@@ -59,20 +59,20 @@ p {
 }
 
 a {
-  color: var(--color-brand-primary, #4f46e5);
+  color: var(--color-brand-primary, #2E9188);
   text-decoration: none;
   transition: color var(--transition-fast, 150ms ease);
 }
 
 a:hover {
-  color: var(--color-brand-hover, #4338ca);
+  color: var(--color-brand-hover, #1F746D);
 }
 
 /* ── Universal Accessibility Focus Rings (WCAG 2.4.7 & 2.2 AA) ── */
 :focus-visible {
-  outline: 2px solid var(--color-brand-primary, #4f46e5);
+  outline: 2px solid var(--color-brand-primary, #2E9188);
   outline-offset: 2px;
-  box-shadow: var(--shadow-focus, 0 0 0 3px rgba(99, 102, 241, 0.45));
+  box-shadow: var(--shadow-focus, 0 0 0 3px rgba(64, 169, 157, 0.45));
 }
 
 /* ── Shell Controls: Buttons (WCAG 2.2 AA Contrast ≥ 4.5:1) ── */
@@ -85,13 +85,13 @@ a.btn-primary,
   justify-content: center;
   gap: var(--space-2, 8px);
   padding: var(--space-2, 8px) var(--space-4, 16px);
-  background-color: var(--color-brand-primary, #4f46e5);
+  background-color: var(--color-brand-primary, #2E9188);
   color: #ffffff;
   font-family: var(--font-sans, system-ui, sans-serif);
   font-size: var(--step-0, 1rem);
   font-weight: var(--font-semibold, 600);
   line-height: 1.5;
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(--radius-sm, 10px);
   border: 1px solid transparent;
   cursor: pointer;
   text-align: center;
@@ -107,7 +107,7 @@ a.btn-primary,
 button.btn-primary:hover,
 a.btn-primary:hover,
 .button-primary:hover {
-  background-color: var(--color-brand-hover, #4338ca);
+  background-color: var(--color-brand-hover, #1F746D);
   color: #ffffff;
 }
 
@@ -133,7 +133,7 @@ a.btn-secondary,
   font-size: var(--step-0, 1rem);
   font-weight: var(--font-medium, 500);
   line-height: 1.5;
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(--radius-sm, 10px);
   border: 1px solid var(--border-subtle, #cbd5e1);
   cursor: pointer;
   text-align: center;
@@ -163,15 +163,15 @@ a.btn-secondary:hover,
   font-size: var(--step--1, 0.875rem);
   font-weight: var(--font-semibold, 600);
   line-height: 1.25;
-  border-radius: var(--radius-full, 9999px);
+  border-radius: var(--radius-sm, 10px);
   background-color: var(--surface-hover, #f1f5f9);
-  color: var(--color-brand-primary, #4f46e5);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: var(--color-brand-primary, #2E9188);
+  border: 1px solid rgba(64, 169, 157, 0.25);
   white-space: nowrap;
 }
 
 .badge-alt {
-  background-color: var(--color-brand-primary, #4f46e5);
+  background-color: var(--color-brand-primary, #2E9188);
   color: #ffffff;
   border-color: transparent;
 }
