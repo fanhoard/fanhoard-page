@@ -228,26 +228,26 @@
 /* ── Dark Mode Semantic Token Overrides ── */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-brand-primary: var(--color-teal-400);
-    --color-brand-hover:   var(--color-teal-500);
-    --color-brand-text:    var(--color-teal-400);
+    --color-brand-primary: var(--color-teal-600);
+    --color-brand-hover:   var(--color-teal-700);
+    --color-brand-text:    var(--color-teal-700);
 
-    --surface-base:   #0B0D10; /* v4 calm deep canvas */
-    --surface-card:   #13161C; /* surface-1 */
-    --surface-hover:  #1B1E26; /* surface-2 */
-    --surface-active: #232833;
+    --surface-base:   #FFFFFF; /* v5 pure white across color preferences */
+    --surface-card:   #FFFFFF; /* v5 pure white surface */
+    --surface-hover:  #F7FBFA; /* subtle teal-tinted interaction only */
+    --surface-active: #EAF7F5;
 
-    --text-main:    var(--color-slate-50);
-    --text-muted:   var(--color-slate-300);
-    --text-faint:   var(--color-slate-400);
+    --text-main:    var(--color-slate-900);
+    --text-muted:   var(--color-slate-600);
+    --text-faint:   var(--color-slate-500);
 
-    --border-subtle: var(--color-slate-700);
-    --border-strong: var(--color-slate-600);
+    --border-subtle: rgba(15, 23, 42, 0.08);
+    --border-strong: rgba(15, 23, 42, 0.16);
 
     --fv-surface-page:       var(--surface-base);
     --fv-surface-soft:       var(--surface-hover);
     --fv-surface-hover:      var(--surface-hover);
-    --fv-surface-teal-hover: rgba(95, 189, 178, 0.15);
+    --fv-surface-teal-hover: var(--color-teal-50);
 
     --fv-text-primary:   var(--text-main);
     --fv-text-secondary: var(--text-muted);
@@ -257,35 +257,35 @@
     --c-heading:     var(--text-main);
     --c-body:        var(--text-muted);
 
-    --glass-bg:    rgba(19, 22, 28, 0.75);
-    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-bg:    rgba(255, 255, 255, 0.96);
+    --glass-border: rgba(15, 23, 42, 0.08);
 
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 0 0 1px var(--border-subtle);
-    --shadow-md: 0 6px 16px -2px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-subtle);
-    --shadow-lg: 0 16px 32px -4px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border-subtle);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.07);
   }
 }
 
 [data-theme="dark"] {
-  --color-brand-primary: var(--color-teal-400);
-  --color-brand-hover:   var(--color-teal-500);
+  --color-brand-primary: var(--color-teal-600);
+  --color-brand-hover:   var(--color-teal-700);
 
-  --surface-base:   #0B0D10; /* v4 calm deep canvas */
-  --surface-card:   #13161C; /* surface-1 */
-  --surface-hover:  #1B1E26; /* surface-2 */
-  --surface-active: #232833;
+  --surface-base:   #FFFFFF; /* v5 pure white across color preferences */
+  --surface-card:   #FFFFFF; /* v5 pure white surface */
+  --surface-hover:  #F7FBFA; /* subtle teal-tinted interaction only */
+  --surface-active: #EAF7F5;
 
-  --text-main:    var(--color-slate-50);
-  --text-muted:   var(--color-slate-300);
-  --text-faint:   var(--color-slate-400);
+  --text-main:    var(--color-slate-900);
+  --text-muted:   var(--color-slate-600);
+  --text-faint:   var(--color-slate-500);
 
-  --border-subtle: var(--color-slate-700);
-  --border-strong: var(--color-slate-600);
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-strong: rgba(15, 23, 42, 0.16);
 
   --fv-surface-page:       var(--surface-base);
   --fv-surface-soft:       var(--surface-hover);
   --fv-surface-hover:      var(--surface-hover);
-  --fv-surface-teal-hover: rgba(95, 189, 178, 0.15);
+  --fv-surface-teal-hover: var(--color-teal-50);
 
   --fv-text-primary:   var(--text-main);
   --fv-text-secondary: var(--text-muted);
@@ -295,10 +295,10 @@
   --c-heading:     var(--text-main);
   --c-body:        var(--text-muted);
 
-  --glass-bg:    rgba(19, 22, 28, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg:    rgba(255, 255, 255, 0.96);
+  --glass-border: rgba(15, 23, 42, 0.08);
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 0 0 1px var(--border-subtle);
-  --shadow-md: 0 6px 16px -2px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-subtle);
-  --shadow-lg: 0 16px 32px -4px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border-subtle);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.07);
 }
