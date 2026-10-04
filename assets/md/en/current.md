@@ -1,13 +1,14 @@
 ---
-version: 3.3.4
-date: 2026-10-04T08:15:36.782Z
-title: Root Redirect Fix
-subtitle: The root-to-home redirect announced in 3.3.3 now actually ships in the build output — a build-pipeline miss, now corrected.
+version: 3.3.5
+date: 2026-10-04T08:26:38.000Z
+title: Root Redirect Removed
+subtitle: The site root serves the friendly 404 page again — the site never takes you home automatically.
 notify: true
 ---
 
-**TL;DR** — The root redirect from the previous release didn't reach the deployed site because the rules file is generated at build time. The generator now includes it, so "/" will redirect to /home/ once this build goes live.
+**TL;DR** — Following the owner's decision, the "/" → /home/ redirect from 3.3.3/3.3.4 is removed. The root once again shows the friendly 404 page, with the "Take Me Home" button for users who want it.
 
-### Fixed
+### Changed
 
-- **Root redirect now ships** — the "/" → /home/ 302 rule was added to the wrong file (a dev-only copy); it is now generated into the build output the site actually serves.
+- **Root redirect removed** — "/" now returns the custom 404 page (with the Take Me Home button) instead of auto-redirecting, restoring the original behavior and the permanent Google Search Console indexing fix.
+- **All other routing untouched** — every other rule in the site's routing behaves exactly as before.

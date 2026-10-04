@@ -41,12 +41,6 @@
 /en/* /:splat 200
 /th/* /:splat 200
 
-# ── Root → home redirect (2026-10-04 v3.3.3: convenience entry point) ─────
-# Master ใช้ / เป็นทางเข้าตรวจงาน — redirect ไป landing page จริง
-# (server-level 302: ไม่แตะเนื้อ 404 page เอง ซึ่งยังห้ามมี redirect ตาม GSC fix 2026-07-28)
-# หมายเหตุ SEO: root จะถูกมองเป็น redirect → ติดตามผลใน GSC หลังขึ้น production
-/ /home/ 302
-
 # ── Catch-all 404 ─────────────────────────────────────────────────────────
 # ทุก path อื่น (รวมถึง /, /index.html, และ path ที่ไม่มีจริง) → ตอบ 404
 # พร้อมส่ง custom 404 HTML ของเรา (/index.html)
