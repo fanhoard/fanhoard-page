@@ -673,8 +673,6 @@
   inset: 0;
   z-index: var(--fv-z-overlay, 500);
   opacity: 0;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
   transition: opacity var(--transition-normal);
   will-change: opacity;
 }
@@ -749,8 +747,7 @@
 /* Calm SaaS toast refinement: centered pill, legible on narrow screens. */
 .fp-toast {
   max-width: min( calc(100vw - 32px), 440px );
-  backdrop-filter: blur(16px) saturate(1.15);
-  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.07));
 }
 .fp-toast .fp-body {
   white-space: normal;

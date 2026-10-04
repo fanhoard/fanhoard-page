@@ -33,20 +33,18 @@
   --fv-scroll-offset: calc(var(--fv-nav-height) + var(--space-4));
   --fv-nav-top-h: var(--fv-nav-height);
 
-  /* ── Brand Core Palette (v4: calm soft-indigo accent) ──
-     --color-teal-* names are kept as legacy aliases — they now resolve to the
-     indigo ramp so every historical consumer flows to the new brand hue. */
-  --color-teal-50:  #eef2ff;
-  --color-teal-100: #e0e7ff;
-  --color-teal-400: #818cf8;
-  --color-teal-500: #6366f1;
-  --color-teal-600: #4f46e5; /* Primary interactive AA (6.3:1 on light) */
-  --color-teal-700: #4338ca;
-  --color-teal-800: #3730a3;
-  --color-teal-900: #312e81;
+  /* ── Brand Core Palette (v5: true pastel teal on pure white) ── */
+  --color-teal-50:  #EAF7F5;
+  --color-teal-100: #D3F0EC;
+  --color-teal-400: #5FBDB2;
+  --color-teal-500: #40A99D;
+  --color-teal-600: #2E9188; /* Primary interactive */
+  --color-teal-700: #1F746D; /* Brand text (AA on white) */
+  --color-teal-800: #175B56;
+  --color-teal-900: #114742;
 
-  --color-indigo-soft: #6366f1;   /* accent for glows & gradients */
-  --color-indigo-glow: rgba(99, 102, 241, 0.15);
+  --color-indigo-soft: var(--color-teal-400);   /* legacy alias -> teal */
+  --color-indigo-glow: rgba(64, 169, 157, 0.15);
 
   --color-emerald-500: #10b981;
   --color-emerald-600: #059669;
@@ -69,7 +67,7 @@
   --color-brand-text:    var(--color-teal-700);
   --color-brand-accent:  var(--color-emerald-600);
 
-  --surface-base:   #F8FAFC; /* v4 calm neutral canvas */
+  --surface-base:   #FFFFFF; /* v5 pure white canvas */
   --surface-card:   #ffffff; /* surface-1 */
   --surface-hover:  var(--color-slate-100); /* surface-2 */
   --surface-active: var(--color-slate-200);
@@ -86,13 +84,13 @@
   --color-success:  #10b981;
   --color-warning:  #f59e0b;
   --color-danger:   #ef4444;
-  --color-info:     #6366f1;
+  --color-info:     var(--color-teal-500);
 
 
   /* ── Glass diffusion (nav bar / modals / floating surfaces) ── */
-  --glass-bg:    rgba(255, 255, 255, 0.82);
-  --glass-blur:  16px;
-  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-bg:    rgba(255, 255, 255, 0.96);
+  --glass-blur:  8px;
+  --glass-border: var(--border-subtle);
   /* ── Legacy Backward-Compatibility Mappings ── */
   --fv-brand-teal:       var(--color-brand-primary);
   --fv-brand-teal-light: var(--color-brand-primary);
@@ -158,12 +156,12 @@
   --fv-space-7: var(--space-7);
 
   /* ── Corner Radii Harmonized Scale ── */
-  --radius-xs:   8px;   /* badge */
-  --radius-sm:   12px;  /* input / button */
-  --radius-md:   16px;  /* card */
-  --radius-lg:   24px;  /* hero */
-  --radius-xl:   32px;  /* modal / sheet */
-  --radius-2xl:  32px;
+  --radius-xs:   6px;   /* badge */
+  --radius-sm:   10px;  /* input / button */
+  --radius-md:   12px;  /* card */
+  --radius-lg:   16px;  /* hero */
+  --radius-xl:   20px;  /* modal / sheet */
+  --radius-2xl:  24px;
   --radius-full: 9999px; /* pill */
 
   --fv-radius-xs:   var(--radius-xs);
@@ -173,18 +171,18 @@
   --fv-radius-xl:   var(--radius-xl);
   --fv-radius-2xl:  var(--radius-2xl);
   --fv-radius-pill: var(--radius-full);
-  --r-btn:  var(--radius-full);
+  --r-btn:  var(--radius-sm);
   --r-card: var(--radius-lg);
 
   /* ── Elevation Tokens (Lighter, Clean Native Layering) ── */
   --ring-subtle:  0 0 0 1px var(--border-subtle);
-  --shadow-sm:    0 1px 2px rgba(0, 0, 0, 0.04), var(--ring-subtle);
-  --shadow-md:    0 6px 16px -2px rgba(0, 0, 0, 0.06), var(--ring-subtle);
-  --shadow-lg:    0 16px 32px -4px rgba(0, 0, 0, 0.08), var(--ring-subtle);
+  --shadow-sm:    0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md:    0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-lg:    0 8px 24px rgba(0, 0, 0, 0.07);
   --shadow-modal: 0 24px 48px -12px rgba(0, 0, 0, 0.18), var(--ring-subtle);
-  --focus-ring-color: rgba(99, 102, 241, 0.35);
+  --focus-ring-color: rgba(64, 169, 157, 0.40);
   --shadow-focus: 0 0 0 3px var(--focus-ring-color);
-  --fv-shadow-teal: 0 4px 16px 0 rgba(99, 102, 241, 0.18);
+  --fv-shadow-teal: 0 4px 16px 0 rgba(64, 169, 157, 0.18);
 
   /* ── Motion & Transitions ── */
   --ease-standard: cubic-bezier(0.16, 1, 0.3, 1); /* soft physics ease-out */
@@ -249,7 +247,7 @@
     --fv-surface-page:       var(--surface-base);
     --fv-surface-soft:       var(--surface-hover);
     --fv-surface-hover:      var(--surface-hover);
-    --fv-surface-teal-hover: rgba(129, 140, 248, 0.15);
+    --fv-surface-teal-hover: rgba(95, 189, 178, 0.15);
 
     --fv-text-primary:   var(--text-main);
     --fv-text-secondary: var(--text-muted);
@@ -287,7 +285,7 @@
   --fv-surface-page:       var(--surface-base);
   --fv-surface-soft:       var(--surface-hover);
   --fv-surface-hover:      var(--surface-hover);
-  --fv-surface-teal-hover: rgba(129, 140, 248, 0.15);
+  --fv-surface-teal-hover: rgba(95, 189, 178, 0.15);
 
   --fv-text-primary:   var(--text-main);
   --fv-text-secondary: var(--text-muted);
