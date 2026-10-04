@@ -60,10 +60,9 @@ nav ul li button:focus-visible {
 }
 
 nav ul li button.active {
-  color: var(--color-brand-text, #1f746d);
-  background: var(--color-teal-50, #EAF7F5);
-  border-color: transparent;
-  border-radius: var(--radius-xs, 6px);
+  color:var(--color-brand-text, #0f766e);
+  background:var(--fv-surface-teal-hover, rgba(0, 150, 136, 0.08));
+  border-color: var(--border-brand, #009688);
   transform: none;
 }
 
@@ -77,8 +76,8 @@ nav ul li button::after {
 }
 
 nav ul li button.active::after {
-  /* v4: soft pill replaces the underline indicator */
-  content: none;
+  transform: translateX(-50%) scaleX(1);
+  transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @media (min-width:600px)  { nav { margin-top:0; } }
