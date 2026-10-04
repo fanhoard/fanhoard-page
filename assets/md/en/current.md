@@ -1,18 +1,19 @@
 ---
-version: 4.0.4
-date: 2026-10-04T10:06:00.000Z
-title: The previous design is back
-subtitle: We've rolled back the experimental v5.0.0 redesign and restored the familiar clean pastel-teal look on every page.
+version: 5.0.0
+date: 2026-10-04T13:04:00.000Z
+title: A fresh start for the design
+subtitle: We've returned every page to the original FanHoard look as the clean starting point for a new design.
 notify: true
 ---
 
-**TL;DR** — The v5.0.0 visual experiment (Mint/Sage green palette, extra-high rounding) has been fully reverted. The site is back to the design you know from v4.0.3: the pure-white canvas, pastel teal palette, crisp top navigation, and classic buttons — unchanged on every page.
+**TL;DR** — The site's appearance is back to the original FanHoard design (classic teal, familiar top navigation and hover effects). This is the clean base we'll build the next design on, one careful step at a time.
 
 ### Changed
 
-- **Full rollback** — every page, component, loading state, popup, and navigation element is restored exactly as it was before the v5.0.0 redesign.
-- **Nothing else touched** — this release contains no feature or behavior changes, only the visual restore.
+- **Original look restored** — every page, popup, search, settings and notification now uses the original FanHoard styling.
+- **Nothing else changed** — your settings, search, loading behavior and everything behind the scenes work exactly as before.
 
 ### For the curious
 
-- The v5.0.0 experiment explored a greener pastel palette and much rounder shapes. Your feedback made clear the previous design was the better fit, so it stays in the archive — the code remains in the project history if we ever want to revisit it.
+- The copy notification keeps its smoother fade timing from recent updates.
+- A new design is being prepared from this base and will arrive in small steps so each change can be reviewed.

@@ -9,9 +9,9 @@ nav {
   position: fixed; top:0; left:0;
   width:100%; height:var(--fv-nav-height, 56px);
   padding:0;
-  background: var(--surface-base, #ffffff);
+  background: var(--fv-surface-nav, #ffffff);
   box-shadow: none;
-  border-bottom: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   z-index: var(--fv-z-nav);
   touch-action: none;
 }
@@ -21,23 +21,23 @@ nav {
   justify-self: center;
   background: none; border:none; cursor:pointer;
   padding:6px; z-index:var(--fv-z-overlay);
-  border-radius:var(--radius-full, 9999px);
-  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  border-radius:var(--fv-radius-sm);
+  transition: background-color 180ms cubic-bezier(0.16, 1, 0.3, 1), transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
   display:flex; align-items:center; justify-content:center;
   min-width: 44px; min-height: 44px;
 }
 .back-button:focus-visible {
-  outline: 2px solid var(--color-brand-primary, #2E9188);
+  outline: 2px solid var(--color-brand-primary, #0d9488);
   outline-offset: 2px;
 }
-.back-button:active { background: var(--surface-hover, rgba(0,0,0,0.07)); }
+.back-button:active { background:rgba(0,0,0,0.07); }
 .back-button:active svg { transform:scale(0.9); }
-.back-button svg { width:auto; height:26px; color:var(--color-brand-primary, #2E9188); transition: color var(--transition-fast), transform var(--transition-fast); }
+.back-button svg { width:auto; height:26px; color:var(--color-brand-primary, #0d9488); transition: color 180ms cubic-bezier(0.16, 1, 0.3, 1), transform 180ms cubic-bezier(0.16, 1, 0.3, 1); }
 
 .page-title {
   grid-column: 2;
   font-size: 1.06rem; font-weight: bold;
-  color: var(--color-brand-text, #1F746D);
+  color: var(--color-brand-text, #0f766e);
   text-align:center; font-family:inherit;
   padding:0 10px; width:100%; box-sizing:border-box;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;

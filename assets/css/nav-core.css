@@ -13,28 +13,21 @@ header {
 .logo {
   font-family:'FoglihtenNo07calt',monospace;
   font-size: var(--step-3, 1.75rem); padding: var(--space-5, 20px) 0 0;
-  color:var(--color-brand-primary, #2E9188);
+  color:var(--color-brand-primary, #009688);
   white-space:nowrap; display:flex; align-items:center;
   margin-left: var(--space-3, 12px); pointer-events:none;
 }
 .logo span { pointer-events:auto; user-select:text; }
 .logo img  { height:var(--height); margin-left: var(--space-1, 4px); }
 
-nav {
-  position: sticky; top: 0;
-  width: 100%; margin-top: 0;
-  z-index: var(--fv-z-nav, 100);
-  contain: layout style;
-}
+nav { width:100%; margin-top: var(--space-2, 8px); contain: layout style; }
 nav ul {
   display:flex; list-style:none; margin:0;
-  gap: var(--space-1, 4px);
-  padding: var(--space-2, 8px) var(--space-4, 16px);
+  padding: var(--space-2, 8px) var(--space-2, 8px) 0;
   overflow-x:auto;
   white-space:nowrap;
   scrollbar-width:none;
-  background: var(--surface-base, #ffffff);
-  border-bottom: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
+  border-bottom: 1px solid var(--border-subtle, rgba(0,0,0,0.06));
   overscroll-behavior-x:contain; touch-action:pan-x;
   -webkit-overflow-scrolling:touch; 
   contain: layout style; 
@@ -46,16 +39,16 @@ nav ul li button {
   position:relative; display:flex; align-items:center; justify-content:center;
   padding: var(--space-3, 12px) var(--space-4, 16px); min-height: 44px; min-width: 44px; border-radius:var(--fv-radius-pill, 9999px);
   font-size: var(--step--1, 0.875rem); font-weight: 500; background:transparent; border:1px solid transparent;
-  color:var(--text-muted, #475569); cursor:pointer; white-space:nowrap;
+  color:var(--text-muted, #757575); cursor:pointer; white-space:nowrap;
   user-select:none; 
   touch-action: manipulation; 
-  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+  transition: background 180ms cubic-bezier(0.16, 1, 0.3, 1), border-color 180ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms cubic-bezier(0.16, 1, 0.3, 1), transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 nav ul li button:hover { color: var(--text-main, #0f172a); }
-nav ul li button:active { background: var(--fv-surface-hover, #f1f5f9); transform: scale(0.97); }
+nav ul li button:active { background: var(--fv-surface-hover, #f0f0f0); transform: scale(0.97); }
 
 nav ul li button:focus-visible {
-  outline: 2px solid var(--color-brand-primary, #2E9188);
+  outline: 2px solid var(--color-brand-primary, #0d9488);
   outline-offset: 2px;
 }
 
@@ -68,7 +61,7 @@ nav ul li button.active {
 
 nav ul li button::after {
   content:''; position:absolute; left:50%; bottom:0;
-  width:40%; height:3px; background:var(--color-brand-primary, #2E9188);
+  width:40%; height:3px; background:var(--color-brand-primary, #009688);
   border-radius: var(--radius-sm, 6px) var(--radius-sm, 6px) 0 0; 
   transform: translateX(-50%) scaleX(0);
   will-change: transform;
@@ -80,8 +73,8 @@ nav ul li button.active::after {
   transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@media (min-width:600px)  { nav { margin-top:0; } }
-@media (min-width:1024px) { nav { margin-top:0; } }
+@media (min-width:600px)  { nav { margin-top:5px; } }
+@media (min-width:1024px) { nav { margin-top:5px; } }
 @media (max-width:320px)  {
   .logo { font-size: var(--step-2); padding: var(--space-4) 0 0; }
   nav ul li button { padding: var(--space-2, 8px) var(--space-3, 12px); font-size: var(--step--1); min-height: 44px; }

@@ -39,18 +39,18 @@
         display: inline-flex;
         align-items: center;
         
-        padding: 12px 22px !important;
-        border-radius: var(--radius-full, 9999px);
+        padding: 12px 20px !important;
+        border-radius: 12px;
 
-        /* v3 themed capsule surface */
-        background: var(--surface-card, #ffffff);
-        border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
-        box-shadow: var(--shadow-md, 0 4px 16px -2px rgba(0, 0, 0, 0.08));
+        /* Pure white canvas surface with hairline border */
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-shadow: none;
 
         /* Typography */
-        font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         font-size: 14px !important;
-        color: var(--text-main, #0f172a);
+        color: #0f172a;
         white-space: nowrap;
         pointer-events: none;
         user-select: none;
@@ -73,7 +73,7 @@
         font-weight: 600;
         font-size: 0.95em !important;
         letter-spacing: 0.01em;
-        color: var(--color-brand-text, #0f766e);
+        color: #0f766e;
         flex-shrink: 0;
       }
 
@@ -81,7 +81,7 @@
       .cn-divider {
         width: 1px;
         height: 14px;
-        background: var(--border-subtle, rgba(0, 0, 0, 0.08));
+        background: rgba(0, 0, 0, 0.06);
         flex-shrink: 0;
         margin: 0 12px;
       }
@@ -90,7 +90,7 @@
       .cn-name {
         font-size: 0.9em !important;
         font-weight: 500;
-        color: var(--text-muted, #64748b);
+        color: #64748b;
         letter-spacing: 0.01em;
         max-width: 200px;
         overflow: hidden;

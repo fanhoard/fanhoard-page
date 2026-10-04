@@ -8,7 +8,7 @@
 
 body {
   font-family: var(--fv-font-stack, var(--font-sans, system-ui, -apple-system, sans-serif));
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, #152a2f);
   background: var(--surface-base, #ffffff);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -35,7 +35,7 @@ body {
   width: 100%;
   transform: translateZ(0) translateY(0%);
   isolation: isolate;
-  transition: transform var(--transition-normal, 250ms cubic-bezier(0.2, 0, 0, 1));
+  transition: transform 0.22s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 .search-header {
@@ -79,8 +79,8 @@ body {
 
 .search-pill:focus-within {
   background: var(--surface-card, #ffffff);
-  border-color: var(--color-brand-primary, var(--color-brand-primary, #2E9188));
-  box-shadow: 0 0 0 3px rgba(64, 169, 157, 0.35);
+  border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.15);
 }
 
 .search-pill__icon {
@@ -93,7 +93,7 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: var(--text-muted, #475569);
+  color: var(--text-muted, #757575);
   background: transparent;
   transition: background-color var(--duration-fast, 150ms) ease, opacity var(--duration-fast, 150ms) ease;
   pointer-events: none;
@@ -127,15 +127,15 @@ body {
   line-height: 1;
   border: 0;
   background: transparent;
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, #152a2f);
   font-family: inherit;
   letter-spacing: 0.1px;
-  caret-color: var(--color-brand-primary, var(--color-brand-primary, #2E9188));
+  caret-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   font-synthesis: none;
 }
 
 #searchInput::placeholder {
-  color: var(--text-muted, #475569);
+  color: var(--text-muted, #757575);
   font-weight: 400;
 }
 
@@ -157,15 +157,15 @@ body {
   border: none;
   cursor: pointer;
   touch-action: manipulation;
-  color: var(--text-muted, #475569);
+  color: var(--text-muted, #757575);
   padding: 0;
   transition: background-color var(--duration-fast, 150ms) ease, opacity var(--duration-fast, 150ms) ease;
 }
 
 #search-clear-btn:hover,
 #search-clear-btn:focus-visible {
-  background: var(--surface-hover, rgba(64, 169, 157, 0.08));
-  color: var(--color-brand-primary, var(--color-brand-primary, #2E9188));
+  background: var(--surface-hover, rgba(13, 148, 136, 0.08));
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
 }
 
 #search-clear-btn:active {
@@ -239,10 +239,10 @@ body {
 }
 
 .filter-pill.active {
-  box-shadow: 0 0 0 1px rgba(64, 169, 157, 0.51);
-  background: var(--surface-hover, rgba(64, 169, 157, 0.08));
+  box-shadow: 0 0 0 1px rgba(13, 148, 136, 0.51);
+  background: var(--surface-hover, rgba(13, 148, 136, 0.08));
   opacity: 1;
-  color: var(--color-brand-text, var(--color-brand-primary, #2E9188));
+  color: var(--color-brand-text, var(--color-brand-primary, #0d9488));
   font-weight: 600;
 }
 
@@ -254,13 +254,13 @@ body {
   font-weight: 500;
   background: transparent;
   border: 1px solid var(--border-subtle, rgba(14, 95, 153, 0.09));
-  color: var(--text-secondary, #475569);
+  color: var(--text-secondary, #374151);
 }
 
 .filter-pill--cat.active {
-  background: rgba(64, 169, 157, 0.07);
-  border-color: rgba(64, 169, 157, 0.42);
-  color: var(--color-brand-text, var(--color-brand-primary, #2E9188));
+  background: rgba(13, 148, 136, 0.07);
+  border-color: rgba(13, 148, 136, 0.42);
+  color: var(--color-brand-text, var(--color-brand-primary, #0d9488));
   font-weight: 600;
   opacity: 1;
   box-shadow: none;
@@ -294,10 +294,10 @@ body {
   gap: var(--space-4, 16px);
   align-items: flex-start;
   padding: 12px 16px;
-  border-radius: var(--radius-lg, 16px);
+  border-radius: var(--radius-lg, 12px);
   background: var(--surface-card, #ffffff);
-  border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
-  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06));
+  box-shadow: none;
   position: relative;
   margin-bottom: 8px;
   touch-action: manipulation;
@@ -306,27 +306,27 @@ body {
 }
 
 .result-card:hover {
-  border-color: rgba(64, 169, 157, 0.24);
-  background: var(--surface-hover, #f1f5f9);
-  box-shadow: var(--shadow-md, 0 4px 16px -2px rgba(0, 0, 0, 0.08));
+  border-color: rgba(0, 150, 136, 0.25);
+  background: rgba(0, 150, 136, 0.03);
+  box-shadow: none;
 }
 
 .result-card:active {
-  background: rgba(64, 169, 157, 0.05);
-  border-color: rgba(64, 169, 157, 0.18);
+  background: rgba(13, 148, 136, 0.05);
+  border-color: rgba(13, 148, 136, 0.18);
 }
 
 .result-card .result-card__glyph {
   flex: 0 0 56px;
   height: 56px;
   font-size: 24px;
-  border-radius: var(--radius-md, 12px);
+  border-radius: var(--radius-md, 16px);
   padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(64, 169, 157, 0.10);
-  color: var(--color-brand-primary, var(--color-brand-primary, #2E9188));
+  background: rgba(13, 148, 136, 0.10);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   border: none;
   flex-shrink: 0;
 }
@@ -342,7 +342,7 @@ body {
 .result-card .result-card__title {
   font-size: 1.02rem;
   font-weight: 700;
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, #152a2f);
   line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
@@ -353,7 +353,7 @@ body {
 .result-card .result-card__subtitle {
   font-size: 0.89rem;
   font-weight: 500;
-  color: var(--text-muted, #475569);
+  color: var(--text-muted, #757575);
   line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
@@ -370,13 +370,13 @@ body {
 }
 
 .result-card .result-card__tag {
-  background: rgba(64, 169, 157, 0.06);
-  color: var(--color-brand-primary, var(--color-brand-primary, #2E9188));
+  background: rgba(13, 148, 136, 0.06);
+  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   padding: 3px 10px;
   font-size: 12px;
   border-radius: var(--radius-full, 999px);
   font-weight: 500;
-  border: 1px solid rgba(64, 169, 157, 0.15);
+  border: 1px solid rgba(13, 148, 136, 0.15);
   line-height: 1.5;
   white-space: nowrap;
   flex-shrink: 0;
@@ -429,7 +429,7 @@ body {
   .result-card {
     padding: 13px 14px;
     gap: 12px;
-    border-radius: var(--radius-md, 12px);
+    border-radius: var(--radius-md, 16px);
   }
   .result-card .result-card__glyph {
     flex: 0 0 52px;
@@ -469,7 +469,7 @@ body {
   padding: 20px 16px 8px;
   font-size: 0.80rem;
   font-weight: 700;
-  color: var(--text-muted, #475569);
+  color: var(--text-muted, #757575);
   text-transform: uppercase;
   letter-spacing: 1px;
   user-select: none;
@@ -495,13 +495,13 @@ body {
   word-break: break-word;
   font-size: 0.95rem;
   font-weight: 500;
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, #2f5157);
   line-height: 1.5;
 }
 
 .search-suggestion-body mark {
-  background: rgba(64, 169, 157, 0.18);
-  color: var(--text-main, #0f172a);
+  background: rgba(13, 148, 136, 0.18);
+  color: var(--text-main, #152a2f);
   font-weight: 600;
   display: inline;
   vertical-align: baseline;
@@ -514,7 +514,7 @@ body {
   margin-top: 40px;
   padding: 36px 28px;
   text-align: center;
-  color: var(--text-muted, #475569);
+  color: var(--text-muted, #757575);
   font-size: 0.91rem;
   font-weight: 500;
   line-height: 1.7;
@@ -531,7 +531,7 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: var(--text-muted, #475569);
+  color: var(--text-muted, #757575);
   font-size: 1.08rem;
   padding: 40px 28px;
   letter-spacing: 0.2px;
@@ -562,7 +562,7 @@ body {
   padding: 4px 16px 6px;
   font-size: 0.86rem;
   font-weight: 600;
-  color: var(--text-muted, #475569);
+  color: var(--text-muted, #757575);
   letter-spacing: 0.2px;
   user-select: none;
   cursor: pointer;
@@ -605,9 +605,9 @@ body {
 
 
 @keyframes _demo-pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(64, 169, 157, 0.40); }
-  60%  { box-shadow: 0 0 0 12px rgba(64, 169, 157, 0); }
-  100% { box-shadow: 0 0 0 16px rgba(64, 169, 157, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.40); }
+  60%  { box-shadow: 0 0 0 12px rgba(13, 148, 136, 0); }
+  100% { box-shadow: 0 0 0 16px rgba(13, 148, 136, 0); }
 }
 
 
@@ -645,7 +645,7 @@ body {
 .filter-pill:focus-visible,
 .result-card:focus-visible,
 .search-suggestion-item:focus-visible {
-  outline: 3px solid rgba(64, 169, 157, 0.35);
+  outline: 2px solid var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   outline-offset: 2px;
 }
 
@@ -661,17 +661,17 @@ body {
 /* ── Hover States ── */
 @media (hover: hover) {
   .search-pill__icon[role="button"]:hover {
-    background: var(--surface-hover, #f1f5f9);
+    background: rgba(14, 95, 153, 0.06);
   }
   #search-clear-btn:hover {
-    background: rgba(64, 169, 157, 0.12);
+    background: rgba(14, 95, 153, 0.16);
   }
   .search-suggestion-item:hover {
-    background: var(--surface-hover, #f1f5f9);
+    background: rgba(14, 95, 153, 0.03);
   }
   .result-card:hover {
-    background: rgba(64, 169, 157, 0.03);
-    border-color: rgba(64, 169, 157, 0.25);
+    background: rgba(0, 150, 136, 0.03);
+    border-color: rgba(0, 150, 136, 0.25);
     box-shadow: none;
   }
   .filter-pill:not(.active):hover {
@@ -679,7 +679,7 @@ body {
   }
   .filter-pill--cat:not(.active):hover {
     opacity: 0.75;
-    background: var(--surface-hover, #f1f5f9);
+    background: rgba(14, 95, 153, 0.03);
   }
 }
 

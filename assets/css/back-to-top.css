@@ -17,7 +17,7 @@
   padding: 0;
   cursor: pointer;
 
-  background: var(--color-brand-primary, #2E9188);
+  background: var(--color-brand-primary, #009688);
   border: none;
   box-shadow: none;
 
@@ -29,9 +29,9 @@
   contain: layout style;
 
   transition:
-    opacity var(--transition-normal, 250ms ease),
-    transform var(--transition-normal, 250ms ease),
-    background-color var(--transition-fast, 150ms ease),
+    opacity 250ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 250ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms ease,
     visibility 0s linear 250ms;
 
   z-index: var(--fv-z-popover, 300);
@@ -39,7 +39,7 @@
 }
 
 #back-to-top:hover {
-  background: var(--color-brand-hover, #1F746D);
+  background: var(--color-brand-hover, #00897b);
 }
 
 #back-to-top svg {
@@ -47,7 +47,7 @@
   pointer-events: none;
   width: 20px;
   height: 20px;
-  transition: transform var(--transition-fast, 150ms ease);
+  transition: transform 150ms ease;
   color: #ffffff;
 }
 
@@ -87,7 +87,7 @@
 }
 
 #back-to-top:focus-visible {
-  outline: 3px solid rgba(64, 169, 157, 0.35);
+  outline: 2px solid var(--color-brand-primary, #009688);
   outline-offset: 2px;
 }
 

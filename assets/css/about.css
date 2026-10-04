@@ -24,7 +24,7 @@ main, #main {
   padding: 0 0 var(--space-8, 2rem) 0;
   margin-bottom: var(--space-8, 2rem);
   border: none;
-  border-bottom: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
+  border-bottom: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06));
   box-shadow: none;
   color: var(--text-main, #0f172a);
 }
@@ -38,7 +38,7 @@ h2.title {
   margin: 0 0 var(--space-3, 0.75rem) 0;
   font-size: var(--step-2, 1.25rem);
   font-weight: var(--font-semibold, 600);
-  color: var(--color-brand-primary, #2E9188);
+  color: var(--color-brand-primary, #009688);
   letter-spacing: 0.01em;
   position: relative;
   padding-left: 0;
@@ -53,7 +53,7 @@ h2.title::before {
 h1.page-title-about {
   font-size: var(--step-4, 1.8rem);
   font-weight: var(--font-bold, 700);
-  color: var(--color-brand-primary, #2E9188);
+  color: var(--color-brand-primary, #009688);
   margin: var(--space-4, 1rem) 0 var(--space-8, 2rem) 0;
   letter-spacing: -0.01em;
   line-height: 1.2;
@@ -72,24 +72,24 @@ p.content {
 }
 
 p.content a {
-  color: var(--color-brand-primary, #2E9188);
+  color: var(--color-brand-primary, #009688);
   text-decoration: underline;
   text-underline-offset: 3px;
   font-weight: var(--font-medium, 500);
   border-bottom: none;
-  transition: color var(--transition-fast, 150ms ease);
+  transition: color var(--transition-fast, 150ms ease-out);
 }
 
 p.content a:hover {
-  color: var(--color-brand-hover, #1F746D);
+  color: var(--color-brand-hover, #0f766e);
   border-color: transparent;
   transform: none;
 }
 
 p.content a:focus-visible {
-  outline: 3px solid rgba(64, 169, 157, 0.35);
+  outline: 2px solid var(--color-brand-primary, #009688);
   outline-offset: 2px;
-  border-radius: var(--radius-sm, 8px);
+  border-radius: var(--radius-sm, 4px);
 }
 
 strong {

@@ -88,11 +88,11 @@ function injectStyles() {
       text-decoration: none;
       background: var(--surface-base, #ffffff);
       border: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
-      color: var(--color-brand-primary, #0d9488);
+      color: var(--color-brand-primary, #009688);
       position: relative;
     }
     .item-card--view-all:hover {
-      border-color: var(--color-brand-primary, #0d9488);
+      border-color: var(--color-brand-primary, #009688);
       background: var(--surface-hover, rgba(0,0,0,0.02));
     }
     .view-all-icon {
@@ -100,26 +100,26 @@ function injectStyles() {
       width: 32px; height: 32px; border-radius: 50%;
       background: transparent;
       border: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
-      color: var(--color-brand-primary, #0d9488);
-      transition: border-color var(--transition-fast, 150ms ease), background-color var(--transition-fast, 150ms ease);
+      color: var(--color-brand-primary, #009688);
+      transition: border-color 0.15s ease, background-color 0.15s ease;
       margin-bottom: 0.12rem; flex-shrink: 0;
     }
     .item-card--view-all:hover .view-all-icon {
       background: var(--surface-hover, rgba(0,0,0,0.03));
-      border-color: var(--color-brand-primary, #0d9488);
+      border-color: var(--color-brand-primary, #009688);
     }
     .view-all-icon svg { display: block; }
     .view-all-label {
       white-space: normal !important; text-align: center;
       line-height: 1.25; font-size: 0.8125rem !important;
-      letter-spacing: 0.02em; color: var(--color-brand-primary, #0d9488) !important;
+      letter-spacing: 0.02em; color: var(--color-brand-primary, #009688) !important;
       background: transparent !important;
       border: none !important;
     }
     .carousel-wrapper {
       position: relative;
       overflow: hidden;
-      border-radius: var(--radius-lg, 16px);
+      border-radius: var(--radius-lg, 12px);
     }
     .carousel-arrow {
       position: absolute; top: 0; bottom: 0; height: 100%;
@@ -129,7 +129,7 @@ function injectStyles() {
       cursor: pointer; user-select: none; -webkit-user-select: none;
       touch-action: manipulation;
       opacity: 0; pointer-events: none;
-      transition: opacity var(--transition-fast, 150ms ease);
+      transition: opacity 0.22s ease;
       background: transparent;
     }
     .carousel-arrow.visible { opacity: 1; pointer-events: auto; }
@@ -138,16 +138,16 @@ function injectStyles() {
     .ca-icon-wrap {
       display: flex; align-items: center; justify-content: center;
       width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-      background: var(--surface-card, #ffffff);
+      background: #ffffff;
       border: 1px solid var(--border-subtle, rgba(0,0,0,0.12));
-      color: var(--text-muted, #475569);
-      transition: background var(--transition-fast, 150ms ease), color var(--transition-fast, 150ms ease), border-color var(--transition-fast, 150ms ease);
+      color: var(--text-muted, #757575);
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
     .carousel-arrow:hover .ca-icon-wrap {
-      background: var(--surface-card, #ffffff); color: var(--color-brand-primary, #0d9488);
-      border-color: var(--color-brand-primary, #0d9488);
+      background: #ffffff; color: var(--color-brand-primary, #009688);
+      border-color: var(--color-brand-primary, #009688);
     }
-    .carousel-arrow:focus-visible .ca-icon-wrap { outline: 3px solid rgba(13, 148, 136, 0.35); outline-offset: 2px; }
+    .carousel-arrow:focus-visible .ca-icon-wrap { outline: 2px solid var(--color-brand-primary, #009688); outline-offset: 2px; }
     .ca-icon-wrap svg { display: block; pointer-events: none; flex-shrink: 0; }
     @media (max-width: 600px) {
       .carousel-arrow { width: 40px; }
@@ -155,11 +155,11 @@ function injectStyles() {
     }
     .carousel-wrapper::before, .carousel-wrapper::after { display: none !important; }
     .home-error {
-      padding: 2rem 1rem; border-radius: var(--radius-lg, 16px);
-      background: rgba(220, 38, 38, 0.06); border: 1px solid rgba(220, 38, 38, 0.25);
-      color: var(--color-danger, #dc2626); font-size: .95rem; text-align: center;
+      padding: 2rem 1rem; border-radius: 12px;
+      background: #fff5f5; border: 1px solid #ffd0d0;
+      color: #c0392b; font-size: .95rem; text-align: center;
     }
-    .home-error small { display: block; margin-top: .4rem; color: #f87171; font-family: monospace; font-size: .82em; }
+    .home-error small { display: block; margin-top: .4rem; color: #ff8a8a; font-family: monospace; font-size: .82em; }
   `;
   document.head.appendChild(s);
 }
