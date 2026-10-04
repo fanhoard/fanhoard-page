@@ -1,15 +1,18 @@
 ---
-version: 4.0.3
-date: 2026-10-04T08:55:55.713Z
-title: Discover filter buttons back to the classic look
-subtitle: The main category buttons on Discover return to the original pill style with the teal border and animated underline — the design that already worked.
+version: 4.0.4
+date: 2026-10-04T10:06:00.000Z
+title: The previous design is back
+subtitle: We've rolled back the experimental v5.0.0 redesign and restored the familiar clean pastel-teal look on every page.
 notify: true
 ---
 
-**TL;DR** — You told us the classic button design was already good, so it is back: the main category buttons on Discover return to the original rounded-pill style with the teal outline and the animated underline on the active tab, replacing the small square chip introduced in v4.0.
+**TL;DR** — The v5.0.0 visual experiment (Mint/Sage green palette, extra-high rounding) has been fully reverted. The site is back to the design you know from v4.0.3: the pure-white canvas, pastel teal palette, crisp top navigation, and classic buttons — unchanged on every page.
 
 ### Changed
 
-- **Main filter buttons restored** — the active category button (All / Symbols / Emojis / Fancy Text) is once again a full rounded pill with a teal border and the spring-animated underline indicator, exactly like the classic design.
-- **Sub buttons unchanged** — the subcategory chips keep the same classic style as before; their protected stylesheet was never touched.
-- **Everything else stays v4** — the pure-white canvas, pastel teal palette, and clean top navigation from the redesign remain exactly as they are.
+- **Full rollback** — every page, component, loading state, popup, and navigation element is restored exactly as it was before the v5.0.0 redesign.
+- **Nothing else touched** — this release contains no feature or behavior changes, only the visual restore.
+
+### For the curious
+
+- The v5.0.0 experiment explored a greener pastel palette and much rounder shapes. Your feedback made clear the previous design was the better fit, so it stays in the archive — the code remains in the project history if we ever want to revisit it.
