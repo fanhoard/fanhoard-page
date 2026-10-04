@@ -781,22 +781,27 @@ details[open] .faq-answer {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   HOME — APP DESIGN v2 (branch design/home-refresh)
-   Concept: installed-application system design, not a website.
-   Narrow app canvas, inset grouped cards (iOS-Settings style),
-   tinted emoji-picker tiles, quiet hovers (bg tint only — no lift,
-   no shadow dance), very high curvature everywhere.
-   Brand teal + white canvas + banner position unchanged.
+   HOME — FANTROVE DNA v3 (branch design/home-refresh)
+   Base: app structure from v2 (canvas 780px, grouped cards,
+   quick actions, quiet hovers). Skin: restored Fantrove identity —
+   lavender-warm surfaces, very high curvature, ZERO borders and
+   ZERO shadows (tint-separated), vivid teal accent.
+   Measured from reference/fantrove-v2.3 rendered DOM:
+   lavender #FAF8FF / #EAECFF, teal rgb(0,206,176), radius 27-47px.
    Scoped to [data-page="home"] so nothing leaks to other pages.
    ═══════════════════════════════════════════════════════════════ */
 
 [data-page="home"] {
-  --radius-card:    26px;
-  --radius-tile:    16px;
-  --radius-squircle: 14px;
-  --radius-cta:     20px;
-  --border-hair:    rgba(15, 23, 42, 0.06);
-  --surface-tint:   #F6F8FA;
+  --radius-card:     32px;
+  --radius-tile:     24px;
+  --radius-row:     18px;
+  --radius-cta:     26px;
+  --ft-lavender:     #FAF8FF;
+  --ft-lavender-btn: #EAECFF;
+  --ft-teal:         #00CEB0;
+  --ft-teal-ink:     #0E8A7A;
+  --ft-teal-tint:    rgba(0, 206, 176, 0.08);
+  --ft-teal-tint-strong: rgba(0, 206, 176, 0.13);
 }
 
 /* ---------- APP CANVAS & FEED RHYTHM ---------- */
@@ -805,15 +810,13 @@ details[open] .faq-answer {
 [data-page="home"] .section,
 [data-page="home"] section { gap: 14px; margin-bottom: 0; }
 
-/* Banner back at original spot — aligned to app canvas */
+/* Banner — original spot, aligned to app canvas */
 [data-page="home"] .img-d1 {
   max-width: 780px;
   padding: 0;
   margin-bottom: var(--space-4, 1rem);
 }
-[data-page="home"] .img-d1 img {
-  border-radius: 20px;
-}
+[data-page="home"] .img-d1 img { border-radius: 28px; }
 
 /* ---------- HERO → APP GREETING ---------- */
 [data-page="home"] .hero {
@@ -831,7 +834,7 @@ details[open] .faq-answer {
   margin-bottom: 0.25rem;
 }
 
-/* 3 entry buttons → app quick-action cards */
+/* Quick actions — Fantrove lavender chips with teal ink */
 [data-page="home"] .hero-btns {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -845,57 +848,39 @@ details[open] .faq-answer {
   flex-direction: column;
   gap: 8px;
   padding: 14px 8px 12px;
-  border-radius: var(--radius-cta, 20px);
-  background: #ffffff;
-  border: 1px solid var(--border-hair);
-  color: var(--text-main, #0f172a);
+  border-radius: var(--radius-cta, 26px);
+  background: var(--ft-lavender-btn, #EAECFF);
+  border: none;
+  color: var(--ft-teal-ink, #0E8A7A);
   box-shadow: none;
   font-weight: var(--font-semibold, 600);
   font-size: 0.85rem;
+  transition: background-color 150ms ease;
 }
 [data-page="home"] .hero-btns .btn:hover,
 [data-page="home"] .hero-btns .button:hover {
   transform: none;
-  background: var(--surface-tint, #F6F8FA);
-  border-color: var(--border-hair);
+  background: var(--ft-teal-tint-strong, rgba(0, 206, 176, 0.13));
   box-shadow: none;
-  color: var(--color-brand-hover, #1F746D);
-}
-[data-page="home"] .hero-btns .btn:first-child,
-[data-page="home"] .hero-btns .button:first-child {
-  background: var(--color-brand-primary, #2E9188);
-  border-color: var(--color-brand-primary, #2E9188);
-  color: #ffffff;
-  box-shadow: none;
-}
-[data-page="home"] .hero-btns .btn:first-child:hover,
-[data-page="home"] .hero-btns .button:first-child:hover {
-  background: var(--color-brand-hover, #1F746D);
-  border-color: var(--color-brand-hover, #1F746D);
-  color: #ffffff;
 }
 [data-page="home"] .hero-btns .btn-icon {
   width: 44px;
   height: 44px;
-  border-radius: var(--radius-squircle, 14px);
-  background: var(--color-teal-50, #EAF7F5);
+  border-radius: 16px;
+  background: #ffffff;
   border: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   margin: 0;
 }
-[data-page="home"] .hero-btns .btn:first-child .btn-icon,
-[data-page="home"] .hero-btns .button:first-child .btn-icon {
-  background: rgba(255, 255, 255, 0.18);
-}
 
-/* ---------- CATEGORY SECTIONS → INSET GROUPED FEED CARDS ---------- */
+/* ---------- CATEGORY SECTIONS → LAVENDER FEED CARDS ---------- */
 [data-page="home"] .category-section {
-  background: #ffffff;
-  border: 1px solid var(--border-hair);
-  border-radius: var(--radius-card, 26px);
-  padding: 16px 16px 18px;
+  background: var(--ft-lavender, #FAF8FF);
+  border: none;
+  border-radius: var(--radius-card, 32px);
+  padding: 18px 18px 20px;
   gap: 12px;
   box-shadow: none;
 }
@@ -906,15 +891,12 @@ details[open] .faq-answer {
   gap: 12px;
   padding: 0 4px;
 }
-[data-page="home"] .text-h h2 {
-  font-size: 1rem;
-  margin: 0;
-}
+[data-page="home"] .text-h h2 { font-size: 1rem; margin: 0; }
 [data-page="home"] .button-h {
   border-radius: var(--radius-full, 9999px);
   border: none;
-  background: var(--color-teal-50, #EAF7F5);
-  color: var(--color-teal-700, #1F746D);
+  background: var(--ft-teal-tint-strong, rgba(0, 206, 176, 0.13));
+  color: var(--ft-teal-ink, #0E8A7A);
   padding: 6px 14px;
   font-size: 0.8125rem;
   font-weight: var(--font-semibold, 600);
@@ -924,129 +906,128 @@ details[open] .faq-answer {
 [data-page="home"] .button-h:hover {
   transform: none;
   box-shadow: none;
-  background: var(--color-teal-100, #D3F0EC);
-  border-color: transparent;
+  background: rgba(0, 206, 176, 0.22);
 }
 
-/* ---------- EMOJI TILES → PICKER-STYLE TINTED TILES ---------- */
+/* ---------- EMOJI TILES → WHITE PILLS ON LAVENDER ---------- */
 [data-page="home"] .item-card,
 [data-page="home"] .item-card.fv-card {
-  background: var(--surface-tint, #F6F8FA);
-  border: 1px solid transparent;
-  border-radius: var(--radius-tile, 16px);
+  background: #ffffff;
+  border: none;
+  border-radius: var(--radius-tile, 24px);
   box-shadow: none;
-  transition: background-color 150ms ease, border-color 150ms ease;
+  transition: background-color 150ms ease;
 }
 [data-page="home"] .item-card:hover,
 [data-page="home"] .item-card.fv-card:hover {
-  background: var(--color-teal-50, #EAF7F5);
-  border-color: var(--color-teal-100, #D3F0EC);
+  background: var(--ft-teal-tint, rgba(0, 206, 176, 0.08));
   transform: none;
   box-shadow: none;
 }
 [data-page="home"] .item-card--view-all {
-  background: #ffffff;
-  border-color: var(--border-hair);
+  background: var(--ft-lavender-btn, #EAECFF);
+  color: var(--ft-teal-ink, #0E8A7A);
 }
 [data-page="home"] .item-card--view-all:hover {
-  background: var(--surface-tint, #F6F8FA);
-  border-color: var(--border-hair);
+  background: var(--ft-teal-tint-strong, rgba(0, 206, 176, 0.13));
 }
+[data-page="home"] .view-all-icon { border-color: transparent; }
 [data-page="home"] .item-card .emoji { font-size: 1.9rem; }
 
-/* ---------- FEATURES → GROUPED LIST CARD (iOS Settings style) ---------- */
+/* ---------- FEATURES → WHITE ROWS ON LAVENDER PANEL ---------- */
 [data-page="home"] .features-section { gap: 10px; }
 [data-page="home"] .features-grid {
   display: flex;
   flex-direction: column;
-  gap: 0;
-  background: #ffffff;
-  border: 1px solid var(--border-hair);
-  border-radius: var(--radius-card, 26px);
-  overflow: hidden;
+  gap: 8px;
+  background: var(--ft-lavender, #FAF8FF);
+  border: none;
+  border-radius: var(--radius-card, 32px);
+  padding: 8px;
+  box-shadow: none;
 }
 [data-page="home"] .feature-card {
   flex-direction: row;
   align-items: center;
   gap: 14px;
-  padding: 14px 18px;
-  background: transparent;
+  padding: 13px 16px;
+  background: #ffffff;
   border: none;
-  border-bottom: 1px solid var(--border-hair);
-  border-radius: 0;
+  border-radius: var(--radius-row, 18px);
   box-shadow: none;
   margin-bottom: 0;
   transition: background-color 150ms ease;
 }
-[data-page="home"] .feature-card:last-child { border-bottom: none; }
 [data-page="home"] .feature-card:hover {
   transform: none;
   box-shadow: none;
-  background: var(--surface-tint, #F6F8FA);
-  border-color: var(--border-hair);
+  background: var(--ft-teal-tint, rgba(0, 206, 176, 0.08));
 }
 [data-page="home"] .feature-icon {
   width: 40px;
   height: 40px;
   font-size: 1.25rem;
-  background: var(--color-teal-50, #EAF7F5);
-  border-radius: var(--radius-squircle, 14px);
+  background: var(--ft-lavender-btn, #EAECFF);
+  border-radius: 14px;
   margin-top: 0;
-  color: var(--color-teal-700, #1F746D);
+  color: var(--ft-teal-ink, #0E8A7A);
 }
 [data-page="home"] .feature-card h3 { margin-bottom: 2px; }
 
-/* ---------- FAQ → GROUPED ACCORDION CARD ---------- */
+/* ---------- FAQ → GROUPED ACCORDION PANEL ---------- */
 [data-page="home"] .faq-section { gap: 10px; }
 [data-page="home"] .faq-grid {
-  background: #ffffff;
-  border: 1px solid var(--border-hair);
-  border-radius: var(--radius-card, 26px);
-  overflow: hidden;
-  padding: 0;
+  background: var(--ft-lavender, #FAF8FF);
+  border: none;
+  border-radius: var(--radius-card, 32px);
+  padding: 8px;
+  gap: 8px;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
 }
 [data-page="home"] .faq-card {
-  background: transparent;
+  background: #ffffff;
   border: none;
-  border-bottom: 1px solid var(--border-hair);
-  border-radius: 0;
+  border-radius: var(--radius-row, 18px);
   box-shadow: none;
   padding: 0 18px;
   transition: background-color 150ms ease;
 }
-[data-page="home"] .faq-card:last-child { border-bottom: none; }
 [data-page="home"] .faq-card:hover {
   transform: none;
   box-shadow: none;
-  background: transparent;
-  border-color: var(--border-hair);
+  background: #ffffff;
 }
 [data-page="home"] .faq-question {
-  padding: 15px 2.25rem 15px 0;
+  padding: 14px 2.25rem 14px 0;
   font-size: 0.9375rem;
+  border-radius: var(--radius-row, 18px);
 }
 [data-page="home"] .faq-answer {
   padding-right: 2rem;
   font-size: 0.9rem;
 }
-[data-page="home"] details[open] .faq-answer { padding-bottom: 15px; }
+[data-page="home"] details[open] .faq-answer { padding-bottom: 14px; }
+details[open] > .faq-card { background: #ffffff; }
 
-/* ---------- SECTION HEADERS — app scale ---------- */
+/* ---------- SECTION HEADERS ---------- */
 [data-page="home"] .features-section h2,
 [data-page="home"] .faq-section h2 {
   font-size: 1.125rem;
   margin-bottom: 2px;
-  padding-left: 4px;
+  padding-left: 6px;
 }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 640px) {
   [data-page="home"] .container-lg { padding: 0 12px; }
   [data-page="home"] .hero { padding: 1.25rem 0 0.75rem 0; }
-  [data-page="home"] .img-d1 img { border-radius: 16px; }
+  [data-page="home"] .img-d1 img { border-radius: 20px; }
   [data-page="home"] .hero-btns { gap: 8px; }
   [data-page="home"] .hero-btns .btn-icon { width: 40px; height: 40px; }
-  [data-page="home"] .category-section { padding: 12px 12px 14px; }
-  [data-page="home"] .feature-card { padding: 12px 14px; }
+  [data-page="home"] .category-section { padding: 14px 12px 16px; }
+  [data-page="home"] .features-grid, [data-page="home"] .faq-grid { padding: 6px; }
+  [data-page="home"] .feature-card { padding: 11px 12px; }
   [data-page="home"] .faq-card { padding: 0 14px; }
 }
