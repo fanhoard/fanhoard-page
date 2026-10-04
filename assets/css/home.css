@@ -779,3 +779,187 @@ details[open] .faq-answer {
   .faq-grid { grid-template-columns: 1fr; }
   .features-section, .faq-section { padding-inline: 16px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   HOME REFRESH (branch design/home-refresh)
+   Direction: 2026 leading-platform — very high curvature, pure
+   white canvas, soft boxed cards, pill buttons, whisper shadows.
+   Brand teal + typography unchanged. Scoped to [data-page="home"]
+   so nothing leaks to other pages.
+   ═══════════════════════════════════════════════════════════════ */
+
+[data-page="home"] {
+  --radius-tile:     18px;
+  --radius-card:     24px;
+  --radius-panel:    28px;
+  --radius-showcase: 32px;
+  --border-hair:     rgba(15, 23, 42, 0.07);
+  --shadow-soft:       0 1px 2px rgba(15, 23, 42, 0.03), 0 8px 24px rgba(15, 23, 42, 0.05);
+  --shadow-soft-hover: 0 2px 4px rgba(15, 23, 42, 0.04), 0 16px 36px rgba(15, 23, 42, 0.10);
+}
+
+/* ---------- Layout rhythm ---------- */
+[data-page="home"] .container-lg { max-width: 1140px; }
+[data-page="home"] .features-section,
+[data-page="home"] .faq-section  { gap: var(--space-6, 1.5rem); }
+
+/* ---------- HERO ---------- */
+[data-page="home"] .hero {
+  padding: 5rem 0 2.5rem 0;
+  gap: var(--space-5, 1.25rem);
+  min-height: 0;
+}
+[data-page="home"] .hero .fv-hero-display,
+[data-page="home"] .hero h1 {
+  font-size: clamp(40px, 4.5vw, 64px);
+  letter-spacing: -0.03em;
+}
+
+/* Pill CTAs — soft floating chips */
+[data-page="home"] .hero-btns .btn,
+[data-page="home"] .hero-btns .button {
+  border-radius: var(--radius-full, 9999px);
+  padding: 0.85rem 1.75rem;
+  font-weight: var(--font-semibold, 600);
+  background: #ffffff;
+  border: 1px solid var(--border-hair);
+  color: var(--text-main, #0f172a);
+  box-shadow: var(--shadow-soft);
+  transition: transform 180ms ease, box-shadow 180ms ease,
+              border-color 150ms ease, background-color 150ms ease;
+}
+[data-page="home"] .hero-btns .btn:hover,
+[data-page="home"] .hero-btns .button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft-hover);
+  border-color: var(--color-teal-400, #5FBDB2);
+  background: #ffffff;
+}
+[data-page="home"] .hero-btns .btn:first-child,
+[data-page="home"] .hero-btns .button:first-child {
+  background: var(--color-brand-primary, #2E9188);
+  border-color: var(--color-brand-primary, #2E9188);
+  color: #ffffff;
+  box-shadow: 0 6px 16px -4px rgba(46, 145, 136, 0.45);
+}
+[data-page="home"] .hero-btns .btn:first-child:hover,
+[data-page="home"] .hero-btns .button:first-child:hover {
+  transform: translateY(-2px);
+  background: var(--color-brand-hover, #1F746D);
+  border-color: var(--color-brand-hover, #1F746D);
+  color: #ffffff;
+  box-shadow: 0 10px 22px -4px rgba(31, 116, 109, 0.50);
+}
+
+/* Hero showcase — banner as floating rounded panel */
+[data-page="home"] .hero-showcase {
+  width: 100%;
+  max-width: 900px;
+  margin: 2.5rem auto 0;
+  padding: var(--space-2, 0.5rem);
+  background: #ffffff;
+  border: 1px solid var(--border-hair);
+  border-radius: var(--radius-showcase, 32px);
+  box-shadow: var(--shadow-soft);
+}
+[data-page="home"] .hero-showcase picture { display: block; width: 100%; }
+[data-page="home"] .hero-showcase img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: calc(var(--radius-showcase, 32px) - 8px);
+}
+
+/* ---------- CAROUSEL TILES ---------- */
+[data-page="home"] .item-card,
+[data-page="home"] .item-card.fv-card {
+  border-radius: var(--radius-tile, 18px);
+  border-color: var(--border-hair);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+}
+[data-page="home"] .item-card:hover,
+[data-page="home"] .item-card.fv-card:hover {
+  background: #ffffff;
+  border-color: var(--color-teal-400, #5FBDB2);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-soft-hover);
+}
+
+/* "View All" header button → pill chip */
+[data-page="home"] .button-h {
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid var(--border-hair);
+  background: #ffffff;
+  color: var(--color-brand-hover, #1F746D);
+  padding: 0.45rem 1.1rem;
+  box-shadow: var(--shadow-soft);
+  transition: transform 180ms ease, box-shadow 180ms ease,
+              border-color 150ms ease, background-color 150ms ease;
+}
+[data-page="home"] .button-h:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft-hover);
+  border-color: var(--color-teal-400, #5FBDB2);
+  background: var(--color-teal-50, #EAF7F5);
+}
+
+/* ---------- FEATURE CARDS → column, boxed, icon tile ---------- */
+[data-page="home"] .feature-card {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-6, 1.5rem) var(--space-5, 1.25rem);
+  border-color: var(--border-hair);
+  border-radius: var(--radius-card, 24px);
+  box-shadow: var(--shadow-soft);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 150ms ease;
+}
+[data-page="home"] .feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-soft-hover);
+  border-color: var(--color-teal-100, #D3F0EC);
+}
+[data-page="home"] .feature-icon {
+  width: 52px;
+  height: 52px;
+  font-size: 1.45rem;
+  background: var(--color-teal-50, #EAF7F5);
+  border-radius: 18px;
+  margin-top: 0;
+  color: var(--color-teal-700, #1F746D);
+}
+
+/* ---------- FAQ → boxed rounded cards ---------- */
+[data-page="home"] .faq-card {
+  background: #ffffff;
+  border: 1px solid var(--border-hair);
+  border-bottom: 1px solid var(--border-hair);
+  border-radius: var(--radius-card, 24px);
+  box-shadow: var(--shadow-soft);
+  padding: 0 var(--space-5, 1.25rem);
+  transition: box-shadow 180ms ease, border-color 150ms ease;
+}
+[data-page="home"] .faq-card:hover {
+  box-shadow: var(--shadow-soft-hover);
+  border-color: var(--color-teal-100, #D3F0EC);
+}
+[data-page="home"] .faq-question {
+  padding: 1.05rem 2.25rem 1.05rem 0;
+}
+[data-page="home"] .faq-answer {
+  padding-right: var(--space-8, 2rem);
+}
+[data-page="home"] details[open] .faq-answer {
+  padding-bottom: 1.1rem;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  [data-page="home"] .hero { padding: 3rem 0 1.5rem 0; }
+  [data-page="home"] .hero-showcase { max-width: 100%; border-radius: 24px; }
+  [data-page="home"] .hero-showcase img { border-radius: 18px; }
+  [data-page="home"] .feature-card { padding: 1.25rem 1rem; }
+  [data-page="home"] .faq-card { padding: 0 1rem; }
+}
