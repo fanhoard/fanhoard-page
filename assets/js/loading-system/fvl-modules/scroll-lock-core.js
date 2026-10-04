@@ -55,34 +55,53 @@ var ScrollLockManager = (function() {
     return false;
   }
 
+  // True while the observable lock attribute is set. Event targets may be
+  // document nodes (ownerDocument === null) — resolve the document either way.
+  function _lockAttrActive(e) {
+    try {
+      var t = e && e.target;
+      var doc = (t && t.nodeType === 9 && t) || (t && t.ownerDocument) ||
+               (typeof window !== "undefined" && window.document) || document;
+      var root = doc && doc.documentElement;
+      return !!(root && root.hasAttribute && root.hasAttribute("data-scroll-locked"));
+    } catch (_) { return false; }
+  }
+
   function _setAttr(locked) {
     try {
       var doc = (typeof window !== "undefined" && window.document) || document;
-    // Restore the DOM too — a hard reset that leaves body position:fixed
-    // would strand the page visually pinned (pinned by unit contract test).
-    if (doc && doc.body && origBodyStyle) {
-      var b = doc.body;
-      b.style.position = origBodyStyle.position;
-      b.style.top = origBodyStyle.top;
-      b.style.width = origBodyStyle.width;
-      b.style.overflow = origBodyStyle.overflow;
-      b.style.paddingRight = origBodyStyle.paddingRight;
-      b.style.overscrollBehavior = origBodyStyle.overscrollBehavior;
-      if (!origBodyStyle.hasStyleAttr && b.getAttribute("style") === "") {
-        b.removeAttribute("style");
-      }
-    }
-    if (doc && doc.documentElement && origHtmlStyle) {
-      var h = doc.documentElement;
-      h.style.overflow = origHtmlStyle.overflow;
-      h.style.overscrollBehavior = origHtmlStyle.overscrollBehavior;
-      h.style.removeProperty("--fvl-scrollbar-width");
-      if (!origHtmlStyle.hasStyleAttr && h.getAttribute("style") === "") {
-        h.removeAttribute("style");
-      }
-    }
       var html = doc && doc.documentElement;
       if (!html) return;
+
+      // FIX (scroll-lock): restore inline styles ONLY when unlocking.
+      // Restoring while locked=true wiped the lock's own inline styles even
+      // though data-scroll-locked said "locked" — the background became
+      // scrollable behind a still-visible fullscreen overlay. Pinned by the
+      // "locked state keeps body fixed" contract test.
+      if (!locked) {
+        if (doc && doc.body && origBodyStyle) {
+          var b = doc.body;
+          b.style.position = origBodyStyle.position;
+          b.style.top = origBodyStyle.top;
+          b.style.width = origBodyStyle.width;
+          b.style.overflow = origBodyStyle.overflow;
+          b.style.paddingRight = origBodyStyle.paddingRight;
+          b.style.overscrollBehavior = origBodyStyle.overscrollBehavior;
+          if (!origBodyStyle.hasStyleAttr && b.getAttribute("style") === "") {
+            b.removeAttribute("style");
+          }
+        }
+        if (doc && doc.documentElement && origHtmlStyle) {
+          var h = doc.documentElement;
+          h.style.overflow = origHtmlStyle.overflow;
+          h.style.overscrollBehavior = origHtmlStyle.overscrollBehavior;
+          h.style.removeProperty("--fvl-scrollbar-width");
+          if (!origHtmlStyle.hasStyleAttr && h.getAttribute("style") === "") {
+            h.removeAttribute("style");
+          }
+        }
+      }
+
       if (locked) html.setAttribute("data-scroll-locked", "true");
       else html.removeAttribute("data-scroll-locked");
     } catch (_) {}
@@ -149,6 +168,7 @@ var ScrollLockManager = (function() {
 
       if (!touchMoveHandler && doc.addEventListener) {
         touchMoveHandler = function(e) {
+          if (!_lockAttrActive(e)) return;
           if (_isScrollableTarget(e.target)) return;
           if (e.cancelable) e.preventDefault();
         };
@@ -157,6 +177,7 @@ var ScrollLockManager = (function() {
 
       if (!wheelHandler && doc.addEventListener) {
         wheelHandler = function(e) {
+          if (!_lockAttrActive(e)) return;
           if (_isScrollableTarget(e.target)) return;
           if (e.cancelable) e.preventDefault();
         };
@@ -170,6 +191,7 @@ var ScrollLockManager = (function() {
           "ArrowUp": 1, "ArrowDown": 1, "ArrowLeft": 1, "ArrowRight": 1
         };
         keydownHandler = function(e) {
+          if (!_lockAttrActive(e)) return;
           var k = e.key || e.keyCode;
           if (SCROLL_KEYS[k]) {
             var tag = e.target && e.target.tagName;

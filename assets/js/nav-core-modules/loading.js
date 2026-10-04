@@ -30,7 +30,7 @@
   'use strict';
 
   // ── Build ID (replaced at build time by scripts/update-version.js) ──────────
-  var FV_BUILD_ID = '3.2.25-202610040013';
+  var FV_BUILD_ID = '3.2.26-202610040621';
 
   /** คืน query string '?v=<buildId>' ถ้าไม่มี buildId คืน '' */
   function _v() { return FV_BUILD_ID ? '?v=' + FV_BUILD_ID : ''; }
@@ -438,6 +438,15 @@
     hideInstant: function (id) {
       this._sessionCount = 0;
       this._releaseBootLock();
+      // FIX (scroll-lock): if the FVL engine's _scrollLocked flag ever
+      // desyncs (exception mid-hide), the 'fvl' reference would leak and the
+      // page would stay locked. releaseAll('fvl') is a no-op when the flag
+      // is healthy, so it is safe to call on every instant teardown.
+      try {
+        if (window.ScrollLockCore && typeof window.ScrollLockCore.releaseAll === 'function') {
+          window.ScrollLockCore.releaseAll('fvl');
+        }
+      } catch (_) {}
       if (this._pendingHideTimer) {
         clearTimeout(this._pendingHideTimer);
         this._pendingHideTimer = null;
@@ -471,6 +480,13 @@
       this._pulseInProgress = false;
       this._visibleSince = 0;
       this._currentPhase = 'initializing';
+      // FIX (scroll-lock): same leak guard as hideInstant — a forced reset
+      // must never leave a stale 'fvl' reference pinning the page.
+      try {
+        if (window.ScrollLockCore && typeof window.ScrollLockCore.releaseAll === 'function') {
+          window.ScrollLockCore.releaseAll('fvl');
+        }
+      } catch (_) {}
       if (this._pendingHideTimer) {
         clearTimeout(this._pendingHideTimer);
         this._pendingHideTimer = null;

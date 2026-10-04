@@ -36,7 +36,7 @@
   //   จึงไม่ถูก regex ?v= ของ update-version.js จับได้
   //   FV_BUILD_ID ถูก inject buildId จริงตอน build → ใช้ต่อ ?v= ท้าย URL
   //   dev mode: ค่า '' → _v() คืน '' → URL ไม่มี ?v= → browser cache ปกติ
-  var FV_BUILD_ID = '3.2.25-202610040013';
+  var FV_BUILD_ID = '3.2.26-202610040621';
   
   /** คืน query string '?v=<buildId>' ถ้าไม่มี buildId คืน '' */
   function _v() { return FV_BUILD_ID ? '?v=' + FV_BUILD_ID : ''; }
@@ -124,9 +124,9 @@
     if (window.ScrollLockCore) return Promise.resolve();
     return loadScript('/assets/js/loading-system/fvl-modules/scroll-lock-core.js')
       .catch(function (err) {
-        // Core unavailable (network hiccup / test env) — modules fall
-        // back to their legacy inline lock, so keep booting anyway.
-        console.warn('[PopupSystem] ScrollLockCore load failed, falling back to legacy lock:', err);
+        // Do not initialize overlays without the shared lock authority.
+        console.error('[PopupSystem] ScrollLockCore failed to load; popup boot aborted:', err);
+        throw err;
       });
   }
 

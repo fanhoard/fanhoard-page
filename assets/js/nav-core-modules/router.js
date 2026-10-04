@@ -430,6 +430,10 @@
         // เฉพาะ navigation ล่าสุดเท่านั้นที่แสดง error
         if (myGen === this._navGen) {
           console.error('[NavCore/Router] navigateTo error:', err);
+          // FIX (scroll-lock): release the FVL lock before showing the error
+          // page — otherwise the page could stay frozen behind the overlay.
+          try { M.LoadingService?.hideInstant(); } catch (_) {}
+          try { window.ScrollLockCore?.releaseAll?.('fvl'); } catch (_) {}
           try { Utils.showErrorFullscreen(err, { label: 'Navigation' }); } catch (_) {}
         }
       } finally {
@@ -446,18 +450,13 @@
           try {
             requestAnimationFrame(() => {
               this._setNavLoading(false);
-              // v2 DEFENSIVE: ensure body scroll-lock is released even if
-              // content.js or LoadingService.hideInstant() threw before
-              // reaching _removeOverlayNow(). This is a no-op when the lock
-              // was already properly restored — it only catches the edge case
-              // where an exception left body stuck at position:fixed.
-              try {
-                if (document.body.style.position === 'fixed') {
-                  document.body.style.position = '';
-                  document.body.style.top      = '';
-                  document.body.style.width    = '';
-                }
-              } catch (_) {}
+              // v3 FIX (scroll-lock): body scroll-lock release is owned by
+              // ScrollLockCore via LoadingService.hideInstant()/
+              // readinessHandshake() ONLY. Clearing body inline styles here
+              // released the lock while a fullscreen overlay was still visible
+              // (MIN_VISIBLE_MS 300ms delayed hide) — background scrolled
+              // behind the loading overlay. If hideInstant ever throws, the
+              // 20s safety timer + _forceReset() handle the recovery instead.
             });
           } catch (_) {}
         }

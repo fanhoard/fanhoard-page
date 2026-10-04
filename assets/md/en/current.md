@@ -1,14 +1,16 @@
 ---
-version: 3.2.25
-date: 2026-10-04T00:13:38.032Z
-title: A Simpler Settings Page
-subtitle: The Appearance section has been removed — the site simply follows your system theme.
+version: 3.2.26
+date: 2026-10-04T06:21:58.665Z
+title: Loading That Truly Locks the Page
+subtitle: The background can no longer scroll behind the fullscreen loading overlay — fixed at the root, plus a CSS safety net.
 notify: true
 ---
 
-**TL;DR** — Settings is now leaner: the Appearance section is gone and FanHoard follows your device's theme (light or dark) automatically.
+**TL;DR** — The page behind the fullscreen loading overlay is now truly frozen while the overlay is visible, and unlocks cleanly when it disappears. Fixed at the root cause, with a CSS backstop so it stays fixed.
 
-### Changed
+### Fixed
 
-- **Simpler Settings** — the Appearance section and its three theme cards have been removed; your interface language, update and data controls remain untouched.
-- **System theme everywhere** — with no saved preference the whole site, Settings included, follows your system's light or dark mode.
+- **Real scroll lock** — the background no longer scrolls behind the fullscreen loading overlay while it is still visible, including during the short delay before the overlay fades out.
+- **Single scroll-lock authority** — navigation no longer force-clears the page's inline lock styles; every lock and unlock now goes through the shared ScrollLockCore, so popups, search and loading overlays can never unlock each other.
+- **CSS safety net** — a backstop rule freezes the page whenever the lock state is active, even if a script error ever loses the inline styles.
+- **Error recovery** — if a page fails to load, the error screen now always releases the scroll lock first, so the page never stays frozen behind an overlay.

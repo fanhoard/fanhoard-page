@@ -56,7 +56,7 @@
   // update-version.js ?v= regex can't catch them. FV_BUILD_ID is injected
   // with the real buildId at build time → appended to module URLs as ?v=.
   // Dev mode: '' → _v() returns '' → URLs have no ?v= → normal browser cache.
-  var FV_BUILD_ID = '3.2.25-202610040013';
+  var FV_BUILD_ID = '3.2.26-202610040621';
 
   /** Returns '?v=<buildId>' if a buildId exists, otherwise ''. */
   function _v() { return FV_BUILD_ID ? '?v=' + FV_BUILD_ID : ''; }
@@ -189,9 +189,9 @@
     if (window.ScrollLockCore) return Promise.resolve();
     return loadScript('/assets/js/loading-system/fvl-modules/scroll-lock-core.js')
       .catch(function (err) {
-        // Core unavailable (network hiccup / test env) — modules fall
-        // back to their legacy inline lock, so keep booting anyway.
-        console.warn('[Search] ScrollLockCore load failed, falling back to legacy lock:', err);
+        // Do not initialize overlays without the shared lock authority.
+        console.error('[Search] ScrollLockCore failed to load; search boot aborted:', err);
+        throw err;
       });
   }
 

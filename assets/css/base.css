@@ -187,3 +187,21 @@ a.btn-secondary:hover,
     scroll-behavior: auto;
   }
 }
+
+/* ── Scroll-lock CSS backstop (ScrollLockCore is the JS authority) ──
+   When <html data-scroll-locked="true">, the background must never scroll,
+   even if JS inline styles are lost or overridden by another writer.
+   NOTE: touch-action is deliberately NOT forced to none here — the CSS
+   touch-action of ancestors intersects with descendants, which would kill
+   native touch scrolling inside allowed overlay surfaces (.fvl-scrollable,
+   .fp-body, .search-overlay-scrollable-content). Touch containment stays
+   with ScrollLockCore's passive:false touchmove handler, which allows
+   those same surfaces. */
+html[data-scroll-locked="true"],
+html[data-scroll-locked="true"] body {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+html[data-scroll-locked="true"] {
+  scrollbar-gutter: stable;
+}

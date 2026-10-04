@@ -1,6 +1,14 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
 
 // Load popup modules into window.PopupModules
+// Install the real shared scroll-lock core used by the application.
+beforeAll(async () => {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const code = fs.readFileSync(path.resolve(process.cwd(), 'assets/js/loading-system/fvl-modules/scroll-lock-core.js'), 'utf8');
+  new Function('window', 'document', code)(window, document);
+});
+
 import '../../assets/js/popup-modules/types.js';
 import '../../assets/js/popup-modules/config.js';
 import '../../assets/js/popup-modules/state.js';
@@ -16,6 +24,7 @@ import '../../assets/js/popup-modules/init.js';
 
 describe('PopupEngine XSS Hardening', () => {
   beforeEach(() => {
+    (window as any).ScrollLockCore?.reset();
     document.body.innerHTML = '';
   });
 
@@ -49,6 +58,7 @@ describe('PopupEngine XSS Hardening', () => {
 
 describe('PopupEngine Rapid Toggle & Robustness', () => {
   beforeEach(() => {
+    (window as any).ScrollLockCore?.reset();
     document.body.innerHTML = '';
     const State = (window as any).PopupModules.State;
     if (State && State.destroyAll) {
