@@ -25,7 +25,7 @@
 
     --fvl-bg:            var(--fv-surface-page, #ffffff);
     --fvl-text:          var(--text-main, #0f172a);
-    --fvl-text-sub:      var(--text-muted, #757575);
+    --fvl-text-sub:      var(--text-muted, #475569);
     --fvl-spinner-track: var(--border-subtle, rgba(0, 0, 0, 0.06));
     --fvl-spinner-arc:   var(--color-brand-primary, #4f46e5);
     --fvl-overlay-bg:    rgba(255, 255, 255, 0.96);
@@ -40,7 +40,7 @@
   .fvl[data-fvl-theme="light"] {
     --fvl-bg:            var(--fv-surface-page, #ffffff);
     --fvl-text:          var(--text-main, #0f172a);
-    --fvl-text-sub:      var(--text-muted, #757575);
+    --fvl-text-sub:      var(--text-muted, #475569);
     --fvl-spinner-track: var(--border-subtle, rgba(0, 0, 0, 0.06));
     --fvl-spinner-arc:   var(--color-brand-primary, #4f46e5);
     --fvl-overlay-bg:    rgba(255, 255, 255, 0.96);

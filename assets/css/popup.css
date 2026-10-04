@@ -517,18 +517,18 @@
 
 .fp-toast-success,
 .fp-variant-success.fp-toast {
-  --fp-toast-dot: var(--color-brand-accent, #059669);
+  --fp-toast-dot: var(--color-brand-accent, #10b981);
 }
 
 .fp-toast-error,
 .fp-variant-error.fp-toast,
 .fp-variant-danger.fp-toast {
-  --fp-toast-dot: var(--color-danger, #dc2626);
+  --fp-toast-dot: var(--color-danger, #ef4444);
 }
 
 .fp-toast-warning,
 .fp-variant-warning.fp-toast {
-  --fp-toast-dot: var(--color-warning, #d97706);
+  --fp-toast-dot: var(--color-warning, #f59e0b);
 }
 
 .fp-toast-info,

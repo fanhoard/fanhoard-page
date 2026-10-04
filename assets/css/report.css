@@ -151,7 +151,7 @@ section.con .fv-section-desc,
 }
 
 .contact-action-btn:hover {
-  background-color: var(--color-brand-hover, #0F766E);
+  background-color: var(--color-brand-hover, #4338ca);
 }
 
 .contact-action-btn svg {
@@ -261,14 +261,14 @@ select.setting-item.select:focus {
 }
 
 .report-submit:hover {
-  background-color: var(--color-brand-hover, #0F766E);
+  background-color: var(--color-brand-hover, #4338ca);
   transform: none;
   box-shadow: none;
 }
 
 .report-submit:active {
   transform: none;
-  background-color: var(--color-brand-hover, #0F766E);
+  background-color: var(--color-brand-hover, #4338ca);
 }
 
 .report-submit:disabled {

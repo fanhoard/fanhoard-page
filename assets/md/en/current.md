@@ -1,17 +1,16 @@
 ---
-version: 3.3.1
-date: 2026-10-04T08:01:37.312Z
-title: Floating Glass Navigation
-subtitle: The main navigation becomes a calm floating glass pill bar, cards lift gently on hover, and popups gain a soft blurred backdrop.
+version: 3.3.2
+date: 2026-10-04T08:03:55.984Z
+title: Consistency & Calm Feedback Surfaces
+subtitle: Footer gains a soft layered surface, loading views get calm empty-state and skeleton styles, and legacy color fallbacks are swept clean.
 notify: true
 ---
 
-**TL;DR** — Navigation is now a floating glass bar: it detaches and floats above the page as you scroll, with the active tab shown as a soft indigo pill. Cards gently lift on hover, and popups get a soft blurred backdrop for extra depth.
+**TL;DR** — A quiet consistency pass: the footer sits on a soft layered surface, empty and loading states gain a gentle icon badge and rounded skeleton shimmer, and dozens of legacy color fallbacks are cleaned up so everything speaks the same calm palette.
 
 ### Changed
 
-- **Floating glass navigation** — the main navigation bar now floats as a rounded glass pill with a soft blur, staying gently in view while you scroll.
-- **Soft pill active tab** — the active section indicator switches from an underline to a soft indigo pill for a calmer look.
-- **Glass sub-page bar** — the top bar on sub-pages uses the same calm glass treatment.
-- **Cards lift on hover** — feed cards now rise slightly with a softer layered shadow when you hover them.
-- **Soft blurred popup backdrop** — popups and modals blur the page behind them slightly, making dialogs feel lighter and more modern.
+- **Soft footer surface** — the footer now closes the page with a subtle layered surface line instead of a hard edge.
+- **Calm empty state** — empty results show a soft rounded icon badge with a gentle tint, keeping the page quiet even when nothing is found.
+- **Rounded skeleton shimmer** — loading placeholders use a calm rounded shimmer that respects reduced-motion settings.
+- **Legacy color cleanup** — leftover color fallbacks from previous designs now match the current calm palette everywhere.

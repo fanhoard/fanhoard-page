@@ -39,7 +39,7 @@
 }
 
 #back-to-top:hover {
-  background: var(--color-brand-hover, #0F766E);
+  background: var(--color-brand-hover, #4338ca);
 }
 
 #back-to-top svg {

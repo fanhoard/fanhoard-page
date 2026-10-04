@@ -8,7 +8,7 @@
 
 body {
   font-family: var(--fv-font-stack, var(--font-sans, system-ui, -apple-system, sans-serif));
-  color: var(--text-main, #152a2f);
+  color: var(--text-main, #0f172a);
   background: var(--surface-base, #ffffff);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -93,7 +93,7 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: var(--text-muted, #757575);
+  color: var(--text-muted, #475569);
   background: transparent;
   transition: background-color var(--duration-fast, 150ms) ease, opacity var(--duration-fast, 150ms) ease;
   pointer-events: none;
@@ -127,7 +127,7 @@ body {
   line-height: 1;
   border: 0;
   background: transparent;
-  color: var(--text-main, #152a2f);
+  color: var(--text-main, #0f172a);
   font-family: inherit;
   letter-spacing: 0.1px;
   caret-color: var(--color-brand-primary, var(--color-brand-primary, #4f46e5));
@@ -135,7 +135,7 @@ body {
 }
 
 #searchInput::placeholder {
-  color: var(--text-muted, #757575);
+  color: var(--text-muted, #475569);
   font-weight: 400;
 }
 
@@ -157,7 +157,7 @@ body {
   border: none;
   cursor: pointer;
   touch-action: manipulation;
-  color: var(--text-muted, #757575);
+  color: var(--text-muted, #475569);
   padding: 0;
   transition: background-color var(--duration-fast, 150ms) ease, opacity var(--duration-fast, 150ms) ease;
 }
@@ -254,7 +254,7 @@ body {
   font-weight: 500;
   background: transparent;
   border: 1px solid var(--border-subtle, rgba(14, 95, 153, 0.09));
-  color: var(--text-secondary, #374151);
+  color: var(--text-secondary, #475569);
 }
 
 .filter-pill--cat.active {
@@ -342,7 +342,7 @@ body {
 .result-card .result-card__title {
   font-size: 1.02rem;
   font-weight: 700;
-  color: var(--text-main, #152a2f);
+  color: var(--text-main, #0f172a);
   line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
@@ -353,7 +353,7 @@ body {
 .result-card .result-card__subtitle {
   font-size: 0.89rem;
   font-weight: 500;
-  color: var(--text-muted, #757575);
+  color: var(--text-muted, #475569);
   line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
@@ -469,7 +469,7 @@ body {
   padding: 20px 16px 8px;
   font-size: 0.80rem;
   font-weight: 700;
-  color: var(--text-muted, #757575);
+  color: var(--text-muted, #475569);
   text-transform: uppercase;
   letter-spacing: 1px;
   user-select: none;
@@ -495,13 +495,13 @@ body {
   word-break: break-word;
   font-size: 0.95rem;
   font-weight: 500;
-  color: var(--text-main, #2f5157);
+  color: var(--text-main, #0f172a);
   line-height: 1.5;
 }
 
 .search-suggestion-body mark {
   background: rgba(99, 102, 241, 0.18);
-  color: var(--text-main, #152a2f);
+  color: var(--text-main, #0f172a);
   font-weight: 600;
   display: inline;
   vertical-align: baseline;
@@ -514,7 +514,7 @@ body {
   margin-top: 40px;
   padding: 36px 28px;
   text-align: center;
-  color: var(--text-muted, #757575);
+  color: var(--text-muted, #475569);
   font-size: 0.91rem;
   font-weight: 500;
   line-height: 1.7;
@@ -531,7 +531,7 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: var(--text-muted, #757575);
+  color: var(--text-muted, #475569);
   font-size: 1.08rem;
   padding: 40px 28px;
   letter-spacing: 0.2px;
@@ -562,7 +562,7 @@ body {
   padding: 4px 16px 6px;
   font-size: 0.86rem;
   font-weight: 600;
-  color: var(--text-muted, #757575);
+  color: var(--text-muted, #475569);
   letter-spacing: 0.2px;
   user-select: none;
   cursor: pointer;

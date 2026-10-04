@@ -340,3 +340,9 @@
     transform: none;
   }
 }
+
+/* Subtle, layered footer surface aligned with the calm neutral system. */
+.footer-minimal {
+  background: var(--surface-base, var(--fv-surface-page, #0B0D10));
+  box-shadow: 0 -1px 0 color-mix(in srgb, var(--border-subtle, #ffffff1a) 80%, transparent);
+}
