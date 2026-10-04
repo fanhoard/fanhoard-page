@@ -4,6 +4,6 @@
 
 :root {
   --main-color: var(--fv-gradient-teal);
-  --main-color0: var(--color-brand-primary, #227258);
-  --main-active-color: var(--color-brand-hover, #195A45);
+  --main-color0: var(--color-brand-primary, #2E9188);
+  --main-active-color: var(--color-brand-hover, #1F746D);
 }

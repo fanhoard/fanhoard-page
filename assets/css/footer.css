@@ -23,8 +23,8 @@
   transform: none;
   z-index: auto;
   float: none;
-  background: var(--surface-base, #FAFDFB);
-  color: var(--text-muted, var(--color-slate-600, #3E564E));
+  background: var(--surface-base, #FAFAFC);
+  color: var(--text-muted, var(--color-slate-600, #475569));
   font-family: var(--font-sans, system-ui, sans-serif);
   font-size: 0.94rem;
   font-weight: 400;
@@ -32,7 +32,7 @@
   letter-spacing: -0.015em;
   box-shadow: 0 -1px 0 0 var(--border-subtle, rgba(15, 23, 42, 0.08));
   border: none;
-  border-radius: 40px 40px 0 0;
+  border-radius: 0;
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
@@ -81,7 +81,7 @@
   font-family: var(--font-sans);
   font-size: 1.7rem;
   font-weight: 700;
-  color: var(--color-brand-primary, #227258);
+  color: var(--color-brand-primary, #2E9188);
   letter-spacing: -0.02em;
   line-height: 1;
 }
@@ -89,7 +89,7 @@
 .footer-minimal .footer-desc {
   margin: 0;
   font-size: 0.88rem;
-  color: var(--text-muted, var(--color-slate-600, #3E564E));
+  color: var(--text-muted, var(--color-slate-600, #475569));
   max-width: 100%;
   line-height: 1.6;
   font-weight: 400;
@@ -103,7 +103,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--text-muted, var(--color-slate-600, #3E564E));
+  color: var(--text-muted, var(--color-slate-600, #475569));
   background: none;
   border: none;
   line-height: 1.5;
@@ -131,13 +131,13 @@
   border-radius: var(--radius-pill, 9999px);
   font-size: 0.92rem;
   font-weight: 500;
-  color: var(--text-muted, var(--color-slate-600, #3E564E));
+  color: var(--text-muted, var(--color-slate-600, #475569));
   text-decoration: none;
   margin-left: -0.6rem;
   width: fit-content;
   box-shadow: 0 0 0 1px var(--border-subtle, rgba(15, 23, 42, 0.08)), 0 2px 6px rgba(0, 0, 0, 0.02);
   border: none;
-  background: var(--surface-base, #FAFDFB);
+  background: var(--surface-base, #FAFAFC);
   transition: background-color var(--transition-fast, 150ms ease),
               box-shadow var(--transition-fast, 150ms ease),
               color var(--transition-fast, 150ms ease),
@@ -146,15 +146,15 @@
 }
 
 .footer-minimal .footer-link:hover {
-  background: var(--surface-hover, #F0F7F4);
-  box-shadow: 0 0 0 1px var(--color-brand-primary, #227258), 0 4px 12px rgba(64, 169, 157, 0.1);
-  color: var(--color-brand-primary, #227258);
+  background: var(--surface-hover, #F1F5F9);
+  box-shadow: 0 0 0 1px var(--color-brand-primary, #2E9188), 0 4px 12px rgba(64, 169, 157, 0.1);
+  color: var(--color-brand-primary, #2E9188);
   text-decoration: none;
   transform: translateX(4px);
 }
 
 .footer-minimal .footer-link:focus-visible {
-  outline: 3px solid rgba(34, 114, 88, 0.35);
+  outline: 3px solid rgba(64, 169, 157, 0.35);
   outline-offset: 2px;
 }
 
@@ -162,7 +162,7 @@
   margin: 1.2rem 0 0;
   padding: 0;
   font-size: 0.8rem;
-  color: var(--text-muted, var(--color-slate-600, #3E564E));
+  color: var(--text-muted, var(--color-slate-600, #475569));
   line-height: 1.6;
   font-weight: 400;
 }
@@ -186,7 +186,7 @@
   background: var(--surface-card, #ffffff);
   font-size: 0.88rem;
   font-weight: 500;
-  color: var(--text-muted, var(--color-slate-600, #3E564E));
+  color: var(--text-muted, var(--color-slate-600, #475569));
   text-decoration: none;
   width: fit-content;
   transition: background-color var(--transition-fast, 150ms ease),
@@ -207,14 +207,14 @@
 }
 
 .footer-minimal .footer-social:hover {
-  box-shadow: 0 0 0 1.5px var(--color-brand-primary, #227258), 0 6px 15px rgba(64, 169, 157, 0.12);
-  color: var(--color-brand-primary, #227258);
-  background: var(--surface-hover, #F0F7F4);
+  box-shadow: 0 0 0 1.5px var(--color-brand-primary, #2E9188), 0 6px 15px rgba(64, 169, 157, 0.12);
+  color: var(--color-brand-primary, #2E9188);
+  background: var(--surface-hover, #F1F5F9);
   transform: translateY(-3px);
 }
 
 .footer-minimal .footer-social:focus-visible {
-  outline: 3px solid rgba(34, 114, 88, 0.35);
+  outline: 3px solid rgba(64, 169, 157, 0.35);
   outline-offset: 2px;
 }
 
@@ -232,13 +232,13 @@
 .footer-minimal .footer-bottom small,
 .footer-minimal .footer-bottom .text-muted {
   font-size: 0.8rem;
-  color: var(--text-muted, var(--color-slate-600, #3E564E));
+  color: var(--text-muted, var(--color-slate-600, #475569));
   font-weight: 400;
   line-height: 1.5;
 }
 
 .footer-minimal .footer-bottom a {
-  color: var(--text-muted, var(--color-slate-600, #3E564E));
+  color: var(--text-muted, var(--color-slate-600, #475569));
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: color var(--transition-fast, 150ms ease),
@@ -247,13 +247,13 @@
 }
 
 .footer-minimal .footer-bottom a:hover {
-  color: var(--color-brand-primary, #227258);
-  border-bottom-color: var(--color-brand-primary, #227258);
+  color: var(--color-brand-primary, #2E9188);
+  border-bottom-color: var(--color-brand-primary, #2E9188);
   text-decoration: none;
 }
 
 .footer-minimal .footer-bottom a:focus-visible {
-  outline: 3px solid rgba(34, 114, 88, 0.35);
+  outline: 3px solid rgba(64, 169, 157, 0.35);
   outline-offset: 2px;
 }
 
@@ -343,19 +343,19 @@
 
 /* Subtle, layered footer surface aligned with the calm neutral system. */
 .footer-minimal {
-  background: var(--surface-base, var(--fv-surface-page, #0F1714));
+  background: var(--surface-base, var(--fv-surface-page, #0B0D10));
   box-shadow: 0 -1px 0 color-mix(in srgb, var(--border-subtle, #ffffff1a) 80%, transparent);
 }
 
 
 /* ── v5 Clean Pastel Footer ── */
-.footer-minimal { background: #FFFFFF; box-shadow: none; border-top: 1px solid var(--border-subtle, rgba(16, 34, 27, 0.08)); }
+.footer-minimal { background: #FFFFFF; box-shadow: none; border-top: 1px solid var(--border-subtle); }
 .footer-minimal .footer-inner { padding-top: 48px; }
 .footer-minimal .footer-grid { gap: 28px 40px; padding-bottom: 36px; }
 .footer-minimal .footer-link {
-  padding: 6px 0; margin-left: 0; border-radius: var(--radius-sm, 12px);
+  padding: 6px 0; margin-left: 0; border-radius: var(--radius-xs);
   box-shadow: none; background: transparent;
 }
-.footer-minimal .footer-link:hover { transform: none; box-shadow: none; color: var(--color-mint-700); }
+.footer-minimal .footer-link:hover { transform: none; box-shadow: none; color: var(--color-teal-700); }
 .footer-minimal .footer-link:focus-visible { outline-color: var(--focus-ring-color); }
-.footer-minimal .logo-text { color: var(--color-mint-700); }
+.footer-minimal .logo-text { color: var(--color-teal-700); }

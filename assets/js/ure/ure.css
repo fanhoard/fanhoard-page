@@ -91,19 +91,19 @@ img.ure-img-loading,
   /* Reserve space while element/image loads — prevents CLS */
   background: linear-gradient(
     90deg,
-    var(--surface-hover, rgba(16, 34, 27, 0.04)) 25%,
-    var(--border-subtle, rgba(16, 34, 27, 0.10)) 50%,
-    var(--surface-hover, rgba(16, 34, 27, 0.04)) 75%
+    var(--surface-hover, rgba(15, 23, 42, 0.04)) 25%,
+    var(--border-subtle, rgba(15, 23, 42, 0.10)) 50%,
+    var(--surface-hover, rgba(15, 23, 42, 0.04)) 75%
   );
   background-size: 200% 100%;
-  border-radius: var(--radius-xl, 20px);
+  border-radius: var(--radius-md, 12px);
 }
 
 @media (prefers-reduced-motion: no-preference) {
   img.ure-img-loading,
   .ure-skeleton,
   [data-ure-skeleton] {
-    animation: ure-shimmer 1.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    animation: ure-shimmer 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 }
 
@@ -139,11 +139,11 @@ img.ure-img-error {
      Animating transform here overrides the engine's positioning and stacks
      all first-window items at translateY(0) — fade opacity only. */
   .ure-visible:not(.ure-settled) {
-    animation: ure-appear-fade 220ms var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: ure-appear-fade 220ms cubic-bezier(0.2, 0, 0, 1) both;
   }
   .cm-group,
   .feed-page {
-    animation: ure-appear 220ms var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: ure-appear 220ms cubic-bezier(0.2, 0, 0, 1) both;
   }
 }
 
@@ -155,7 +155,7 @@ img.ure-img-error {
   font-size: var(--step--1);
   background: rgba(220, 38, 38, 0.06);
   border: 1px solid rgba(220, 38, 38, 0.25);
-  border-radius: var(--radius-md, 16px);
+  border-radius: var(--radius-md);
 }
 
 /* ── Reduced-motion override ────────────────────────────────────────────────── */

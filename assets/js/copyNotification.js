@@ -42,15 +42,15 @@
         padding: 12px 22px !important;
         border-radius: var(--radius-full, 9999px);
 
-        /* v5 themed capsule surface */
+        /* v3 themed capsule surface */
         background: var(--surface-card, #ffffff);
-        border: 1px solid var(--border-subtle, rgba(16, 34, 27, 0.08));
-        box-shadow: var(--shadow-md, 0 6px 16px -2px rgba(16, 34, 27, 0.07));
+        border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
+        box-shadow: var(--shadow-md, 0 4px 16px -2px rgba(0, 0, 0, 0.08));
 
         /* Typography */
         font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
         font-size: 14px !important;
-        color: var(--text-main, #10221B);
+        color: var(--text-main, #0f172a);
         white-space: nowrap;
         pointer-events: none;
         user-select: none;
@@ -68,12 +68,12 @@
         margin-right: 12px;
       }
 
-      /* ── Primary Label (WCAG AA Mint Sage) ─────────────── */
+      /* ── Primary Label (WCAG AA Dark Teal) ─────────────── */
       .cn-label {
         font-weight: 600;
         font-size: 0.95em !important;
         letter-spacing: 0.01em;
-        color: var(--color-brand-text, #195A45);
+        color: var(--color-brand-text, #0f766e);
         flex-shrink: 0;
       }
 
@@ -81,7 +81,7 @@
       .cn-divider {
         width: 1px;
         height: 14px;
-        background: var(--border-subtle, rgba(16, 34, 27, 0.08));
+        background: var(--border-subtle, rgba(0, 0, 0, 0.08));
         flex-shrink: 0;
         margin: 0 12px;
       }
@@ -90,7 +90,7 @@
       .cn-name {
         font-size: 0.9em !important;
         font-weight: 500;
-        color: var(--text-muted, #3E564E);
+        color: var(--text-muted, #64748b);
         letter-spacing: 0.01em;
         max-width: 200px;
         overflow: hidden;
@@ -155,7 +155,7 @@
       _holdTimer = null;
     }
     
-    el.style.transition = `opacity ${FADE_OUT_MS}ms cubic-bezier(0.34, 1.56, 0.64, 1)`;
+    el.style.transition = `opacity ${FADE_OUT_MS}ms cubic-bezier(0.2, 0, 0, 1)`;
     el.style.opacity = '0';
     
     setTimeout(() => el.parentNode?.removeChild(el), FADE_OUT_MS + 40);
@@ -192,7 +192,7 @@
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (_activeEl !== el) return;
-        el.style.transition = `opacity ${FADE_IN_MS}ms cubic-bezier(0.34, 1.56, 0.64, 1)`;
+        el.style.transition = `opacity ${FADE_IN_MS}ms cubic-bezier(0.2, 0, 0, 1)`;
         el.style.opacity = '1';
       });
     });

@@ -10,7 +10,6 @@ describe('Settings System & Theme Core Polish', () => {
   });
 
   it('ThemeCore initializes default theme and persists changes', async () => {
-     // @ts-ignore
     await import('../assets/js/setting-system/theme-core.js');
 
     const ThemeCore = (window as any).ThemeCore;
@@ -31,7 +30,6 @@ describe('Settings System & Theme Core Polish', () => {
   });
 
   it('ThemeCore dispatches fv:themechange events on theme toggle', async () => {
-     // @ts-ignore
     await import('../assets/js/setting-system/theme-core.js');
     const ThemeCore = (window as any).ThemeCore;
 
@@ -61,9 +59,7 @@ describe('Settings System & Theme Core Polish', () => {
       toast: Object.assign(toastSpy, { success: toastSpy })
     };
 
-     // @ts-ignore
     await import('../assets/js/setting-system/theme-core.js');
-     // @ts-ignore
     await import('../assets/js/setting-system/setting-ui.js');
 
     const SettingUI = (window as any).SettingUI;
@@ -81,7 +77,6 @@ describe('Settings System & Theme Core Polish', () => {
   });
 
   it('back-to-top creates accessible button with type=button and aria-label', async () => {
-     // @ts-ignore
     await import('../assets/js/back-to-top.js');
 
     // Dispatch DOMContentLoaded

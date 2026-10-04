@@ -9,7 +9,7 @@
 
 
 body {
-  color: var(--text-main, var(--text-main, #10221B));
+  color: var(--text-main, var(--text-main, #0f172a));
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -57,7 +57,7 @@ h1 {
   font-size: var(--step-2, 1.5rem);
   font-weight: var(--font-bold, 700);
   margin-top: var(--space-6, 1.5rem);
-  color: var(--color-brand-primary, var(--color-brand-primary, #227258));
+  color: var(--color-brand-primary, var(--color-brand-primary, #2E9188));
 }
 
 .fv-section-label, .h {
@@ -66,7 +66,7 @@ h1 {
   font-weight: var(--font-semibold, 600);
   margin-top: 0;
   margin-bottom: var(--space-3, 0.75rem);
-  color: var(--color-brand-primary, var(--color-brand-primary, #227258));
+  color: var(--color-brand-primary, var(--color-brand-primary, #2E9188));
   display: block;
   padding-left: var(--space-1, 0.25rem);
   letter-spacing: 0.01em;
@@ -75,13 +75,13 @@ h1 {
 h5 {
   font-size: var(--step-1, 1.25rem);
   margin-bottom: var(--space-2, 0.5rem);
-  color: var(--color-brand-primary, var(--color-brand-primary, #227258));
+  color: var(--color-brand-primary, var(--color-brand-primary, #2E9188));
 }
 
 .setting-item label, label {
   display: block;
   font-size: var(--step--1, 0.8125rem);
-  color: var(--text-muted, #3E564E);
+  color: var(--text-muted, #475569);
   margin-bottom: var(--space-2, 0.5rem);
   font-weight: var(--font-semibold, 600);
   letter-spacing: 0.025em;
@@ -130,7 +130,7 @@ h5 {
 /* Legacy container utility for community pages */
 section.con {
   padding: var(--space-5, 1.25rem);
-  border-radius: var(--radius-2xl, 28px);
+  border-radius: var(--radius-lg, 0.75rem);
   background-color: var(--surface-card, #ffffff);
   border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06));
 }
@@ -138,7 +138,7 @@ section.con {
 section.con p {
   font-size: var(--step-0, 0.9375rem);
   line-height: 1.6;
-  color: var(--text-main, var(--text-main, #10221B));
+  color: var(--text-main, var(--text-main, #0f172a));
   margin-bottom: var(--space-3, 0.75rem);
 }
 
@@ -146,7 +146,7 @@ section.con .fv-section-label {
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   font-size: var(--step-2, 1.5rem);
   font-weight: var(--font-bold, 700);
-  color: var(--text-main, var(--text-main, #10221B));
+  color: var(--text-main, var(--text-main, #0f172a));
   margin-bottom: var(--space-3, 0.75rem);
   display: block;
 }
@@ -154,13 +154,13 @@ section.con .fv-section-label {
 section.con .fv-section-desc {
   font-size: var(--step-0, 0.9375rem);
   line-height: 1.6;
-  color: var(--text-muted, #3E564E);
+  color: var(--text-muted, #475569);
   margin-bottom: 0;
 }
 
 section.con span {
   font-weight: var(--font-bold, 700);
-  color: var(--color-brand-text, #195A45);
+  color: var(--color-brand-text, #1F746D);
 }
 
 section.con h1 {
@@ -180,9 +180,9 @@ section.con h1 {
   padding: 12px 8px;
   font-size: var(--step-0, 0.9375rem);
   border: none;
-  border-radius: var(--radius-pill, 9999px);
+  border-radius: var(--radius-md, 0.375rem);
   background-color: transparent;
-  color: var(--text-main, var(--text-main, #10221B));
+  color: var(--text-main, var(--text-main, #0f172a));
   transition: background-color var(--duration-fast, 150ms) var(--ease-out, ease-out);
   cursor: pointer;
   appearance: none;
@@ -200,7 +200,7 @@ section.con h1 {
   display: inline-flex;
   align-items: center;
   gap: var(--space-3, 0.75rem);
-  color: var(--text-main, var(--text-main, #10221B));
+  color: var(--text-main, var(--text-main, #0f172a));
 }
 
 /* Select & Language Button dropdown arrow */
@@ -235,7 +235,7 @@ section.con h1 {
   width: 24px;
   flex-shrink: 0;
   display: block;
-  stroke: var(--text-muted, #3E564E);
+  stroke: var(--text-muted, #475569);
   stroke-width: 1.5;
 }
 
@@ -253,15 +253,15 @@ section.con h1 {
   position: relative;
   overflow: hidden;
   user-select: none;
-  color: var(--text-main, var(--text-main, #10221B));
+  color: var(--text-main, var(--text-main, #0f172a));
 }
 
 .buttons.buy svg {
-  stroke: var(--color-brand-primary, var(--color-brand-primary, #227258));
+  stroke: var(--color-brand-primary, var(--color-brand-primary, #2E9188));
 }
 
 .b2 {
-  border-radius: var(--radius-pill, 9999px);
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 /* Auto-Update Switch Container & Controls */
@@ -282,7 +282,7 @@ section.con h1 {
   overflow-wrap: break-word;
   white-space: normal;
   word-break: break-word;
-  color: var(--text-main, var(--text-main, #10221B));
+  color: var(--text-main, var(--text-main, #0f172a));
   cursor: pointer;
   font-weight: var(--font-normal, 400);
 }
@@ -290,7 +290,7 @@ section.con h1 {
 .auto-update-desc {
   display: block;
   font-size: var(--step--1, 0.8125rem);
-  color: var(--text-muted, #3E564E);
+  color: var(--text-muted, #475569);
   font-weight: var(--font-normal, 400);
   margin-top: 2px;
 }
@@ -309,8 +309,8 @@ section.con h1 {
   position: relative;
   width: 44px;
   height: 24px;
-  background-color: var(--surface-active, var(--border-strong, rgba(16, 34, 27, 0.16)));
-  border-radius: var(--radius-pill, 9999px);
+  background-color: var(--surface-active, var(--border-strong, #cbd5e1));
+  border-radius: var(--radius-full, 9999px);
   cursor: pointer;
   transition: background-color var(--duration-fast, 150ms) var(--ease-out, ease-out);
   border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
@@ -333,7 +333,7 @@ section.con h1 {
 }
 
 .switch-outer input:checked + .slider {
-  background-color: var(--color-brand-primary, var(--color-brand-primary, #227258));
+  background-color: var(--color-brand-primary, var(--color-brand-primary, #2E9188));
 }
 
 .switch-outer input:checked + .slider::before {
@@ -345,7 +345,7 @@ section.con h1 {
 #language-button:focus-visible,
 .buttons:focus-visible,
 #auto-update-switch:focus-visible + .slider {
-  outline: 2px solid var(--color-brand-primary, var(--color-brand-primary, #227258));
+  outline: 2px solid var(--color-brand-primary, var(--color-brand-primary, #2E9188));
   outline-offset: 2px;
 }
 
@@ -376,7 +376,7 @@ section.con h1 {
 
 
 .language-option:hover {
-  border-color: var(--color-brand-primary, var(--color-brand-primary, #227258));
+  border-color: var(--color-brand-primary, var(--color-brand-primary, #2E9188));
   background-color: var(--surface-hover, rgba(0, 0, 0, 0.03));
 }
 
@@ -398,7 +398,7 @@ section.con h1 {
   background-color: var(--color-danger, #ef4444);
   color: #ffffff;
   padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
-  border-radius: var(--radius-pill, 9999px);
+  border-radius: var(--radius-md, 0.375rem);
   font-size: var(--step--1, 0.8125rem);
   font-weight: var(--font-semibold, 600);
   box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
@@ -438,7 +438,7 @@ section.con h1 {
   padding: 8px 16px;
   background: var(--surface-card, #ffffff);
   border: 1px solid var(--border-subtle, rgba(15,23,42,0.08));
-  border-radius: var(--radius-2xl, 28px);
+  border-radius: var(--radius-lg, 16px);
   box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
 }
 
@@ -452,17 +452,17 @@ section.con h1 {
   padding-left: 4px;
   font-size: 18px;
   font-weight: var(--font-semibold, 600);
-  color: var(--text-main, #10221B);
+  color: var(--text-main, #0f172a);
 }
 
 .setting-item label, label {
-  color: var(--text-muted, #3E564E);
+  color: var(--text-muted, #475569);
 }
 
 .setting-item select,
 #language-button,
 .buttons {
-  border-radius: var(--radius-pill, 9999px);
+  border-radius: var(--radius-md, 12px);
   transition: background-color var(--transition-fast, 150ms ease), color var(--transition-fast, 150ms ease), border-color var(--transition-fast, 150ms ease);
 }
 
@@ -470,7 +470,7 @@ section.con h1 {
 .setting-item.select:hover,
 #language-button:hover,
 .buttons.auto-update-toggle:hover {
-  background-color: var(--surface-hover, #F0F7F4);
+  background-color: var(--surface-hover, #f1f5f9);
   border-color: var(--border-subtle, rgba(15,23,42,0.08));
 }
 

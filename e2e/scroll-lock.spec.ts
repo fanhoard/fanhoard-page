@@ -126,8 +126,8 @@ test.describe('Unified Scroll-Lock Core', () => {
     await waitForUnlocked(page, 10000);
     // Scroll position restored after unlock — no lost reading position.
     await expect
-      .poll(() => page.evaluate((s) => Math.abs(window.scrollY - s) <= 2, savedY), { timeout: 5000 })
-      .toBe(true);
+      .poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 })
+      .toBe(savedY);
   });
 
   test('popup close must not destroy the still-open loading overlay lock', async ({ page }) => {
@@ -184,8 +184,8 @@ test.describe('Unified Scroll-Lock Core', () => {
     , handleId);
     await waitForUnlocked(page, 10000);
     await expect
-      .poll(() => page.evaluate((s) => Math.abs(window.scrollY - s) <= 2, savedY), { timeout: 5000 })
-      .toBe(true);
+      .poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 })
+      .toBe(savedY);
   });
 
   test('search overlay locks scroll through the shared core and restores position', async ({ page }) => {

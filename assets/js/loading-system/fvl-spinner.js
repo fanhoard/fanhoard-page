@@ -15,7 +15,7 @@
     '.fvl-spinner { display: flex; align-items: center; justify-content: center; flex-shrink: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; will-change: transform; }\n' +
     '.fvl-spinner svg { width: 100%; height: 100%; overflow: visible; display: block; backface-visibility: hidden; -webkit-backface-visibility: hidden; }\n' +
     '.fvl-spinner .fvl-track { stroke: var(--fvl-spinner-track-color, var(--fvl-spinner-track, rgba(0, 0, 0, 0.06))); stroke-width: var(--fvl-spinner-stroke-width, 3.5); fill: none; }\n' +
-    '.fvl-spinner .fvl-arc { stroke: var(--fvl-spinner-color, var(--fvl-spinner-arc, #227258)); stroke-width: var(--fvl-spinner-stroke-width, 3.5); stroke-linecap: round; stroke-dasharray: 88 132; fill: none; transform-box: fill-box; transform-origin: center; animation: _fvl_spin 0.7s linear infinite; }\n' +
+    '.fvl-spinner .fvl-arc { stroke: var(--fvl-spinner-color, var(--fvl-spinner-arc, #009688)); stroke-width: var(--fvl-spinner-stroke-width, 3.5); stroke-linecap: round; stroke-dasharray: 88 132; fill: none; transform-box: fill-box; transform-origin: center; animation: _fvl_spin 0.7s linear infinite; }\n' +
     '.fvl-spinner-inline .fvl-track, .fvl-spinner-inline .fvl-arc { stroke-width: var(--fvl-spinner-stroke-width, 5); }\n' +
     '.fvl-spinner--sm { width: 18px; height: 18px; }\n' +
     '.fvl-spinner--md { width: 32px; height: 32px; }\n' +
@@ -27,7 +27,7 @@
     '.fvl-spinner--stroke-thin .fvl-track, .fvl-spinner--stroke-thin .fvl-arc { stroke-width: 2px !important; }\n' +
     '.fvl-spinner--stroke-medium .fvl-track, .fvl-spinner--stroke-medium .fvl-arc { stroke-width: 3.5px !important; }\n' +
     '.fvl-spinner--stroke-thick .fvl-track, .fvl-spinner--stroke-thick .fvl-arc { stroke-width: 5px !important; }\n' +
-    '.fvl-spinner--determinate .fvl-arc { animation: none !important; stroke-dasharray: 138.23px; stroke-dashoffset: 138.23px; transition: stroke-dashoffset 200ms cubic-bezier(0.16, 1, 0.3, 1); }\n' +
+    '.fvl-spinner--determinate .fvl-arc { animation: none !important; stroke-dasharray: 138.23px; stroke-dashoffset: 138.23px; transition: stroke-dashoffset 200ms cubic-bezier(0.4, 0, 0.2, 1); }\n' +
 '.fvl-spinner--center { margin-left: auto; margin-right: auto; align-self: center; justify-self: center; }\n' +
 '.fvl-spinner--align-left { margin-left: 0; margin-right: auto; }\n' +
 '.fvl-spinner--align-right { margin-left: auto; margin-right: 0; }\n' +

@@ -21,7 +21,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   FANHOARD DESIGN TOKENS v5.0 (2026 App Native - Pastel Mint/Sage, XL Radius, Spring Depth)
+   FANHOARD DESIGN TOKENS v4.0 (Calm SaaS — Soft Indigo, High-Radius, Glass)
    assets/css/tokens.css
    Single Source of Truth for Design Custom Properties
    ═══════════════════════════════════════════════════════════════ */
@@ -33,91 +33,76 @@
   --fv-scroll-offset: calc(var(--fv-nav-height) + var(--space-4));
   --fv-nav-top-h: var(--fv-nav-height);
 
-  /* ── Brand Mint / Sage Green Family (v5) ── */
-  --color-mint-50:  #F2F9F6;
-  --color-mint-100: #E1F3EC;
-  --color-mint-200: #C3E7DA;
-  --color-mint-300: #98D4C0;
-  --color-mint-400: #62BA9F;
-  --color-mint-500: #309C7D;
-  --color-mint-600: #227258; /* Primary interactive (5.67:1 AA on light canvas) */
-  --color-mint-700: #195A45; /* Hover & Header Text (7.92:1 AAA) */
-  --color-mint-800: #114333; /* Deep contrast text (10.94:1 AAA) */
-  --color-mint-900: #0A2A24;
+  /* ── Brand Core Palette (v5: true pastel teal on pure white) ── */
+  --color-teal-50:  #EAF7F5;
+  --color-teal-100: #D3F0EC;
+  --color-teal-400: #5FBDB2;
+  --color-teal-500: #40A99D;
+  --color-teal-600: #2E9188; /* Primary interactive */
+  --color-teal-700: #1F746D; /* Brand text (AA on white) */
+  --color-teal-800: #175B56;
+  --color-teal-900: #114742;
 
-  /* ── Legacy Teal & Indigo Aliases (Mapped to Mint Palette for Backward Compatibility) ── */
-  --color-teal-50:  var(--color-mint-50);
-  --color-teal-100: var(--color-mint-100);
-  --color-teal-200: var(--color-mint-200);
-  --color-teal-300: var(--color-mint-300);
-  --color-teal-400: var(--color-mint-400);
-  --color-teal-500: var(--color-mint-500);
-  --color-teal-600: var(--color-mint-600);
-  --color-teal-700: var(--color-mint-700);
-  --color-teal-800: var(--color-mint-800);
-  --color-teal-900: var(--color-mint-900);
-
-  --color-indigo-soft: var(--color-mint-400);
-  --color-indigo-glow: rgba(48, 156, 125, 0.15);
+  --color-indigo-soft: var(--color-teal-400);   /* legacy alias -> teal */
+  --color-indigo-glow: rgba(64, 169, 157, 0.15);
 
   --color-emerald-500: #10b981;
   --color-emerald-600: #059669;
 
-  /* ── Neutral Slate / Sage Base Scale ── */
-  --color-slate-50:  #F2F9F6;
-  --color-slate-100: #E1F3EC;
-  --color-slate-200: #C3E7DA;
-  --color-slate-300: #98D4C0;
-  --color-slate-400: #68857C;
-  --color-slate-500: #526C63;
-  --color-slate-600: #3E564E;
-  --color-slate-700: #273B35;
-  --color-slate-800: #16221E;
-  --color-slate-900: #10221B;
+  --color-slate-50:  #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
 
   /* ── Semantic Colors (Light Default) ── */
-  --color-brand-primary: var(--color-mint-600);
-  --color-brand-hover:   var(--color-mint-700);
-  --color-brand-active:  var(--color-mint-800);
-  --color-brand-text:    var(--color-mint-700);
-  --color-brand-accent:  #059669;
+  --color-brand-primary: var(--color-teal-600);
+  --color-brand-hover:   var(--color-teal-700);
+  --color-brand-active:  var(--color-teal-800);
+  --color-brand-text:    var(--color-teal-700);
+  --color-brand-accent:  var(--color-emerald-600);
 
-  --surface-base:   #FAFDFB; /* Soft mint-tinted warm white canvas */
-  --surface-card:   #FFFFFF; /* Pure crisp white elevated surface */
-  --surface-hover:  #F0F7F4; /* Light hover surface tint */
-  --surface-active: #E1F3EC; /* Active press surface tint */
+  --surface-base:   #FFFFFF; /* v5 pure white canvas */
+  --surface-card:   #ffffff; /* surface-1 */
+  --surface-hover:  var(--color-slate-100); /* surface-2 */
+  --surface-active: var(--color-slate-200);
 
-  --text-main:      #10221B; /* Primary body text (16.19:1 contrast vs canvas) */
-  --text-muted:     #3E564E; /* Secondary text (7.75:1 contrast vs canvas) */
-  --text-faint:     #526C63; /* Faint caption text (5.56:1 contrast vs canvas) */
-  --text-inverse:   #FFFFFF;
+  --text-main:      var(--color-slate-900);
+  --text-muted:     var(--color-slate-600);
+  --text-faint:     var(--color-slate-400);
+  --text-inverse:   #ffffff;
 
-  --border-subtle:  rgba(16, 34, 27, 0.08);
-  --border-strong:  rgba(16, 34, 27, 0.16);
-  --border-brand:   var(--color-mint-600);
+  --border-subtle:  rgba(15, 23, 42, 0.08);
+  --border-strong:  rgba(15, 23, 42, 0.16);
+  --border-brand:   var(--color-teal-600);
 
   --color-success:  #10b981;
   --color-warning:  #f59e0b;
   --color-danger:   #ef4444;
-  --color-info:     var(--color-mint-500);
+  --color-info:     var(--color-teal-500);
 
-  /* ── Glass diffusion (floating nav pill / modals / overlays) ── */
-  --glass-bg:    rgba(250, 253, 251, 0.85);
-  --glass-blur:  12px;
+
+  /* ── Glass diffusion (nav bar / modals / floating surfaces) ── */
+  --glass-bg:    rgba(255, 255, 255, 0.96);
+  --glass-blur:  8px;
   --glass-border: var(--border-subtle);
-
   /* ── Legacy Backward-Compatibility Mappings ── */
   --fv-brand-teal:       var(--color-brand-primary);
   --fv-brand-teal-light: var(--color-brand-primary);
   --fv-brand-teal-dark:  var(--color-brand-hover);
 
-  --fv-gradient-teal: var(--color-brand-primary, #227258);
-  --fv-gradient-btn:  var(--color-brand-primary, #227258);
+  --fv-gradient-teal: var(--color-brand-primary, #009688);
+  --fv-gradient-btn:  var(--color-brand-primary, #009688);
 
   --fv-surface-page:       var(--surface-base);
   --fv-surface-soft:       var(--surface-hover);
   --fv-surface-hover:      var(--surface-hover);
-  --fv-surface-teal-hover: var(--color-mint-50);
+  --fv-surface-teal-hover: var(--color-teal-50);
 
   --fv-text-primary:   var(--text-main);
   --fv-text-secondary: var(--text-muted);
@@ -128,7 +113,7 @@
   --c-heading:     var(--text-main);
   --c-body:        var(--text-muted);
 
-  /* ── Typography Scale ── */
+  /* ── Typography Scale (Minor Third Fluid Scale) ── */
   --font-sans:    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   --font-heading: var(--font-sans);
   --font-mono:    ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
@@ -146,14 +131,14 @@
   --step-4:  clamp(2.074rem, 1.82rem + 1.25vw, 2.50rem);
   --step-5:  clamp(2.488rem, 2.14rem + 1.75vw, 3.125rem);
 
-  /* ── Spacing Scale (Strict 4/8px Grid) ── */
+  /* ── Baseline Spacing Scale (Strict 4/8px Grid) ── */
   --space-1:  0.25rem;  /* 4px */
   --space-2:  0.5rem;   /* 8px */
   --space-3:  0.75rem;  /* 12px */
   --space-4:  1rem;     /* 16px */
   --space-5:  1.25rem;  /* 20px */
   --space-6:  1.5rem;   /* 24px */
-  --space-7:  1.75rem;  /* 28px */
+  --space-7:  1.75rem;  /* 28px - Explicit addition to fix missing token */
   --space-8:  2rem;     /* 32px */
   --space-10: 2.5rem;   /* 40px */
   --space-12: 3rem;     /* 48px */
@@ -170,17 +155,14 @@
   --fv-space-6: var(--space-6);
   --fv-space-7: var(--space-7);
 
-  /* ── XL Radius Token Scale (v5 High Rounding Mandate) ── */
-  --radius-xs:   8px;    /* Tiny badges, tooltips, inline tags */
-  --radius-sm:   12px;   /* Small dropdowns, chips */
-  --radius-md:   16px;   /* Compact cards, toast notifications */
-  --radius-lg:   20px;   /* Standard modals, secondary cards */
-  --radius-xl:   24px;   /* Feature cards, media thumbnails */
-  --radius-2xl:  28px;   /* Standard content cards & feed cards */
-  --radius-3xl:  36px;   /* Large container panels, reader containers */
-  --radius-4xl:  48px;   /* Hero sections & page outer shell */
-  --radius-full: 9999px; /* Pill buttons, inputs, search, nav pill */
-  --radius-pill: 9999px; /* Pill shortcut */
+  /* ── Corner Radii Harmonized Scale ── */
+  --radius-xs:   6px;   /* badge */
+  --radius-sm:   10px;  /* input / button */
+  --radius-md:   12px;  /* card */
+  --radius-lg:   16px;  /* hero */
+  --radius-xl:   20px;  /* modal / sheet */
+  --radius-2xl:  24px;
+  --radius-full: 9999px; /* pill */
 
   --fv-radius-xs:   var(--radius-xs);
   --fv-radius-sm:   var(--radius-sm);
@@ -188,45 +170,37 @@
   --fv-radius-lg:   var(--radius-lg);
   --fv-radius-xl:   var(--radius-xl);
   --fv-radius-2xl:  var(--radius-2xl);
-  --fv-radius-3xl:  var(--radius-3xl);
-  --fv-radius-4xl:  var(--radius-4xl);
-  --fv-radius-pill: var(--radius-pill);
+  --fv-radius-pill: var(--radius-full);
+  --r-btn:  var(--radius-sm);
+  --r-card: var(--radius-lg);
 
-  --r-btn:            var(--radius-pill);
-  --r-card:           var(--radius-2xl);
-  --radius-btn:       var(--radius-pill);
-  --radius-input:     var(--radius-pill);
-  --radius-card:      var(--radius-2xl);
-  --radius-container: var(--radius-3xl);
-  --radius-shell:     var(--radius-4xl);
+  /* ── Elevation Tokens (Lighter, Clean Native Layering) ── */
+  --ring-subtle:  0 0 0 1px var(--border-subtle);
+  --shadow-sm:    0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md:    0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-lg:    0 8px 24px rgba(0, 0, 0, 0.07);
+  --shadow-modal: 0 24px 48px -12px rgba(0, 0, 0, 0.18), var(--ring-subtle);
+  --focus-ring-color: rgba(64, 169, 157, 0.40);
+  --shadow-focus: 0 0 0 3px var(--focus-ring-color);
+  --fv-shadow-teal: 0 4px 16px 0 rgba(64, 169, 157, 0.18);
 
-  /* ── Multi-Layer Depth Shadows & Focus Rings ── */
-  --ring-subtle:      0 0 0 1px var(--border-subtle);
-  --shadow-sm:        0 2px 6px -1px rgba(16, 34, 27, 0.05), 0 1px 3px -1px rgba(16, 34, 27, 0.03);
-  --shadow-md:        0 6px 16px -2px rgba(16, 34, 27, 0.07), 0 2px 6px -1px rgba(16, 34, 27, 0.04);
-  --shadow-lg:        0 16px 32px -4px rgba(16, 34, 27, 0.09), 0 4px 12px -2px rgba(16, 34, 27, 0.04);
-  --shadow-modal:     0 24px 48px -8px rgba(16, 34, 27, 0.18), var(--ring-subtle);
-  --focus-ring-color: rgba(34, 114, 88, 0.35);
-  --shadow-focus:     0 0 0 3px var(--focus-ring-color);
-  --fv-shadow-teal:   0 4px 16px 0 rgba(34, 114, 88, 0.18);
-
-  /* ── Motion & Transitions (Spring Micro-Transitions) ── */
-  --ease-standard:    cubic-bezier(0.34, 1.56, 0.64, 1); /* springy micro-transition curve */
-  --ease-out:         cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in-out:      cubic-bezier(0.4, 0, 0.2, 1);
-  --duration-fast:    150ms;
-  --duration-normal:  220ms;
-  --duration-slow:    350ms;
+  /* ── Motion & Transitions ── */
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1); /* soft physics ease-out */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast:   150ms; /* controls */
+  --duration-normal: 220ms; /* card / modal */
+  --duration-slow:   350ms; /* page */
 
   --transition-fast:   150ms var(--ease-standard);
-  --transition-normal: 220ms var(--ease-standard);
+  --transition-normal: 250ms var(--ease-standard);
   --transition-slow:   350ms var(--ease-standard);
 
   --fv-transition-fast:   var(--transition-fast);
   --fv-transition-normal: var(--transition-normal);
   --fv-transition-slow:   var(--transition-slow);
 
-  /* ── Z-Index Scale ── */
+  /* ── Standardized 8-Tier Z-Index Scale ── */
   --z-base:     0;
   --z-sticky:   100;
   --z-dropdown: 200;
@@ -251,32 +225,29 @@
   }
 }
 
-/* ── Dark Mode Token Overrides ── */
+/* ── Dark Mode Semantic Token Overrides ── */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-brand-primary: #34D399; /* Mint-400 for high dark contrast */
-    --color-brand-hover:   #6EE7B7; /* Mint-300 hover glow */
-    --color-brand-active:  #A7F3D0;
-    --color-brand-text:    #6EE7B7;
+    --color-brand-primary: var(--color-teal-600);
+    --color-brand-hover:   var(--color-teal-700);
+    --color-brand-text:    var(--color-teal-700);
 
-    --surface-base:   #0F1714; /* Deep obsidian sage canvas */
-    --surface-card:   #16221E; /* Rich elevated dark sage card */
-    --surface-hover:  #1E2E29; /* Dark hover tint */
-    --surface-active: #273B35; /* Dark active tint */
+    --surface-base:   #FFFFFF; /* v5 pure white across color preferences */
+    --surface-card:   #FFFFFF; /* v5 pure white surface */
+    --surface-hover:  #F7FBFA; /* subtle teal-tinted interaction only */
+    --surface-active: #EAF7F5;
 
-    --text-main:      #E8F5F1; /* Primary body text (14.64:1 AAA) */
-    --text-muted:     #A1BBB2; /* Secondary text (8.01:1 AAA) */
-    --text-faint:     #68857C; /* Caption text (4.08:1 AA) */
-    --text-inverse:   #0F1714; /* Inverse dark text on bright mint */
+    --text-main:    var(--color-slate-900);
+    --text-muted:   var(--color-slate-600);
+    --text-faint:   var(--color-slate-500);
 
-    --border-subtle:  rgba(232, 245, 241, 0.08);
-    --border-strong:  rgba(232, 245, 241, 0.16);
-    --border-brand:   #34D399;
+    --border-subtle: rgba(15, 23, 42, 0.08);
+    --border-strong: rgba(15, 23, 42, 0.16);
 
     --fv-surface-page:       var(--surface-base);
     --fv-surface-soft:       var(--surface-hover);
     --fv-surface-hover:      var(--surface-hover);
-    --fv-surface-teal-hover: #1E2E29;
+    --fv-surface-teal-hover: var(--color-teal-50);
 
     --fv-text-primary:   var(--text-main);
     --fv-text-secondary: var(--text-muted);
@@ -286,39 +257,35 @@
     --c-heading:     var(--text-main);
     --c-body:        var(--text-muted);
 
-    --glass-bg:    rgba(22, 34, 30, 0.85);
-    --glass-border: rgba(232, 245, 241, 0.10);
+    --glass-bg:    rgba(255, 255, 255, 0.96);
+    --glass-border: rgba(15, 23, 42, 0.08);
 
-    --shadow-sm: 0 2px 6px -1px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 6px 16px -2px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 16px 32px -4px rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.07);
   }
 }
 
 [data-theme="dark"] {
-  --color-brand-primary: #34D399;
-  --color-brand-hover:   #6EE7B7;
-  --color-brand-active:  #A7F3D0;
-  --color-brand-text:    #6EE7B7;
+  --color-brand-primary: var(--color-teal-600);
+  --color-brand-hover:   var(--color-teal-700);
 
-  --surface-base:   #0F1714;
-  --surface-card:   #16221E;
-  --surface-hover:  #1E2E29;
-  --surface-active: #273B35;
+  --surface-base:   #FFFFFF; /* v5 pure white across color preferences */
+  --surface-card:   #FFFFFF; /* v5 pure white surface */
+  --surface-hover:  #F7FBFA; /* subtle teal-tinted interaction only */
+  --surface-active: #EAF7F5;
 
-  --text-main:      #E8F5F1;
-  --text-muted:     #A1BBB2;
-  --text-faint:     #68857C;
-  --text-inverse:   #0F1714;
+  --text-main:    var(--color-slate-900);
+  --text-muted:   var(--color-slate-600);
+  --text-faint:   var(--color-slate-500);
 
-  --border-subtle:  rgba(232, 245, 241, 0.08);
-  --border-strong:  rgba(232, 245, 241, 0.16);
-  --border-brand:   #34D399;
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-strong: rgba(15, 23, 42, 0.16);
 
   --fv-surface-page:       var(--surface-base);
   --fv-surface-soft:       var(--surface-hover);
   --fv-surface-hover:      var(--surface-hover);
-  --fv-surface-teal-hover: #1E2E29;
+  --fv-surface-teal-hover: var(--color-teal-50);
 
   --fv-text-primary:   var(--text-main);
   --fv-text-secondary: var(--text-muted);
@@ -328,65 +295,10 @@
   --c-heading:     var(--text-main);
   --c-body:        var(--text-muted);
 
-  --glass-bg:    rgba(22, 34, 30, 0.85);
-  --glass-border: rgba(232, 245, 241, 0.10);
+  --glass-bg:    rgba(255, 255, 255, 0.96);
+  --glass-border: rgba(15, 23, 42, 0.08);
 
-  --shadow-sm: 0 2px 6px -1px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 6px 16px -2px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 16px 32px -4px rgba(0, 0, 0, 0.5);
-}
-
-:root {
-  /* ── Component & Floating Overlay Compatibility Aliases ── */
-  --fv-text-heading:    var(--text-main);
-  --text-secondary:     var(--text-muted);
-  --fv-text-muted:      var(--text-muted);
-  --fv-text-tertiary:   var(--text-faint);
-
-  --surface-subtle:      var(--surface-hover);
-  --fv-surface-elevated: var(--surface-card);
-
-  --fv-container-max:   1200px;
-  --fv-container-md:    960px;
-  --fv-container-sm:    720px;
-
-  --fv-text-base:       var(--step-0);
-  --fv-text-sm:         var(--step--1);
-  --fv-text-xs:         0.75rem;
-  --fv-text-lg:         var(--step-1);
-
-  --fv-font-stack:      var(--font-sans);
-  --fv-font-medium:     var(--font-medium);
-  --fv-font-semibold:   var(--font-semibold);
-
-  --lh-tight:           1.25;
-  --lh-normal:          1.5;
-  --lh-relaxed:         1.625;
-  --fv-leading-tight:   var(--lh-tight);
-  --fv-leading-normal:  var(--lh-normal);
-  --fv-leading-relaxed: var(--lh-relaxed);
-
-  --fv-error-bg:        #FEF2F2;
-  --fv-error-fg:        var(--color-danger);
-
-  --tx-mid:             var(--text-muted);
-  --tx-lo:              var(--text-faint);
-
-  --fv-z-fullscreen-overlay: var(--z-overlay);
-  --fv-z-scoped-overlay:     var(--z-overlay);
-  --fv-z-popover:            var(--z-popover);
-  --fv-nav-bottom-h:         var(--fv-nav-height);
-
-  /* Modal Popup (--fp-*) Compat Tokens */
-  --fp-bg:              var(--surface-card);
-  --fp-text:            var(--text-main);
-  --fp-text-heading:    var(--text-main);
-  --fp-text-muted:      var(--text-muted);
-  --fp-border:          var(--border-subtle);
-  --fp-shadow:          var(--shadow-modal);
-  --fp-radius:          var(--radius-3xl);
-  --fp-close-hover-bg:  var(--surface-hover);
-  --fp-toast-dot:        var(--color-mint-500);
-  --fp-divider:         var(--border-subtle);
-  --container-max-w:    1200px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.07);
 }
