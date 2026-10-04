@@ -9,9 +9,11 @@ nav {
   position: fixed; top:0; left:0;
   width:100%; height:var(--fv-nav-height, 56px);
   padding:0;
-  background: var(--surface-base, #ffffff);
+  background: var(--glass-bg, rgba(250, 253, 251, 0.85));
+  backdrop-filter: blur(var(--glass-blur, 16px));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 16px));
   box-shadow: none;
-  border-bottom: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
+  border-bottom: 1px solid var(--glass-border, rgba(34, 114, 88, 0.12));
   z-index: var(--fv-z-nav);
   touch-action: none;
 }
@@ -27,17 +29,17 @@ nav {
   min-width: 44px; min-height: 44px;
 }
 .back-button:focus-visible {
-  outline: 2px solid var(--color-brand-primary, #2E9188);
+  outline: 2px solid var(--color-brand-primary, #227258);
   outline-offset: 2px;
 }
 .back-button:active { background: var(--surface-hover, rgba(0,0,0,0.07)); }
 .back-button:active svg { transform:scale(0.9); }
-.back-button svg { width:auto; height:26px; color:var(--color-brand-primary, #2E9188); transition: color var(--transition-fast), transform var(--transition-fast); }
+.back-button svg { width:auto; height:26px; color:var(--color-brand-primary, #227258); transition: color var(--transition-fast), transform var(--transition-fast); }
 
 .page-title {
   grid-column: 2;
   font-size: 1.06rem; font-weight: bold;
-  color: var(--color-brand-text, #1F746D);
+  color: var(--color-brand-text, #195A45);
   text-align:center; font-family:inherit;
   padding:0 10px; width:100%; box-sizing:border-box;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;

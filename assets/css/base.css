@@ -1,8 +1,8 @@
 /* ==========================================================================
-   FANHOARD BASE STYLES
+   FANHOARD BASE STYLES v5.0 (2026 Native Application Foundation)
    assets/css/base.css
    Layer 2: Global reset, element defaults, FOUC transition, focus rings,
-            and shell controls (buttons & badges).
+            and shell controls (pill buttons & badges).
    ========================================================================== */
 
 /* ── Global Reset & Box Sizing ── */
@@ -25,8 +25,8 @@ body {
   font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
   font-size: var(--step-0, 1rem);
   line-height: var(--lh-normal, 1.5);
-  color: var(--text-main, #0f172a);
-  background-color: var(--surface-base, #ffffff);
+  color: var(--text-main, #10221B);
+  background-color: var(--surface-base, #FAFDFB);
   min-height: 100vh;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -48,7 +48,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading, var(--font-sans, system-ui, sans-serif));
   font-weight: var(--font-bold, 700);
   line-height: var(--lh-tight, 1.25);
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, #10221B);
   margin-top: 0;
   margin-bottom: var(--space-3, 12px);
 }
@@ -59,23 +59,23 @@ p {
 }
 
 a {
-  color: var(--color-brand-primary, #2E9188);
+  color: var(--color-brand-primary, #227258);
   text-decoration: none;
   transition: color var(--transition-fast, 150ms ease);
 }
 
 a:hover {
-  color: var(--color-brand-hover, #1F746D);
+  color: var(--color-brand-hover, #195A45);
 }
 
 /* ── Universal Accessibility Focus Rings (WCAG 2.4.7 & 2.2 AA) ── */
 :focus-visible {
-  outline: 2px solid var(--color-brand-primary, #2E9188);
+  outline: 2px solid var(--color-brand-primary, #227258);
   outline-offset: 2px;
-  box-shadow: var(--shadow-focus, 0 0 0 3px rgba(64, 169, 157, 0.45));
+  box-shadow: var(--shadow-focus, 0 0 0 3px rgba(34, 114, 88, 0.35));
 }
 
-/* ── Shell Controls: Buttons (WCAG 2.2 AA Contrast ≥ 4.5:1) ── */
+/* ── Shell Controls: Pill Buttons (WCAG 2.2 AA Contrast ≥ 4.5:1) ── */
 .btn-primary,
 button.btn-primary,
 a.btn-primary,
@@ -84,38 +84,38 @@ a.btn-primary,
   align-items: center;
   justify-content: center;
   gap: var(--space-2, 8px);
-  padding: var(--space-2, 8px) var(--space-4, 16px);
-  background-color: var(--color-brand-primary, #2E9188);
-  color: #ffffff;
+  padding: var(--space-2, 8px) var(--space-5, 20px);
+  background-color: var(--color-brand-primary, #227258);
+  color: var(--text-inverse, #ffffff);
   font-family: var(--font-sans, system-ui, sans-serif);
   font-size: var(--step-0, 1rem);
   font-weight: var(--font-semibold, 600);
   line-height: 1.5;
-  border-radius: var(--radius-sm, 10px);
+  border-radius: var(--radius-pill, 9999px);
   border: 1px solid transparent;
   cursor: pointer;
   text-align: center;
   white-space: nowrap;
   user-select: none;
   touch-action: manipulation;
-  transition: background-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
-              border-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
-              transform var(--duration-fast, 150ms) var(--ease-out, ease-out);
+  transition: background-color var(--duration-fast, 150ms) var(--ease-standard, ease-out),
+              border-color var(--duration-fast, 150ms) var(--ease-standard, ease-out),
+              transform var(--duration-fast, 150ms) var(--ease-standard, ease-out);
 }
 
 .btn-primary:hover,
 button.btn-primary:hover,
 a.btn-primary:hover,
 .button-primary:hover {
-  background-color: var(--color-brand-hover, #1F746D);
-  color: #ffffff;
+  background-color: var(--color-brand-hover, #195A45);
+  color: var(--text-inverse, #ffffff);
 }
 
 .btn-primary:active,
 button.btn-primary:active,
 a.btn-primary:active,
 .button-primary:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 .btn-secondary,
@@ -126,30 +126,30 @@ a.btn-secondary,
   align-items: center;
   justify-content: center;
   gap: var(--space-2, 8px);
-  padding: var(--space-2, 8px) var(--space-4, 16px);
+  padding: var(--space-2, 8px) var(--space-5, 20px);
   background-color: var(--surface-card, #ffffff);
-  color: var(--text-main, #0f172a);
+  color: var(--text-main, #10221B);
   font-family: var(--font-sans, system-ui, sans-serif);
   font-size: var(--step-0, 1rem);
   font-weight: var(--font-medium, 500);
   line-height: 1.5;
-  border-radius: var(--radius-sm, 10px);
-  border: 1px solid var(--border-subtle, #cbd5e1);
+  border-radius: var(--radius-pill, 9999px);
+  border: 1px solid var(--border-subtle, rgba(16, 34, 27, 0.08));
   cursor: pointer;
   text-align: center;
   white-space: nowrap;
   user-select: none;
   touch-action: manipulation;
-  transition: background-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
-              border-color var(--duration-fast, 150ms) var(--ease-out, ease-out);
+  transition: background-color var(--duration-fast, 150ms) var(--ease-standard, ease-out),
+              border-color var(--duration-fast, 150ms) var(--ease-standard, ease-out);
 }
 
 .btn-secondary:hover,
 button.btn-secondary:hover,
 a.btn-secondary:hover,
 .button-secondary:hover {
-  background-color: var(--surface-hover, #f1f5f9);
-  border-color: var(--border-strong, #94a3b8);
+  background-color: var(--surface-hover, #F0F7F4);
+  border-color: var(--border-strong, rgba(16, 34, 27, 0.16));
 }
 
 /* ── Shell Controls: Badges (WCAG 2.2 AA Contrast ≥ 4.5:1) ── */
@@ -163,16 +163,16 @@ a.btn-secondary:hover,
   font-size: var(--step--1, 0.875rem);
   font-weight: var(--font-semibold, 600);
   line-height: 1.25;
-  border-radius: var(--radius-sm, 10px);
-  background-color: var(--surface-hover, #f1f5f9);
-  color: var(--color-brand-primary, #2E9188);
-  border: 1px solid rgba(64, 169, 157, 0.25);
+  border-radius: var(--radius-pill, 9999px);
+  background-color: var(--surface-hover, #F0F7F4);
+  color: var(--color-brand-primary, #227258);
+  border: 1px solid rgba(34, 114, 88, 0.20);
   white-space: nowrap;
 }
 
 .badge-alt {
-  background-color: var(--color-brand-primary, #2E9188);
-  color: #ffffff;
+  background-color: var(--color-brand-primary, #227258);
+  color: var(--text-inverse, #ffffff);
   border-color: transparent;
 }
 
@@ -181,22 +181,14 @@ a.btn-secondary:hover,
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms;
-    animation-iteration-count: 1;
-    transition-duration: 0.01ms;
-    scroll-behavior: auto;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
-/* ── Scroll-lock CSS backstop (ScrollLockCore is the JS authority) ──
-   When <html data-scroll-locked="true">, the background must never scroll,
-   even if JS inline styles are lost or overridden by another writer.
-   NOTE: touch-action is deliberately NOT forced to none here — the CSS
-   touch-action of ancestors intersects with descendants, which would kill
-   native touch scrolling inside allowed overlay surfaces (.fvl-scrollable,
-   .fp-body, .search-overlay-scrollable-content). Touch containment stays
-   with ScrollLockCore's passive:false touchmove handler, which allows
-   those same surfaces. */
+/* ── Scroll-lock CSS backstop ── */
 html[data-scroll-locked="true"],
 html[data-scroll-locked="true"] body {
   overflow: hidden !important;

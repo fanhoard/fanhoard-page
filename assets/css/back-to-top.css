@@ -17,9 +17,9 @@
   padding: 0;
   cursor: pointer;
 
-  background: var(--color-brand-primary, #2E9188);
+  background: var(--color-brand-primary, #227258);
   border: none;
-  box-shadow: none;
+  box-shadow: var(--shadow-lg, 0 10px 25px -5px rgba(16, 34, 27, 0.15));
 
   transform-origin: center;
 
@@ -39,7 +39,7 @@
 }
 
 #back-to-top:hover {
-  background: var(--color-brand-hover, #1F746D);
+  background: var(--color-brand-hover, #195A45);
 }
 
 #back-to-top svg {
@@ -87,7 +87,7 @@
 }
 
 #back-to-top:focus-visible {
-  outline: 3px solid rgba(64, 169, 157, 0.35);
+  outline: 3px solid rgba(34, 114, 88, 0.35);
   outline-offset: 2px;
 }
 

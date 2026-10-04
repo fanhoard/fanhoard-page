@@ -23,13 +23,13 @@
     --fvl-top: 0px;
     --clp-top: 0px;
 
-    --fvl-bg:            var(--fv-surface-page, #ffffff);
-    --fvl-text:          var(--text-main, #0f172a);
-    --fvl-text-sub:      var(--text-muted, #475569);
-    --fvl-spinner-track: var(--border-subtle, rgba(0, 0, 0, 0.06));
-    --fvl-spinner-arc:   var(--color-brand-primary, #2E9188);
-    --fvl-overlay-bg:    rgba(255, 255, 255, 0.96);
-    --fvl-topbar-bg:     var(--color-brand-primary, #2E9188);
+    --fvl-bg:            var(--fv-surface-page, #FAFDFB);
+    --fvl-text:          var(--text-main, #10221B);
+    --fvl-text-sub:      var(--text-muted, #3E564E);
+    --fvl-spinner-track: var(--border-subtle, rgba(16, 34, 27, 0.08));
+    --fvl-spinner-arc:   var(--color-brand-primary, #227258);
+    --fvl-overlay-bg:    rgba(250, 253, 251, 0.96);
+    --fvl-topbar-bg:     var(--color-brand-primary, #227258);
   }
 
   .fvl {
@@ -38,31 +38,31 @@
   }
 
   .fvl[data-fvl-theme="light"] {
-    --fvl-bg:            var(--fv-surface-page, #ffffff);
-    --fvl-text:          var(--text-main, #0f172a);
-    --fvl-text-sub:      var(--text-muted, #475569);
-    --fvl-spinner-track: var(--border-subtle, rgba(0, 0, 0, 0.06));
-    --fvl-spinner-arc:   var(--color-brand-primary, #2E9188);
-    --fvl-overlay-bg:    rgba(255, 255, 255, 0.96);
-    --fvl-topbar-bg:     var(--color-brand-primary, #2E9188);
+    --fvl-bg:            var(--fv-surface-page, #FAFDFB);
+    --fvl-text:          var(--text-main, #10221B);
+    --fvl-text-sub:      var(--text-muted, #3E564E);
+    --fvl-spinner-track: var(--border-subtle, rgba(16, 34, 27, 0.08));
+    --fvl-spinner-arc:   var(--color-brand-primary, #227258);
+    --fvl-overlay-bg:    rgba(250, 253, 251, 0.96);
+    --fvl-topbar-bg:     var(--color-brand-primary, #227258);
   }
   .fvl[data-fvl-theme="dark"] {
-    --fvl-bg:            #0F172A;
-    --fvl-text:          #F8FAFC;
-    --fvl-text-sub:      #CBD5E1;
-    --fvl-spinner-track: #334155;
-    --fvl-spinner-arc:   var(--color-brand-primary, #2E9188);
-    --fvl-overlay-bg:    rgba(15, 23, 42, 0.96);
-    --fvl-topbar-bg:     var(--color-brand-primary, #2E9188);
+    --fvl-bg:            var(--surface-base, #0F1714);
+    --fvl-text:          var(--text-main, #E8F5F1);
+    --fvl-text-sub:      var(--text-muted, #A1BBB2);
+    --fvl-spinner-track: var(--border-subtle, rgba(232, 245, 241, 0.08));
+    --fvl-spinner-arc:   var(--color-brand-primary, #34D399);
+    --fvl-overlay-bg:    rgba(15, 23, 20, 0.96);
+    --fvl-topbar-bg:     var(--color-brand-primary, #34D399);
   }
   .fvl[data-fvl-theme="brand"] {
-    --fvl-bg:            var(--color-brand-primary, #2E9188);
+    --fvl-bg:            var(--color-brand-primary, #227258);
     --fvl-text:          #ffffff;
     --fvl-text-sub:      rgba(255, 255, 255, 0.85);
     --fvl-spinner-track: rgba(255, 255, 255, 0.2);
     --fvl-spinner-arc:   #ffffff;
-    --fvl-overlay-bg:    rgba(0, 150, 136, 0.96);
-    --fvl-topbar-bg:     var(--color-brand-primary, #2E9188);
+    --fvl-overlay-bg:    rgba(34, 114, 88, 0.96);
+    --fvl-topbar-bg:     var(--color-brand-primary, #227258);
   }
 
   .fvl-spinner {
@@ -128,7 +128,7 @@
     animation: none !important;
     stroke-dasharray: 138.23px;
     stroke-dashoffset: 138.23px;
-    transition: stroke-dashoffset 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: stroke-dashoffset 200ms var(--ease-smooth, cubic-bezier(0.16, 1, 0.3, 1));
   }
 
   /* Bare & Chromeless modifiers */
@@ -270,18 +270,18 @@
     box-shadow: none;
   }
   .fvl-topbar-bar.fvl-topbar-indeterminate {
-    animation: _fvl_topbar_indeterminate 1.5s ease-in-out infinite;
+    animation: _fvl_topbar_indeterminate 1.5s var(--ease-smooth, cubic-bezier(0.16, 1, 0.3, 1)) infinite;
   }
 
   .fvl.fvl-entering {
-    animation: _fvl_in 0.15s ease-out forwards;
+    animation: _fvl_in 0.15s var(--ease-smooth, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
   }
   .fvl.fvl-leaving {
-    animation: _fvl_out 0.18s ease-in forwards;
+    animation: _fvl_out 0.18s var(--ease-smooth, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
     pointer-events: none;
   }
   .fvl.fvl-pulse {
-    animation: _fvl_pulse 0.3s ease-in-out;
+    animation: _fvl_pulse 0.3s var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -327,7 +327,7 @@ body.nav-loading #sub-nav {
 
 header nav,
 #sub-nav {
-  transition: opacity var(--transition-normal, 250ms cubic-bezier(0.2, 0, 0, 1));
+  transition: opacity var(--transition-normal, 250ms var(--ease-smooth, cubic-bezier(0.16, 1, 0.3, 1)));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -338,7 +338,6 @@ header nav,
     transition: none !important;
   }
 }
-
 
 .fvl-spinner--center { margin-left: auto; margin-right: auto; align-self: center; justify-self: center; }
 .fvl-spinner--align-left { margin-left: 0; margin-right: auto; }

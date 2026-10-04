@@ -2,6 +2,7 @@
  * DiscoverFeed.ts
  *
  * Discover Feed Component with DOM Node Recycling & DocumentFragment Batching.
+ * Compliant with FANHOARD Design System v5 (28px card rounding, spring interaction).
  * Eliminates layout thrashing and full subtree string re-renders during infinite scrolling.
  */
 
