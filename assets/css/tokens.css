@@ -21,7 +21,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   FANHOARD DESIGN TOKENS v2.1 (Phase 1 Native Foundation)
+   FANHOARD DESIGN TOKENS v3.0 (Phase 1 Native Foundation - Pastel Green Teal)
    assets/css/tokens.css
    Single Source of Truth for Design Custom Properties
    ═══════════════════════════════════════════════════════════════ */
@@ -33,15 +33,15 @@
   --fv-scroll-offset: calc(var(--fv-nav-height) + var(--space-4));
   --fv-nav-top-h: var(--fv-nav-height);
 
-  /* ── Brand Core Palette ── */
-  --color-teal-50:  #f0fdf4;
-  --color-teal-100: #ccfbf1;
-  --color-teal-400: #2dd4bf;
-  --color-teal-500: #14b8a6;
-  --color-teal-600: #0d9488; /* Primary interactive AA (4.88:1 on light) */
-  --color-teal-700: #0f766e;
-  --color-teal-800: #115e59;
-  --color-teal-900: #134e4a;
+  /* ── Brand Core Palette (Pastel Green-Leaning Teal) ── */
+  --color-teal-50:  #f0fdf6;
+  --color-teal-100: #d1fae5;
+  --color-teal-400: #34d399;
+  --color-teal-500: #10b981;
+  --color-teal-600: #0f836c; /* Primary interactive AA (4.68:1 on light) */
+  --color-teal-700: #0d6f5c;
+  --color-teal-800: #0b5b4c;
+  --color-teal-900: #08473c;
 
   --color-emerald-500: #10b981;
   --color-emerald-600: #059669;
@@ -61,20 +61,20 @@
   --color-brand-primary: var(--color-teal-600);
   --color-brand-hover:   var(--color-teal-700);
   --color-brand-active:  var(--color-teal-800);
-  --color-brand-text:    var(--color-teal-700);
-  --color-brand-accent:  var(--color-emerald-600);
+  --color-brand-text:    var(--color-teal-600);
+  --color-brand-accent:  var(--color-emerald-500);
 
-  --surface-base:   var(--color-slate-50);
+  --surface-base:   var(--color-teal-50);
   --surface-card:   #ffffff;
-  --surface-hover:  var(--color-slate-100);
-  --surface-active: var(--color-slate-200);
+  --surface-hover:  var(--color-teal-100);
+  --surface-active: #bbf7d0;
 
   --text-main:      var(--color-slate-900);
-  --text-muted:     var(--color-slate-600);
-  --text-faint:     var(--color-slate-400);
+  --text-muted:     var(--color-slate-700);
+  --text-faint:     var(--color-slate-500);
   --text-inverse:   #ffffff;
 
-  --border-subtle:  var(--color-slate-200);
+  --border-subtle:  var(--color-teal-100);
   --border-strong:  var(--color-slate-300);
   --border-brand:   var(--color-teal-600);
 
@@ -88,8 +88,8 @@
   --fv-brand-teal-light: var(--color-brand-primary);
   --fv-brand-teal-dark:  var(--color-brand-hover);
 
-  --fv-gradient-teal: var(--color-brand-primary, #009688);
-  --fv-gradient-btn:  var(--color-brand-primary, #009688);
+  --fv-gradient-teal: var(--color-brand-primary, #0f836c);
+  --fv-gradient-btn:  var(--color-brand-primary, #0f836c);
 
   --fv-surface-page:       var(--surface-card);
   --fv-surface-soft:       var(--surface-hover);
@@ -105,7 +105,7 @@
   --c-heading:     var(--text-main);
   --c-body:        var(--text-muted);
 
-  /* ── Typography Scale (Minor Third Fluid Scale) ── */
+  /* ── Typography Scale (Calm Fluid Scale) ── */
   --font-sans:    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   --font-heading: var(--font-sans);
   --font-mono:    ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
@@ -115,29 +115,29 @@
   --font-semibold: 600;
   --font-bold:     700;
 
-  --step--1: clamp(0.80rem, 0.78rem + 0.10vw, 0.85rem);
-  --step-0:  clamp(1.00rem, 0.95rem + 0.25vw, 1.125rem);
-  --step-1:  clamp(1.20rem, 1.12rem + 0.40vw, 1.35rem);
-  --step-2:  clamp(1.44rem, 1.32rem + 0.60vw, 1.62rem);
-  --step-3:  clamp(1.728rem, 1.55rem + 0.90vw, 2.00rem);
-  --step-4:  clamp(2.074rem, 1.82rem + 1.25vw, 2.50rem);
-  --step-5:  clamp(2.488rem, 2.14rem + 1.75vw, 3.125rem);
+  --step--1: clamp(0.8125rem, 0.80rem + 0.12vw, 0.875rem);
+  --step-0:  clamp(1.00rem, 0.96rem + 0.20vw, 1.125rem);
+  --step-1:  clamp(1.1875rem, 1.12rem + 0.35vw, 1.3125rem);
+  --step-2:  clamp(1.375rem, 1.28rem + 0.50vw, 1.5625rem);
+  --step-3:  clamp(1.625rem, 1.48rem + 0.75vw, 1.875rem);
+  --step-4:  clamp(1.9375rem, 1.72rem + 1.10vw, 2.25rem);
+  --step-5:  clamp(2.3125rem, 2.02rem + 1.50vw, 2.75rem);
 
-  /* ── Baseline Spacing Scale (Strict 4/8px Grid) ── */
+  /* ── Spacious Spacing Scale ── */
   --space-1:  0.25rem;  /* 4px */
   --space-2:  0.5rem;   /* 8px */
-  --space-3:  0.75rem;  /* 12px */
-  --space-4:  1rem;     /* 16px */
-  --space-5:  1.25rem;  /* 20px */
-  --space-6:  1.5rem;   /* 24px */
-  --space-7:  1.75rem;  /* 28px - Explicit addition to fix missing token */
-  --space-8:  2rem;     /* 32px */
-  --space-10: 2.5rem;   /* 40px */
-  --space-12: 3rem;     /* 48px */
-  --space-16: 4rem;     /* 64px */
+  --space-3:  0.875rem; /* 14px */
+  --space-4:  1.25rem;  /* 20px */
+  --space-5:  1.5rem;   /* 24px */
+  --space-6:  2rem;     /* 32px */
+  --space-7:  2.5rem;   /* 40px */
+  --space-8:  3rem;     /* 48px */
+  --space-10: 3.5rem;   /* 56px */
+  --space-12: 4.5rem;   /* 72px */
+  --space-16: 6rem;     /* 96px */
 
-  --space-section-desktop: var(--space-12); /* 48px */
-  --space-section-mobile:  var(--space-8);  /* 32px */
+  --space-section-desktop: var(--space-12); /* 72px */
+  --space-section-mobile:  var(--space-8);  /* 48px */
 
   --fv-space-1: var(--space-1);
   --fv-space-2: var(--space-2);
@@ -147,14 +147,14 @@
   --fv-space-6: var(--space-6);
   --fv-space-7: var(--space-7);
 
-  /* ── Corner Radii Harmonized Scale ── */
-  --radius-xs:   4px;
-  --radius-sm:   6px;
-  --radius-md:   8px;
-  --radius-lg:   12px;
-  --radius-xl:   16px;
-  --radius-2xl:  24px;
-  --radius-full: 9999px;
+  /* ── Corner Radii Harmonized Scale (Raised Scale) ── */
+  --radius-xs:   16px;   /* small elements 16px */
+  --radius-sm:   16px;   /* small elements 16px */
+  --radius-md:   20px;   /* medium elements 20px */
+  --radius-lg:   24px;   /* large elements 24px */
+  --radius-xl:   28px;   /* cards 28px */
+  --radius-2xl:  32px;   /* large panels/sheets 32px */
+  --radius-full: 9999px; /* pill 9999px */
 
   --fv-radius-xs:   var(--radius-xs);
   --fv-radius-sm:   var(--radius-sm);
@@ -166,24 +166,26 @@
   --r-btn:  var(--radius-full);
   --r-card: var(--radius-xl);
 
-  /* ── Elevation Tokens (Lighter, Clean Native Layering) ── */
-  --shadow-sm:    0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md:    0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg:    0 12px 24px -4px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.04);
-  --focus-ring-color: rgba(13, 148, 136, 0.45);
+  /* ── Elevation Tokens (Soft Layered Shadows) ── */
+  --shadow-sm:    0 2px 8px -2px rgba(15, 131, 108, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+  --shadow-md:    0 8px 24px -4px rgba(15, 131, 108, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg:    0 20px 36px -8px rgba(15, 131, 108, 0.12), 0 8px 16px -4px rgba(0, 0, 0, 0.04);
+  --focus-ring-color: rgba(15, 131, 108, 0.45);
   --shadow-focus: 0 0 0 3px var(--focus-ring-color);
-  --fv-shadow-teal: 0 4px 14px 0 rgba(13, 148, 136, 0.20);
+  --fv-shadow-teal: 0 8px 20px -4px rgba(15, 131, 108, 0.18);
 
-  /* ── Motion & Transitions ── */
+  /* ── Motion & Transitions (Spring-like cubic-bezier) ── */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Spring overshoot: opt-in for transform/scale ONLY (never color, opacity or shadow) */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --duration-fast:   150ms;
   --duration-normal: 250ms;
   --duration-slow:   350ms;
 
-  --transition-fast:   150ms var(--ease-out);
-  --transition-normal: 250ms var(--ease-out);
-  --transition-slow:   350ms var(--ease-out);
+  --transition-fast:   var(--duration-fast) var(--ease-out);
+  --transition-normal: var(--duration-normal) var(--ease-out);
+  --transition-slow:   var(--duration-slow) var(--ease-out);
 
   --fv-transition-fast:   var(--transition-fast);
   --fv-transition-normal: var(--transition-normal);
@@ -218,25 +220,25 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --color-brand-primary: var(--color-teal-400);
-    --color-brand-hover:   var(--color-teal-500);
+    --color-brand-hover:   #6ee7b7;
     --color-brand-text:    var(--color-teal-400);
 
-    --surface-base:   var(--color-slate-900);
-    --surface-card:   var(--color-slate-800);
-    --surface-hover:  var(--color-slate-700);
-    --surface-active: var(--color-slate-600);
+    --surface-base:   #0b1714;
+    --surface-card:   #132621;
+    --surface-hover:  #1c362d;
+    --surface-active: #26473b;
 
     --text-main:    var(--color-slate-50);
     --text-muted:   var(--color-slate-300);
     --text-faint:   var(--color-slate-400);
 
-    --border-subtle: var(--color-slate-700);
-    --border-strong: var(--color-slate-600);
+    --border-subtle: #1c362d;
+    --border-strong: #26473b;
 
     --fv-surface-page:       var(--surface-card);
     --fv-surface-soft:       var(--surface-hover);
     --fv-surface-hover:      var(--surface-hover);
-    --fv-surface-teal-hover: rgba(45, 212, 191, 0.15);
+    --fv-surface-teal-hover: rgba(52, 211, 153, 0.15);
 
     --fv-text-primary:   var(--text-main);
     --fv-text-secondary: var(--text-muted);
@@ -246,32 +248,33 @@
     --c-heading:     var(--text-main);
     --c-body:        var(--text-muted);
 
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 2px 8px 0 rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 20px 36px -8px rgba(0, 0, 0, 0.60);
   }
 }
 
 [data-theme="dark"] {
   --color-brand-primary: var(--color-teal-400);
-  --color-brand-hover:   var(--color-teal-500);
+  --color-brand-hover:   #6ee7b7;
+  --color-brand-text:    var(--color-teal-400);
 
-  --surface-base:   var(--color-slate-900);
-  --surface-card:   var(--color-slate-800);
-  --surface-hover:  var(--color-slate-700);
-  --surface-active: var(--color-slate-600);
+  --surface-base:   #0b1714;
+  --surface-card:   #132621;
+  --surface-hover:  #1c362d;
+  --surface-active: #26473b;
 
   --text-main:    var(--color-slate-50);
   --text-muted:   var(--color-slate-300);
   --text-faint:   var(--color-slate-400);
 
-  --border-subtle: var(--color-slate-700);
-  --border-strong: var(--color-slate-600);
+  --border-subtle: #1c362d;
+  --border-strong: #26473b;
 
   --fv-surface-page:       var(--surface-card);
   --fv-surface-soft:       var(--surface-hover);
   --fv-surface-hover:      var(--surface-hover);
-  --fv-surface-teal-hover: rgba(45, 212, 191, 0.15);
+  --fv-surface-teal-hover: rgba(52, 211, 153, 0.15);
 
   --fv-text-primary:   var(--text-main);
   --fv-text-secondary: var(--text-muted);
@@ -281,7 +284,7 @@
   --c-heading:     var(--text-main);
   --c-body:        var(--text-muted);
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 2px 8px 0 rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 36px -8px rgba(0, 0, 0, 0.60);
 }
