@@ -119,7 +119,7 @@ function injectStyles() {
     .carousel-wrapper {
       position: relative;
       overflow: hidden;
-      border-radius: var(--radius-lg, 12px);
+      border-radius: var(--radius-2xl, 32px);
     }
     .carousel-arrow {
       position: absolute; top: 0; bottom: 0; height: 100%;
@@ -155,7 +155,7 @@ function injectStyles() {
     }
     .carousel-wrapper::before, .carousel-wrapper::after { display: none !important; }
     .home-error {
-      padding: 2rem 1rem; border-radius: 12px;
+      padding: 2rem 1rem; border-radius: var(--radius-xl, 28px);
       background: #fff5f5; border: 1px solid #ffd0d0;
       color: #c0392b; font-size: .95rem; text-align: center;
     }
