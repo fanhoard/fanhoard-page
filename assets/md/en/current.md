@@ -1,15 +1,15 @@
 ---
-version: 5.2.0
-date: 2026-10-16T22:34:00.000Z
-title: Home page rounder cards and pill buttons
-subtitle: Home page components now use 28px rounder cards, 32px panels and pill buttons from design tokens.
+version: 5.3.0
+date: 2026-10-17T00:00:00.000Z
+title: Search page rounder cards and pill inputs
+subtitle: Search page components now use 28px rounder cards, 32px panels, and pill inputs from design tokens.
 notify: true
 ---
 
-**TL;DR** — The Home page now uses rounder 28px cards, 32px panels, and pill buttons powered by the new design tokens. HTML structure and page layout remain unchanged.
+**TL;DR** — The Search page now uses rounder 28px result cards, 32px panels, and pill search inputs powered by design tokens.
 
 ### Changed
 
-- **Rounder Home page cards** — Updated Home page cards to use 28px border-radius design tokens.
-- **Rounder panels & pill buttons** — Applied 32px corner radii to panels and full pill shapes to buttons on the Home page.
-- **HTML structure unchanged** — Layout structure, navigation, hover/active states, and keyboard shortcuts remain unchanged.
+- **Rounder search result cards** — Updated Search page result cards to use 28px corner radius design tokens.
+- **Pill search inputs & chips** — Applied full pill corner radii to the main search input bar, clear button, and filter chips.
+- **Rounder search panels** — Applied 32px corner radii to search filter containers and empty-state panels.
