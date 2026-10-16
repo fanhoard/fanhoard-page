@@ -429,7 +429,7 @@ body {
   .result-card {
     padding: 13px 14px;
     gap: var(--space-3, 12px);
-    border-radius: var(--radius-sm, 16px);
+    border-radius: var(--radius-xl, 28px);
   }
   .result-card .result-card__glyph {
     flex: 0 0 52px;

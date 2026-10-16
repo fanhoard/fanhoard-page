@@ -1,15 +1,13 @@
 ---
-version: 5.3.0
+version: 5.3.1
 date: 2026-10-17T00:00:00.000Z
-title: Search page rounder cards and pill inputs
-subtitle: Search page components now use 28px rounder cards, 32px panels, and pill inputs from design tokens.
+title: Search result cards now stay rounded on phones
+subtitle: A small fix so search result cards keep their 28px rounded corners on narrow screens too.
 notify: true
 ---
 
-**TL;DR** — The Search page now uses rounder 28px result cards, 32px panels, and pill search inputs powered by design tokens.
+**TL;DR** — Search result cards were dropping to smaller corners on phone-width screens. They now keep the same 28px rounded corners everywhere.
 
-### Changed
+### Fixed
 
-- **Rounder search result cards** — Updated Search page result cards to use 28px corner radius design tokens.
-- **Pill search inputs & chips** — Applied full pill corner radii to the main search input bar, clear button, and filter chips.
-- **Rounder search panels** — Applied 32px corner radii to search filter containers and empty-state panels.
+- **Search result cards on phones** — On narrow screens the cards fell back to 16px corners instead of 28px. They now match the rounded look used on larger screens.
