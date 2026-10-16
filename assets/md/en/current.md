@@ -1,14 +1,14 @@
 ---
-version: 5.4.0
+version: 5.5.0
 date: 2026-10-17T00:00:00.000Z
-title: Settings rows and notifications get softer shapes
-subtitle: Settings rows are now rounded pills and pop-up notifications use larger, softer corners.
+title: Report form and contact buttons get rounder shapes
+subtitle: The Report an Issue form and the Contact page buttons now use pill and rounded shapes.
 notify: true
 ---
 
-**TL;DR** — The tappable rows on the Settings page are now rounded pills, and notification pop-ups have larger, softer corners.
+**TL;DR** — The Report an Issue form and the Contact buttons are now softer: dropdowns, text fields and buttons are pills, and the larger text boxes have rounded corners.
 
 ### Changed
 
-- **Rounded Settings rows** — The tappable rows on the Settings page (such as the language and update options) now highlight as rounded pills instead of square-cornered bars.
-- **Softer notifications** — Pop-up notifications and error messages now use larger rounded corners, and the small close button on a notification is a circle.
+- **Report form fields** — Dropdowns and single-line fields on the Report an Issue page are now pill-shaped, and the larger description boxes use soft rounded corners so longer text stays comfortable to read.
+- **Buttons** — The Send Report button and the action buttons on the Contact page are now pills.
