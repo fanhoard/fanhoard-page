@@ -16,12 +16,18 @@ let totalFiles = 0;
 let passedFiles = 0;
 let failedFiles = 0;
 
-function validateFile(relativePath: string, schema: any) {
+function validateFile(relativePath: string, schema: any, opts?: { generatedIfMissing?: boolean }) {
+  const generatedIfMissing = !!opts?.generatedIfMissing;
   totalFiles++;
   const fullPath = path.join(ROOT, relativePath);
   if (!fs.existsSync(fullPath)) {
-    console.error(`❌ [MISSING] File not found: ${relativePath}`);
-    failedFiles++;
+    if (generatedIfMissing) {
+      // ไฟล์ Manifest ของ Release Ledger สร้างตอน build (npm run build) — ยังไม่ build ไม่ถือเป็น error
+      console.log(`↩️  [SKIP] ${relativePath} — สร้างโดย build (ยังไม่ build)`);
+    } else {
+      console.error(`❌ [MISSING] File not found: ${relativePath}`);
+      failedFiles++;
+    }
     return;
   }
 
@@ -76,12 +82,12 @@ for (const subdir of subdirs) {
 console.log('\n--- Application Configs ---');
 validateFile('assets/json/buttons.json', ButtonConfigSchema);
 validateFile('assets/json/current-stage.json', StageConfigSchema);
-validateFile('assets/json/version.json', VersionConfigSchema);
+validateFile('assets/json/version.json', VersionConfigSchema, { generatedIfMissing: true });
 
 // 5. Release Manifests
 console.log('\n--- Release Manifests ---');
-validateFile('assets/md/en/releases/index.json', ReleaseManifestSchema);
-validateFile('assets/md/th/releases/index.json', ReleaseManifestSchema);
+validateFile('assets/md/en/releases/index.json', ReleaseManifestSchema, { generatedIfMissing: true });
+validateFile('assets/md/th/releases/index.json', ReleaseManifestSchema, { generatedIfMissing: true });
 
 console.log('\n========================================');
 console.log(`Validation Summary: ${passedFiles}/${totalFiles} passed (${failedFiles} errors)`);

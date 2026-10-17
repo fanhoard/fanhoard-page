@@ -58,11 +58,10 @@ const ALLOWED_FILES = new Set([
 // ── ไฟล์ที่เป็น generated artifacts (blocklist) ─────────────────────────────
 // v1.4: ปรับสำหรับ v6.1 — releases/ folder ในแต่ละภาษา
 const GENERATED_PATTERNS = [
-  // v6.1: per-language releases/ folder
+  // v7.0: releases/v*.md คือ Ledger (ของผู้พัฒนา — hook สร้างตอน commit) ไม่ใช่ generated
+  //       ที่เป็น generated คือ manifest ที่ build สร้างเท่านั้น
   /^assets\/md\/en\/releases\/index\.json$/,
   /^assets\/md\/th\/releases\/index\.json$/,
-  /^assets\/md\/en\/releases\/v.*\.md$/,
-  /^assets\/md\/th\/releases\/v.*\.md$/,
   // v6.0 legacy: index.json / v*.md ใน root ของภาษา (ควรจะย้ายไป releases/ แล้ว)
   /^assets\/md\/en\/index\.json$/,
   /^assets\/md\/th\/index\.json$/,
@@ -94,8 +93,9 @@ function isGenerated(filePath) {
   return GENERATED_PATTERNS.some(p => p.test(filePath));
 }
 
+const LEDGER_FILE_RE = /^assets\/md\/(en|th)\/releases\/v[^/]+\.md$/; // v7.0: Ledger ของผู้พัฒนา (hook สร้างตอน commit)
 function isAllowed(filePath) {
-  return ALLOWED_FILES.has(filePath);
+  return ALLOWED_FILES.has(filePath) || LEDGER_FILE_RE.test(filePath);
 }
 
 // ── Bypass logic ────────────────────────────────────────────────────────────
@@ -295,7 +295,7 @@ function validate(files) {
 }
 
 // ── เวลาปล่อยของรุ่น: ผู้พัฒนาห้ามตั้งเอง และห้ามเปลี่ยนหลังบันทึกแล้ว ─────────────────
-//  เวลาจริงมาจาก update-version.js (commit แรกที่ตั้งรุ่นนั้นใน git) เท่านั้น
+//  เวลาจริงมาจาก pre-commit hook (stamp-release.js ประทับตอน commit รุ่นใหม่) และล็อกหลังจากนั้น
 //  - รุ่นใหม่ (bump): ห้ามมี date: ใน current.md เลย ระบบจะใส่ให้จาก git
 //  - รุ่นเดิม (ไม่ bump): date: ต้องเท่าเดิมใน HEAD เป๊ะ (เพิ่ม/แก้/ลบ = ผิด)
 //  เฉพาะไฟล์ที่ staged และนอกโหมด CI (CI เป็นผู้เขียน date: ตามหน้าที่)
@@ -317,8 +317,25 @@ function checkReleaseDateLock() {
       if (newDate !== oldDate) {
         problems.push({ file: rel, reason: `date: ของรุ่น ${newVer} ถูกเปลี่ยน (${oldDate || 'ไม่มี'} → ${newDate || 'ไม่มี'}) — เวลาปล่อยถูกล็อกหลังบันทึกครั้งแรก เปลี่ยนไม่ได้` });
       }
-    } else if (newDate) {
-      problems.push({ file: rel, reason: `รุ่นใหม่ ${newVer} มี date: ${newDate} ที่ตั้งเอง — ห้ามใส่ ระบบจะบันทึกเวลาจริงจาก git ให้ตอน build` });
+    } else if (newDate && process.env.FANHOARD_STAMPED !== '1') {
+      // FANHOARD_STAMPED=1 ตั้งโดย pre-commit hook หลัง stamp-release.js ประทับ Released At ให้ (ไม่ใช่คนพิมพ์)
+      problems.push({ file: rel, reason: `รุ่นใหม่ ${newVer} มี date: ${newDate} ที่ตั้งเอง — ห้ามใส่ hook จะประทับเวลาจริงให้ตอน commit (Released At)` });
+    }
+  }
+  // v7.0: ไฟล์ Ledger (releases/v*.md) — รุ่นที่ปล่อยแล้ว date: ล็อกเหมือน current.md
+  const ledgerStaged = spawnSync('git', ['diff', '--cached', '--name-only', '--', 'assets/md'], { encoding: 'utf8', cwd: ROOT });
+  if (ledgerStaged.status === 0) {
+    for (const rel of ledgerStaged.stdout.split('\n').filter(Boolean)) {
+      if (!/^assets\/md\/(en|th)\/releases\/v[^/]+\.md$/.test(rel)) continue;
+      const now = spawnSync('git', ['show', ':' + rel], { encoding: 'utf8', cwd: ROOT });
+      const head = spawnSync('git', ['show', 'HEAD:' + rel], { encoding: 'utf8', cwd: ROOT });
+      if (now.status !== 0 || head.status !== 0) continue; // ไฟล์ใหม่ = hook สร้าง ปล่อยผ่าน
+      const pick = (txt, re) => { const m = (txt || '').match(re); return m ? m[1].trim() : null; };
+      const newDate = pick(now.stdout, /^date:\s*(.+)$/m);
+      const oldDate = pick(head.stdout, /^date:\s*(.+)$/m);
+      if (newDate !== oldDate) {
+        problems.push({ file: rel, reason: `date: ใน Ledger ถูกเปลี่ยน (${oldDate || 'ไม่มี'} → ${newDate || 'ไม่มี'}) — เวลาปล่อยถูกล็อกหลังบันทึกครั้งแรก เปลี่ยนไม่ได้` });
+      }
     }
   }
   return problems;
@@ -502,18 +519,35 @@ function main() {
       console.log('   ตรวจสอบว่าการเปลี่ยนแปลงเหล่านี้มาจาก update-version.js เท่านั้น');
       console.log('');
     } else {
-      console.log('❌  FAILED — พบการแก้ generated artifacts ที่ห้ามแก้:');
-      violations.forEach(v => {
-        console.log('     • ' + v.file);
-        console.log('       ' + v.reason);
-      });
-      console.log('');
-      console.log('   💡  วิธีแก้:');
-      console.log('       1. แก้ไขเฉพาะ assets/md/{en,th}/current.md เท่านั้น');
-      console.log('       2. ไฟล์อื่นๆ ระบบจะสร้างให้อัตโนมัติใน CI/CD');
-      console.log('       3. git checkout -- <file> เพื่อ revert การแก้ไขที่ผิด');
-      console.log('');
-      process.exit(1);
+      // ข้อยกเว้นที่อนุญาตครั้งเดียว: bypass token (เช่น การย้ายข้อมูลครั้งเดียวที่แก้เวลาให้ตรงจริง)
+      // ใช้ได้เฉพาะเมื่อ token มากกว่า counter ทุกครั้งที่ใช้จะถูกบันทึกและหมดไป
+      const migrateBypass = checkBypass();
+      if (migrateBypass.bypass) {
+        console.log('⚠️  พบการแก้ไฟล์ที่ต้องใช้ bypass token (การย้ายข้อมูลที่อนุญาตครั้งเดียว):');
+        violations.forEach(v => {
+          console.log('     • ' + v.file);
+          console.log('       ' + v.reason);
+        });
+        console.log('');
+        console.log('   🔓  ใช้ bypass token ' + migrateBypass.counter + ' — ครั้งถัดไปต้องเพิ่มเป็น ' + (migrateBypass.counter + 1));
+        consumeBypass();
+        console.log('   ✅ Bypass token ถูกใช้แล้ว — .release-bypass-counter อัปเดตเป็น ' + migrateBypass.counter);
+        console.log('');
+      } else {
+        console.log('❌  FAILED — พบการแก้ generated artifacts ที่ห้ามแก้:');
+        violations.forEach(v => {
+          console.log('     • ' + v.file);
+          console.log('       ' + v.reason);
+        });
+        console.log('');
+        console.log('   💡  วิธีแก้:');
+        console.log('       1. แก้ไขเฉพาะ assets/md/{en,th}/current.md เท่านั้น');
+        console.log('       2. ไฟล์อื่นๆ ระบบจะสร้างให้อัตโนมัติใน CI/CD');
+        console.log('       3. git checkout -- <file> เพื่อ revert การแก้ไขที่ผิด');
+        console.log('       4. การย้ายข้อมูลที่อนุญาตครั้งเดียว: ตั้ง .release-bypass เป็นเลขที่มากกว่า .release-bypass-counter');
+        console.log('');
+        process.exit(1);
+      }
     }
   }
 

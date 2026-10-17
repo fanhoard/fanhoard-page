@@ -1,13 +1,15 @@
 ---
-version: 5.11.2
+version: 5.11.3
+date: 2026-10-17T21:43:08.403Z
 notify: true
-title: Menu bar and history labels are easier to read in the dark theme
-subtitle: The selected tab in the bottom menu and the "Previous releases" label are clearer in the dark theme.
+title: Update history is complete again, with real release times
+subtitle: Versions that were missing from the update history are back, and every release shows the exact time it was released.
 ---
 
-**TL;DR** — In the dark theme, the name of the selected tab in the bottom menu and the "Previous releases" heading on the What's New page were too dim. They are now much easier to read.
+**TL;DR** — The update history stopped recording new versions after 5.8.0, and some releases did not show a release time. Both problems are fixed, and the system now records the release time automatically so they cannot happen again.
 
 ### Fixed
 
-- **Selected tab in the bottom menu** In the dark theme, the name of the tab you are on (Home, Search, Setting, Discover) was too dim against the menu bar. It now uses the theme's own green and is much clearer.
-- **"Previous releases" heading** On the What's New page, this heading was also too dim in the dark theme. It is now clearer.
+- **Missing update history** Versions from 5.9.0 onwards were missing from the update history. They are all back.
+- **No release time shown** The update list and each version now show the exact time that version was released. The time is recorded automatically when a version is released and can never change afterwards.
+- **Two wrong times corrected** The times shown for 5.8.0 and 5.8.1 were the time of a rebuild, not the real release time. They now show the real times.

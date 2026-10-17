@@ -17,3 +17,8 @@ Thumbs.db
 
 # ผลวัดของชุดตรวจดีไซน์ (สร้างใหม่ได้)
 .design-checks/
+
+# Release Ledger manifests — สร้างตอน build ทุกสาขา (docs/adr/0001-release-ledger.md) ห้าม commit
+assets/md/en/releases/index.json
+assets/md/th/releases/index.json
+assets/json/version.json

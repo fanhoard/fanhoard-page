@@ -37,32 +37,25 @@ describe('Version Pipeline Audit & Standard Verification', () => {
       }
     });
 
-    it('verifies index.json in releases/ contains top history excluding current version', () => {
+    it('buildLedger คำนวณ Manifest จาก Ledger ได้ (ไม่ต้องมีไฟล์ index.json ใน git)', () => {
+      const { buildLedger } = require('../scripts/release-ledger.js');
       for (const lang of ['en', 'th']) {
-        const indexPath = path.join(ROOT, `assets/md/${lang}/releases/index.json`);
-        expect(fs.existsSync(indexPath)).toBe(true);
-        const indexData = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
-        expect(Array.isArray(indexData.versions)).toBe(true);
-        expect(indexData.versions.length).toBeGreaterThan(0);
-        expect(indexData.versions.length).toBeLessThanOrEqual(7);
-
-        // Latest history entry should have valid version and hasDetails
-        const latestHistory = indexData.versions[0];
-        expect(latestHistory).toBeDefined();
+        const { manifest } = buildLedger(ROOT, lang);
+        expect(Array.isArray(manifest.versions)).toBe(true);
+        expect(manifest.versions.length).toBeGreaterThan(0);
+        expect(manifest.versions.length).toBeLessThanOrEqual(7);
+        const latestHistory = manifest.versions[0];
         expect(latestHistory.version).toBeTruthy();
         expect(latestHistory.hasDetails).toBe(true);
       }
     });
 
-    it('verifies assets/json/version.json matches current.md version', () => {
-      const enPath = path.join(ROOT, 'assets/md/en/current.md');
-      const enContent = fs.readFileSync(enPath, 'utf8');
-      const currentVer = enContent.match(/^version:\s*(.+)$/m)![1].trim();
-
-      const versionJsonPath = path.join(ROOT, 'assets/json/version.json');
-      expect(fs.existsSync(versionJsonPath)).toBe(true);
-      const versionJson = JSON.parse(fs.readFileSync(versionJsonPath, 'utf8'));
-      expect(versionJson.version).toBe(currentVer);
+    it('buildLedger ให้ version.json ตรงกับรุ่นล่าสุดใน Ledger (ผ่าน seam ไม่ผ่านไฟล์)', () => {
+      const { buildLedger } = require('../scripts/release-ledger.js');
+      const { version } = buildLedger(ROOT, 'en');
+      const ledgerFiles = fs.readdirSync(path.join(ROOT, 'assets/md/en/releases')).filter(f => /^v[0-9]/.test(f));
+      const expected = ledgerFiles.map(f => f.replace(/^v|\.md$/g, '')).sort(require('../scripts/release-ledger.js').cmpVersion).pop();
+      expect(version.version).toBe(expected);
     });
   });
 

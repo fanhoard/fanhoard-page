@@ -4,8 +4,13 @@ import os from 'os';
 import path from 'path';
 import { spawnSync } from 'child_process';
 
-// เวลาปล่อยของรุ่นต้องเป็นเวลาจริง (commit แรกที่ตั้งรุ่นใน git) และล็อกหลังบันทึก
-// ทดสอบพฤติกรรมจริงบน git repo ชั่วคราวด้วยสคริปต์จริง ไม่ตรวจข้อความในโค้ด
+// พฤติกรรมเวลาปล่อยในสถาปัตยกรรม Release Ledger (docs/adr/0001-release-ledger.md):
+//   1. pre-commit hook (stamp-release.js) ประทับ Released At ครั้งเดียวให้รุ่นใหม่ ทุกภาษาเวลาเดียวกัน
+//   2. build (build-ledger.js) ย้าย Draft เข้า Ledger คงเวลาเดิม และสร้าง Manifest
+//   3. แก้โน้ตรุ่นเดิมทีหลัง: เวลาใน Ledger ไม่ขยับ
+//   4. build ซ้ำ: ผลเหมือนเดิมทุกไฟล์ (idempotent)
+//   5. Draft ไม่มีเวลา (ไม่ผ่าน hook): build ล้มชัดเจน ไม่เดาเวลา
+// ทดสอบบน git repo ชั่วคราวด้วย hook และสคริปต์จริง
 
 const ROOT = path.resolve(__dirname, '..');
 const NOTE = (v: string, extra = '') =>
@@ -13,89 +18,112 @@ const NOTE = (v: string, extra = '') =>
 
 function sh(cwd: string, cmd: string, args: string[], env: Record<string, string> = {}) {
   const r = spawnSync(cmd, args, { cwd, encoding: 'utf8', env: { ...process.env, ...env } });
-  if (r.status !== 0 && cmd === 'git') throw new Error(`git ${args.join(' ')}: ${r.stderr}`);
+  if (r.status !== 0 && cmd === 'git' && !['commit'].includes(args[0])) throw new Error(`git ${args.join(' ')}: ${r.stderr}`);
   return r;
 }
 
 let dir: string;
-const commitTimes: Record<string, string> = {};
 
-function commit(msg: string, isoUtc: string) {
-  sh(dir, 'git', ['add', '-A']);
-  sh(dir, 'git', ['commit', '-q', '-m', msg], { GIT_AUTHOR_DATE: isoUtc, GIT_COMMITTER_DATE: isoUtc });
-}
 function writeNotes(v: string, extra = '') {
   for (const l of ['en', 'th']) fs.writeFileSync(path.join(dir, `assets/md/${l}/current.md`), NOTE(v, extra));
 }
-function build() {
-  return sh(dir, 'node', ['scripts/update-version.js']);
+function commitThroughHook(msg: string) {
+  // commit ผ่าน pre-commit hook จริง (stamp-release + validate-release)
+  sh(dir, 'git', ['add', '-A']);
+  return sh(dir, 'git', ['commit', '-q', '-m', msg]);
+}
+function ledgerBuild() {
+  return sh(dir, 'node', ['scripts/build-ledger.js']);
 }
 const dateOf = (rel: string) => (fs.readFileSync(path.join(dir, rel), 'utf8').match(/^date:\s*(.+)$/m) || [])[1];
+const nowIso = () => new Date().toISOString();
 
 beforeAll(() => {
   dir = fs.mkdtempSync(path.join(os.tmpdir(), 'release-time-'));
   fs.mkdirSync(path.join(dir, 'scripts'), { recursive: true });
+  fs.mkdirSync(path.join(dir, '.githooks'), { recursive: true });
   for (const l of ['en', 'th']) fs.mkdirSync(path.join(dir, `assets/md/${l}/releases`), { recursive: true });
   fs.mkdirSync(path.join(dir, 'assets/json'), { recursive: true });
-  for (const f of ['update-version.js', 'validate-release.js'])
+  for (const f of ['stamp-release.js', 'release-ledger.js', 'build-ledger.js', 'validate-release.js'])
     fs.copyFileSync(path.join(ROOT, 'scripts', f), path.join(dir, 'scripts', f));
+  fs.copyFileSync(path.join(ROOT, '.githooks/pre-commit'), path.join(dir, '.githooks/pre-commit'));
+  // .gitignore เหมือน repo จริง: manifest เป็นของ build ห้ามติดตาม
+  fs.writeFileSync(path.join(dir, '.gitignore'), 'assets/md/en/releases/index.json\nassets/md/th/releases/index.json\nassets/json/version.json\n');
+  fs.writeFileSync(path.join(dir, '.release-bypass'), '1000');
+  fs.writeFileSync(path.join(dir, '.release-bypass-counter'), '0');
   sh(dir, 'git', ['init', '-q']);
   sh(dir, 'git', ['config', 'user.email', 't@t']);
   sh(dir, 'git', ['config', 'user.name', 't']);
-  writeNotes('1.0.0');
-  commit('release: v1.0.0', '2026-01-01T10:00:00Z');
-  commitTimes['1.0.0'] = '2026-01-01T10:00:00.000Z';
-  writeNotes('1.1.0');
-  commit('release: v1.1.0', '2026-02-02T11:22:33Z');
-  commitTimes['1.1.0'] = '2026-02-02T11:22:33.000Z';
+  sh(dir, 'git', ['config', 'core.hooksPath', '.githooks']);
 }, 60000);
 
 afterAll(() => {
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-describe('Release time is the real commit time and is locked', () => {
-  it('writes the real commit time of the version into current.md, snapshot and version.json', () => {
-    const r = build();
+describe('Released At: hook stamps it once, build moves it to Ledger, it never moves again', () => {
+  it('hook ประทับเวลาเดียวกันให้ทุกภาษาตอนปล่อยรุ่นใหม่ (ใกล้เวลา commit จริง)', () => {
+    writeNotes('1.0.0');
+    const before = nowIso();
+    const r = commitThroughHook('release: v1.0.0');
     expect(r.status).toBe(0);
-    expect(dateOf('assets/md/en/current.md')).toBe(commitTimes['1.1.0']);
-    expect(dateOf('assets/md/th/current.md')).toBe(commitTimes['1.1.0']);
-    expect(dateOf('assets/md/en/releases/v1.1.0.md')).toBe(commitTimes['1.1.0']);
-    expect(JSON.parse(fs.readFileSync(path.join(dir, 'assets/json/version.json'), 'utf8')).date).toBe(commitTimes['1.1.0']);
+    const after = nowIso();
+    const d = dateOf('assets/md/en/current.md');
+    expect(d).toBeTruthy();
+    expect(new Date(d).getTime()).toBeGreaterThanOrEqual(new Date(before).getTime() - 2000);
+    expect(new Date(d).getTime()).toBeLessThanOrEqual(new Date(after).getTime() + 2000);
+    expect(dateOf('assets/md/th/current.md')).toBe(d);
   });
 
-  it('ignores a hand-typed date: and uses the real commit time instead', () => {
-    writeNotes('1.1.0', 'date: 2030-12-31T00:00:00.000Z\n');
-    expect(build().status).toBe(0);
-    expect(dateOf('assets/md/en/current.md')).toBe(commitTimes['1.1.0']);
+  it('build ย้าย Draft เข้า Ledger โดยคงเวลาที่ประทับไว้ และสร้าง Manifest ตรงกันทั้งสองภาษา', () => {
+    expect(ledgerBuild().status).toBe(0);
+    expect(dateOf('assets/md/en/releases/v1.0.0.md')).toBe(dateOf('assets/md/en/current.md'));
+    const mEn = JSON.parse(fs.readFileSync(path.join(dir, 'assets/md/en/releases/index.json'), 'utf8'));
+    const mTh = JSON.parse(fs.readFileSync(path.join(dir, 'assets/md/th/releases/index.json'), 'utf8'));
+    expect(mEn.versions.map((e: any) => e.version)).toEqual(mTh.versions.map((e: any) => e.version));
+    expect(mEn.versions[0].date).toBe(dateOf('assets/md/en/current.md'));
+    const v = JSON.parse(fs.readFileSync(path.join(dir, 'assets/json/version.json'), 'utf8'));
+    expect(v.version).toBe('1.0.0');
+    expect(v.date).toBe(mEn.versions[0].date);
   });
 
-  it('does not move when the notes of an already-released version are edited later', () => {
+  it('รุ่นถัดไปได้เวลาของตัวเอง และรุ่นก่อนไม่ขยับ', () => {
     writeNotes('1.1.0');
-    fs.appendFileSync(path.join(dir, 'assets/md/en/current.md'), '\n- **late edit** typo fix\n');
-    commit('docs: typo', '2026-03-03T09:00:00Z'); // commit ล่าสุดขยับ แต่ commit แรกของรุ่นไม่ขยับ
-    expect(build().status).toBe(0);
-    expect(dateOf('assets/md/en/current.md')).toBe(commitTimes['1.1.0']);
-    expect(dateOf('assets/md/en/current.md')).not.toBe('2026-03-03T09:00:00.000Z');
+    const r = commitThroughHook('release: v1.1.0');
+    expect(r.status).toBe(0);
+    const d10 = dateOf('assets/md/en/releases/v1.0.0.md');
+    const d11 = dateOf('assets/md/en/current.md');
+    expect(d11).toBeTruthy();
+    expect(d11).not.toBe(d10);
+    expect(ledgerBuild().status).toBe(0);
+    expect(dateOf('assets/md/en/releases/v1.0.0.md')).toBe(d10);
+    expect(dateOf('assets/md/en/releases/v1.1.0.md')).toBe(d11);
   });
 
-  it('is idempotent: repeated builds produce identical files', () => {
-    build();
-    const read = () => ['assets/md/en/current.md', 'assets/md/en/releases/v1.1.0.md', 'assets/json/version.json']
+  it('แก้โน้ตรุ่นที่ปล่อยแล้วทีหลัง เวลาใน Ledger ไม่ขยับ', () => {
+    const before = dateOf('assets/md/en/releases/v1.1.0.md');
+    fs.appendFileSync(path.join(dir, 'assets/md/en/current.md'), '\n- **late edit** typo fix\n');
+    sh(dir, 'git', ['add', '-A']);
+    sh(dir, 'git', ['commit', '-q', '-m', 'docs: typo']);
+    expect(ledgerBuild().status).toBe(0);
+    expect(dateOf('assets/md/en/current.md')).toBe(before);
+  });
+
+  it('build ซ้ำหลายครั้ง ผลเหมือนเดิมทุกไฟล์ (idempotent)', () => {
+    ledgerBuild();
+    const read = () => ['assets/md/en/current.md', 'assets/md/en/releases/v1.1.0.md', 'assets/md/en/releases/index.json', 'assets/json/version.json']
       .map((f) => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n---\n');
     const first = read();
-    build();
-    build();
+    ledgerBuild();
+    ledgerBuild();
     expect(read()).toBe(first);
   });
 
-  it('gives each version its own real time in history', () => {
+  it('Draft ที่ไม่ผ่าน hook (ไม่มี Released At): build ล้มชัดเจน ไม่เดาเวลา', () => {
     writeNotes('1.2.0');
-    commit('release: v1.2.0', '2026-04-04T12:00:00Z');
-    commitTimes['1.2.0'] = '2026-04-04T12:00:00.000Z';
-    expect(build().status).toBe(0);
-    expect(dateOf('assets/md/en/current.md')).toBe(commitTimes['1.2.0']);
-    expect(dateOf('assets/md/en/releases/v1.1.0.md')).toBe(commitTimes['1.1.0']);
+    const r = ledgerBuild();
+    expect(r.status).not.toBe(0);
+    expect(String(r.stderr || r.stdout)).toMatch(/Released At/);
   });
 });
 
