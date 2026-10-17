@@ -1,40 +1,40 @@
 {
   "versions": [
     {
-      "version": "3.2.22",
-      "date": "2026-10-04T07:20:00.000Z",
+      "version": "5.8.0",
+      "date": "2026-10-17T10:52:19.000Z",
       "hasDetails": true
     },
     {
-      "version": "3.2.24",
-      "date": "2026-10-03T23:39:31.059Z",
+      "version": "5.7.1",
+      "date": "2026-10-17T03:33:05.000Z",
       "hasDetails": true
     },
     {
-      "version": "3.2.23",
-      "date": "2026-10-03T23:18:34.935Z",
+      "version": "5.7.0",
+      "date": "2026-10-17T02:56:44.000Z",
       "hasDetails": true
     },
     {
-      "version": "3.2.21",
-      "date": "2026-10-03T22:46:37.335Z",
+      "version": "5.6.1",
+      "date": "2026-10-17T00:28:01.000Z",
       "hasDetails": true
     },
     {
-      "version": "3.2.20",
-      "date": "2026-10-03T22:45:07.000Z",
+      "version": "5.6.0",
+      "date": "2026-10-17T00:04:12.000Z",
       "hasDetails": true
     },
     {
-      "version": "3.2.19",
-      "date": "2026-10-03T22:35:19.101Z",
+      "version": "5.5.0",
+      "date": "2026-10-16T23:52:07.000Z",
       "hasDetails": true
     },
     {
-      "version": "3.2.18",
-      "date": "2026-10-03T22:28:51.517Z",
+      "version": "5.4.0",
+      "date": "2026-10-16T23:34:43.000Z",
       "hasDetails": true
     }
   ],
-  "updatedAt": "2026-10-04T00:13:38.032Z"
+  "updatedAt": "2026-10-17T10:57:40.417Z"
 }

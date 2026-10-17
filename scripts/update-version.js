@@ -217,10 +217,9 @@ function getPreviousCurrentMdContent(lang, newVersion) {
 // ── BACKFILL: กู้ทุกรุ่นที่ยังไม่มีไฟล์ประวัติ จากประวัติ git ของ current.md ──────
 //  ปัญหาเดิม: AUTO-SNAPSHOT บันทึกได้ทีละ "รุ่นก่อนหน้า" รุ่นเดียวต่อการรัน ถ้ารุ่นถูกปล่อย
 //  หลายรุ่นระหว่างการรัน (เช่นปล่อยบน develop ที่ CI ไม่รัน) รุ่นตรงกลางจะหายถาวร
-//  วิธีแก้: ย้อนดูทุก commit ที่แก้ current.md หารุ่นที่ใหม่กว่า BACKFILL_FROM และยังไม่มีไฟล์
+//  วิธีแก้: ย้อนดูทุก commit ที่แก้ current.md หา MAX_HISTORY รุ่นล่าสุดก่อนรุ่นปัจจุบัน ที่ยังไม่มีไฟล์
 //  แล้วสร้างจากเนื้อหาของ commit ที่ตั้งรุ่นนั้นล่าสุด ใช้ "วันที่ commit ของรุ่นนั้นเอง"
 //  (ไม่ใช่เวลา HEAD) ปลอดภัยต่อการรันซ้ำ: ไม่เขียนทับไฟล์ที่มีอยู่
-var BACKFILL_FROM = '3.2.25';
 function backfillMissingHistory(currentVersion) {
   var created = 0;
   for (var i = 0; i < LANGS.length; i++) {
@@ -229,26 +228,30 @@ function backfillMissingHistory(currentVersion) {
     var dir = path.join(ROOT, CONFIG.perLangReleasesDir.replace('{lang}', lang));
     var log = git(['log', '--format=%H %ct', '--', relPath]);
     var rows = log ? log.split('\n').filter(Boolean) : [];
-    var seen = {};
-    // log เรียงใหม่ → เก่า: commit แรกที่เจอของแต่ละรุ่น = commit ล่าสุดที่ตั้งรุ่นนั้น
+    var latest = {};   // version -> {content, ct}  (commit ล่าสุดที่ตั้งรุ่นนั้น; log เรียงใหม่ → เก่า)
     for (var r = 0; r < rows.length; r++) {
       var parts = rows[r].split(' ');
       var content = git(['show', parts[0] + ':' + relPath]);
       var m = content && content.match(/^version:\s*([0-9][0-9.]*)\s*$/m);
-      if (!m) continue;
-      var ver = m[1];
-      if (seen[ver]) continue;
-      seen[ver] = true;
-      if (ver === currentVersion) continue;
-      if (compareSemver(ver, BACKFILL_FROM) < 0) continue;
+      if (!m || latest[m[1]]) continue;
+      latest[m[1]] = { content: content, ct: parts[1] };
+    }
+    // เก็บเฉพาะ MAX_HISTORY รุ่นล่าสุดก่อนรุ่นปัจจุบัน (เท่ากับที่ index.json แสดงได้จริง)
+    var wanted = Object.keys(latest)
+      .filter(function(v) { return v !== currentVersion && compareSemver(v, currentVersion) < 0; })
+      .sort(function(x, y) { return compareSemver(y, x); })
+      .slice(0, MAX_HISTORY);
+    for (var w = 0; w < wanted.length; w++) {
+      var ver = wanted[w];
       var dest = path.join(dir, 'v' + ver + '.md');
       if (fs.existsSync(dest)) continue;
-      var when = new Date(parseInt(parts[1], 10) * 1000).toISOString();
-      content = /^date:\s*.+$/m.test(content)
-        ? content.replace(/^date:\s*.+$/m, 'date: ' + when)
-        : content.replace(/^(version:\s*.+)$/m, '$1\ndate: ' + when);
+      var when = new Date(parseInt(latest[ver].ct, 10) * 1000).toISOString();
+      var body = latest[ver].content;
+      body = /^date:\s*.+$/m.test(body)
+        ? body.replace(/^date:\s*.+$/m, 'date: ' + when)
+        : body.replace(/^(version:\s*.+)$/m, '$1\ndate: ' + when);
       fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(dest, content, 'utf8');
+      fs.writeFileSync(dest, body, 'utf8');
       created++;
       console.log('♻️   BACKFILL ' + CONFIG.perLangReleasesDir.replace('{lang}', lang) + '/v' + ver + '.md (' + when.slice(0, 10) + ')');
     }
