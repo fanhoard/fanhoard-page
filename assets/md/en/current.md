@@ -1,5 +1,6 @@
 ---
 version: 3.0.4
+date: 2026-10-17T11:07:32.065Z
 title: Update history is sorted correctly
 subtitle: Past updates are now listed newest first by version number, and missing entries can be rebuilt.
 notify: false
