@@ -1,19 +1,13 @@
 ---
-version: 5.7.0
+version: 5.7.1
 date: 2026-10-17T00:00:00.000Z
-title: A calmer, cleaner look with the green kept for what matters
-subtitle: Pages now sit on a clean white base, and the brand green is used only for actions and selections.
+title: Update pop-ups are readable in the dark theme
+subtitle: The update notification now follows the dark theme instead of staying white.
 notify: true
 ---
 
-**TL;DR** — The green no longer covers whole pages. Backgrounds and cards are white with soft grey borders, and the brand green now marks buttons, links and the item you have selected.
-
-### Improved
-
-- Page and card backgrounds are now white instead of light green, and card borders are soft grey. The green now appears only on buttons, links, selected filters and focus outlines, so it stands out where it matters.
-- Badges, selected filters and hovered links use a slightly deeper green for their text, so they are easier to read.
-- The status labels on the What's New page (New, Improved, Fixed, Removed) use deeper text colors in the light theme so they are readable, and keep the brighter colors in the dark theme.
+**TL;DR** — In the dark theme, pop-ups such as the update notification had a white background with light text, which made them hard to read. They now use the dark surface.
 
 ### Fixed
 
-- Several green-on-light-green texts did not have enough contrast to read comfortably. They now meet the WCAG AA contrast level.
+- Pop-ups (including the update notification) kept a white background in the dark theme while their text turned light, so the text was almost invisible. The background now follows the theme. The light theme looks exactly the same as before.

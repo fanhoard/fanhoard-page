@@ -22,7 +22,7 @@
   font-size: var(--fv-text-base, 15px);
   line-height: var(--fv-leading-normal, 1.5);
   color: var(--fp-text, var(--text-main, #0f172a));
-  background: var(--fp-bg, #ffffff);
+  background: var(--fp-bg, var(--surface-card, #ffffff));
   border: 1px solid var(--fp-border, rgba(0, 0, 0, 0.06));
   border-radius: var(--fp-radius, var(--radius-xl, 28px));
   box-shadow: none;
