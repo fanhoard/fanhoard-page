@@ -1,5 +1,6 @@
 ---
 version: 3.0.5
+date: 2026-10-17T16:07:57.000Z
 notify: true
 title: Update times are now the real release time
 subtitle: Each update shows the exact time it was released, and that time can no longer change.
