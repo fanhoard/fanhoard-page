@@ -1,15 +1,13 @@
 ---
-version: 5.6.0
+version: 5.6.1
 date: 2026-10-17T00:00:00.000Z
-title: Pop-ups and feed cards get softer, rounder shapes
-subtitle: Dialogs, sheets, drawers, toasts and discover cards now use larger rounded corners.
+title: Dialog pop-ups now match the rounder shapes
+subtitle: Dialog windows now use the same large rounded corners as the other pop-ups.
 notify: true
 ---
 
-**TL;DR** — Pop-up windows and the cards in your feed now have larger, softer corners, and the small buttons inside pop-ups are pills.
+**TL;DR** — Dialog pop-up windows now have the same large, soft corners as sheets and drawers.
 
-### Changed
+### Fixed
 
-- **Pop-ups** — Dialogs, toasts and popovers use larger rounded corners. Bottom sheets and side drawers use the roundest corners, and their close and action buttons are now pills.
-- **Feed cards** — Cards in the discover feed and their images use larger rounded corners, and the image corners match the card so nothing pokes out.
-- **Unchanged** — The navigation bar keeps its exact position and behavior, and full-screen pop-ups still fill the whole screen.
+- Dialog pop-ups kept smaller corners (20px) after the last update because a theme setting overrode the new size. They now use the 28px corners in light and dark themes.
