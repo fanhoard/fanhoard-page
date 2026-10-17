@@ -124,7 +124,7 @@ staging rules, and active search module paths.
 
 ## 4. Release Control & Bypass Token Mechanics
 
-FanHoard uses a 4-layer release validation pipeline enforced by `scripts/validate-release.js` and Git hooks (`scripts/hooks/pre-commit`, `pre-push`).
+FanHoard uses a 4-layer release validation pipeline enforced by `scripts/validate-release.js` and Git hooks (`.githooks/pre-commit`, `.githooks/pre-push`).
 
 ### 4.1 Release Bypass Rules
 - Documentation-only or internal refactoring pushes MUST NOT bump semantic version numbers in `assets/md/{lang}/current.md`.
