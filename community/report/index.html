@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <script src="assets/js/lang-proxy.js?v=3.2.26-202610040621"></script>
+  <script src="/assets/js/lang-proxy.js?v=3.2.26-202610040621"></script>
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title data-translate="page-report">Report an Issue</title>
@@ -190,7 +190,10 @@
        HELPERS
        ══════════════════════════════════════════════ */
     function getLang() {
-      return localStorage.getItem('fv_lang') || 'en';
+      // คำนำหน้า URL (/th/ หรือ /en/) รู้ตั้งแต่ก่อนโหลด ส่วน selectedLang ถูกเขียนทีหลัง DOMContentLoaded
+      var m = location.pathname.match(/^\/(th|en)(\/|$)/);
+      if (m) return m[1];
+      return localStorage.getItem('selectedLang') || localStorage.getItem('fv_lang') || 'en';
     }
 
     function populateSelect(selectEl, items) {
@@ -268,7 +271,7 @@
       if (!category) {
         showError('report-category', 'error-category',
           'Please select an issue category.',
-          '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E21\u0E25\u0E37\u0E2D\u0E01\u0E2B\u0E21\u0E27\u0E14\u0E2B\u0E21\u0E39\u0E48\u0E1B\u0E31\u0E0D\u0E2B\u0E32');
+          '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E2B\u0E21\u0E27\u0E14\u0E2B\u0E21\u0E39\u0E48\u0E1B\u0E31\u0E0D\u0E2B\u0E32');
         valid = false;
       }
 
@@ -284,7 +287,7 @@
       if (!pageVal) {
         showError('report-page', 'error-page',
           'Please select the page where the issue occurred.',
-          '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E21\u0E25\u0E37\u0E2D\u0E01\u0E2B\u0E19\u0E49\u0E32\u0E17\u0E35\u0E48\u0E1E\u0E1A\u0E1B\u0E31\u0E0D\u0E2B\u0E32');
+          '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E2B\u0E19\u0E49\u0E32\u0E17\u0E35\u0E48\u0E1E\u0E1A\u0E1B\u0E31\u0E0D\u0E2B\u0E32');
         valid = false;
       } else if (pageVal === 'custom') {
         var customPage = document.getElementById('report-page-custom').value.trim();

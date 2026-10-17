@@ -1,13 +1,18 @@
 ---
-version: 5.9.1
+version: 5.10.0
 date: 2026-10-17T00:00:00.000Z
-title: Settings page loads cleanly
-subtitle: A missing-file request on the Settings page is fixed.
+title: Contact and Report pages work properly in Thai
+subtitle: Language choices, Thai text and button colors are fixed on the Community and About pages.
 notify: false
 ---
 
-**TL;DR** — When the Settings page was opened without a language in the address, the browser asked for a file in the wrong place and got an error. It now asks in the right place. Nothing you see on the page changes.
+**TL;DR** — The Contact page had an empty language list, the Report form showed English text on the Thai page, and some buttons were hard to read in the dark theme. All of that is fixed.
 
 ### Fixed
 
-- **Settings page loading** The page no longer makes a failed request for its language helper file. The language switch, the auto-update switch and all saved settings work as before.
+- **Contact page language list** The form language menu was always empty. It now lists English and Thai.
+- **Report form in Thai** Category and page choices, the error messages and the "sending" text now show in Thai on the Thai page, as they should.
+- **Thai spelling** Two error messages on the Report form had a typo ("เลือก" was misspelled). They are corrected.
+- **Dark theme buttons** The Submit Report button, the Send via Gmail button and the version badges on the Roadmap and What's New pages are now easy to read in the dark theme.
+- **Older updates in What's New** Labels such as "New" and "Improved" on past updates were too faint in the light theme. They are clearer now.
+- **Page loading** The Community, Contact, Report and About pages no longer make a failed request for a helper file.

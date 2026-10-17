@@ -141,7 +141,7 @@ section.con .fv-section-desc,
   padding: 0.5rem 1rem;
   font-size: var(--step-0, 0.9375rem);
   font-weight: var(--font-semibold, 600);
-  color: #ffffff;
+  color: var(--color-on-brand, #ffffff);
   background-color: var(--color-brand-hover, var(--color-brand-primary, #0d9488));
   border: none;
   border-radius: var(--radius-full, 9999px);
@@ -266,7 +266,7 @@ select.setting-item.select:focus {
   font-size: var(--step-0, 1rem);
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   font-weight: var(--font-semibold, 600);
-  color: #ffffff;
+  color: var(--color-on-brand, #ffffff);
   background-color: var(--color-brand-hover, #0f766e);
   border: none;
   border-radius: var(--radius-full, 9999px);
