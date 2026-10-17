@@ -294,6 +294,36 @@ function validate(files) {
   return { violations, releaseNotesChanges };
 }
 
+// ── เวลาปล่อยของรุ่น: ผู้พัฒนาห้ามตั้งเอง และห้ามเปลี่ยนหลังบันทึกแล้ว ─────────────────
+//  เวลาจริงมาจาก update-version.js (commit แรกที่ตั้งรุ่นนั้นใน git) เท่านั้น
+//  - รุ่นใหม่ (bump): ห้ามมี date: ใน current.md เลย ระบบจะใส่ให้จาก git
+//  - รุ่นเดิม (ไม่ bump): date: ต้องเท่าเดิมใน HEAD เป๊ะ (เพิ่ม/แก้/ลบ = ผิด)
+//  เฉพาะไฟล์ที่ staged และนอกโหมด CI (CI เป็นผู้เขียน date: ตามหน้าที่)
+function checkReleaseDateLock() {
+  const problems = [];
+  for (const lang of ['en', 'th']) {
+    const rel = `assets/md/${lang}/current.md`;
+    const staged = spawnSync('git', ['diff', '--cached', '--name-only', '--', rel], { encoding: 'utf8', cwd: ROOT });
+    if (staged.status !== 0 || !staged.stdout.trim()) continue; // ไม่ได้ staged ไฟล์นี้ = ไม่ต้องตรวจ
+    const now = spawnSync('git', ['show', ':' + rel], { encoding: 'utf8', cwd: ROOT });
+    if (now.status !== 0) continue;
+    const head = spawnSync('git', ['show', 'HEAD:' + rel], { encoding: 'utf8', cwd: ROOT });
+    const pick = (txt, re) => { const m = (txt || '').match(re); return m ? m[1].trim() : null; };
+    const newVer = pick(now.stdout, /^version:\s*(.+)$/m);
+    const newDate = pick(now.stdout, /^date:\s*(.+)$/m);
+    const oldVer = head.status === 0 ? pick(head.stdout, /^version:\s*(.+)$/m) : null;
+    const oldDate = head.status === 0 ? pick(head.stdout, /^date:\s*(.+)$/m) : null;
+    if (oldVer && newVer === oldVer) {
+      if (newDate !== oldDate) {
+        problems.push({ file: rel, reason: `date: ของรุ่น ${newVer} ถูกเปลี่ยน (${oldDate || 'ไม่มี'} → ${newDate || 'ไม่มี'}) — เวลาปล่อยถูกล็อกหลังบันทึกครั้งแรก เปลี่ยนไม่ได้` });
+      }
+    } else if (newDate) {
+      problems.push({ file: rel, reason: `รุ่นใหม่ ${newVer} มี date: ${newDate} ที่ตั้งเอง — ห้ามใส่ ระบบจะบันทึกเวลาจริงจาก git ให้ตอน build` });
+    }
+  }
+  return problems;
+}
+
 function checkCurrentMdWarnings() {
   const warnings = [];
   const enVersion = readVersionFromCurrentMd('en');
@@ -314,6 +344,15 @@ function checkCurrentMdWarnings() {
         warnings.push({
           type: 'manual_date',
           message: `assets/md/${lang}/current.md มี date: — ระบบจะ sync ทับด้วยค่าจาก registry ใน CI/CD`,
+        });
+      }
+      // รุ่นที่ตั้ง notify: false แต่มีหัวข้อ New/Improved/Fixed/Changed = ผู้ใช้จะไม่เห็นป๊อปอัป ทั้งที่นโยบาย (release-policy.md §3)
+      // ให้ User Bug Fix และ UI Overhaul ขึ้นป๊อปอัป เตือนเท่านั้น เพราะรุ่น Silent ที่ผู้ใช้ไม่เห็นความต่างจริงเป็นเรื่องถูกนโยบาย
+      const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+      if (fmMatch && /^notify:\s*["']?false["']?\s*$/m.test(fmMatch[1]) && /^###\s+(New|Improved|Fixed|Changed|ใหม่|ปรับปรุง|แก้ไข|สิ่งที่เปลี่ยนแปลง)/m.test(content)) {
+        warnings.push({
+          type: 'silent_with_user_changes',
+          message: `assets/md/${lang}/current.md ตั้ง notify: false แต่มีหัวข้อ New/Improved/Fixed/Changed — ผู้ใช้จะไม่เห็นป๊อปอัปอัปเดต ถ้าเป็นการแก้ที่ผู้ใช้เห็นจริงให้ใช้ notify: true (release-policy.md §3)`,
         });
       }
     } catch (_) {}
@@ -395,6 +434,12 @@ function main() {
   }
 
   const { violations, releaseNotesChanges } = validate(files);
+
+  if (!ciMode) {
+    for (const pr of checkReleaseDateLock()) {
+      violations.push({ file: pr.file, reason: pr.reason });
+    }
+  }
 
   console.log('   ไฟล์ release-notes ที่เปลี่ยน: ' + releaseNotesChanges.length);
   releaseNotesChanges.forEach(f => {
