@@ -1,14 +1,17 @@
 ---
-version: 5.8.1
+version: 5.9.0
 date: 2026-10-17T00:00:00.000Z
-title: Update history is sorted correctly
-subtitle: Past updates now appear newest first, and missing entries can be restored.
+title: Search filters work in English
+subtitle: The type filters on the Search page now match the Home page tabs.
 notify: false
 ---
 
-**TL;DR** — The list of past updates could show an older update above a newer one, and many recent updates were missing. The release tool now sorts by version number and can rebuild missing entries.
+**TL;DR** — On the English Search page, tapping Emoji, Symbol, Collections or Fancy Text showed "No results" even when there were matches. That is fixed, and the filters now look like the tabs on the Home page.
 
 ### Fixed
 
-- **Update history order** Past updates are now listed by version number, newest first, instead of by a date that was sometimes wrong.
-- **Missing past updates** The release tool can now rebuild entries that were never saved, using the project's own change history.
+- **Search type filters** On the English Search page, every type filter used to come back empty. They now show the right results, the same as the Thai page.
+
+### Changed
+
+- **Search filter style** The type filters are now plain text tabs with an underline under the selected one, matching the Home page. They stay easy to tap and easy to read in light and dark themes.

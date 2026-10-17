@@ -214,6 +214,13 @@
       link.href = cssUrl;
       link.setAttribute('data-search-system-css', 'true');
       document.head.appendChild(link);
+      // S3: ชุดองค์ประกอบกลาง (ds.css) ฉีดหลัง search-system.css เพื่อให้แท็บกรองใช้สไตล์เดียวกับ Home
+      // โดยไม่ต้องแก้ search/index.html
+      if (!document.getElementById('search-ds-css')) {
+        const ds = document.createElement('link');
+        ds.id = 'search-ds-css'; ds.rel = 'stylesheet'; ds.href = '/assets/css/ds.css';
+        document.head.appendChild(ds);
+      }
     } catch (e) {
       console.warn('[Search] CSS auto-inject failed:', e);
     }

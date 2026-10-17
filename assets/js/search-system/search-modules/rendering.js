@@ -353,7 +353,7 @@
         const pills  = [];
 
         pills.push(
-          `<button class="filter-pill${active === 'all' ? ' active' : ''}" data-filter-type="all" aria-pressed="${active === 'all'}">`
+          `<button class="filter-pill ds-pill${active === 'all' ? ' active' : ''}" data-filter-type="all" aria-pressed="${active === 'all'}">`
           + StringService.escapeHtml(LanguageService.t('all_types'))
           + `</button>`
         );
@@ -361,15 +361,20 @@
         for (const t of (State.apiData?.type || [])) {
           const lbl = t.name?.[lang] || t.name?.en || '';
           if (!lbl) continue;
+          // ค่ากรองต้องเป็นชื่อไทยของชนิด (typeKey ที่ engine เทียบ) ไม่ใช่ป้ายตามภาษาหน้า
+          // ไม่งั้นหน้าอังกฤษส่ง "Emoji" แล้ว engine ไม่เจอเอกสารเลย (ป้ายยังแสดงตามภาษาหน้าเหมือนเดิม)
+          const val = t.name?.th || lbl;
+          const escVal = StringService.escapeHtml(val);
           const esc = StringService.escapeHtml(lbl);
           pills.push(
-            `<button class="filter-pill${active === lbl ? ' active' : ''}" data-filter-type="${esc}" aria-pressed="${active === lbl}">`
+            `<button class="filter-pill ds-pill${active === val ? ' active' : ''}" data-filter-type="${escVal}" aria-pressed="${active === val}">`
             + esc
             + `</button>`
           );
         }
 
         el.innerHTML = pills.join('');
+        el.classList.add('ds-pills');
         State.selectedType = active;
 
         el._pillHandler && el.removeEventListener('click', el._pillHandler);

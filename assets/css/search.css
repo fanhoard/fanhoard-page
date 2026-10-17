@@ -855,3 +855,15 @@ body {
 .search-suggestion-item:focus-visible {
   outline: 2px solid var(--color-brand-primary, #0d9488);
 }
+
+/* S3: แถวตัวกรองชนิดใช้แท็บข้อความ + เส้นใต้ (ds-pill) เหมือน Home แทนแคปซูลกรอบเขียว */
+#typeFilter.ds-pills { padding-block: 0; padding-inline: 14px; gap: 0; }
+#typeFilter .filter-pill.ds-pill,
+#typeFilter .filter-pill.ds-pill.active {
+  border-radius: 0; box-shadow: none; background: transparent; opacity: 1;
+  color: var(--ds-ink-soft); font-weight: var(--font-medium);
+  border-bottom: 2px solid transparent;
+}
+#typeFilter .filter-pill.ds-pill[aria-pressed="true"] {
+  color: var(--ds-ink); font-weight: var(--font-semibold); border-bottom-color: var(--ds-ink);
+}
