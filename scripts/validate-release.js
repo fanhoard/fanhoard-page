@@ -315,7 +315,7 @@ function checkReleaseDateLock() {
     const oldDate = head.status === 0 ? pick(head.stdout, /^date:\s*(.+)$/m) : null;
     if (oldVer && newVer === oldVer) {
       if (newDate !== oldDate) {
-        problems.push({ file: rel, reason: `date: ของรุ่น ${newVer} ถูกเปลี่ยน (${oldDate || 'ไม่มี'} → ${newDate || 'ไม่มี'}) — เวลาปล่อยถูกล็อกหลังบันทึกครั้งแรก เปลี่ยนไม่ได้` });
+        problems.push({ file: rel, reason: `date: ของรุ่น ${newVer} ถูกเปลี่ยน (${oldDate || 'ไม่มี'} → ${newDate || 'ไม่มี'}) — เวลาปล่อยถูกล็อกหลังบันทึกครั้งแรก เปลี่ยนไม่ได้`, bypassable: true });
       }
     } else if (newDate && process.env.FANHOARD_STAMPED !== '1') {
       // FANHOARD_STAMPED=1 ตั้งโดย pre-commit hook หลัง stamp-release.js ประทับ Released At ให้ (ไม่ใช่คนพิมพ์)
@@ -334,7 +334,7 @@ function checkReleaseDateLock() {
       const newDate = pick(now.stdout, /^date:\s*(.+)$/m);
       const oldDate = pick(head.stdout, /^date:\s*(.+)$/m);
       if (newDate !== oldDate) {
-        problems.push({ file: rel, reason: `date: ใน Ledger ถูกเปลี่ยน (${oldDate || 'ไม่มี'} → ${newDate || 'ไม่มี'}) — เวลาปล่อยถูกล็อกหลังบันทึกครั้งแรก เปลี่ยนไม่ได้` });
+        problems.push({ file: rel, reason: `date: ใน Ledger ถูกเปลี่ยน (${oldDate || 'ไม่มี'} → ${newDate || 'ไม่มี'}) — เวลาปล่อยถูกล็อกหลังบันทึกครั้งแรก เปลี่ยนไม่ได้`, bypassable: true });
       }
     }
   }
@@ -454,7 +454,7 @@ function main() {
 
   if (!ciMode) {
     for (const pr of checkReleaseDateLock()) {
-      violations.push({ file: pr.file, reason: pr.reason });
+      violations.push({ file: pr.file, reason: pr.reason, bypassable: pr.bypassable === true });
     }
   }
 
@@ -521,8 +521,9 @@ function main() {
     } else {
       // ข้อยกเว้นที่อนุญาตครั้งเดียว: bypass token (เช่น การย้ายข้อมูลครั้งเดียวที่แก้เวลาให้ตรงจริง)
       // ใช้ได้เฉพาะเมื่อ token มากกว่า counter ทุกครั้งที่ใช้จะถูกบันทึกและหมดไป
+      const allBypassable = violations.every(v => v.bypassable === true);
       const migrateBypass = checkBypass();
-      if (migrateBypass.bypass) {
+      if (allBypassable && migrateBypass.bypass) {
         console.log('⚠️  พบการแก้ไฟล์ที่ต้องใช้ bypass token (การย้ายข้อมูลที่อนุญาตครั้งเดียว):');
         violations.forEach(v => {
           console.log('     • ' + v.file);
