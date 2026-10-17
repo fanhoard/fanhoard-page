@@ -1,17 +1,13 @@
 ---
-version: 5.9.0
+version: 5.9.1
 date: 2026-10-17T00:00:00.000Z
-title: Search filters work in English
-subtitle: The type filters on the Search page now match the Home page tabs.
+title: Settings page loads cleanly
+subtitle: A missing-file request on the Settings page is fixed.
 notify: false
 ---
 
-**TL;DR** — On the English Search page, tapping Emoji, Symbol, Collections or Fancy Text showed "No results" even when there were matches. That is fixed, and the filters now look like the tabs on the Home page.
+**TL;DR** — When the Settings page was opened without a language in the address, the browser asked for a file in the wrong place and got an error. It now asks in the right place. Nothing you see on the page changes.
 
 ### Fixed
 
-- **Search type filters** On the English Search page, every type filter used to come back empty. They now show the right results, the same as the Thai page.
-
-### Changed
-
-- **Search filter style** The type filters are now plain text tabs with an underline under the selected one, matching the Home page. They stay easy to tap and easy to read in light and dark themes.
+- **Settings page loading** The page no longer makes a failed request for its language helper file. The language switch, the auto-update switch and all saved settings work as before.
