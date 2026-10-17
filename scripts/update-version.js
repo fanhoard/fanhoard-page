@@ -193,6 +193,33 @@ function scanHistoryFiles(lang) {
 //    - ไม่ตรง (ปกติ, รันตอน local/pre-commit) → HEAD คือของเก่าจริง ใช้ได้เลย
 //    - ตรงกัน (CI หลัง push) → HEAD คือ commit ใหม่ ต้องย้อนไปหา commit ก่อนหน้า
 //      ที่แก้ไฟล์นี้จริงๆ ด้วย `git log` แทน
+// ── เวลาปล่อยจริงของรุ่น (แหล่งความจริงเดียว) ─────────────────────────────────────
+//  คืนเวลา (ISO) ของ commit "แรก" ที่ตั้ง version นี้ใน current.md เดินจากใหม่ไปเก่า
+//  แล้วหยุดที่ commit แรกสุดที่ยังเป็นรุ่นนี้ จึงล็อกโดยธรรมชาติ: แก้โน้ตของรุ่นเดิมทีหลัง
+//  (แก้คำผิด ฯลฯ) ทำให้ commit ล่าสุดขยับ แต่ commit แรกไม่ขยับ เวลาจึงไม่เปลี่ยน
+//  ไม่ใช้ date: ที่พิมพ์ในไฟล์ และไม่ใช้ NOW (เวลา build) เพื่อให้ตรวจย้อนหลังด้วย git ได้เสมอ
+//  คืน null ถ้ารุ่นนี้ยังไม่เคยถูก commit (ยังไม่ปล่อยจริง)
+var _releaseTimeCache = {};
+function releaseTimeOf(version) {
+  if (Object.prototype.hasOwnProperty.call(_releaseTimeCache, version)) return _releaseTimeCache[version];
+  var result = null;
+  for (var li = 0; li < LANGS.length && !result; li++) {
+    var relPath = CONFIG.perLangCurrent.replace('{lang}', LANGS[li]);
+    var rows = (git(['log', '--format=%H %ct', '--', relPath]) || '').split('\n').filter(Boolean); // ใหม่ -> เก่า
+    var first = null;
+    for (var r = 0; r < rows.length; r++) {
+      var parts = rows[r].split(' ');
+      var c = git(['show', parts[0] + ':' + relPath]);
+      var m = c && c.match(/^version:\s*([0-9][0-9.]*)\s*$/m);
+      if (m && m[1] === version) first = parts[1];
+      else if (first) break;
+    }
+    if (first) result = new Date(parseInt(first, 10) * 1000).toISOString();
+  }
+  _releaseTimeCache[version] = result;
+  return result;
+}
+
 function getPreviousCurrentMdContent(lang, newVersion) {
   var relPath = CONFIG.perLangCurrent.replace('{lang}', lang);
   var headContent = git(['show', 'HEAD:' + relPath]);
@@ -245,7 +272,7 @@ function backfillMissingHistory(currentVersion) {
       var ver = wanted[w];
       var dest = path.join(dir, 'v' + ver + '.md');
       if (fs.existsSync(dest)) continue;
-      var when = new Date(parseInt(latest[ver].ct, 10) * 1000).toISOString();
+      var when = releaseTimeOf(ver) || new Date(parseInt(latest[ver].ct, 10) * 1000).toISOString();
       var body = latest[ver].content;
       body = /^date:\s*.+$/m.test(body)
         ? body.replace(/^date:\s*.+$/m, 'date: ' + when)
@@ -300,11 +327,8 @@ function autoSnapshotPrevious(newVersion) {
 
     // ถ้ายังไม่มีไฟล์ → สร้างใหม่ (ถ้ามีแล้วไม่เขียนทับ)
     if (!fs.existsSync(snapDestPath)) {
-      // sync date ใน snapshot ให้เป็น commit time ของ HEAD (หรือ NOW ถ้าไม่ได้)
-      var headCommitTime = git(['log', '-1', '--format=%ct', 'HEAD']);
-      var snapDate = headCommitTime
-        ? new Date(parseInt(headCommitTime, 10) * 1000).toISOString()
-        : NOW.toISOString();
+      // date ของ snapshot = เวลาปล่อยจริงของรุ่นที่ snapshot (commit แรกที่ตั้งรุ่นนั้น) ไม่ใช่เวลาของ HEAD
+      var snapDate = releaseTimeOf(prevVersion) || NOW.toISOString();
 
       if (/^date:\s*.+$/m.test(snapContent)) {
         snapContent = snapContent.replace(/^date:\s*.+$/m, 'date: ' + snapDate);
@@ -361,22 +385,9 @@ function syncCurrentMdDate(lang, version, isNewVersion) {
 
   var content = fs.readFileSync(fp, 'utf8');
 
-  // หา date ที่ควรใช้
-  var targetDate;
-  if (isNewVersion) {
-    targetDate = NOW.toISOString();
-  } else {
-    // v6.1: อ่าน date จากไฟล์ประวัติของ version นี้ใน releases/ (ถ้ามี)
-    var histPath = path.join(ROOT, CONFIG.perLangReleasesDir.replace('{lang}', lang), 'v' + version + '.md');
-    if (fs.existsSync(histPath)) {
-      var histParsed = parseMD(fs.readFileSync(histPath, 'utf8'), lang);
-      targetDate = histParsed.date || NOW.toISOString();
-    } else {
-      // ถ้าไม่มีไฟล์ประวัติ → ใช้ date ปัจจุบันใน current.md (ถ้ามี), ไม่งั้น NOW
-      var existingMatch = content.match(/^date:\s*(.+)$/m);
-      targetDate = existingMatch ? existingMatch[1].trim() : NOW.toISOString();
-    }
-  }
+  // เวลาปล่อยจริง = commit แรกที่ตั้งรุ่นนี้ใน git (ล็อก เปลี่ยนไม่ได้) ไม่ใช้ค่าที่พิมพ์เองหรือ NOW
+  //  รุ่นที่ยังไม่เคย commit (กำลัง build ก่อนปล่อย) ใช้ NOW ชั่วคราวเพื่อให้ build ได้ ไม่ใช่ค่าที่ถูกบันทึกถาวร
+  var targetDate = releaseTimeOf(version) || NOW.toISOString();
 
   var existingDateMatch = content.match(/^date:\s*(.+)$/m);
   var existingDate = existingDateMatch ? existingDateMatch[1].trim() : null;
@@ -403,11 +414,12 @@ function createNewVersionSnapshot(lang, version) {
   if (!fs.existsSync(srcPath)) return;
 
   var content = fs.readFileSync(srcPath, 'utf8');
-  // sync date
+  // date ของสแนปช็อต = เวลาปล่อยจริง (commit แรกที่ตั้งรุ่นนี้) ไม่ใช่ NOW; ยังไม่เคย commit ใช้ NOW ชั่วคราว
+  var snapWhen = releaseTimeOf(version) || NOW.toISOString();
   if (/^date:\s*.+$/m.test(content)) {
-    content = content.replace(/^date:\s*.+$/m, 'date: ' + NOW.toISOString());
+    content = content.replace(/^date:\s*.+$/m, 'date: ' + snapWhen);
   } else {
-    content = content.replace(/^(version:\s*.+)$/m, '$1\ndate: ' + NOW.toISOString());
+    content = content.replace(/^(version:\s*.+)$/m, '$1\ndate: ' + snapWhen);
   }
 
   fs.mkdirSync(path.dirname(destPath), { recursive: true });
@@ -688,14 +700,8 @@ console.log('');
 
 // ── STEP 6: Generate version.json (backward compat) ──────────────────────────
 console.log('📦  STEP 6: Generate version.json...');
-var currentReleaseDateISO;
-if (isNewVersion) {
-  currentReleaseDateISO = NOW.toISOString();
-} else {
-  // อ่าน date จาก current.md
-  var curParsed = readCurrentMd('en') || readCurrentMd('th');
-  currentReleaseDateISO = (curParsed && curParsed.date) ? curParsed.date : NOW.toISOString();
-}
+// เวลาเดียวกับใน current.md: commit แรกที่ตั้งรุ่นนี้ (ล็อก) ยังไม่เคย commit ใช้ NOW ชั่วคราว
+var currentReleaseDateISO = releaseTimeOf(newVersion) || NOW.toISOString();
 generateVersionJson(newVersion, currentReleaseDateISO);
 console.log('');
 

@@ -1,22 +1,14 @@
 ---
-version: 5.11.0
-date: 2026-10-17T00:00:00.000Z
-title: Fixes for Search, Contact, Report and update notices
-subtitle: Several recent fixes you may have missed, plus the update pop-up is back.
+version: 5.11.1
 notify: true
+title: Update times are now the real release time
+subtitle: Each update shows the exact time it was released, and that time can no longer change.
 ---
 
-**TL;DR** — The "new update" pop-up had stopped appearing for the last few updates, so you may have missed these fixes. The pop-up works again, and here is everything that changed.
+**TL;DR** — The time shown on an update used to be a value typed in by hand, so it could be wrong. It is now taken from the real moment the update was released, and it stays fixed after that.
 
 ### Fixed
 
-- **Update pop-up** The "new update" pop-up now appears again when there is a new version.
-- **Search filters in English** Tapping Emoji, Symbol, Collections or Fancy Text on the English Search page used to show "No results" even when there were matches. They now show the right results.
-- **Update history** Past updates are now listed from newest to oldest, and missing ones are filled in.
-- **Contact page language list** The form language menu was always empty. It now lists English and Thai.
-- **Report form in Thai** Category and page choices, error messages and the "sending" text now show in Thai on the Thai page. Two misspelled Thai error messages are corrected.
-- **Dark theme buttons** The Submit Report button, the Send via Gmail button and the version badges on the Roadmap and What's New pages are easier to read in the dark theme.
-
-### Improved
-
-- **Search filter tabs** The type filters are now plain text tabs with an underline under the selected one, matching the Home page.
+- **Real release time** The time on each update (in the update pop-up and on the What's New page) is now the actual time it was released, not a typed-in value.
+- **Time never changes afterwards** Once an update has been released, its time is locked. Editing its notes later no longer moves it.
+- **Update history times** Two recent updates in the history showed a time that was off by up to 34 minutes. They now show the real time.
