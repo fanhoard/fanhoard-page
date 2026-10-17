@@ -23,7 +23,7 @@
   transform: scale(0.97);
 }
 .button-sub.active {
-  color: var(--color-brand-text, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, #0d7360);
   background: var(--fv-surface-teal-hover, rgba(0, 150, 136, 0.08));
   border-color: var(--border-brand, var(--color-brand-primary, #0d9488));
 }
@@ -65,7 +65,7 @@
 :where(.button-content.active) {
   background: var(--fv-surface-teal-hover, rgba(0, 150, 136, 0.08));
   border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, #0d7360);
   transform: scale(0.97);
 }
 

@@ -164,8 +164,8 @@ body {
 
 #search-clear-btn:hover,
 #search-clear-btn:focus-visible {
-  background: var(--surface-hover, rgba(13, 148, 136, 0.08));
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  background: var(--surface-hover, #f4f7f6);
+  color: var(--color-brand-text, #0d7360);
 }
 
 #search-clear-btn:active {
@@ -239,8 +239,8 @@ body {
 }
 
 .filter-pill.active {
-  box-shadow: 0 0 0 1px rgba(13, 148, 136, 0.51);
-  background: var(--surface-hover, rgba(13, 148, 136, 0.08));
+  box-shadow: 0 0 0 1px var(--color-brand-primary, #0f836c);
+  background: var(--surface-accent, #f0fdf6);
   opacity: 1;
   color: var(--color-brand-text, var(--color-brand-primary, #0d9488));
   font-weight: 600;

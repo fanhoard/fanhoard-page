@@ -53,7 +53,7 @@ nav ul li button:focus-visible {
 }
 
 nav ul li button.active {
-  color:var(--color-brand-text, #0f766e);
+  color: var(--color-brand-text, #0d7360);
   background:var(--fv-surface-teal-hover, rgba(0, 150, 136, 0.08));
   border-color: var(--border-brand, #009688);
   transform: none;

@@ -176,7 +176,7 @@ section.mn {
 .button:hover, .btn:hover {
   background-color: var(--surface-hover, rgba(0,0,0,0.03));
   border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, #0d7360);
 }
 
 .button-primary, .btn-primary {
@@ -199,7 +199,7 @@ section.mn {
 
 .button-secondary:hover, .btn-secondary:hover {
   background-color: var(--surface-hover, rgba(0,0,0,0.03));
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, #0d7360);
   border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
 }
 

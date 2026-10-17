@@ -61,20 +61,24 @@
   --color-brand-primary: var(--color-teal-600);
   --color-brand-hover:   var(--color-teal-700);
   --color-brand-active:  var(--color-teal-800);
-  --color-brand-text:    var(--color-teal-600);
+  --color-brand-text:    #0d7360; /* AA >= 4.9:1 on white, accent tint and neutral hover rows */
   --color-brand-accent:  var(--color-emerald-500);
 
-  --surface-base:   var(--color-teal-50);
+  /* Surfaces are NEUTRAL (60-30-10): the brand color is an accent, never a background.
+     Page and card are white; --surface-hover is a quiet cool neutral for rows and
+     inactive controls. Brand-tinted fills exist only as --surface-accent (selected). */
+  --surface-base:   #ffffff;
   --surface-card:   #ffffff;
-  --surface-hover:  var(--color-teal-100);
-  --surface-active: #bbf7d0;
+  --surface-hover:  #f4f7f6;
+  --surface-active: #e9eeec;
+  --surface-accent: var(--color-teal-50);
 
   --text-main:      var(--color-slate-900);
   --text-muted:     var(--color-slate-700);
   --text-faint:     var(--color-slate-500);
   --text-inverse:   #ffffff;
 
-  --border-subtle:  var(--color-teal-100);
+  --border-subtle:  var(--color-slate-200);
   --border-strong:  var(--color-slate-300);
   --border-brand:   var(--color-teal-600);
 
@@ -94,7 +98,7 @@
   --fv-surface-page:       var(--surface-card);
   --fv-surface-soft:       var(--surface-hover);
   --fv-surface-hover:      var(--surface-hover);
-  --fv-surface-teal-hover: var(--color-teal-50);
+  --fv-surface-teal-hover: var(--surface-accent);
 
   --fv-text-primary:   var(--text-main);
   --fv-text-secondary: var(--text-muted);
@@ -227,6 +231,7 @@
     --surface-card:   #132621;
     --surface-hover:  #1c362d;
     --surface-active: #26473b;
+    --surface-accent: rgba(52, 211, 153, 0.14);
 
     --text-main:    var(--color-slate-50);
     --text-muted:   var(--color-slate-300);
@@ -263,6 +268,7 @@
   --surface-card:   #132621;
   --surface-hover:  #1c362d;
   --surface-active: #26473b;
+  --surface-accent: rgba(52, 211, 153, 0.14);
 
   --text-main:    var(--color-slate-50);
   --text-muted:   var(--color-slate-300);
