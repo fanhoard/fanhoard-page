@@ -4,6 +4,9 @@ import { resolve } from 'path';
 export default defineConfig({
   root: '.',
   build: {
+    // S6: ห้าม vite ยัด CSS เล็กเป็น data: URL — production CSP (style-src 'self') บล็อก data:
+    // เคสจริง: top-navigation-bar.css (1.7KB) ถูกยัดเป็น data:text/css แล้วโดนบล็อกเงียบๆ ทุกหน้า
+    assetsInlineLimit: (filePath) => (filePath.endsWith('.css') ? false : 4096),
     outDir: 'dist',
     emptyOutDir: true,
     manifest: 'manifest.json',

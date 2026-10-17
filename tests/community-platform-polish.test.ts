@@ -13,8 +13,9 @@ describe('Community & Platform Pages Polish', () => {
     expect(content).toContain('class="skip-link fv-skip-link"');
   });
 
-  it('verifies assets/lang/en.json has correct official email spelling', () => {
-    const content = fs.readFileSync(path.join(repoRoot, 'assets/lang/en.json'), 'utf8');
+  it('verifies footer template has correct official email spelling', () => {
+    // S6: หน้าติดต่อเป็นสถานะกำลังพัฒนา อีเมลหลักอยูที่ footer เพียงหนึ่ง
+    const content = fs.readFileSync(path.join(repoRoot, 'assets/template-html/footer-template.html'), 'utf8');
     expect(content).toContain('fanhoard.official@gmail.com');
     expect(content).not.toContain('fanhoard.offical@gmail.com');
   });
@@ -56,9 +57,12 @@ describe('Community & Platform Pages Polish', () => {
     expect(content).toContain("window.addEventListener('fv:langchange', refreshSelects)");
   });
 
-  it('verifies contact page script includes dynamic language change listeners', () => {
+  it('verifies contact page is a work-in-progress placeholder (S6 decision, Oct 2026)', () => {
     const content = fs.readFileSync(path.join(repoRoot, 'community/contact/index.html'), 'utf8');
-    expect(content).toContain("window.addEventListener('fv:langchange'");
-    expect(content).toContain("window.addEventListener('languageChange'");
+    // หน้าติดต่ออยู่ในสถาบันกำลังพัฒนา ไม่มีตัวเลือกติดต่ออีก
+    expect(content).toContain('data-translate="contact-other-title"');
+    expect(content).not.toContain('contact-method');
+    expect(content).not.toContain('goto-form-btn');
+    expect(content).not.toContain('docs.google.com/forms');
   });
 });

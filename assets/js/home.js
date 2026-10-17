@@ -79,14 +79,7 @@ async function copyToClipboard(text) {
   } catch { return false; }
 }
 
-// S2: ชุดองค์ประกอบกลาง (ds.css) โหลดจากสคริปต์นี้ เพื่อไม่ต้องแก้ home/index.html
-function ensureDesignSystem() {
-  if (document.getElementById('home-ds-css')) return;
-  const l = document.createElement('link');
-  l.id = 'home-ds-css'; l.rel = 'stylesheet'; l.href = '/assets/css/ds.css';
-  document.head.appendChild(l);
-}
-
+// S6: ds.css โหลดผ่าน <link> ใน HTML ของทุกหน้าแล้ว (ยกเลิกการฉีดจาก JS)
 const HOME_TAB_KEY = 'fv-home-tab';
 function readSavedTab() { try { return localStorage.getItem(HOME_TAB_KEY); } catch (_) { return null; } }
 function saveTab(id)    { try { localStorage.setItem(HOME_TAB_KEY, id); } catch (_) {} }
@@ -397,7 +390,6 @@ function renderToApp(assembled, lang) {
     ));
     return;
   }
-  ensureDesignSystem();
   const saved  = readSavedTab();
   const active = copyableTypes.some(t => t.id === saved) ? saved : copyableTypes[0].id;
 

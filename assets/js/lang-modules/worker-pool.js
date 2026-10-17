@@ -21,9 +21,11 @@
      * @param {string} workerCode  — source code ของ worker (string)
      * @param {number} poolSize    — จำนวน worker สูงสุด
      */
-    constructor(workerCode, poolSize) {
+    constructor(workerCode, poolSize, inlineFn) {
       this._code = workerCode;
       this._size = poolSize;
+      this._inline = inlineFn || null; // S6: fallback เมื่อสร้าง Worker ไม่ได้
+      this._fallback = false;         // true = ทำงานบนเธรดหลักแทน worker
       this._blobUrl = null; // shared URL สำหรับทุก worker
       
       /** @type {Worker[]} */
@@ -47,16 +49,25 @@
     _ensureReady() {
       if (this._ready) return;
       
-      // สร้าง blob URL ครั้งเดียว ใช้ร่วมกันทุก worker
-      const blob = new Blob([this._code], { type: 'application/javascript' });
-      this._blobUrl = URL.createObjectURL(blob);
-      
-      for (let i = 0; i < this._size; i++) {
-        const w = new Worker(this._blobUrl);
-        w.onmessage = (e) => this._onMessage(w, e);
-        w.onerror = (e) => this._onError(w, e);
-        this._workers.push(w);
-        this._idle.push(w);
+      try {
+        // สร้าง blob URL ครั้งเดียว ใช้ร่วมกันทุก worker
+        const blob = new Blob([this._code], { type: 'application/javascript' });
+        this._blobUrl = URL.createObjectURL(blob);
+        
+        for (let i = 0; i < this._size; i++) {
+          const w = new Worker(this._blobUrl);
+          w.onmessage = (e) => this._onMessage(w, e);
+          w.onerror = (e) => this._onError(w, e);
+          this._workers.push(w);
+          this._idle.push(w);
+        }
+      } catch (e) {
+        // S6: CSP บลอก blob worker หรือสภาวะแวกล้องไม่รองรับ
+        // → สลับไปทำงานบนเธรดหลักแทน โดยไม่ต้องอาศัย CSP
+        console.warn('[WorkerPool] Worker unavailable, using main-thread fallback:', e && e.message);
+        this._workers = [];
+        this._idle = [];
+        this._fallback = true;
       }
       
       this._ready = true;
@@ -71,6 +82,10 @@
      */
     execute(data) {
       this._ensureReady();
+      if (this._fallback) {
+        // S6: ไม่มี worker ใช้งานเท่ากับ worker โดยตรง (จาก inlineFn ที่ translator ส่งมา)
+        return Promise.resolve(this._inline ? this._inline(data) : data);
+      }
       return new Promise((resolve, reject) => {
         const job = { data, resolve, reject };
         const worker = this._idle.pop();
@@ -101,19 +116,30 @@
     
     /** @private */
     _onError(worker, e) {
-      console.error('[WorkerPool] Worker error:', e);
-      
+      // S6: ใน Chrome จริง CSP บล็อก blob worker แบบ async (constructor ไม่ throw)
+      // แต่ยิง error event ที่ worker → ต้องสลับเป็นโหมด main-thread ทันที
+      // แล้วรีเล่น job ที่ค้างให้จบบนเธรดหลัก ไม่ปล่อยให้การแปลค้างกลางคัน
+      console.warn('[WorkerPool] Worker error, switching to main-thread fallback:', (e && e.message) || e);
+      this._fallback = true;
+      try { worker.terminate && worker.terminate(); } catch (_) { /* noop */ }
+      this._workers = this._workers.filter((w) => w !== worker);
+      this._idle = this._idle.filter((w) => w !== worker);
+
+      // จบ job ของ worker ที่พังด้วยเส้นทาง inline
       const job = this._jobMap.get(worker);
-      if (job) {
-        this._jobMap.delete(worker);
-        job.reject(e);
-      }
-      
-      // Return worker สู่ idle และดึง job ถัดไป
-      this._idle.push(worker);
-      const next = this._queue.shift();
-      if (next && this._idle.length) {
-        this._dispatch(this._idle.pop(), next);
+      this._jobMap.delete(worker);
+      this._runInline(job);
+      // คิวที่เหลือทั้งหมดจบด้วย inline เช่นกัน
+      while (this._queue.length) this._runInline(this._queue.shift());
+    }
+
+    /** @private รัน job เดียวบนเธรดหลัก (fallback) */
+    _runInline(job) {
+      if (!job) return;
+      try {
+        job.resolve(this._inline ? this._inline(job.data) : job.data);
+      } catch (err) {
+        job.reject(err);
       }
     }
     

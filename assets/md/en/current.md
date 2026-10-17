@@ -1,15 +1,21 @@
 ---
-version: 5.11.3
-date: 2026-10-17T21:43:08.403Z
+version: 5.12.0
+date: 2026-10-17T23:14:45.691Z
 notify: true
-title: Update history is complete again, with real release times
-subtitle: Versions that were missing from the update history are back, and every release shows the exact time it was released.
+title: Language switching now works in every browser, and every page shares one design system
+subtitle: The red error box when changing language is gone for good, and all 14 pages load the same design system styles.
 ---
 
-**TL;DR** — The update history stopped recording new versions after 5.8.0, and some releases did not show a release time. Both problems are fixed, and the system now records the release time automatically so they cannot happen again.
+**TL;DR** — On some browsers, the site's security policy blocked the part of the site that translates the page, so changing the language showed a red error box and parts of the page stayed untranslated. That whole path is rebuilt and tested in a real browser, and every page now loads the design system the same way.
 
 ### Fixed
 
-- **Missing update history** Versions from 5.9.0 onwards were missing from the update history. They are all back.
-- **No release time shown** The update list and each version now show the exact time that version was released. The time is recorded automatically when a version is released and can never change afterwards.
-- **Two wrong times corrected** The times shown for 5.8.0 and 5.8.1 were the time of a rebuild, not the real release time. They now show the real times.
+- **Red error box when changing language** The security policy of the site blocks small helper threads, and on some browsers the translator did not notice in time, showing a red error box instead of switching the language. The translator now notices both immediately and mid-way through, and finishes the translation on the main thread instead.
+- **Half-translated pages** If the translator stopped mid-way, the sections still waiting could stay in the old language. Every pending section now completes even after such a failure.
+- **Silently blocked stylesheet on every page** One small stylesheet was squeezed into the page in a way the security policy blocks, so it never loaded anywhere. All stylesheets now load as proper files.
+- **Missing logos in Discover** The AI tool cards (OpenAI and Anthropic) on the Discover page had no logos. The logos are now included and load correctly.
+
+### Changed
+
+- **One design system for all pages** All 14 pages now load the design system stylesheet the same way, instead of a mix of page-specific methods.
+- **Contact page** The contact page now shows a single status card saying the contact form is under development and will arrive in a future release.

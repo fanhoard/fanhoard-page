@@ -49,55 +49,63 @@
    *   @br          — line break
    *   @strong...@  — bold text
    */
-  const WORKER_CODE = `
-    // สร้าง regex constants ครั้งเดียวต่อ worker instance
-    const HTML_TAG_RE   = /(<\\/?[^>]+>)/;
-    const MARKER_RE_SRC =
-      '(@lsvg(?::([^@]+))?@)' +
-      '|(@svg(?::([^@]+))?@)' +
-      '|(@slot:([^@]+)@)'     +
-      '|(@a(.*?)@)'           +
-      '|(@br)'                +
-      '|(@strong(.*?)@)';
+  // S6: ย้าย splitMarkersAndHtml ออกจาก WORKER_CODE มาอยู่บนเธรดหลัก
+  // เพื่อให้ inline fallback (เมื่อ CSP บล็อก blob worker) ใช้ logic เดียวกัน
+  // โดย WORKER_CODE ฉีดฟังก์ชันเดียวกันกลับเข้าไปผ่าน toString()
 
-    function splitMarkersAndHtml(str) {
-      const htmlParts   = str.split(HTML_TAG_RE);
-      const parts       = [];
-      const markerRegex = new RegExp(MARKER_RE_SRC, 'g');
+// สร้าง regex constants ครั้งเดียวต่อ worker instance
+const HTML_TAG_RE   = /(<\/?[^>]+>)/;
+const MARKER_RE_SRC =
+  '(@lsvg(?::([^@]+))?@)' +
+  '|(@svg(?::([^@]+))?@)' +
+  '|(@slot:([^@]+)@)'     +
+  '|(@a(.*?)@)'           +
+  '|(@br)'                +
+  '|(@strong(.*?)@)';
 
-      for (const segment of htmlParts) {
-        if (!segment) continue;
+function splitMarkersAndHtml(str) {
+  const htmlParts   = str.split(HTML_TAG_RE);
+  const parts       = [];
+  const markerRegex = new RegExp(MARKER_RE_SRC, 'g');
 
-        // HTML tag segment (จาก split capture group)
-        if (/^<\\/?[^>]+>$/.test(segment)) {
-          parts.push({ type: 'html', html: segment });
-          continue;
-        }
+  for (const segment of htmlParts) {
+    if (!segment) continue;
 
-        // Text segment — scan สำหรับ markers
-        let lastIndex = 0;
-        let m;
-        markerRegex.lastIndex = 0; // reset สำหรับ segment ใหม่
-
-        while ((m = markerRegex.exec(segment)) !== null) {
-          if (m.index > lastIndex)
-            parts.push({ type: 'text', text: segment.slice(lastIndex, m.index) });
-
-          if      (m[1])  parts.push({ type: 'lsvg',   id:        m[2] || null });
-          else if (m[3])  parts.push({ type: 'svg',    id:        m[4] || null });
-          else if (m[5])  parts.push({ type: 'slot',   name:      m[6] || null });
-          else if (m[7])  parts.push({ type: 'a',      translate: (m[8] || '') !== '', text: m[8] || '' });
-          else if (m[9])  parts.push({ type: 'br'  });
-          else if (m[10]) parts.push({ type: 'strong', text:      m[11] || '' });
-
-          lastIndex = markerRegex.lastIndex;
-        }
-
-        if (lastIndex < segment.length)
-          parts.push({ type: 'text', text: segment.slice(lastIndex) });
-      }
-      return parts;
+    // HTML tag segment (จาก split capture group)
+    if (/^<\/?[^>]+>$/.test(segment)) {
+      parts.push({ type: 'html', html: segment });
+      continue;
     }
+
+    // Text segment — scan สำหรับ markers
+    let lastIndex = 0;
+    let m;
+    markerRegex.lastIndex = 0; // reset สำหรับ segment ใหม่
+
+    while ((m = markerRegex.exec(segment)) !== null) {
+      if (m.index > lastIndex)
+        parts.push({ type: 'text', text: segment.slice(lastIndex, m.index) });
+
+      if      (m[1])  parts.push({ type: 'lsvg',   id:        m[2] || null });
+      else if (m[3])  parts.push({ type: 'svg',    id:        m[4] || null });
+      else if (m[5])  parts.push({ type: 'slot',   name:      m[6] || null });
+      else if (m[7])  parts.push({ type: 'a',      translate: (m[8] || '') !== '', text: m[8] || '' });
+      else if (m[9])  parts.push({ type: 'br'  });
+      else if (m[10]) parts.push({ type: 'strong', text:      m[11] || '' });
+
+      lastIndex = markerRegex.lastIndex;
+    }
+
+    if (lastIndex < segment.length)
+      parts.push({ type: 'text', text: segment.slice(lastIndex) });
+  }
+  return parts;
+}
+  const WORKER_CODE = `
+    // S6: ฉีด logic จากเธรดหลัก (single source of truth) แทนการเขียนซ้ำใน string
+    const HTML_TAG_RE   = ${HTML_TAG_RE.toString()};
+    const MARKER_RE_SRC = ${JSON.stringify(MARKER_RE_SRC)};
+    const splitMarkersAndHtml = ${splitMarkersAndHtml.toString()};
 
     self.onmessage = function(e) {
       const { nodes, langData, batchIdx } = e.data;
@@ -121,7 +129,19 @@
      */
     initPool() {
       const { WorkerPool, State } = M;
-      State.workerPool = new WorkerPool(WORKER_CODE, State.maxWorker);
+      // S6: inline fallback — logic เดียวกับ WORKER_CODE แต่รันบนเธรดหลัก
+      // ใช้เมื่อ CSP บลอก blob worker (กรณีผู้ใช้เห็นกลางก่อนตัดกรรมดาทุกครั้ง)
+      const inlineFn = (data) => {
+        const { nodes, langData, batchIdx } = data;
+        return {
+          batchIdx,
+          result: nodes.map(({ key }, idx) => ({
+            idx,
+            parts: splitMarkersAndHtml(langData[key] || ''),
+          })),
+        };
+      };
+      State.workerPool = new WorkerPool(WORKER_CODE, State.maxWorker, inlineFn);
     },
 
     // ── Translation ───────────────────────────────────────────────────────────
