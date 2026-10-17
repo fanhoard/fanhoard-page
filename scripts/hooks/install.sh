@@ -1,7 +1,7 @@
 #!/bin/bash
 # scripts/hooks/install.sh — ติดตั้ง git hooks สำหรับ 4-layer version control
 #
-# v2: เรียกอัตโนมัติผ่าน npm "prepare" script (ดู package.json) ตอน npm install
+# v3: เรียกอัตโนมัติผ่าน npm "prepare" script (ดู package.json) ตอน npm install
 #     ผู้ใช้ไม่ต้องจำมารัน `npm run hooks:install` เองอีกต่อไป — เดิม Layer 1
 #     (pre-commit) และ Layer 2 (pre-push) ไม่เคยทำงานเลยถ้าไม่มีใครรันคำสั่งนี้
 #     ด้วยมือ ทำให้ "ระบบบล็อก 4 ชั้น" ทำงานจริงแค่ครึ่งเดียว (Layer 3/4 เท่านั้น)
@@ -36,16 +36,10 @@ fi
 
 cd "$REPO_ROOT"
 
-# สร้าง .githooks directory
-mkdir -p .githooks
-
-# copy hooks
-cp scripts/hooks/pre-commit .githooks/pre-commit
-cp scripts/hooks/pre-push .githooks/pre-push
-
-# ตั้ง executable
-chmod +x .githooks/pre-commit
-chmod +x .githooks/pre-push
+# v3: .githooks/ คือแหล่งความจริงเดียว (track ใน git) — ไม่คัดลอกจากเทมเพลตอีก
+#     เดิมคัดลอกจาก scripts/hooks/* ทำให้ npm ci ดาวน์เกรด hook ที่อัปเดตแล้วเงียบๆ
+#     (เกิดจริง: hook ฉบับประทับเวลา Ledger ถูกเขียนทับด้วยเทมเพลตเก่า)
+chmod +x .githooks/pre-commit .githooks/pre-push
 
 # บอก git ให้ใช้ hooks directory นี้
 git config core.hooksPath .githooks

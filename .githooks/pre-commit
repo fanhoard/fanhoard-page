@@ -25,10 +25,16 @@ if ! command -v node &> /dev/null; then
   exit 1
 fi
 
+# ประทับ Released At ของรุ่นใหม่ (ครั้งเดียว ทุกภาษาเวลาเดียวกัน) ก่อนตรวจ
+# ผู้พัฒนาห้ามพิมพ์ date: เอง hook เป็นผู้ประทับเวลาจริง (docs/adr/0001-release-ledger.md)
+STAMP_OUT=$(node scripts/stamp-release.js "$REPO_ROOT" 2>&1) || { echo "$STAMP_OUT"; echo "❌ stamp-release ล้ม — commit ถูก block"; exit 1; }
+echo "$STAMP_OUT"
+echo "$STAMP_OUT" | grep -q "ประทับ" && export FANHOARD_STAMPED=1
+
 # รัน validate-release.js ใน pre-commit mode
 # --staged: ตรวไฟล์ที่ staged
 # (validate-release.js บังคับ version bump อัตโนมัติใน staged mode ยกเว้นมี bypass)
-node scripts/validate-release.js --staged
+FANHOARD_STAMPED=$FANHOARD_STAMPED node scripts/validate-release.js --staged
 
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then

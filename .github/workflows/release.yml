@@ -1,12 +1,15 @@
 # .github/workflows/release.yml — Layer 3: CI validation + build + deploy
 # 4-layer version control system for FanHoard
 #
-# Workflow:
+# Workflow (Release Ledger — docs/adr/0001-release-ledger.md):
 #   1. Validate (validate-release.js --ci)
-#   2. Build (update-version.js — ไม่ต้องส่ง APP_VERSION แล้ว)
-#   3. Deploy to Cloudflare Pages (เฉพาะ main branch)
+#   2. Build Ledger (build-ledger.js — สร้าง manifest จาก Ledger ใน repo)
+#      + Cache-bust (update-version.js)
+#   3. Cloudflare Pages deploy และสร้าง artifact ด้วย npm run build เอง
+#      (build-ledger รันใน build ทุกครั้ง — manifest ถูกต้องเสมอโดยไม่ต้อง commit กลับ)
 #
 # ถ้า validate ไม่ผ่าน → deploy ไม่ทำงาน
+# v7: ยกเลิก Layer 3.4 commit-back (ต้นเหตุทำให้ manifest กับ Ledger ไม่ตรงกันและ deploy ค้าง [skip ci])
 
 name: Release
 
@@ -44,7 +47,9 @@ jobs:
       - name: Layer 3.2 — Build (update-version.js)
         run: |
           echo "📦  Layer 3.2: Building release artifacts..."
-          # v5.1: ไม่ต้องส่ง APP_VERSION แล้ว — อ่านจาก current.md โดยตรง
+          # v7: สร้าง manifest จาก Ledger (releases/v*.md) แล้ว cache-bust
+          #     Released At ถูกประทับโดย pre-commit hook แล้ว ที่นี่ไม่แตะเวลา
+          node scripts/build-ledger.js
           node scripts/update-version.js
           echo "✅  Layer 3.2 PASSED"
 
@@ -65,23 +70,6 @@ jobs:
           fi
           echo "   Version: $VERSION"
           echo "✅  Layer 3.3 PASSED"
-
-      - name: Layer 3.4 — Commit build artifacts
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
-          echo "📝  Layer 3.4: Committing build artifacts..."
-          git config user.name "FanHoard CI"
-          git config user.email "ci@fanhoard.local"
-          # v6.2: commit path ให้ตรงกับโครงสร้าง per-language releases/ (แทน path เก่าที่ไม่มีแล้ว)
-          git add assets/md/en/releases/ assets/md/th/releases/ assets/json/version.json assets/md/en/current.md assets/md/th/current.md
-          if git diff --staged --quiet; then
-            echo "   ไม่มี artifacts ใหม่ต้อง commit"
-          else
-            git commit -m "ci: build artifacts for v$(node -e "console.log(require('./assets/json/version.json').version)") [skip ci]"
-            git push
-            echo "   Pushed build artifacts"
-          fi
-          echo "✅  Layer 3.4 PASSED"
 
 # ── Layer 4 (Deploy to Cloudflare Pages) — ถูกถอดออก ─────────────────────────
 # Production deploy ทำผ่าน Cloudflare Pages Git Integration ของ project

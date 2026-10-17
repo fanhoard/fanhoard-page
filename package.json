@@ -4,7 +4,7 @@
   "private": true,
   "description": "FanHoard Emoji & Symbols Hub — static build system",
   "scripts": {
-    "build": "vite build && tsx src/build/ssg.ts",
+    "build": "node scripts/build-ledger.js && vite build && tsx src/build/ssg.ts",
     "build:dry": "tsx src/build/ssg.ts --dry-run",
     "build:verbose": "tsx src/build/ssg.ts --verbose",
     "type-check": "tsc --noEmit",
@@ -23,7 +23,8 @@
     "generate-sitemap": "tsx src/build/sitemap.ts",
     "postbuild": "npm run generate-sitemap && node -e \"const fs=require('fs'); const src='sitemap.xml'; const dest='dist/sitemap.xml'; try{ fs.mkdirSync('dist',{ recursive:true }); fs.copyFileSync(src, dest); console.log('sitemap copied to', dest); } catch(e) { console.warn('sitemap copy failed:', e && e.message ? e.message : e); }\"",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "ledger": "node scripts/build-ledger.js"
   },
   "dependencies": {
     "cheerio": "^1.0.0",
