@@ -88,6 +88,14 @@ function compareSemver(a, b) {
 }
 
 // ── Markdown parser (single-language) ────────────────────────────────────────
+function classifySection(headingText) {
+  var h = (headingText || '').toLowerCase();
+  if (h.indexOf('new') >= 0 || h.indexOf('ใหม่') >= 0) return 'new';
+  if (h.indexOf('fix') >= 0 || h.indexOf('แก้') >= 0 || h.indexOf('reliab') >= 0 || h.indexOf('ความเสถียร') >= 0) return 'fixed';
+  if (h.indexOf('remove') >= 0 || h.indexOf('ลบ') >= 0) return 'removed';
+  return 'improved';
+}
+
 function parseMD(mdText, lang) {
   var result = { version:'', date:null, title:null, subtitle:null, notify:true, sections:[] };
   try {
@@ -109,7 +117,7 @@ function parseMD(mdText, lang) {
     for (var i = 0; i < lines.length; i++) {
       var line = lines[i];
       var hm = line.match(/^###\s+(New|Improved|Fixed|Removed)\s*$/i);
-      if (hm) { if(cs) result.sections.push(cs); cs={type:hm[1].toLowerCase(),items:[]}; ci=null; continue; }
+      if (hm) { if(cs) result.sections.push(cs); cs={type:classifySection(hm[1].trim()),items:[]}; ci=null; continue; }
       if (line.match(/^\s*-\s+\*\*/)) { if(ci&&cs) cs.items.push(ci); ci=parseItemLine(line,lang); continue; }
       if (ci && line.trim() && !line.match(/^---/) && !line.match(/^###/)) {
         if (!ci.desc) { ci.desc = {}; ci.desc[lang||'en'] = ''; }
@@ -171,11 +179,9 @@ function scanHistoryFiles(lang) {
     }
   }
 
-  // เรียงจากใหม่ → เก่า ตาม date (fallback semver)
-  entries.sort(function(a, b) {
-    if (a.date && b.date) return b.date.localeCompare(a.date);
-    return compareSemver(b.version, a.version);
-  });
+  // เรียงจากใหม่ → เก่า ตามเวอร์ชัน (semver) เท่านั้น
+  // เดิมเรียงตาม date แต่ date ของไฟล์ประวัติเคยผิด/ตั้งมือ ทำให้รุ่นเก่าขึ้นหน้ารุ่นใหม่
+  entries.sort(function(a, b) { return compareSemver(b.version, a.version); });
 
   return entries;
 }
@@ -206,6 +212,51 @@ function getPreviousCurrentMdContent(lang, newVersion) {
   var hashes = log ? log.split('\n').filter(Boolean) : [];
   if (hashes.length < 2) return null; // ไม่มีประวัติก่อนหน้า (เป็น release แรก)
   return git(['show', hashes[1] + ':' + relPath]);
+}
+
+// ── BACKFILL: กู้ทุกรุ่นที่ยังไม่มีไฟล์ประวัติ จากประวัติ git ของ current.md ──────
+//  ปัญหาเดิม: AUTO-SNAPSHOT บันทึกได้ทีละ "รุ่นก่อนหน้า" รุ่นเดียวต่อการรัน ถ้ารุ่นถูกปล่อย
+//  หลายรุ่นระหว่างการรัน (เช่นปล่อยบน develop ที่ CI ไม่รัน) รุ่นตรงกลางจะหายถาวร
+//  วิธีแก้: ย้อนดูทุก commit ที่แก้ current.md หา MAX_HISTORY รุ่นล่าสุดก่อนรุ่นปัจจุบัน ที่ยังไม่มีไฟล์
+//  แล้วสร้างจากเนื้อหาของ commit ที่ตั้งรุ่นนั้นล่าสุด ใช้ "วันที่ commit ของรุ่นนั้นเอง"
+//  (ไม่ใช่เวลา HEAD) ปลอดภัยต่อการรันซ้ำ: ไม่เขียนทับไฟล์ที่มีอยู่
+function backfillMissingHistory(currentVersion) {
+  var created = 0;
+  for (var i = 0; i < LANGS.length; i++) {
+    var lang = LANGS[i];
+    var relPath = CONFIG.perLangCurrent.replace('{lang}', lang);
+    var dir = path.join(ROOT, CONFIG.perLangReleasesDir.replace('{lang}', lang));
+    var log = git(['log', '--format=%H %ct', '--', relPath]);
+    var rows = log ? log.split('\n').filter(Boolean) : [];
+    var latest = {};   // version -> {content, ct}  (commit ล่าสุดที่ตั้งรุ่นนั้น; log เรียงใหม่ → เก่า)
+    for (var r = 0; r < rows.length; r++) {
+      var parts = rows[r].split(' ');
+      var content = git(['show', parts[0] + ':' + relPath]);
+      var m = content && content.match(/^version:\s*([0-9][0-9.]*)\s*$/m);
+      if (!m || latest[m[1]]) continue;
+      latest[m[1]] = { content: content, ct: parts[1] };
+    }
+    // เก็บเฉพาะ MAX_HISTORY รุ่นล่าสุดก่อนรุ่นปัจจุบัน (เท่ากับที่ index.json แสดงได้จริง)
+    var wanted = Object.keys(latest)
+      .filter(function(v) { return v !== currentVersion && compareSemver(v, currentVersion) < 0; })
+      .sort(function(x, y) { return compareSemver(y, x); })
+      .slice(0, MAX_HISTORY);
+    for (var w = 0; w < wanted.length; w++) {
+      var ver = wanted[w];
+      var dest = path.join(dir, 'v' + ver + '.md');
+      if (fs.existsSync(dest)) continue;
+      var when = new Date(parseInt(latest[ver].ct, 10) * 1000).toISOString();
+      var body = latest[ver].content;
+      body = /^date:\s*.+$/m.test(body)
+        ? body.replace(/^date:\s*.+$/m, 'date: ' + when)
+        : body.replace(/^(version:\s*.+)$/m, '$1\ndate: ' + when);
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(dest, body, 'utf8');
+      created++;
+      console.log('♻️   BACKFILL ' + CONFIG.perLangReleasesDir.replace('{lang}', lang) + '/v' + ver + '.md (' + when.slice(0, 10) + ')');
+    }
+  }
+  console.log(created ? '♻️   BACKFILL: กู้ ' + created + ' ไฟล์' : 'ℹ️  BACKFILL: ไม่มีรุ่นที่ขาด');
 }
 
 // ── v6.0: AUTO-SNAPSHOT previous version ─────────────────────────────────────
@@ -413,7 +464,8 @@ var DYNAMIC_LOADERS = [
   'assets/js/nav-core.js',
   'assets/js/ure/ure.js',
   'assets/js/popup.js',
-  'assets/js/search-ui.js',
+  'assets/js/search-system/search.js',
+  'assets/js/loading-system/fvl.js',
   'assets/js/language.js',
   'assets/js/nav-core-modules/loading.js',
 ];
@@ -605,6 +657,8 @@ if (isNewVersion) {
 } else {
   console.log('ℹ️  Skip — version เดิม');
 }
+// BACKFILL ทำเสมอ (แม้เป็นรุ่นเดิม): ช่องว่างของประวัติเกิดได้ทุกเมื่อ และสคริปต์ไม่เขียนทับไฟล์ที่มีอยู่
+backfillMissingHistory(newVersion);
 console.log('');
 
 // ── STEP 3: Sync date in current.md ──────────────────────────────────────────

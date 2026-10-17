@@ -1,14 +1,13 @@
 ---
-version: 3.0.3
-date: 2026-09-25T05:13:54.496Z
-title: Report form was blocked by its own security policy
-subtitle: The site's content security policy only allowed the report server's old address, so browsers silently blocked every submission. The policy now points at the live report server.
-notify: true
+version: 3.0.4
+title: Update history is sorted correctly
+subtitle: Past updates are now listed newest first by version number, and missing entries can be rebuilt.
+notify: false
 ---
 
-**TL;DR** — The site's security header still whitelisted the report server's old address, so real browsers quietly blocked the report form from sending anything. The header now matches the report server actually in use, and submissions go through.
+**TL;DR** — The list of past updates is now ordered by version number, and the release tool can rebuild entries that were never saved.
 
 ### Fixed
 
-- **Security policy now allows the report server**
-  The Content-Security-Policy header whitelisted a retired report-server domain, so browsers blocked the form's request to the current server before it was ever sent. The whitelisted address now matches the report server the site actually uses, and report submissions complete successfully.
+- **Update history order** Past updates are listed by version number, newest first, instead of by a date that could be wrong.
+- **Missing past updates** The release tool can now rebuild entries that were never saved, using the project's own change history.
