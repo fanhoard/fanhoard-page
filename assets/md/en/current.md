@@ -1,21 +1,14 @@
 ---
-version: 5.8.0
+version: 5.8.1
 date: 2026-10-17T00:00:00.000Z
-title: A calmer home page with tabs
-subtitle: The home page now shows one type at a time, with a tab bar to switch between them.
-notify: true
+title: Update history is sorted correctly
+subtitle: Past updates now appear newest first, and missing entries can be restored.
+notify: false
 ---
 
-**TL;DR** — The home page used to be one very long list. It now has a tab bar at the top, so you pick Emoji, Symbols or Fancy Text and see just that one.
+**TL;DR** — The list of past updates could show an older update above a newer one, and many recent updates were missing. The release tool now sorts by version number and can rebuild missing entries.
 
-### New
+### Fixed
 
-- **Tabs on the home page** Tap Emoji, Symbols or Fancy Text to switch. The app remembers the tab you used last and opens it next time. Arrow keys move between tabs.
-
-### Improved
-
-- **Shorter home page** Only one type is shown at a time, so the page is about 40% shorter and easier to scroll.
-- **Cleaner "View all" button** It is now a solid black button that matches the rest of the app, and it stays readable in both light and dark themes.
-- **Simpler tab style** The selected tab is bold with an underline, and the others are quiet grey text.
-
-Tapping a card to copy it works exactly as before.
+- **Update history order** Past updates are now listed by version number, newest first, instead of by a date that was sometimes wrong.
+- **Missing past updates** The release tool can now rebuild entries that were never saved, using the project's own change history.
