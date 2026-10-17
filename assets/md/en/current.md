@@ -1,14 +1,15 @@
 ---
-version: 5.5.0
+version: 5.6.0
 date: 2026-10-17T00:00:00.000Z
-title: Report form and contact buttons get rounder shapes
-subtitle: The Report an Issue form and the Contact page buttons now use pill and rounded shapes.
+title: Pop-ups and feed cards get softer, rounder shapes
+subtitle: Dialogs, sheets, drawers, toasts and discover cards now use larger rounded corners.
 notify: true
 ---
 
-**TL;DR** — The Report an Issue form and the Contact buttons are now softer: dropdowns, text fields and buttons are pills, and the larger text boxes have rounded corners.
+**TL;DR** — Pop-up windows and the cards in your feed now have larger, softer corners, and the small buttons inside pop-ups are pills.
 
 ### Changed
 
-- **Report form fields** — Dropdowns and single-line fields on the Report an Issue page are now pill-shaped, and the larger description boxes use soft rounded corners so longer text stays comfortable to read.
-- **Buttons** — The Send Report button and the action buttons on the Contact page are now pills.
+- **Pop-ups** — Dialogs, toasts and popovers use larger rounded corners. Bottom sheets and side drawers use the roundest corners, and their close and action buttons are now pills.
+- **Feed cards** — Cards in the discover feed and their images use larger rounded corners, and the image corners match the card so nothing pokes out.
+- **Unchanged** — The navigation bar keeps its exact position and behavior, and full-screen pop-ups still fill the whole screen.
