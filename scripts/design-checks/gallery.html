@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>FanHoard DS Gallery (internal)</title>
+<link rel="stylesheet" href="/__css/tokens.css">
+<link rel="stylesheet" href="/__css/ds.css">
+<style>
+  /* เฉพาะหน้าตัวอย่างนี้: ระยะเรียงส่วนต่าง ๆ ไม่ใช่ส่วนของ ds.css */
+  body { margin: 0; background: var(--surface-base); color: var(--text-main); font-family: var(--font-sans); }
+  main { max-width: 560px; margin: 0 auto; padding: var(--space-4); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+  section > h2 { margin: 0 0 var(--space-3); font-size: var(--ds-text-caption); font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: .04em; }
+  .stack { display: grid; gap: var(--space-3); }
+  .inline { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+</style>
+</head>
+<body>
+<main>
+  <section id="appbar"><h2>Appbar + Pagehead</h2>
+    <div class="ds-card ds-card--flush">
+      <div class="ds-appbar"><button class="ds-icon-btn" aria-label="กลับ"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><h1 class="ds-appbar__title">ตั้งค่า Settings</h1><button class="ds-icon-btn" aria-label="เมนู"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></div>
+    </div>
+    <p class="ds-pagehead" style="margin-top:var(--space-4)">คลังอีโมจิและสัญลักษณ์</p>
+  </section>
+
+  <section id="buttons"><h2>Buttons</h2>
+    <div class="inline">
+      <button class="ds-btn ds-btn--primary">บันทึก Save</button>
+      <button class="ds-btn ds-btn--solid">ติดตาม Follow</button>
+      <button class="ds-btn ds-btn--secondary">ยกเลิก Cancel</button>
+      <button class="ds-btn ds-btn--text">ข้าม</button>
+      <button class="ds-btn ds-btn--primary" disabled>ปิดใช้งาน</button>
+      <button class="ds-icon-btn" aria-label="ถูกใจ"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg></button>
+    </div>
+  </section>
+
+  <section id="pills"><h2>Pills (inline, scrollable)</h2>
+    <div class="ds-pills" role="tablist" aria-label="หมวด">
+      <button class="ds-pill" role="tab" aria-selected="true">ทั้งหมด</button>
+      <button class="ds-pill" role="tab" aria-selected="false">😀 อีโมจิ</button>
+      <button class="ds-pill" role="tab" aria-selected="false">✨ สัญลักษณ์</button>
+      <button class="ds-pill" role="tab" aria-selected="false">🔤 ข้อความแฟนซี</button>
+      <button class="ds-pill" role="tab" aria-selected="false">ตัวอักษรพิเศษที่ชื่อยาวมากเป็นพิเศษ</button>
+      <button class="ds-pill" role="tab" aria-selected="false">Kaomoji</button>
+    </div>
+  </section>
+
+  <section id="field"><h2>Search field</h2>
+    <input class="ds-field" type="search" placeholder="ค้นหาอีโมจิ Search emoji" aria-label="ค้นหา">
+  </section>
+
+  <section id="card"><h2>Card</h2>
+    <div class="ds-card">
+      <h3 class="ds-card__title">อัปเดตใหม่ What's new</h3>
+      <p class="ds-card__text">เพิ่มหมวดสัญลักษณ์ใหม่และปรับปรุงการค้นหาให้เร็วขึ้น ข้อความภาษาไทยที่ยาวขึ้นต้องขึ้นบรรทัดใหม่ได้โดยไม่ล้นกรอบและอ่านง่ายทุกขนาดจอ</p>
+    </div>
+  </section>
+
+  <section id="rows"><h2>List rows in one card</h2>
+    <div class="ds-card ds-card--flush">
+      <ul class="ds-list">
+        <li><a class="ds-row" href="#rows"><span class="ds-row__icon">🌐</span><span class="ds-row__body"><span class="ds-row__title">ภาษา Language</span><span class="ds-row__sub">ไทย</span></span><span class="ds-row__trail"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span></a></li>
+        <li><a class="ds-row" href="#rows"><span class="ds-row__icon">🌙</span><span class="ds-row__body"><span class="ds-row__title">ธีม Appearance</span><span class="ds-row__sub">ตามระบบ</span></span><span class="ds-row__trail"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span></a></li>
+        <li><a class="ds-row" href="#rows"><span class="ds-row__icon">🔔</span><span class="ds-row__body"><span class="ds-row__title">การแจ้งเตือนเกี่ยวกับการอัปเดตและประกาศสำคัญของแพลตฟอร์มทั้งหมดที่ส่งถึงคุณ</span><span class="ds-row__sub">ข้อความยาวต้องไม่ดันปุ่มท้ายแถวออกนอกจอ</span></span><span class="ds-row__trail"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span></a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="empty"><h2>Empty state</h2>
+    <div class="ds-card"><div class="ds-empty"><span class="ds-empty__glyph">🔍</span><h3 class="ds-empty__title">ไม่พบผลลัพธ์</h3><p class="ds-empty__text">ลองใช้คำอื่น หรือเลือกหมวดอื่น No results found.</p></div></div>
+  </section>
+
+  <section id="sheet-trigger"><h2>Bottom sheet</h2>
+    <button class="ds-btn ds-btn--secondary" id="open-sheet" aria-haspopup="dialog">เปิดแผ่นล่าง Open sheet</button>
+  </section>
+</main>
+
+<div class="ds-sheet-backdrop" id="sheet-bd" hidden></div>
+<div class="ds-sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden>
+  <div class="ds-sheet__grip"></div>
+  <div class="ds-sheet__head"><h3 class="ds-sheet__title" id="sheet-title">เลือกภาษา Language</h3><button class="ds-sheet__close" id="close-sheet" aria-label="ปิด"><svg class="ds-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <ul class="ds-list">
+    <li><button class="ds-row" type="button"><span class="ds-row__body"><span class="ds-row__title">ไทย</span></span></button></li>
+    <li><button class="ds-row" type="button"><span class="ds-row__body"><span class="ds-row__title">English</span></span></button></li>
+  </ul>
+</div>
+<script>
+  // base.css ซ่อน body (opacity:0) จนกว่าสคริปต์ของหน้าจริงใส่ is-loaded หน้าตัวอย่างไม่มีสคริปต์นั้นจึงใส่เอง
+  document.body.classList.add('is-loaded');
+  // เฉพาะหน้าตัวอย่าง: เปิด/ปิดแผ่นล่างด้วยปุ่มและ Escape (ล็อกการเลื่อนของ body ขณะเปิด)
+  const sh=document.getElementById('sheet'), bd=document.getElementById('sheet-bd'), op=document.getElementById('open-sheet'), cl=document.getElementById('close-sheet');
+  function show(v){ sh.hidden=bd.hidden=!v; document.body.style.overflow=v?'hidden':''; (v?cl:op).focus(); }
+  op.addEventListener('click',()=>show(true)); cl.addEventListener('click',()=>show(false)); bd.addEventListener('click',()=>show(false));
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!sh.hidden) show(false); });
+</script>
+</body>
+</html>

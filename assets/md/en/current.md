@@ -1,13 +1,21 @@
 ---
-version: 5.7.1
+version: 5.8.0
 date: 2026-10-17T00:00:00.000Z
-title: Update pop-ups are readable in the dark theme
-subtitle: The update notification now follows the dark theme instead of staying white.
+title: A calmer home page with tabs
+subtitle: The home page now shows one type at a time, with a tab bar to switch between them.
 notify: true
 ---
 
-**TL;DR** — In the dark theme, pop-ups such as the update notification had a white background with light text, which made them hard to read. They now use the dark surface.
+**TL;DR** — The home page used to be one very long list. It now has a tab bar at the top, so you pick Emoji, Symbols or Fancy Text and see just that one.
 
-### Fixed
+### New
 
-- Pop-ups (including the update notification) kept a white background in the dark theme while their text turned light, so the text was almost invisible. The background now follows the theme. The light theme looks exactly the same as before.
+- **Tabs on the home page** Tap Emoji, Symbols or Fancy Text to switch. The app remembers the tab you used last and opens it next time. Arrow keys move between tabs.
+
+### Improved
+
+- **Shorter home page** Only one type is shown at a time, so the page is about 40% shorter and easier to scroll.
+- **Cleaner "View all" button** It is now a solid black button that matches the rest of the app, and it stays readable in both light and dark themes.
+- **Simpler tab style** The selected tab is bold with an underline, and the others are quiet grey text.
+
+Tapping a card to copy it works exactly as before.

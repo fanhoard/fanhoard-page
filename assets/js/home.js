@@ -79,6 +79,18 @@ async function copyToClipboard(text) {
   } catch { return false; }
 }
 
+// S2: ชุดองค์ประกอบกลาง (ds.css) โหลดจากสคริปต์นี้ เพื่อไม่ต้องแก้ home/index.html
+function ensureDesignSystem() {
+  if (document.getElementById('home-ds-css')) return;
+  const l = document.createElement('link');
+  l.id = 'home-ds-css'; l.rel = 'stylesheet'; l.href = '/assets/css/ds.css';
+  document.head.appendChild(l);
+}
+
+const HOME_TAB_KEY = 'fv-home-tab';
+function readSavedTab() { try { return localStorage.getItem(HOME_TAB_KEY); } catch (_) { return null; } }
+function saveTab(id)    { try { localStorage.setItem(HOME_TAB_KEY, id); } catch (_) {} }
+
 function injectStyles() {
   if (document.getElementById('home-extra-styles')) return;
   const s = document.createElement('style');
@@ -346,9 +358,8 @@ function buildTypeSection(typeObj, lang) {
 
   const viewAllBtn = document.createElement('a');
   viewAllBtn.href      = getViewAllUrl(typeObj.id);
-  viewAllBtn.className = 'button-h';
+  viewAllBtn.className = 'button-h ds-btn ds-btn--solid';
   viewAllBtn.setAttribute('aria-label', getViewAllLabel(typeObj.id));
-  viewAllBtn.setAttribute('wave', 'c=#D7C7FF');
   viewAllBtn.innerHTML = `<span class="btn-content">${getViewAllLabel(typeObj.id)}</span>`;
   header.appendChild(viewAllBtn);
   wrapper.appendChild(header);
@@ -386,10 +397,62 @@ function renderToApp(assembled, lang) {
     ));
     return;
   }
-  const frag = document.createDocumentFragment();
-  copyableTypes.forEach(typeObj => frag.appendChild(buildTypeSection(typeObj, lang)));
+  ensureDesignSystem();
+  const saved  = readSavedTab();
+  const active = copyableTypes.some(t => t.id === saved) ? saved : copyableTypes[0].id;
+
+  // แถบแท็บสลับชนิด (ARIA tabs: ลูกศรซ้ายขวาย้ายตัวเลือกได้)
+  const tabs = document.createElement('div');
+  tabs.className = 'ds-pills home-tabs';
+  tabs.setAttribute('role', 'tablist');
+  tabs.setAttribute('aria-label', lang === 'th' ? 'ชนิดเนื้อหา' : 'Content type');
+
+  const panels = document.createDocumentFragment();
+  const tabEls = [];
+  copyableTypes.forEach(typeObj => {
+    const isActive = typeObj.id === active;
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'ds-pill';
+    tab.id = `home-tab-${typeObj.id}`;
+    tab.setAttribute('role', 'tab');
+    tab.setAttribute('aria-controls', `home-panel-${typeObj.id}`);
+    tab.setAttribute('aria-selected', String(isActive));
+    tab.tabIndex = isActive ? 0 : -1;
+    tab.textContent = pickLang(typeObj.name, lang);
+    tabs.appendChild(tab); tabEls.push(tab);
+
+    const panel = buildTypeSection(typeObj, lang);
+    panel.id = `home-panel-${typeObj.id}`;
+    panel.className = 'home-panel';
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', tab.id);
+    panel.hidden = !isActive;
+    panels.appendChild(panel);
+  });
+
+  const select = (id, focus) => {
+    tabEls.forEach(t => {
+      const on = t.id === `home-tab-${id}`;
+      t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1;
+      if (on && focus) t.focus();
+    });
+    app.querySelectorAll('.home-panel').forEach(p => { p.hidden = p.id !== `home-panel-${id}`; });
+    saveTab(id);
+  };
+  tabEls.forEach((t, i) => {
+    t.addEventListener('click', () => select(t.id.replace('home-tab-', ''), false));
+    t.addEventListener('keydown', ev => {
+      if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
+      ev.preventDefault();
+      const n = (i + (ev.key === 'ArrowRight' ? 1 : -1) + tabEls.length) % tabEls.length;
+      select(tabEls[n].id.replace('home-tab-', ''), true);
+    });
+  });
+
   app.innerHTML = '';
-  app.appendChild(frag);
+  app.appendChild(tabs);
+  app.appendChild(panels);
 }
 
 function renderErrorToApp(msg, detail) {

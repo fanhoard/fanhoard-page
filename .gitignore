@@ -14,3 +14,6 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo.githooks/
+
+# ผลวัดของชุดตรวจดีไซน์ (สร้างใหม่ได้)
+.design-checks/

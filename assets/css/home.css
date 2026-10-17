@@ -416,6 +416,18 @@ details[open] .faq-answer {
   text-decoration: underline;
 }
 
+/* S2: Home แบบแอป - แท็บสลับชนิดอินไลน์ + ปุ่ม "ดูทั้งหมด" เป็นปุ่มดำทึบ (ds-btn--solid) */
+.home-tabs { margin: var(--space-2, 0.5rem) 0 var(--space-4, 1rem); }
+.home-panel[hidden] { display: none; }
+/* ชื่อชนิดซ้ำกับแท็บ ซ่อนเฉพาะสายตา คงไว้ให้โปรแกรมอ่านจอ */
+.home-panel > .text-h { margin-top: 0; border-bottom: 0; justify-content: flex-end; padding-bottom: 0; }
+.home-panel > .text-h h2 {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.button-h.ds-btn--solid { color: var(--ds-surface); min-height: var(--ds-target, 44px); padding: 0 var(--space-4, 1rem); }
+.button-h.ds-btn--solid:hover { text-decoration: none; }
+
 .carousel-wrapper {
   position: relative;
   overflow: hidden;
