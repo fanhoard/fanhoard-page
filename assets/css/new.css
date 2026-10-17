@@ -65,7 +65,7 @@ ul li {
   font-weight: var(--font-semibold, 600);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #0f766e;
+  color: var(--color-brand-text, #0f766e);
   padding: var(--space-6, 1.5rem) 0 var(--space-3, 0.75rem);
 }
 

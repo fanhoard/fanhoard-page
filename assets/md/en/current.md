@@ -1,14 +1,13 @@
 ---
-version: 5.11.1
+version: 5.11.2
 notify: true
-title: Update times are now the real release time
-subtitle: Each update shows the exact time it was released, and that time can no longer change.
+title: Menu bar and history labels are easier to read in the dark theme
+subtitle: The selected tab in the bottom menu and the "Previous releases" label are clearer in the dark theme.
 ---
 
-**TL;DR** — The time shown on an update used to be a value typed in by hand, so it could be wrong. It is now taken from the real moment the update was released, and it stays fixed after that.
+**TL;DR** — In the dark theme, the name of the selected tab in the bottom menu and the "Previous releases" heading on the What's New page were too dim. They are now much easier to read.
 
 ### Fixed
 
-- **Real release time** The time on each update (in the update pop-up and on the What's New page) is now the actual time it was released, not a typed-in value.
-- **Time never changes afterwards** Once an update has been released, its time is locked. Editing its notes later no longer moves it.
-- **Update history times** Two recent updates in the history showed a time that was off by up to 34 minutes. They now show the real time.
+- **Selected tab in the bottom menu** In the dark theme, the name of the tab you are on (Home, Search, Setting, Discover) was too dim against the menu bar. It now uses the theme's own green and is much clearer.
+- **"Previous releases" heading** On the What's New page, this heading was also too dim in the dark theme. It is now clearer.
