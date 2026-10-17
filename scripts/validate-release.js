@@ -316,6 +316,15 @@ function checkCurrentMdWarnings() {
           message: `assets/md/${lang}/current.md มี date: — ระบบจะ sync ทับด้วยค่าจาก registry ใน CI/CD`,
         });
       }
+      // รุ่นที่ตั้ง notify: false แต่มีหัวข้อ New/Improved/Fixed/Changed = ผู้ใช้จะไม่เห็นป๊อปอัป ทั้งที่นโยบาย (release-policy.md §3)
+      // ให้ User Bug Fix และ UI Overhaul ขึ้นป๊อปอัป เตือนเท่านั้น เพราะรุ่น Silent ที่ผู้ใช้ไม่เห็นความต่างจริงเป็นเรื่องถูกนโยบาย
+      const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+      if (fmMatch && /^notify:\s*["']?false["']?\s*$/m.test(fmMatch[1]) && /^###\s+(New|Improved|Fixed|Changed|ใหม่|ปรับปรุง|แก้ไข|สิ่งที่เปลี่ยนแปลง)/m.test(content)) {
+        warnings.push({
+          type: 'silent_with_user_changes',
+          message: `assets/md/${lang}/current.md ตั้ง notify: false แต่มีหัวข้อ New/Improved/Fixed/Changed — ผู้ใช้จะไม่เห็นป๊อปอัปอัปเดต ถ้าเป็นการแก้ที่ผู้ใช้เห็นจริงให้ใช้ notify: true (release-policy.md §3)`,
+        });
+      }
     } catch (_) {}
   }
 
