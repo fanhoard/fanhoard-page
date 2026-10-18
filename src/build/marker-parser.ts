@@ -109,23 +109,29 @@ export function normalizeParts(parts: TranslationPart[]): TranslationPart[] {
 }
 
 /**
- * Flatten a nested JSON object (mirrors flattenLanguageJson in loader.js).
+ * Flatten a nested JSON translation file into dotted-path keys plus leaf fallbacks.
  */
 export function flattenJson(json: Record<string, unknown>): Record<string, string> {
+  // Pass 1: every leaf under its full dotted path (e.g. "about.1title").
+  // Pass 2: leaf-only fallback (e.g. "home-seo-title" for "seo.home-seo-title")
+  // so template ids that use just the leaf segment keep working. Dotted and
+  // top-level keys are never overwritten by fallbacks.
   const result: Record<string, string> = {};
-  const stack: unknown[] = [json];
 
-  while (stack.length) {
-    const obj = stack.pop();
-    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
-      for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
-        if (v !== null && typeof v === 'object' && !Array.isArray(v)) {
-          stack.push(v);
-        } else {
-          result[k] = String(v ?? '');
-        }
+  const walk = (obj: Record<string, unknown>, prefix: string, fallback: boolean): void => {
+    for (const [k, v] of Object.entries(obj)) {
+      const path = prefix ? `${prefix}.${k}` : k;
+      if (v !== null && typeof v === 'object' && !Array.isArray(v)) {
+        walk(v as Record<string, unknown>, path, fallback);
+      } else if (fallback) {
+        if (!(k in result)) result[k] = String(v ?? '');
+      } else {
+        result[path] = String(v ?? '');
       }
     }
-  }
+  };
+
+  walk(json, '', false);
+  walk(json, '', true);
   return result;
 }

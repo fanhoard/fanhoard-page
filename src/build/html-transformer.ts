@@ -69,8 +69,12 @@ export function transformHtml(
     const key = $el.attr('data-translate');
 
     if (key && translations[key]) {
-      const parts = normalizeParts(parseTranslation(translations[key]));
-      $el.html(_partsToHtml($, $el, parts));
+      if ($el.is('meta')) {
+        $el.attr('content', _stripMarkersToText(translations[key]));
+      } else {
+        const parts = normalizeParts(parseTranslation(translations[key]));
+        $el.html(_partsToHtml($, $el, parts));
+      }
     }
 
     $el.removeAttr('data-translate')

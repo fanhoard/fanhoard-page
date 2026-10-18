@@ -7,7 +7,7 @@ describe('Community & Platform Pages Polish', () => {
 
   it('verifies community/page.html has correct title and links', () => {
     const content = fs.readFileSync(path.join(repoRoot, 'community/page.html'), 'utf8');
-    expect(content).toContain('data-translate="others.community-text"');
+    expect(content).toContain('data-translate="community-seo-title"');
     expect(content).toContain('href="./contact/"');
     expect(content).toContain('href="./report/"');
     expect(content).toContain('class="skip-link fv-skip-link"');
