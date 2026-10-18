@@ -27,7 +27,6 @@
      * @returns {'th'|'en'}
      */
     getLang() {
-      if (window.FvLang && (window.FvLang.lang === "th" || window.FvLang.lang === "en")) return window.FvLang.lang;
       try {
         return (
           localStorage.getItem(CONFIG.STORAGE.langKey) ||

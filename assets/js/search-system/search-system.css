@@ -1,6 +1,17 @@
 /* ════════════════════════════════════════════════════════════════════════
  *  search-system.css
  *  Supplemental styles for the unified search system (search-system/).
+ *
+ *  Loaded by search-system/search.js when the entry point boots.
+ *  These styles are ADDITIVE to the legacy /assets/css/search.css and
+ *  /assets/css/search-compact-overrides.css — they do not replace them.
+ *
+ *  Scope:
+ *    • Fullscreen overlay transitions & smoothness (v5.0)
+ *    • Suggestion list transitions, hover/focus states, keynav indicators (v5.0)
+ *    • Suggestion source badges (type / category indicators)
+ *    • Discovery section (v4.0 — related content after primary results)
+ *    • Compact empty-state styling (v4.0 — friendlier, smaller message)
  * ════════════════════════════════════════════════════════════════════════ */
 
 /* ── Fullscreen Overlay Transitions ────────────────────────────────────── */
@@ -12,7 +23,7 @@
   flex-direction: column;
   align-items: stretch;
   overflow: hidden;
-  background-color: var(--fh-sys-color-bg, var(--surface-base, rgb(250, 248, 241)));
+  background-color: var(--surface-base, #ffffff);
   opacity: 0;
   transform: translateY(4px);
   transition: opacity 180ms cubic-bezier(0.16, 1, 0.3, 1), transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -48,13 +59,13 @@
 .search-suggestion-item:hover,
 .search-suggestion-item:focus,
 .search-suggestion-item:focus-visible {
-  background: var(--fh-sys-color-surface-tint, rgba(15, 163, 107, 0.08));
-  border-left-color: var(--fh-sys-color-primary, var(--color-brand-primary));
+  background: var(--surface-hover, rgba(13, 148, 136, 0.08));
+  border-left-color: var(--color-brand-primary, #0d9488);
   outline: none;
 }
 
 .search-suggestion-item:active {
-  background: rgba(15, 163, 107, 0.14);
+  background: rgba(13, 148, 136, 0.14);
 }
 
 /* ── Suggestion badges ──────────────────────────────────────────────────── */
@@ -73,91 +84,170 @@
   white-space: nowrap;
   user-select: none;
   background: rgba(103, 115, 135, 0.10);
-  color: var(--fh-sys-color-text-muted, var(--fv-text-secondary));
+  color: var(--fv-text-secondary, #52638A);
 }
 
 .search-suggestion-badge--type {
-  background: rgba(15, 163, 107, 0.12);
-  color: var(--fh-sys-color-primary-text);
+  background: rgba(19, 180, 127, 0.12);
+  color: #0f7a55;
 }
 
 .search-suggestion-badge--category {
   background: rgba(14, 95, 153, 0.10);
-  color: var(--fh-sys-color-primary-text);
+  color: #1a5276;
 }
 
 @media (prefers-color-scheme: dark) {
   .search-overlay {
-    background-color: var(--fh-sys-color-bg, var(--surface-base));
+    background-color: var(--surface-base, #111827);
   }
   .search-suggestion-badge {
     background: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.65);
   }
   .search-suggestion-badge--type {
-    background: rgba(15, 163, 107, 0.18);
-    color: var(--fh-sys-color-primary-text);
+    background: rgba(19, 180, 127, 0.18);
+    color: #6ce0b1;
   }
   .search-suggestion-badge--category {
     background: rgba(96, 165, 250, 0.16);
-    color: var(--fh-sys-color-primary-text);
+    color: #93c5fd;
   }
 }
 
 @media (max-width: 480px) {
   .search-suggestion-badge {
     font-size: 0.62rem;
-    padding: 1px 6px;
+    padding: 2px 6px;
+    border-radius: 5px;
   }
 }
 
-/* ── Discovery Section Polish ───────────────────────────────────────────── */
-.search-discovery {
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--fh-sys-color-border-subtle);
-  animation: fvSuggestionFade 200ms ease-out;
+/* ── Reduced Motion Support ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .search-overlay,
+  .search-suggestion-item {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
 }
 
-.search-discovery__heading {
-  font-size: 0.82rem;
+/* ════════════════════════════════════════════════════════════════════════
+ *  Discovery section (v4.0)
+ * ════════════════════════════════════════════════════════════════════════ */
+.discovery-section {
+  padding: 32px 0 48px;
+  width: 100%;
+}
+
+.discovery-header {
+  padding: 0 16px;
+  margin-bottom: 16px;
+  border-top: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06));
+  padding-top: 24px;
+}
+
+.discovery-title {
+  font-size: 1.15rem;
   font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: var(--fh-sys-color-text-muted);
-  margin-bottom: 12px;
+  line-height: 1.3;
+  margin: 0 0 4px;
+  color: var(--color-brand-primary, #009688);
+  padding: 0;
 }
 
-.search-discovery__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 10px;
+.discovery-hint {
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.4;
+  margin: 0;
+  color: var(--text-muted, #757575);
 }
 
-.search-discovery__card {
-  padding: 10px 12px;
-  border-radius: var(--fh-sys-radius-card);
-  background: var(--fh-comp-card-bg);
-  border: 1px solid var(--fh-sys-color-border-subtle);
-  cursor: pointer;
-  transition: transform 120ms ease, border-color 120ms ease;
+.discovery-list {
+  width: 100%;
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 
-.search-discovery__card:hover {
-  transform: translateY(-1px);
-  border-color: var(--fh-sys-color-primary);
+@media (prefers-color-scheme: dark) {
+  .discovery-title {
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .discovery-hint {
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .discovery-header {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
 }
 
-/* ── Compact Empty State ────────────────────────────────────────────────── */
-.search-empty-compact {
-  padding: 24px 16px;
+@media (max-width: 480px) {
+  .discovery-section {
+    padding: 24px 0 32px;
+  }
+  .discovery-header {
+    padding: 0 12px;
+    padding-top: 20px;
+    margin-bottom: 12px;
+  }
+  .discovery-title {
+    font-size: 1.05rem;
+  }
+  .discovery-hint {
+    font-size: 0.8rem;
+  }
+  .discovery-list {
+    padding: 0 12px;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+ *  Compact empty-state (v4.0)
+ * ════════════════════════════════════════════════════════════════════════ */
+.no-result--compact {
+  padding: 24px 16px 16px;
   text-align: center;
-  color: var(--fh-sys-color-text-muted);
-  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
 
-.search-empty-compact__icon {
-  font-size: 1.8rem;
-  margin-bottom: 8px;
-  opacity: 0.6;
+.no-result__title {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
+  color: var(--color-brand-primary, #009688);
+}
+
+.no-result__hint {
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.4;
+  margin: 0;
+  color: var(--text-muted, #757575);
+}
+
+@media (prefers-color-scheme: dark) {
+  .no-result__title {
+    color: rgba(255, 255, 255, 0.88);
+  }
+  .no-result__hint {
+    color: rgba(255, 255, 255, 0.55);
+  }
+}
+
+@media (max-width: 480px) {
+  .no-result--compact {
+    padding: 20px 12px 12px;
+  }
+  .no-result__title {
+    font-size: 0.95rem;
+  }
+  .no-result__hint {
+    font-size: 0.8rem;
+  }
 }

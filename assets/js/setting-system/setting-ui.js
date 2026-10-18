@@ -2,7 +2,7 @@
  * setting-ui.js v1.0 — FanHoard Settings Page Control Orchestrator
  *
  * Coordinates settings page controls: theme switch, auto-update switch,
- * language selector, clear cache, save feedback toasts, keyboard focus, and accessibility.
+ * language selector, save feedback toasts, keyboard focus, and accessibility.
  *
  * Used by: setting/index.html
  */
@@ -17,7 +17,6 @@
     AUTO_TOGGLE_ID    : 'auto-update-toggle-btn',
     AUTO_SWITCH_ID    : 'auto-update-switch',
     LANG_BTN_ID       : 'language-button',
-    CLEAR_CACHE_BTN_ID: 'clear-cache-btn',
     NO_UPDATE_KEY     : 'fv_noupdate'
   };
 
@@ -185,20 +184,13 @@
       var isTh = lang === 'th';
 
       btn.innerHTML = `
-        <span class="c-list-row__start">
-          <span class="c-icon-circle c-icon-circle--solid">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M4 5h7" /><path d="M9 3v2c0 4.418 -2.239 8 -5 8" /><path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" /><path d="M12 20l4 -9l4 9" /><path d="M19.1 18h-6.2" />
-            </svg>
-          </span>
-          <span class="c-list-row__content">
-            <span class="c-list-row__title">${isTh ? 'ภาษาอินเทอร์เฟซ' : 'Interface Language'}</span>
-            <span class="c-list-row__subtitle">${isTh ? 'เลือกภาษาที่แสดงในระบบ' : 'Choose interface language'}</span>
-          </span>
+        <span class="setting-item-inner">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 5h7" /><path d="M9 3v2c0 4.418 -2.239 8 -5 8" /><path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" /><path d="M12 20l4 -9l4 9" /><path d="M19.1 18h-6.2" />
+          </svg>
+          <span>${isTh ? 'ภาษาอินเทอร์เฟซ (Language)' : 'Interface Language'}</span>
         </span>
-        <span class="c-list-row__end">
-          <span class="fv-lang-badge">${isTh ? 'ไทย (TH)' : 'English (EN)'}</span>
-        </span>
+        <span class="fv-lang-badge">${isTh ? 'ไทย (TH)' : 'English (EN)'}</span>
       `;
     }
 
@@ -208,6 +200,7 @@
       if (global.LangUI && typeof global.LangUI.showModal === 'function') {
         global.LangUI.showModal();
       } else if (global.PopupSystem && typeof global.PopupSystem.open === 'function') {
+        // Fallback: trigger language modal via event or LangUI
         var event = new CustomEvent('fv:open-lang-modal');
         window.dispatchEvent(event);
       }
@@ -227,32 +220,11 @@
     });
   }
 
-  // ── Clear Cache Button ────────────────────────────────────
-  function setupClearCacheControl() {
-    var btn = document.getElementById(CFG.CLEAR_CACHE_BTN_ID);
-    if (!btn) return;
-
-    btn.addEventListener('click', function() {
-      try {
-        sessionStorage.clear();
-        if (typeof global.caches !== 'undefined' && typeof global.caches.keys === 'function') {
-          global.caches.keys().then(function(names) {
-            names.forEach(function(name) { global.caches.delete(name); });
-          });
-        }
-      } catch (_) {}
-      var isTh = _getLang() === 'th';
-      var msg = isTh ? 'ล้างแคชเรียบร้อยแล้ว' : 'Cache cleared successfully';
-      _showToast(msg, 'success');
-    });
-  }
-
   // ── Initialize Settings System ─────────────────────────────
   function initSettings() {
     setupThemeControl();
     setupAutoUpdateControl();
     setupLanguageControl();
-    setupClearCacheControl();
   }
 
   if (document.readyState === 'loading') {
@@ -265,8 +237,7 @@
     init: initSettings,
     setupThemeControl: setupThemeControl,
     setupAutoUpdateControl: setupAutoUpdateControl,
-    setupLanguageControl: setupLanguageControl,
-    setupClearCacheControl: setupClearCacheControl
+    setupLanguageControl: setupLanguageControl
   });
 
 })(typeof window !== 'undefined' ? window : this);

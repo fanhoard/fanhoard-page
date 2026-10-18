@@ -12,21 +12,17 @@
   <title>Settings — FanHoard</title>
   <meta name="description" content="Customize your FanHoard experience — choose language, toggle features, and more.">
 
-  <meta name="theme-color" content="rgb(15, 163, 107)" />
+  <meta name="theme-color" content="#0d9488" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
   <link rel="icon" type="image/x-icon" href="/assets/images/fanhoard-verse360.ico" />
 
-  <!-- 1. Tokens & Design Core -->
-  <link rel="preload" href="/assets/css/design-core-tokens.css" as="style">
-  <link rel="stylesheet" href="/assets/css/design-core-tokens.css">
-  <link rel="preload" href="/assets/css/design-core.css" as="style">
-  <link rel="stylesheet" href="/assets/css/design-core.css">
+  <!-- 1. Tokens -->
   <link rel="preload" href="/assets/css/tokens.css" as="style">
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/ds.css">
 
-  <!-- 2. Page CSS -->
+  <!-- 2. CSS -->
   <link rel="preload" href="/assets/css/setting.css?v=5.11.2-202610172134" as="style" onload="this.rel='stylesheet'" />
   <noscript><link rel="stylesheet" href="/assets/css/setting.css?v=5.11.2-202610172134" /></noscript>
   <link rel="preload" href="/assets/css/bg.css?v=5.11.2-202610172134" as="style" onload="this.rel='stylesheet'" />
@@ -56,161 +52,67 @@
         <!-- SEO h1 — Hidden visually for crawler accessibility -->
         <h1 class="fv-sr-only">Settings — FanHoard</h1>
 
-        <!-- Page Header -->
-        <header class="c-page-header">
-          <h1 class="c-page-header__title setting-title" data-translate="page-setting">Control Center</h1>
-          <p class="c-page-header__subtitle">Manage interface, preferences, and platform options</p>
-        </header>
-
         <!-- Settings Section -->
         <section class="fv-section">
-          <p class="fv-section-label" data-translate="page-setting">Control Center</p>
+          <p class="fv-section-label" data-translate="page-setting"></p>
 
           <div class="fv-setting-group">
-            <!-- Language Control -->
             <div class="fv-setting-row">
               <div id="language-selector-container">
-                <button id="language-button" class="c-card c-list-row c-list-row--interactive tap" type="button" aria-label="Select Interface Language">
-                  <span class="c-list-row__start">
-                    <span class="c-icon-circle c-icon-circle--solid">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M4 5h7" /><path d="M9 3v2c0 4.418 -2.239 8 -5 8" /><path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" /><path d="M12 20l4 -9l4 9" /><path d="M19.1 18h-6.2" />
-                      </svg>
-                    </span>
-                    <span class="c-list-row__content">
-                      <span class="c-list-row__title">Interface Language</span>
-                      <span class="c-list-row__subtitle">Choose interface language / เลือกภาษา</span>
-                    </span>
-                  </span>
-                  <span class="c-list-row__end">
-                    <span class="fv-lang-badge">English (EN)</span>
-                  </span>
-                </button>
+                <button id="language-button" class="tap" type="button" aria-label="Select Interface Language"></button>
               </div>
             </div>
 
-            <!-- Theme Switch -->
             <div class="fv-setting-row">
-              <div class="c-card c-list-row c-list-row--interactive buttons" id="theme-toggle-btn" tabindex="0" role="button" aria-label="Appearance Theme">
-                <div class="c-list-row__start">
-                  <span class="c-icon-circle c-icon-circle--solid">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-5.4-5.4c0-1.81.89-3.42 2.26-4.4C12.92 3.04 12.46 3 12 3z" />
-                    </svg>
-                  </span>
-                  <div class="c-list-row__content">
-                    <span class="c-list-row__title" data-translate="theme-setting">Appearance Mode</span>
-                    <span class="c-list-row__subtitle" id="theme-desc">Light Mode (Bright & clear)</span>
-                  </div>
-                </div>
-                <div class="c-list-row__end">
-                  <label for="theme-switch" class="switch-outer">
-                    <input type="checkbox" id="theme-switch" role="switch" class="fv-sr-only" aria-checked="false" aria-label="Theme Mode" />
-                    <span class="slider" aria-hidden="true"></span>
+              <div class="buttons auto-update-toggle" id="auto-update-toggle-btn">
+                <div class="setting-item-inner">
+                  <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
+                    <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
+                    <path d="M12 9l0 3" /><path d="M12 15l.01 0" />
+                  </svg>
+                  <label for="auto-update-switch" class="text-content">
+                    <span data-translate="avcs"></span>
+                    <span class="auto-update-desc" data-translate="aud"></span>
                   </label>
                 </div>
+                <label for="auto-update-switch" class="switch-outer">
+                  <input type="checkbox" id="auto-update-switch" role="switch" class="fv-sr-only" aria-checked="true" aria-label="Auto Update" />
+                  <span class="slider" aria-hidden="true"></span>
+                </label>
               </div>
-            </div>
-
-            <!-- Auto Update Switch -->
-            <div class="fv-setting-row">
-              <div class="c-card c-list-row c-list-row--interactive buttons auto-update-toggle" id="auto-update-toggle-btn" tabindex="0" role="button" aria-label="Auto Update">
-                <div class="c-list-row__start">
-                  <span class="c-icon-circle c-icon-circle--solid">
-                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
-                      <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
-                      <path d="M12 9l0 3" /><path d="M12 15l.01 0" />
-                    </svg>
-                  </span>
-                  <label for="auto-update-switch" class="c-list-row__content text-content">
-                    <span class="c-list-row__title" data-translate="avcs">Automatic version checking system</span>
-                    <span class="c-list-row__subtitle auto-update-desc" data-translate="aud">Turn on/off notifications and automatic website version updates.</span>
-                  </label>
-                </div>
-                <div class="c-list-row__end">
-                  <label for="auto-update-switch" class="switch-outer">
-                    <input type="checkbox" id="auto-update-switch" role="switch" class="fv-sr-only" aria-checked="true" aria-label="Auto Update" />
-                    <span class="slider" aria-hidden="true"></span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <!-- Clear Cache Row -->
-            <div class="fv-setting-row">
-              <button class="c-card c-list-row c-list-row--interactive buttons tap" id="clear-cache-btn" type="button" aria-label="Clear Cache">
-                <span class="c-list-row__start">
-                  <span class="c-icon-circle c-icon-circle--solid">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16" />
-                    </svg>
-                  </span>
-                  <span class="c-list-row__content">
-                    <span class="c-list-row__title">Clear App Cache</span>
-                    <span class="c-list-row__subtitle">Clear local storage and refresh application cache</span>
-                  </span>
-                </span>
-                <span class="c-list-row__end">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
-                </span>
-              </button>
             </div>
           </div>
         </section>
 
         <!-- About / Platform Section -->
         <section class="fv-section">
-          <p class="fv-section-label" data-translate="about-text">Platform</p>
+          <p class="fv-section-label" data-translate="about-text"></p>
 
           <div class="fv-setting-group">
             <div class="fv-setting-row">
-              <a class="c-card c-list-row c-list-row--interactive buttons tap" href="/platform/about">
-                <span class="c-list-row__start">
-                  <span class="c-icon-circle c-icon-circle--solid">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
-                  </span>
-                  <span class="c-list-row__content">
-                    <span class="c-list-row__title" data-translate="about-button">FanHoard Overview</span>
-                    <span class="c-list-row__subtitle">Learn about FanHoard platform and license</span>
-                  </span>
-                </span>
-                <span class="c-list-row__end">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+              <a class="buttons tap" href="/platform/about">
+                <span class="setting-item-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
+                  <span data-translate="about-button">About</span>
                 </span>
               </a>
             </div>
 
             <div class="fv-setting-row">
-              <a class="c-card c-list-row c-list-row--interactive buttons tap" href="/platform/whats_new">
-                <span class="c-list-row__start">
-                  <span class="c-icon-circle c-icon-circle--solid">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M6 4v4" /><path d="M6 12v8" /><path d="M13.879 15.312a2 2 0 1 0 -2.26 2.652" /><path d="M12 4v10" /><path d="M16 7a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M18 4v1" /><path d="M18 9v2.5" /><path d="M19 22.5a4.75 4.75 0 0 1 3.5 -3.5a4.75 4.75 0 0 1 -3.5 -3.5a4.75 4.75 0 0 1 -3.5 3.5a4.75 4.75 0 0 1 3.5 3.5" /></svg>
-                  </span>
-                  <span class="c-list-row__content">
-                    <span class="c-list-row__title" data-translate="new-button">What's New</span>
-                    <span class="c-list-row__subtitle">Latest release notes and features</span>
-                  </span>
-                </span>
-                <span class="c-list-row__end">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+              <a class="buttons tap" href="/platform/whats_new">
+                <span class="setting-item-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M6 4v4" /><path d="M6 12v8" /><path d="M13.879 15.312a2 2 0 1 0 -2.26 2.652" /><path d="M12 4v10" /><path d="M16 7a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M18 4v1" /><path d="M18 9v2.5" /><path d="M19 22.5a4.75 4.75 0 0 1 3.5 -3.5a4.75 4.75 0 0 1 -3.5 -3.5a4.75 4.75 0 0 1 -3.5 3.5a4.75 4.75 0 0 1 3.5 3.5" /></svg>
+                  <span data-translate="new-button">What's New</span>
                 </span>
               </a>
             </div>
 
             <div class="fv-setting-row">
-              <a class="c-card c-list-row c-list-row--interactive buttons tap" href="/platform/roadmap">
-                <span class="c-list-row__start">
-                  <span class="c-icon-circle c-icon-circle--solid">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21v-4" /><path d="M12 13v-4" /><path d="M12 5v-2" /><path d="M10 21h4" /><path d="M8 5v4h11l2 -2l-2 -2z" /><path d="M14 13v4h-8l-2 -2l2 -2z" /></svg>
-                  </span>
-                  <span class="c-list-row__content">
-                    <span class="c-list-row__title" data-translate="planned-features-button">Coming Features</span>
-                    <span class="c-list-row__subtitle">Upcoming roadmap & developments</span>
-                  </span>
-                </span>
-                <span class="c-list-row__end">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+              <a class="buttons tap" href="/platform/roadmap">
+                <span class="setting-item-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21v-4" /><path d="M12 13v-4" /><path d="M12 5v-2" /><path d="M10 21h4" /><path d="M8 5v4h11l2 -2l-2 -2z" /><path d="M14 13v4h-8l-2 -2l2 -2z" /></svg>
+                  <span data-translate="planned-features-button">Roadmap</span>
                 </span>
               </a>
             </div>
@@ -219,39 +121,23 @@
 
         <!-- Community Section -->
         <section class="fv-section">
-          <p class="fv-section-label" data-translate="community-text">community</p>
+          <p class="fv-section-label" data-translate="community-text"></p>
 
           <div class="fv-setting-group">
             <div class="fv-setting-row">
-              <a class="c-card c-list-row c-list-row--interactive buttons tap" href="/community/contact">
-                <span class="c-list-row__start">
-                  <span class="c-icon-circle c-icon-circle--solid">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 21v-6.5a3.5 3.5 0 0 0 -7 0v6.5h18v-6a4 4 0 0 0 -4 -4h-10.5" /><path d="M12 11v-8h4l2 2l-2 2h-4" /><path d="M6 15h1" /></svg>
-                  </span>
-                  <span class="c-list-row__content">
-                    <span class="c-list-row__title" data-translate="contact-button">Talk to the Creator</span>
-                    <span class="c-list-row__subtitle">Get in touch with the development team</span>
-                  </span>
-                </span>
-                <span class="c-list-row__end">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+              <a class="buttons tap" href="/community/contact">
+                <span class="setting-item-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 21v-6.5a3.5 3.5 0 0 0 -7 0v6.5h18v-6a4 4 0 0 0 -4 -4h-10.5" /><path d="M12 11v-8h4l2 2l-2 2h-4" /><path d="M6 15h1" /></svg>
+                  <span data-translate="contact-button">Contact Us</span>
                 </span>
               </a>
             </div>
 
             <div class="fv-setting-row">
-              <a class="c-card c-list-row c-list-row--interactive buttons tap" href="/community/report/">
-                <span class="c-list-row__start">
-                  <span class="c-icon-circle c-icon-circle--solid">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 9v-1a3 3 0 0 1 6 0v1" /><path d="M8 9h8a6 6 0 0 1 1 3v3a5 5 0 0 1 -10 0v-3a6 6 0 0 1 1 -3" /><path d="M3 13l4 0" /><path d="M17 13l4 0" /><path d="M12 20l0 -6" /><path d="M4 19l3.35 -2" /><path d="M20 19l-3.35 -2" /><path d="M4 7l3.75 2.4" /><path d="M20 7l-3.75 2.4" /></svg>
-                  </span>
-                  <span class="c-list-row__content">
-                    <span class="c-list-row__title" data-translate="report-button">Report an Issue</span>
-                    <span class="c-list-row__subtitle">Submit bug report or feedback</span>
-                  </span>
-                </span>
-                <span class="c-list-row__end">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+              <a class="buttons tap" href="/community/report/">
+                <span class="setting-item-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 9v-1a3 3 0 0 1 6 0v1" /><path d="M8 9h8a6 6 0 0 1 1 3v3a5 5 0 0 1 -10 0v-3a6 6 0 0 1 1 -3" /><path d="M3 13l4 0" /><path d="M17 13l4 0" /><path d="M12 20l0 -6" /><path d="M4 19l3.35 -2" /><path d="M20 19l-3.35 -2" /><path d="M4 7l3.75 2.4" /><path d="M20 7l-3.75 2.4" /></svg>
+                  <span data-translate="report-button">Report Issue</span>
                 </span>
               </a>
             </div>
@@ -260,39 +146,23 @@
 
         <!-- Support Section -->
         <section class="fv-section">
-          <p class="fv-section-label" data-translate="support-text">Fuel FanHoard</p>
+          <p class="fv-section-label" data-translate="support-text"></p>
 
           <div class="fv-setting-group">
             <div class="fv-setting-row">
-              <a class="c-card c-list-row c-list-row--interactive buttons buy tap" href="https://ko-fi.com/nontakorn_nonsurat" target="_blank" rel="noopener noreferrer">
-                <span class="c-list-row__start">
-                  <span class="c-icon-circle c-icon-circle--solid">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 14c.83 .642 2.077 1.017 3.5 1c1.423 .017 2.67 -.358 3.5 -1c.83 -.642 2.077 -1.017 3.5 -1c1.423 -.017 2.67 .358 3.5 1" /><path d="M8 3a2.4 2.4 0 0 0 -1 2a2.4 2.4 0 0 0 1 2" /><path d="M12 3a2.4 2.4 0 0 0 -1 2a2.4 2.4 0 0 0 1 2" /><path d="M3 10h14v5a6 6 0 0 1 -6 6h-2a6 6 0 0 1 -6 -6v-5" /><path d="M16.746 16.726a3 3 0 1 0 .252 -5.555" /></svg>
-                  </span>
-                  <span class="c-list-row__content">
-                    <span class="c-list-row__title" data-translate="support-button">Support on Ko-fi</span>
-                    <span class="c-list-row__subtitle">Buy the creator a coffee</span>
-                  </span>
-                </span>
-                <span class="c-list-row__end">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+              <a class="buttons buy tap" href="https://ko-fi.com/nontakorn_nonsurat" target="_blank" rel="noopener noreferrer">
+                <span class="setting-item-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-coffee" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 14c.83 .642 2.077 1.017 3.5 1c1.423 .017 2.67 -.358 3.5 -1c.83 -.642 2.077 -1.017 3.5 -1c1.423 -.017 2.67 .358 3.5 1" /><path d="M8 3a2.4 2.4 0 0 0 -1 2a2.4 2.4 0 0 0 1 2" /><path d="M12 3a2.4 2.4 0 0 0 -1 2a2.4 2.4 0 0 0 1 2" /><path d="M3 10h14v5a6 6 0 0 1 -6 6h-2a6 6 0 0 1 -6 -6v-5" /><path d="M16.746 16.726a3 3 0 1 0 .252 -5.555" /></svg>
+                  <span data-translate="support-button">Support on Ko-fi</span>
                 </span>
               </a>
             </div>
 
             <div class="fv-setting-row">
-              <a class="c-card c-list-row c-list-row--interactive buttons buy tap" href="https://www.patreon.com/rowingsco" target="_blank" rel="noopener noreferrer">
-                <span class="c-list-row__start">
-                  <span class="c-icon-circle c-icon-circle--solid">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"/><path d="M12 6l-3.293 3.293a1 1 0 0 0 0 1.414l.543 .543c.69 .69 1.81 .69 2.5 0l1 -1a3.182 3.182 0 0 1 4.5 0l2.25 2.25"/><path d="M12.5 15.5l2 2"/><path d="M15 13l2 2"/></svg>
-                  </span>
-                  <span class="c-list-row__content">
-                    <span class="c-list-row__title" data-translate="support-button-patreon">Support on Patreon</span>
-                    <span class="c-list-row__subtitle">Become a monthly patron</span>
-                  </span>
-                </span>
-                <span class="c-list-row__end">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+              <a class="buttons buy tap" href="https://www.patreon.com/rowingsco" target="_blank" rel="noopener noreferrer">
+                <span class="setting-item-inner">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"/><path d="M12 6l-3.293 3.293a1 1 0 0 0 0 1.414l.543 .543c.69 .69 1.81 .69 2.5 0l1 -1a3.182 3.182 0 0 1 4.5 0l2.25 2.25"/><path d="M12.5 15.5l2 2"/><path d="M15 13l2 2"/></svg>
+                  <span data-translate="support-button-patreon">Support on Patreon</span>
                 </span>
               </a>
             </div>

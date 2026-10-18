@@ -7,16 +7,12 @@
   <title data-translate="others.community-text">Community — FanHoard</title>
   <meta name="description" content="Get in touch with the FanHoard team — contact us or report an issue.">
 
-  <meta name="theme-color" content="rgb(15, 163, 107)" />
+  <meta name="theme-color" content="#0d9488" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
   <link rel="icon" type="image/x-icon" href="/assets/images/fanhoard-verse360.ico" />
 
-  <!-- 1. Tokens & Design Core -->
-  <link rel="preload" href="/assets/css/design-core-tokens.css" as="style">
-  <link rel="stylesheet" href="/assets/css/design-core-tokens.css">
-  <link rel="preload" href="/assets/css/design-core.css" as="style">
-  <link rel="stylesheet" href="/assets/css/design-core.css">
+  <!-- 1. Tokens -->
   <link rel="preload" href="/assets/css/tokens.css" as="style">
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/ds.css">
@@ -40,7 +36,7 @@
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7" />
           </svg>
         </button>
-        <span class="page-title" data-translate="page-contact-main">Community</span>
+        <span class="page-title" data-translate="page-contact-main"></span>
       </nav>
     </header>
 
@@ -50,56 +46,26 @@
         <!-- SEO h1 -->
         <h1 class="fv-sr-only">Contact FanHoard</h1>
 
-        <div class="c-page-header">
-          <h1 class="c-page-header__title" data-translate="contact-main-title">Community & Support</h1>
-          <p class="c-page-header__subtitle" data-translate="contact-main-desc">Get in touch with the FanHoard team — contact us or report an issue.</p>
-        </div>
+        <section class="fv-section fv-card con">
+          <p class="fv-section-label" data-translate="contact-main-title"></p>
+          <p class="fv-section-desc" data-translate="contact-main-desc"></p>
+        </section>
 
         <section class="fv-section community-portal-links">
-          <div class="fv-setting-group">
-            <a class="c-list-row c-list-row--interactive" href="./contact/">
-              <div class="c-list-row__start">
-                <div class="c-icon-circle c-icon-circle--solid">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                    <path d="M7 9a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
-                    <path d="M5.75 15a8.015 8.015 0 1 0 9.25 -13" />
-                    <path d="M11 17v4" />
-                    <path d="M7 21h8" />
-                  </svg>
-                </div>
-                <div class="c-list-row__content">
-                  <span class="c-list-row__title" data-translate="contact-other-text">Contact Us</span>
-                  <span class="c-list-row__subtitle" data-translate="contact-other-desc">This page is under development and will be available in a future release.</span>
-                </div>
-              </div>
-              <div class="c-list-row__end">
-                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                  <path d="M9 18l6-6-6-6"/>
-                </svg>
-              </div>
-            </a>
-
-            <a class="c-list-row c-list-row--interactive" href="./report/">
-              <div class="c-list-row__start">
-                <div class="c-icon-circle c-icon-circle--solid">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                    <path d="M12 9v4" />
-                    <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" />
-                    <path d="M12 16h.01" />
-                  </svg>
-                </div>
-                <div class="c-list-row__content">
-                  <span class="c-list-row__title" data-translate="contact-report-text">Report Issue</span>
-                  <span class="c-list-row__subtitle" data-translate="report-new-desc">Found a bug or have a suggestion? Let us know so we can improve FanHoard.</span>
-                </div>
-              </div>
-              <div class="c-list-row__end">
-                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                  <path d="M9 18l6-6-6-6"/>
-                </svg>
-              </div>
-            </a>
-          </div>
+          <a class="community-link-row" href="./contact/">
+            <span class="community-link-content">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 9a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M5.75 15a8.015 8.015 0 1 0 9.25 -13" /><path d="M11 17v4" /><path d="M7 21h8" /></svg>
+              <span data-translate="contact-other-text">Contact Us</span>
+            </span>
+            <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 18l6-6-6-6"/></svg>
+          </a>
+          <a class="community-link-row" href="./report/">
+            <span class="community-link-content">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></svg>
+              <span data-translate="contact-report-text">Report Issue</span>
+            </span>
+            <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 18l6-6-6-6"/></svg>
+          </a>
         </section>
       </div>
     </main>

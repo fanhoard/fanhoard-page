@@ -8,23 +8,18 @@
   <title>Discover Emoji &amp; Symbols | FanHoard Verse</title>
   <meta name="description" content="Browse and discover emojis, symbols, and special characters by category. Copy with one tap — free forever.">
 
-  <meta name="theme-color" content="rgb(15, 163, 107)" />
+  <meta name="theme-color" content="#0d9488" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
   <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
   <link rel="icon" type="image/x-icon" href="/assets/images/fanhoard-verse360.ico" />
 
-  <!-- 1. Tokens & Design Core Components -->
-  <link rel="preload" href="/assets/css/design-core-tokens.css" as="style">
-  <link rel="stylesheet" href="/assets/css/design-core-tokens.css">
-  <link rel="preload" href="/assets/css/design-core.css" as="style">
-  <link rel="stylesheet" href="/assets/css/design-core.css">
+  <!-- 1. Tokens & Layout CSS -->
   <link rel="preload" href="/assets/css/tokens.css" as="style">
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/ds.css">
   <link rel="stylesheet" href="/assets/css/layout.css">
-  <link rel="stylesheet" href="/assets/css/discover.css">
 
   <!-- 2. CSS -->
   <link rel="preload" href="/assets/css/loading.css?v=5.11.2-202610172134" as="style" onload="this.rel='stylesheet'" />
@@ -38,7 +33,7 @@
   <link rel="stylesheet" href="/assets/css/back-to-top.css?v=5.11.2-202610172134">
 
   <style>
-    html { background: var(--fh-sys-color-bg, var(--surface-card)); }
+    html { background: var(--surface-card, #ffffff); }
     body { margin:0; opacity:1; }
     html, body { overscroll-behavior-y:none; -webkit-overflow-scrolling:touch; }
     header { min-height: var(--fv-nav-height, 64px); contain:layout style; }
@@ -72,7 +67,7 @@
       align-items: center;
       justify-content: center;
       gap: var(--space-6, 24px);
-      background: var(--fh-sys-color-bg, var(--surface-primary));
+      background: var(--surface-primary, var(--fv-surface-page, #ffffff));
       contain: layout style;
       transform: translateZ(0);
       font-family: var(--fv-font-stack, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
@@ -101,12 +96,12 @@
       display: block;
     }
     #fv-boot-loader .fv-boot-track {
-      stroke: var(--fh-sys-color-border-subtle, var(--border-subtle));
+      stroke: var(--surface-tertiary, var(--border-subtle, #e8f5ef));
       stroke-width: 3.5;
       fill: none;
     }
     #fv-boot-loader .fv-boot-arc {
-      stroke: var(--fh-sys-color-primary, var(--color-brand-primary));
+      stroke: var(--color-brand-primary, #0d9488);
       stroke-width: 3.5;
       stroke-linecap: round;
       stroke-dasharray: 88 132;
@@ -121,7 +116,7 @@
     #fv-boot-loader .fv-boot-msg {
       font-size: var(--step-0, 1rem);
       font-weight: 600;
-      color: var(--fh-sys-color-text-main, var(--text-primary));
+      color: var(--text-primary, #3c4043);
       text-align: center;
       line-height: 1.4;
       min-width: 100px;

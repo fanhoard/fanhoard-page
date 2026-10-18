@@ -128,7 +128,6 @@ export function generateSitemap(): void {
     'scripts',
     'src',
     '.cloudflare',
-    'assets/demo',
     'google6b646fa60e0f9f2f.html',
     'index.html',
   ]);

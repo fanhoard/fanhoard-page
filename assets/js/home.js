@@ -91,41 +91,40 @@ function injectStyles() {
   s.textContent = `
     .item-card--view-all {
       text-decoration: none;
-      background: var(--fh-sys-color-surface-tint);
-      border: 1px solid var(--fh-sys-color-border-subtle);
-      color: var(--fh-sys-color-primary-text);
+      background: var(--surface-base, #ffffff);
+      border: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
+      color: var(--color-brand-primary, #009688);
       position: relative;
     }
     .item-card--view-all:hover {
-      border-color: var(--fh-sys-color-primary);
-      background: var(--fh-sys-color-primary);
-      color: var(--fh-sys-color-on-primary);
+      border-color: var(--color-brand-primary, #009688);
+      background: var(--surface-hover, rgba(0,0,0,0.02));
     }
     .view-all-icon {
       display: flex; align-items: center; justify-content: center;
       width: 32px; height: 32px; border-radius: 50%;
-      background: var(--fh-sys-color-surface);
-      border: 1px solid var(--fh-sys-color-border-subtle);
-      color: var(--fh-sys-color-primary-text);
+      background: transparent;
+      border: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
+      color: var(--color-brand-primary, #009688);
       transition: border-color 0.15s ease, background-color 0.15s ease;
       margin-bottom: 0.12rem; flex-shrink: 0;
     }
     .item-card--view-all:hover .view-all-icon {
-      background: var(--fh-sys-color-surface-tint);
-      border-color: var(--fh-sys-color-primary-text);
+      background: var(--surface-hover, rgba(0,0,0,0.03));
+      border-color: var(--color-brand-primary, #009688);
     }
     .view-all-icon svg { display: block; }
     .view-all-label {
       white-space: normal !important; text-align: center;
       line-height: 1.25; font-size: 0.8125rem !important;
-      letter-spacing: 0.02em; color: var(--fh-sys-color-primary-text) !important;
+      letter-spacing: 0.02em; color: var(--color-brand-primary, #009688) !important;
       background: transparent !important;
       border: none !important;
     }
     .carousel-wrapper {
       position: relative;
       overflow: hidden;
-      border-radius: var(--fh-sys-radius-card);
+      border-radius: var(--radius-2xl, 32px);
     }
     .carousel-arrow {
       position: absolute; top: 0; bottom: 0; height: 100%;
@@ -144,17 +143,16 @@ function injectStyles() {
     .ca-icon-wrap {
       display: flex; align-items: center; justify-content: center;
       width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-      background: var(--fh-sys-color-surface);
-      border: 1px solid var(--fh-sys-color-border);
-      color: var(--fh-sys-color-text-muted);
+      background: #ffffff;
+      border: 1px solid var(--border-subtle, rgba(0,0,0,0.12));
+      color: var(--text-muted, #757575);
       transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
     .carousel-arrow:hover .ca-icon-wrap {
-      background: var(--fh-sys-color-surface-tint);
-      color: var(--fh-sys-color-primary-text);
-      border-color: var(--fh-sys-color-primary);
+      background: #ffffff; color: var(--color-brand-primary, #009688);
+      border-color: var(--color-brand-primary, #009688);
     }
-    .carousel-arrow:focus-visible .ca-icon-wrap { outline: 2px solid var(--fh-sys-color-primary-text); outline-offset: 2px; }
+    .carousel-arrow:focus-visible .ca-icon-wrap { outline: 2px solid var(--color-brand-primary, #009688); outline-offset: 2px; }
     .ca-icon-wrap svg { display: block; pointer-events: none; flex-shrink: 0; }
     @media (max-width: 600px) {
       .carousel-arrow { width: 40px; }
@@ -162,11 +160,11 @@ function injectStyles() {
     }
     .carousel-wrapper::before, .carousel-wrapper::after { display: none !important; }
     .home-error {
-      padding: 2rem 1rem; border-radius: var(--fh-sys-radius-card);
-      background: var(--fh-sys-color-surface-tint); border: 1px solid var(--fh-sys-color-border);
-      color: var(--fh-sys-color-accent-text); font-size: .95rem; text-align: center;
+      padding: 2rem 1rem; border-radius: var(--radius-xl, 28px);
+      background: #fff5f5; border: 1px solid #ffd0d0;
+      color: #c0392b; font-size: .95rem; text-align: center;
     }
-    .home-error small { display: block; margin-top: .4rem; color: var(--fh-sys-color-accent); font-family: monospace; font-size: .82em; }
+    .home-error small { display: block; margin-top: .4rem; color: #ff8a8a; font-family: monospace; font-size: .82em; }
   `;
   document.head.appendChild(s);
 }

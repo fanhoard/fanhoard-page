@@ -7,15 +7,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title data-translate="page-report">Report an Issue</title>
   <meta name="description" content="Report a bug, issue, or suggestion to help improve FanHoard.">
-  <meta name="theme-color" content="rgb(15, 163, 107)" />
+  <meta name="theme-color" content="#0d9488" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <link rel="icon" type="image/x-icon" href="/assets/images/fanhoard-verse360.ico" />
 
-  <!-- 1. Tokens & Design Core -->
-  <link rel="preload" href="/assets/css/design-core-tokens.css" as="style">
-  <link rel="stylesheet" href="/assets/css/design-core-tokens.css">
-  <link rel="preload" href="/assets/css/design-core.css" as="style">
-  <link rel="stylesheet" href="/assets/css/design-core.css">
+  <!-- 1. Tokens -->
   <link rel="preload" href="/assets/css/tokens.css" as="style">
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/ds.css">
@@ -53,13 +49,13 @@
     <main id="fv-main" class="fv-main" role="main" tabindex="-1">
       <div class="container-md stack-md">
 
-        <div class="c-page-header">
-          <h1 class="c-page-header__title" data-translate="report-new-title">Report an Issue</h1>
-          <p class="c-page-header__subtitle" data-translate="report-new-desc">Found a bug or have a suggestion? Let us know so we can improve FanHoard.</p>
-        </div>
+        <section class="fv-section fv-card con">
+          <p class="fv-section-label" data-translate="report-new-title">Report an Issue</p>
+          <p class="report-desc" data-translate="report-new-desc">Found a bug or have a suggestion? Let us know so we can improve FanHoard.</p>
+        </section>
 
         <section class="fv-section report-form-section">
-          <form id="report-form" class="c-card report-form-card" novalidate>
+          <form id="report-form" class="stack-md" novalidate>
 
             <!-- Issue Type -->
             <div class="setting-item fv-setting-row">
@@ -116,7 +112,7 @@
 
             <!-- Submit -->
             <div class="fv-setting-row">
-              <button type="submit" class="c-btn c-btn--solid c-btn--full report-submit" id="report-submit" data-translate="report-submit-btn">Submit Report</button>
+              <button type="submit" class="report-submit" id="report-submit" data-translate="report-submit-btn">Submit Report</button>
             </div>
 
           </form>
@@ -195,6 +191,7 @@
        HELPERS
        ══════════════════════════════════════════════ */
     function getLang() {
+      // คำนำหน้า URL (/th/ หรือ /en/) รู้ตั้งแต่ก่อนโหลด ส่วน selectedLang ถูกเขียนทีหลัง DOMContentLoaded
       var m = location.pathname.match(/^\/(th|en)(\/|$)/);
       if (m) return m[1];
       return localStorage.getItem('selectedLang') || localStorage.getItem('fv_lang') || 'en';
@@ -277,7 +274,6 @@
           'Please select an issue category.',
           '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E2B\u0E21\u0E27\u0E14\u0E2B\u0E21\u0E39\u0E48\u0E1B\u0E31\u0E0D\u0E2B\u0E32');
         valid = false;
-        if (!firstInvalidEl) firstInvalidEl = document.getElementById('report-category');
       }
 
       var details = document.getElementById('report-details').value.trim();
@@ -286,7 +282,6 @@
           'Please describe the problem details.',
           '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E23\u0E30\u0E1A\u0E38\u0E23\u0E32\u0E22\u0E25\u0E30\u0E40\u0E2D\u0E35\u0E22\u0E14\u0E1B\u0E31\u0E0D\u0E2B\u0E32');
         valid = false;
-        if (!firstInvalidEl) firstInvalidEl = document.getElementById('report-details');
       }
 
       var pageVal = document.getElementById('report-page').value;
@@ -295,7 +290,6 @@
           'Please select the page where the issue occurred.',
           '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E2B\u0E19\u0E49\u0E32\u0E17\u0E35\u0E48\u0E1E\u0E1A\u0E1B\u0E31\u0E0D\u0E2B\u0E32');
         valid = false;
-        if (!firstInvalidEl) firstInvalidEl = document.getElementById('report-page');
       } else if (pageVal === 'custom') {
         var customPage = document.getElementById('report-page-custom').value.trim();
         if (!customPage) {
@@ -303,7 +297,6 @@
             'Please specify the page URL or name.',
             '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E23\u0E30\u0E1A\u0E38 URL \u0E2B\u0E23\u0E37\u0E2D\u0E0A\u0E37\u0E48\u0E2D\u0E2B\u0E19\u0E49\u0E32');
           valid = false;
-          if (!firstInvalidEl) firstInvalidEl = document.getElementById('report-page-custom');
         }
       }
 
@@ -345,13 +338,13 @@
       var payload = {
         category: categoryLabel,
         message: details,
-        expectedBehavior: expected,
-        pageUrl: finalPage,
-        browser: browser,
-        email: email,
-        userAgent: detectUserAgent(),
-        appVersion: getAppVersion(),
-        timestamp: new Date().toISOString()
+        expected: expected || null,
+        page: finalPage,
+        browser: browser || detectUserAgent(),
+        email: email || null,
+        language: lang,
+        version: getAppVersion(),
+        device: window.screen.width + 'x' + window.screen.height + ' (' + window.innerWidth + 'x' + window.innerHeight + ')'
       };
 
       fetch(API_ENDPOINT, {
@@ -360,16 +353,21 @@
         body: JSON.stringify(payload)
       })
       .then(function(res) {
-        if (res.ok) {
-          showSuccessPopup(lang);
-          document.getElementById('report-form').reset();
-          clearErrors();
-        } else {
-          showErrorPopup(lang, res.status);
-        }
+        return res.json().catch(function() { return {}; }).then(function(data) {
+          if (!res.ok) {
+            var err = new Error((data && data.error) ? data.error : 'HTTP ' + res.status);
+            err.status = res.status;
+            throw err;
+          }
+          return data;
+        });
       })
-      .catch(function() {
-        showErrorPopup(lang, 0);
+      .then(function() {
+        showSuccessModal();
+        document.getElementById('report-form').reset();
+      })
+      .catch(function(err) {
+        showErrorModal(err && err.message ? err.message : null, err && err.status);
       })
       .finally(function() {
         submitBtn.disabled = false;
@@ -377,11 +375,12 @@
       });
     }
 
-    function showSuccessPopup(lang) {
-      var title = lang === 'th' ? '\u0E2A\u0E48\u0E07\u0E23\u0E32\u0E22\u0E07\u0E32\u0E19\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08' : 'Report Sent!';
+    function showSuccessModal() {
+      var lang = getLang();
+      var title = lang === 'th' ? '\u0E2A\u0E48\u0E07\u0E23\u0E32\u0E22\u0E07\u0E32\u0E19\u0E41\u0E25\u0E49\u0E27' : 'Report Sent!';
       var body  = lang === 'th'
-        ? '\u0E02\u0E2D\u0E1A\u0E04\u0E38\u0E13\u0E2A\u0E33\u0E2B\u0E23\u0E31\u0E1A\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25 \u0E17\u0E35\u0E48\u0E21\u0E07\u0E32\u0E19\u0E08\u0E30\u0E19\u0E33\u0E44\u0E1B\u0E1B\u0E23\u0E31\u0E1A\u0E1B\u0E23\u0E38\u0E07 QuickHoard \u0E15\u0E48\u0E2D\u0E44\u0E1B'
-        : 'Thank you for helping us improve QuickHoard! Our team has received your report.';
+        ? '\u0E02\u0E2D\u0E1A\u0E04\u0E38\u0E13\u0E2A\u0E33\u0E2B\u0E23\u0E31\u0E1A\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25 \u0E40\u0E23\u0E32\u0E0A\u0E48\u0E27\u0E22\u0E1B\u0E23\u0E31\u0E1A\u0E1B\u0E23\u0E38\u0E07 FanHoard \u0E43\u0E2B\u0E49\u0E14\u0E35\u0E02\u0E36\u0E42\u0E19\u0E21\u0E35\u0E41\u0E25\u0E49\u0E27'
+        : 'Thank you for your feedback! Your report helps us make FanHoard better.';
 
       if (window.showPopup) {
         window.showPopup({ title: title, message: body });
@@ -390,17 +389,25 @@
       }
     }
 
-    function showErrorPopup(lang, status) {
-      var title = lang === 'th' ? '\u0E40\u0E01\u0E34\u0E14\u0E02\u0E49\u0E2D\u0E1C\u0E34\u0E14\u0E1E\u0E25\u0E32\u0E14' : 'Submission Failed';
-      var body = '';
-
-      if (status === 400) {
+    function showErrorModal(serverError, status) {
+      var lang = getLang();
+      var title = lang === 'th' ? 'เกิดข้อผิดพลาด' : 'Submission Failed';
+      var body;
+      if (serverError === 'Report service is not configured') {
         body = lang === 'th'
-          ? '\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E43\u0E19\u0E1F\u0E2D\u0E23\u0E4C\u0E21\u0E44\u0E21\u0E48\u0E16\u0E39\u0E01\u0E15\u0E49\u0E2D\u0E07 \u0E0D\u0E23\u0E14\u0E15\u0E23\u0E20\u0E08\u0E2A\u0E2D\u0E1A\u0E41\u0E25\u0E30\u0E01\u0E23\u0E2D\u0E01\u0E2D\u0E35\u0E01\u0E04\u0E23\u0E31\u0E49\u0E07'
+          ? 'ระบบรายงานยังปรับปรุงอยู่ ทีมงานรู้อยู่แล้ว โปรดลองอีกครั้งภายหลัง'
+          : 'The report service is temporarily not ready. Our team already knows about it — please try again later.';
+      } else if (status === 429) {
+        body = lang === 'th'
+          ? 'ส่งซ้ำชิ้นเกินไป โปรดรอสักครู่แล้วลองอีกครั้ง'
+          : 'You are sending reports too quickly. Please wait a moment and try again.';
+      } else if (status === 400) {
+        body = lang === 'th'
+          ? 'ข้อมูลในฟอร์มไม่ถูกต้อง โปรดตรวจสอบและกรอกอีกครั้ง'
           : 'Some details in the form are not valid. Please check them and try again.';
       } else {
         body = lang === 'th'
-          ? '\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E15\u0E34\u0E14\u0E15\u0E48\u0E2D\u0E40\u0E0B\u0E34\u0E23\u0E4C\u0E1F\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E44\u0E14\u0E49 \u0E01\u0E23\u0E38\u0E13\u0E32\u0E15\u0E23\u0E20\u0E08\u0E2A\u0E2D\u0E1A\u0E01\u0E22\u0E23\u0E40\u0E0A\u0E37\u0E48\u0E2D\u0E21\u0E15\u0E48\u0E2D\u0E41\u0E25\u0E49\u0E27\u0E25\u0E2D\u0E07\u0E2D\u0E35\u0E01\u0E04\u0E23\u0E31\u0E49\u0E07'
+          ? 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง'
           : 'Could not reach the report server. Please check your connection and try again.';
       }
 

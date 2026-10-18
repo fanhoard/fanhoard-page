@@ -1,9 +1,12 @@
-/* What's New page v3.0 - Design Core Tokenized Redesign */
+/* What's New page v2.0 - Read surface mode tokenized redesign */
 
+
+
+/* Legacy */
 h1 {
-  color: var(--fh-sys-color-primary-text);
-  font-size: var(--fh-ref-size-body-sm);
-  margin: 0 0 var(--fh-ref-space-1) var(--fh-ref-space-5);
+  color: var(--color-brand-primary, #009688);
+  font-size: var(--step--1, 0.875rem);
+  margin: 0 0 5px 20px;
   display: flex;
   align-items: center;
 }
@@ -11,133 +14,135 @@ h1 span {
   display: inline-block;
   vertical-align: middle;
   line-height: 1;
-  margin: 0 0 var(--fh-ref-space-1) var(--fh-ref-space-4);
+  margin: 0 0 3px 18px;
 }
 ul {
   list-style-type: none;
   padding: 0;
 }
 ul li {
-  margin: var(--fh-ref-space-2) 0;
-  font-size: var(--fh-ref-size-body-sm);
+  margin: 10px 0;
+  font-size: 0.9em;
 }
 
 .wn-header-banner {
   text-align: left;
   max-width: var(--fv-container-sm, 720px);
   margin: 0 auto;
-  padding: var(--fh-ref-space-6) var(--fh-ref-space-5);
-  font-size: var(--fh-ref-size-headline);
-  font-weight: 700;
-  color: var(--fh-sys-color-primary-text);
+  padding: var(--space-6, 1.5rem) var(--space-5, 1.25rem) var(--space-2, 0.5rem);
+  font-size: var(--step-3, 1.5rem);
+  font-weight: var(--font-bold, 700);
+  color: var(--color-brand-primary, #009688);
 }
 
 #whats-new-container {
   max-width: var(--fv-container-sm, 720px);
   margin: 0 auto;
-  padding: var(--fh-ref-space-2) 0 var(--fh-ref-space-16);
-  font-size: var(--fh-ref-size-body-md);
-  display: flex;
-  flex-direction: column;
-  gap: var(--fh-ref-space-4);
+  padding: var(--space-2, 0.5rem) var(--space-5, 1.25rem) var(--space-16, 4rem);
+  font-size: var(--step-0, 1rem);
 }
 
 .wn-release {
-  background: var(--fh-comp-card-bg);
-  border-radius: var(--fh-comp-card-radius);
-  border: 1px solid var(--fh-sys-color-border-subtle);
-  padding: var(--fh-comp-card-padding);
-  box-shadow: var(--fh-comp-card-shadow);
-  margin-bottom: var(--fh-ref-space-4);
+  background: transparent;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06));
+  padding: 0 0 var(--space-8, 2rem) 0;
+  margin-bottom: var(--space-8, 2rem);
+  box-shadow: none;
 }
 
 .wn-release--current {
-  border-color: var(--fh-sys-color-primary);
+  border-bottom-color: var(--color-brand-primary, #009688);
+}
+
+.wn-release--past {
+  /* ไม่ลด opacity ทั้งบล็อก: ทำให้ตัวอักษรป้ายสีเขียวตกเหลือ 3.5:1 (ธีมสว่าง) ความเด่นที่ลดของรุ่นเก่ามาจากป้ายเวอร์ชัน/ชิปเวลาที่มีสไตล์แยกอยู่แล้ว */
 }
 
 .wn-history-label {
-  font-size: var(--fh-ref-size-body-sm);
-  font-weight: 600;
+  font-size: var(--step--1, 0.875rem);
+  font-weight: var(--font-semibold, 600);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--fh-sys-color-primary-text);
-  padding: var(--fh-ref-space-6) 0 var(--fh-ref-space-3);
+  color: var(--color-brand-text, #0f766e);
+  padding: var(--space-6, 1.5rem) 0 var(--space-3, 0.75rem);
 }
 
 .wn-header {
   display: flex;
   align-items: center;
-  gap: var(--fh-ref-space-2);
-  margin-bottom: var(--fh-ref-space-4);
+  gap: var(--space-2, 0.5rem);
+  margin-bottom: var(--space-4, 1rem);
   flex-wrap: wrap;
 }
 
 .wn-version-badge {
   display: inline-block;
-  background: var(--fh-sys-color-primary);
-  color: var(--fh-sys-color-on-primary);
-  font-size: var(--fh-ref-size-body-sm);
-  font-weight: 700;
-  padding: var(--fh-ref-space-1) var(--fh-ref-space-3);
-  border-radius: var(--fh-sys-radius-pill);
+  background: var(--color-brand-primary, #009688);
+  color: var(--color-on-brand, #ffffff);
+  font-size: var(--step--1, 0.875rem);
+  font-weight: var(--font-bold, 700);
+  padding: var(--space-1, 0.25rem) var(--space-3, 0.75rem);
+  border-radius: var(--radius-full, 9999px);
   letter-spacing: 0.05em;
   white-space: nowrap;
 }
 
 .wn-version-badge--past {
-  background: var(--fh-sys-color-surface-tint);
-  color: var(--fh-sys-color-text-muted);
+  background: var(--surface-hover, #f8fafc);
+  color: var(--text-muted, #757575);
 }
 
 .wn-time-chip {
-  font-size: var(--fh-ref-size-body-sm);
-  font-weight: 500;
-  color: var(--fh-sys-color-primary-text);
-  background: var(--fh-sys-color-surface-tint);
-  border: 1px solid var(--fh-sys-color-border-subtle);
-  padding: var(--fh-ref-space-1) var(--fh-ref-space-3);
-  border-radius: var(--fh-sys-radius-pill);
+  font-size: var(--step--1, 0.875rem);
+  font-weight: var(--font-medium, 500);
+  color: #0f766e;
+  background: var(--teal-50, #f0fdf4);
+  border: 1px solid rgba(0, 150, 136, 0.2);
+  padding: var(--space-1, 0.25rem) var(--space-3, 0.75rem);
+  border-radius: var(--radius-full, 9999px);
   white-space: nowrap;
 }
 
 .wn-release--past .wn-time-chip {
-  color: var(--fh-sys-color-text-muted);
-  background: var(--fh-sys-color-surface-tint);
-  border-color: var(--fh-sys-color-border-subtle);
+  color: var(--text-muted, #757575);
+  background: var(--surface-hover, #f8fafc);
+  border-color: rgba(0, 0, 0, 0.06);
 }
 
 .wn-date-full {
-  font-size: var(--fh-ref-size-body-sm);
-  color: var(--fh-sys-color-text-muted);
+  font-size: var(--step--1, 0.875rem);
+  color: var(--text-muted, #757575);
   white-space: nowrap;
-  font-weight: 400;
+  font-weight: var(--font-normal, 400);
 }
 
 .wn-title {
-  font-size: var(--fh-ref-size-title);
-  font-weight: 700;
-  margin: 0 0 var(--fh-ref-space-1);
+  font-size: var(--step-2, 1.25rem);
+  font-weight: var(--font-bold, 700);
+  margin: 0 0 var(--space-1, 0.25rem);
   line-height: 1.35;
-  color: var(--fh-sys-color-primary-text);
+  color: var(--color-brand-primary, #009688);
   letter-spacing: 0.005em;
 }
 
 h3.wn-title {
-  font-size: var(--fh-ref-size-body-md);
-  font-weight: 600;
-  color: var(--fh-sys-color-text-main);
+  font-size: var(--step-0, 1rem);
+  font-weight: var(--font-semibold, 600);
+  color: var(--text-main, #0f172a);
 }
 
 .wn-subtitle {
-  font-size: var(--fh-ref-size-body-md);
-  color: var(--fh-sys-color-text-muted);
-  margin: 0 0 var(--fh-ref-space-5);
+  font-size: var(--step-0, 1rem);
+  color: var(--text-muted, #757575);
+  margin: 0 0 var(--space-5, 1.25rem);
   line-height: 1.68;
-  font-weight: 400;
+  font-weight: var(--font-normal, 400);
 }
 
 .wn-section {
-  margin-bottom: var(--fh-ref-space-4);
+  margin-bottom: var(--space-4, 1rem);
 }
 
 .wn-section:last-child {
@@ -145,18 +150,18 @@ h3.wn-title {
 }
 
 .wn-section-head {
-  margin-bottom: var(--fh-ref-space-2);
+  margin-bottom: var(--space-2, 0.5rem);
 }
 
 .wn-section-pill {
   display: inline-flex;
   align-items: center;
-  font-size: var(--fh-ref-size-body-sm);
-  font-weight: 700;
+  font-size: var(--step--1, 0.875rem);
+  font-weight: var(--font-bold, 700);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: var(--fh-ref-space-1) var(--fh-ref-space-3);
-  border-radius: var(--fh-sys-radius-pill);
+  padding: var(--space-1, 0.25rem) var(--space-3, 0.75rem);
+  border-radius: var(--radius-full, 9999px);
   border: 1px solid transparent;
 }
 
@@ -174,17 +179,17 @@ h3.wn-title {
   align-items: stretch;
   border-radius: 0;
   border: none;
-  border-bottom: 1px solid var(--fh-sys-color-border-subtle);
+  border-bottom: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06));
   background: transparent;
   overflow: hidden;
-  padding: var(--fh-ref-space-3) 0;
+  padding: var(--space-3, 0.75rem) 0;
 }
 
 .wn-item-bar {
   width: 3px;
   flex-shrink: 0;
   border-radius: 2px;
-  margin-right: var(--fh-ref-space-3);
+  margin-right: var(--space-3, 0.75rem);
 }
 
 .wn-item-body {
@@ -194,27 +199,42 @@ h3.wn-title {
 }
 
 .wn-item-title {
-  font-size: var(--fh-ref-size-body-md);
-  font-weight: 600;
-  margin-bottom: var(--fh-ref-space-1);
+  font-size: var(--step-0, 1rem);
+  font-weight: var(--font-semibold, 600);
+  margin-bottom: var(--space-1, 0.25rem);
   line-height: 1.45;
-  color: var(--fh-sys-color-text-main);
+  color: var(--text-main, #0f172a);
 }
 
 .wn-item-desc {
-  font-size: var(--fh-ref-size-body-sm);
-  color: var(--fh-sys-color-text-muted);
+  font-size: var(--step--1, 0.875rem);
+  color: var(--text-muted, #757575);
   line-height: 1.68;
-  font-weight: 400;
+  font-weight: var(--font-normal, 400);
 }
 
 @media (max-width: 600px) {
   #whats-new-container {
-    padding: var(--fh-ref-space-1) var(--fh-ref-space-3) var(--fh-ref-space-12);
+    padding: var(--space-1, 0.25rem) var(--space-3, 0.75rem) var(--space-12, 3rem);
   }
   .wn-release {
-    padding: var(--fh-ref-space-4);
-    margin-bottom: var(--fh-ref-space-3);
+    padding: 0 0 var(--space-5, 1.25rem) 0;
+    margin-bottom: var(--space-5, 1.25rem);
+  }
+}
+
+@media (max-width: 450px) {
+  body {
+    font-size: 14px;
+  }
+  #whats-new-container {
+    padding: var(--space-1, 0.25rem) var(--space-2, 0.5rem) var(--space-10, 2.5rem);
+  }
+}
+
+@media (min-width: 600px) {
+  body {
+    font-size: 16px;
   }
 }
 
@@ -224,7 +244,9 @@ h3.wn-title {
   }
 }
 
+
+/* Focus ring accessibility */
 a:focus-visible, button:focus-visible, [role="button"]:focus-visible {
-  outline: 2px solid var(--fh-sys-color-primary-text);
+  outline: 2px solid var(--color-brand-primary, #009688);
   outline-offset: 2px;
 }

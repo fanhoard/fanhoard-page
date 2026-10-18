@@ -1,23 +1,14 @@
 ---
-version: 6.0.0
-date: 2026-10-18T03:22:18.636Z
+version: 6.1.0
+date: 2026-10-18T08:21:04.840Z
 notify: true
-title: Redesigned entire site with Design Core and brand new dark theme
-subtitle: All 14 pages updated with Emerald Fresh palette, Anuphan typography, high curved capsules, and full theme support.
+title: We brought back the previous design
+subtitle: The big v6.0.0 redesign is rolled back, and the familiar clean design is back on every page.
 ---
 
-**TL;DR** — The entire site across all 14 pages has been redesigned with the new Design Core system featuring an Emerald Fresh palette on warm cream background, Anuphan font, high curved capsule design, and a modern dark theme while keeping 100% of existing functionality.
-
-### Added
-
-- **Design Core system** Redesigned all 14 pages with standardized Design Core tokens, Emerald Fresh color palette (#0FA36B), cream canvas background (#FAF8F1), and Anuphan typography.
-- **Brand new dark theme** Introduced a modern warm dark theme with high contrast (WCAG AA compliant) across all pages.
-- **High-radius capsule layout** Rebuilt component cards, pills, and navigation bars with soft high-curved capsules for a native minimal look and feel.
+**TL;DR** — The visual overhaul from v6.0.0 went further than it should have. This release rolls it back, so every page looks and works like it did before v6.0.0.
 
 ### Changed
 
-- **Unified design structure** All pages (Home, Search, Discover, Scope, Setting, Community pages, and Platform pages) now share the same Design Core design system.
-
-### Preserved
-
-- **Full functionality & brand assets** All features, main group capsules in Discover, original animations, and brand logo remain untouched and 100% functional.
+- **Previous design restored** All pages are back to the colors, sizes, and layout you were used to before the v6.0.0 redesign. Nothing about how the site works has changed.
+- **v6.0.0 stays in history** The redesign is not lost. It remains in the release history, and what we learned from it will shape future improvements.
