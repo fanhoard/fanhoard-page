@@ -14,12 +14,16 @@
   <title>About FanHoard — Emoji &amp; Symbol Collection</title>
   <meta name="description" content="Learn about FanHoard, the team behind it, and our mission to make emojis and symbols accessible to everyone.">
 
-  <meta name="theme-color" content="#13b47f" />
+  <meta name="theme-color" content="rgb(15, 163, 107)" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
   <link rel="icon" type="image/x-icon" href="/assets/images/fanhoard-verse360.ico" />
 
-  <!-- 1. Tokens -->
+  <!-- 1. Tokens & Design Core -->
+  <link rel="preload" href="/assets/css/design-core-tokens.css" as="style">
+  <link rel="stylesheet" href="/assets/css/design-core-tokens.css">
+  <link rel="preload" href="/assets/css/design-core.css" as="style">
+  <link rel="stylesheet" href="/assets/css/design-core.css">
   <link rel="preload" href="/assets/css/tokens.css" as="style">
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/ds.css">
@@ -68,13 +72,13 @@
         <h1 class="page-title-about">About FanHoard</h1>
 
         <!-- Website Concept -->
-        <section class="fv-section section" aria-labelledby="about-concept">
+        <section class="fv-section section c-card" aria-labelledby="about-concept">
           <h2 class="title" id="about-concept" data-translate="1title"></h2>
           <p class="content" data-translate="1content"></p>
         </section>
 
         <!-- Content License -->
-        <section class="fv-section section" aria-labelledby="about-license">
+        <section class="fv-section section c-card" aria-labelledby="about-license">
           <h2 class="title" id="about-license" data-translate="6title"></h2>
           <p class="content" data-translate="5content">
             <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener" >CC0 1.0 Universal Public Domain Dedication</a>

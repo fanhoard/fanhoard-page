@@ -9,7 +9,7 @@
   <title>What's New — FanHoard Update Notes</title>
   <meta name="description" content="See the latest features and improvements added to FanHoard — release notes and update history.">
 
-  <meta name="theme-color" content="#13b47f" />
+  <meta name="theme-color" content="rgb(15, 163, 107)" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="fv-page" content="whats-new" />
 
@@ -18,7 +18,11 @@
 
   <link rel="icon" type="image/x-icon" href="/assets/images/fanhoard-verse360.ico" />
 
-  <!-- 1. Tokens -->
+  <!-- 1. Tokens & Design Core -->
+  <link rel="preload" href="/assets/css/design-core-tokens.css" as="style">
+  <link rel="stylesheet" href="/assets/css/design-core-tokens.css">
+  <link rel="preload" href="/assets/css/design-core.css" as="style">
+  <link rel="stylesheet" href="/assets/css/design-core.css">
   <link rel="preload" href="/assets/css/tokens.css" as="style">
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/ds.css">
@@ -65,14 +69,14 @@
     <main id="fv-main" class="fv-main" role="main" tabindex="-1">
       <div class="container-narrow stack-md">
 
-        <!-- h1 SEO — มีข้อความจริงสำหรับ Crawler -->
+        <!-- h1 SEO -->
         <h1 class="fv-sr-only">What's New in FanHoard — Release Notes</h1>
 
-        <!-- Visual page title (ไม่ใช่ heading) -->
-        <div class="wn-header-banner" aria-hidden="true">
+        <!-- Visual page title card -->
+        <section class="fv-section section c-card wn-header-banner" aria-hidden="true">
           <span data-translate="new_version_text"></span>
           <span id="title"></span>
-        </div>
+        </section>
 
         <section id="whats-new-container" aria-label="Release notes"></section>
 

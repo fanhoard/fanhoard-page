@@ -1,0 +1,516 @@
+/* ==========================================================================
+   FANHOARD DESIGN CORE COMPONENTS (ArchiveTune Style)
+   Path: assets/css/design-core.css
+   Dependency: assets/css/design-core-tokens.css
+   Style Characteristics: High radius, wide spacing, cream background foundation
+   ========================================================================== */
+
+@import url('./design-core-tokens.css');
+
+/* ------------------------------------------------------------------------
+   1. BUTTONS (ปุ่ม: solid / soft / capsule / ghost)
+   ------------------------------------------------------------------------ */
+
+.c-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fh-ref-space-2);
+  font-family: var(--fh-sys-font-body);
+  font-size: var(--fh-ref-size-body-md);
+  font-weight: 500;
+  line-height: 1.4;
+  padding: var(--fh-comp-button-padding-y) var(--fh-comp-button-padding-x);
+  border-radius: var(--fh-comp-button-radius);
+  border: 1.5px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+
+.c-btn:focus-visible {
+  outline: 2px solid var(--fh-sys-color-primary-text);
+  outline-offset: 2px;
+}
+
+.c-btn:active {
+  transform: scale(0.98);
+}
+
+/* Button Variant: Solid */
+.c-btn--solid,
+.c-btn-solid {
+  background-color: var(--fh-comp-button-bg-primary);
+  color: var(--fh-comp-button-text-primary);
+  border-color: var(--fh-comp-button-bg-primary);
+}
+
+.c-btn--solid:hover,
+.c-btn-solid:hover {
+  background-color: var(--fh-ref-color-primary-deep);
+  border-color: var(--fh-ref-color-primary-deep);
+}
+
+/* Button Variant: Soft */
+.c-btn--soft,
+.c-btn-soft {
+  background-color: var(--fh-comp-button-bg-secondary);
+  color: var(--fh-comp-button-text-secondary);
+  border-color: transparent;
+}
+
+.c-btn--soft:hover,
+.c-btn-soft:hover {
+  background-color: var(--fh-sys-color-primary);
+  color: var(--fh-sys-color-on-primary);
+}
+
+/* Button Variant: Capsule (Bordered Pill) */
+.c-btn--capsule,
+.c-btn-capsule {
+  background-color: var(--fh-sys-color-surface);
+  color: var(--fh-sys-color-text-main);
+  border-color: var(--fh-sys-color-border);
+  border-radius: var(--fh-sys-radius-pill);
+}
+
+.c-btn--capsule:hover,
+.c-btn-capsule:hover {
+  border-color: var(--fh-sys-color-primary-text);
+  color: var(--fh-sys-color-primary-text);
+  background-color: var(--fh-sys-color-surface-tint);
+}
+
+/* Button Variant: Ghost */
+.c-btn--ghost,
+.c-btn-ghost {
+  background-color: transparent;
+  color: var(--fh-sys-color-primary-text);
+  border-color: transparent;
+}
+
+.c-btn--ghost:hover,
+.c-btn-ghost:hover {
+  background-color: var(--fh-sys-color-surface-tint);
+}
+
+/* Button Sizes */
+.c-btn--sm,
+.c-btn-sm {
+  padding: var(--fh-ref-space-1) var(--fh-ref-space-4);
+  font-size: var(--fh-ref-size-body-sm);
+}
+
+.c-btn--lg,
+.c-btn-lg {
+  padding: var(--fh-ref-space-4) var(--fh-ref-space-8);
+  font-size: var(--fh-ref-size-body-lg);
+  font-weight: 600;
+}
+
+.c-btn--full,
+.c-btn-full {
+  width: 100%;
+}
+
+
+/* ------------------------------------------------------------------------
+   2. CARDS (การ์ด: High Radius, Wide Spacing, ArchiveTune Concept)
+   ------------------------------------------------------------------------ */
+
+.c-card {
+  background-color: var(--fh-comp-card-bg);
+  border-radius: var(--fh-comp-card-radius);
+  padding: var(--fh-comp-card-padding);
+  box-shadow: var(--fh-comp-card-shadow);
+  border: 1px solid var(--fh-sys-color-border-subtle);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
+}
+
+.c-card--interactive {
+  cursor: pointer;
+}
+
+.c-card--interactive:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px var(--fh-sys-color-border);
+  border-color: var(--fh-sys-color-primary);
+}
+
+.c-card--tinted {
+  background-color: var(--fh-sys-color-surface-tint);
+  border-color: var(--fh-sys-color-border);
+}
+
+.c-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--fh-ref-space-4);
+  gap: var(--fh-ref-space-3);
+}
+
+.c-card__title {
+  font-family: var(--fh-sys-font-body);
+  font-size: var(--fh-ref-size-title);
+  font-weight: 700;
+  color: var(--fh-sys-color-text-main);
+  line-height: 1.3;
+}
+
+.c-card__subtitle {
+  font-size: var(--fh-ref-size-body-sm);
+  color: var(--fh-sys-color-text-muted);
+  margin-top: var(--fh-ref-space-1);
+}
+
+.c-card__body {
+  font-size: var(--fh-ref-size-body-md);
+  color: var(--fh-sys-color-text-main);
+  line-height: 1.6;
+}
+
+.c-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--fh-ref-space-6);
+  padding-top: var(--fh-ref-space-4);
+  border-top: 1px solid var(--fh-sys-color-border-subtle);
+}
+
+
+/* ------------------------------------------------------------------------
+   3. BOTTOM NAVIGATION (แถบนำทางล่าง 4 แท็บสไตล์ pill โปร่ง)
+   ------------------------------------------------------------------------ */
+
+.c-bottom-nav {
+  position: fixed;
+  bottom: var(--fh-ref-space-5);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - (var(--fh-ref-space-5) * 2));
+  max-width: 480px;
+  z-index: 1000;
+}
+
+.c-bottom-nav__track {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background-color: var(--fh-sys-color-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--fh-sys-radius-pill);
+  padding: var(--fh-ref-space-2);
+  box-shadow: 0 12px 36px var(--fh-sys-color-border);
+  border: 1px solid var(--fh-sys-color-border);
+}
+
+.c-bottom-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: var(--fh-ref-space-2) var(--fh-ref-space-3);
+  border-radius: var(--fh-sys-radius-pill);
+  color: var(--fh-sys-color-text-muted);
+  text-decoration: none;
+  font-family: var(--fh-sys-font-body);
+  font-size: var(--fh-ref-size-caption);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  gap: var(--fh-ref-space-1);
+}
+
+.c-bottom-nav__item:hover {
+  color: var(--fh-sys-color-primary-text);
+}
+
+.c-bottom-nav__item.is-active,
+.c-bottom-nav__item--active {
+  background-color: var(--fh-sys-color-primary-container);
+  color: var(--fh-sys-color-primary-text);
+  font-weight: 600;
+}
+
+.c-bottom-nav__icon {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.c-bottom-nav__icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.c-bottom-nav__label {
+  line-height: 1.1;
+}
+
+
+/* ------------------------------------------------------------------------
+   4. CAPSULE CHIPS (แคปซูลชิป)
+   ------------------------------------------------------------------------ */
+
+.c-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fh-ref-space-2);
+  padding: var(--fh-ref-space-2) var(--fh-ref-space-4);
+  border-radius: var(--fh-comp-chip-radius);
+  background-color: var(--fh-comp-chip-bg);
+  color: var(--fh-comp-chip-text);
+  font-family: var(--fh-sys-font-body);
+  font-size: var(--fh-ref-size-body-sm);
+  font-weight: 500;
+  line-height: 1.4;
+  border: 1px solid transparent;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.c-chip:hover {
+  background-color: var(--fh-sys-color-primary);
+  color: var(--fh-sys-color-on-primary);
+}
+
+.c-chip--active,
+.c-chip.is-active {
+  background-color: var(--fh-sys-color-primary-text);
+  color: var(--fh-sys-color-on-primary);
+  font-weight: 600;
+}
+
+.c-chip--outline {
+  background-color: transparent;
+  border-color: var(--fh-sys-color-border);
+  color: var(--fh-sys-color-text-main);
+}
+
+.c-chip--outline:hover {
+  border-color: var(--fh-sys-color-primary-text);
+  background-color: var(--fh-sys-color-surface-tint);
+  color: var(--fh-sys-color-primary-text);
+}
+
+.c-chip--amber {
+  background-color: var(--fh-sys-color-accent);
+  color: var(--fh-sys-color-on-accent);
+}
+
+.c-chip--amber:hover {
+  background-color: var(--fh-ref-color-accent-dark);
+  color: var(--fh-ref-color-white);
+}
+
+.c-chip__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+
+/* ------------------------------------------------------------------------
+   5. LIST ROWS (แถวรายการ: High Radius, Soft Border)
+   ------------------------------------------------------------------------ */
+
+.c-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fh-ref-space-4);
+  padding: var(--fh-ref-space-4) var(--fh-ref-space-5);
+  background-color: var(--fh-sys-color-surface);
+  border-radius: var(--fh-ref-radius-lg);
+  border: 1px solid var(--fh-sys-color-border-subtle);
+  margin-bottom: var(--fh-ref-space-3);
+  transition: all 0.2s ease;
+}
+
+.c-list-row--interactive {
+  cursor: pointer;
+}
+
+.c-list-row--interactive:hover {
+  background-color: var(--fh-sys-color-surface-tint);
+  border-color: var(--fh-sys-color-border);
+  transform: translateX(3px);
+}
+
+.c-list-row__start {
+  display: flex;
+  align-items: center;
+  gap: var(--fh-ref-space-4);
+  flex: 1;
+  min-width: 0;
+}
+
+.c-list-row__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fh-ref-space-1);
+  min-width: 0;
+}
+
+.c-list-row__title {
+  font-family: var(--fh-sys-font-body);
+  font-size: var(--fh-ref-size-body-md);
+  font-weight: 600;
+  color: var(--fh-sys-color-text-main);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c-list-row__subtitle {
+  font-size: var(--fh-ref-size-body-sm);
+  color: var(--fh-sys-color-text-muted);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c-list-row__end {
+  display: flex;
+  align-items: center;
+  gap: var(--fh-ref-space-3);
+  flex-shrink: 0;
+}
+
+
+/* ------------------------------------------------------------------------
+   6. PAGE & SECTION HEADERS (หัวข้อหน้า)
+   ------------------------------------------------------------------------ */
+
+.c-page-header {
+  margin-bottom: var(--fh-ref-space-8);
+  padding-bottom: var(--fh-ref-space-4);
+  border-bottom: 2px solid var(--fh-sys-color-border-subtle);
+}
+
+.c-page-header__title {
+  font-family: var(--fh-sys-font-brand);
+  font-size: var(--fh-ref-size-display);
+  font-weight: 700;
+  color: var(--fh-sys-color-primary-text);
+  line-height: 1.2;
+  margin-bottom: var(--fh-ref-space-2);
+}
+
+.c-page-header__subtitle {
+  font-family: var(--fh-sys-font-body);
+  font-size: var(--fh-ref-size-body-lg);
+  color: var(--fh-sys-color-text-muted);
+  line-height: 1.5;
+}
+
+.c-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--fh-ref-space-5);
+  gap: var(--fh-ref-space-3);
+}
+
+.c-section-title {
+  font-family: var(--fh-sys-font-body);
+  font-size: var(--fh-ref-size-headline);
+  font-weight: 700;
+  color: var(--fh-sys-color-text-main);
+  line-height: 1.3;
+}
+
+.c-section-header__action {
+  font-family: var(--fh-sys-font-body);
+  font-size: var(--fh-ref-size-body-sm);
+  font-weight: 600;
+  color: var(--fh-sys-color-primary-text);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.c-section-header__action:hover {
+  color: var(--fh-ref-color-primary-deep);
+  text-decoration: underline;
+}
+
+
+/* ------------------------------------------------------------------------
+   7. ICON CIRCLES (วงกลมไอคอน)
+   ------------------------------------------------------------------------ */
+
+.c-icon-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--fh-ref-radius-full);
+  background-color: var(--fh-sys-color-primary-container);
+  color: var(--fh-sys-color-primary-text);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.c-icon-circle svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+/* Icon Circle Size Modifiers */
+.c-icon-circle--sm {
+  width: 36px;
+  height: 36px;
+}
+
+.c-icon-circle--sm svg {
+  width: 18px;
+  height: 18px;
+}
+
+.c-icon-circle--md {
+  width: 48px;
+  height: 48px;
+}
+
+.c-icon-circle--lg {
+  width: 60px;
+  height: 60px;
+}
+
+.c-icon-circle--lg svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Icon Circle Color Modifiers */
+.c-icon-circle--solid {
+  background-color: var(--fh-sys-color-primary-text);
+  color: var(--fh-sys-color-on-primary);
+}
+
+.c-icon-circle--amber {
+  background-color: var(--fh-sys-color-accent);
+  color: var(--fh-sys-color-on-accent);
+}
+
+.c-icon-circle--dark {
+  background-color: var(--fh-ref-color-dark);
+  color: var(--fh-ref-color-white);
+}

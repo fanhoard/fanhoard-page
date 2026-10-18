@@ -116,7 +116,7 @@
             flexDirection  : 'column',
             alignItems     : 'stretch',
             overflow       : 'hidden',
-            backgroundColor: 'var(--surface-base, #ffffff)',
+            backgroundColor: 'var(--fh-sys-color-bg, var(--surface-base))',
           });
           document.body.appendChild(ov);
           if (typeof requestAnimationFrame === 'function') {
@@ -137,7 +137,7 @@
             display      : 'flex',
             alignItems   : 'center',
             padding      : '8px 10px',
-            background   : 'var(--surface-base, #ffffff)',
+            background   : 'var(--fh-sys-color-bg, var(--surface-base))',
             borderBottom : '1px solid var(--border-subtle, rgba(0,0,0,.08))',
             flexShrink   : '0',
             width        : '100%',

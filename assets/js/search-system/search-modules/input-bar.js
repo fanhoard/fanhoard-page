@@ -51,7 +51,7 @@
         slot.setAttribute('role',       'button');
         slot.setAttribute('tabindex',   '0');
         slot.setAttribute('aria-label', LanguageService.t('back'));
-        slot.style.cssText = 'cursor:pointer;color:var(--tx-mid,#2b4539);pointer-events:auto;';
+        slot.style.cssText = 'cursor:pointer;color:var(--fh-sys-color-text-main);pointer-events:auto;';
 
         this._clickHandler = (e) => { e.preventDefault(); e.stopPropagation(); history.back(); };
         this._keyHandler   = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); history.back(); } };
@@ -99,7 +99,7 @@
           background            : 'rgba(0,0,0,.10)',
           border                : 'none',
           cursor                : 'pointer',
-          color                 : 'var(--tx-lo,#637a6e)',
+          color : 'var(--fh-sys-color-text-muted)',
           padding               : '0',
           WebkitTapHighlightColor: 'transparent',
         });
@@ -161,6 +161,7 @@
       const clearBtn = ClearBtnService.build();
       if (!wrapper.contains(clearBtn)) wrapper.appendChild(clearBtn);
 
+      this.syncPlaceholder();
       this._wrapperBuilt = true;
     },
 
@@ -236,9 +237,14 @@
       } catch {}
     },
 
+    updateUILanguage() {
+      this.syncPlaceholder();
+      if (M.RenderingService?.refreshCache) M.RenderingService.refreshCache();
+    },
+
     syncPlaceholder() {
       const inp = DOMService.get(CONFIG.DOM.searchInputId);
-      if (inp) DOMService.setAttr(inp, 'placeholder', LanguageService.t('placeholder'));
+      if (inp) DOMService.setAttr(inp, 'placeholder', LanguageService.t('search_placeholder'));
     },
   };
 

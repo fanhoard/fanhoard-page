@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design Core C1 Token System — Emerald Fresh Demo</title>
+  <link rel="stylesheet" href="../css/design-core-tokens.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--fh-sys-color-bg);
+      color: var(--fh-sys-color-text-main);
+      font-family: var(--fh-sys-font-body);
+      padding: var(--fh-ref-space-8);
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: var(--fh-ref-space-8);
+      padding-bottom: var(--fh-ref-space-4);
+      border-bottom: 2px solid var(--fh-sys-color-border);
+    }
+    h1 {
+      font-family: var(--fh-sys-font-brand);
+      font-size: var(--fh-ref-size-display);
+      color: var(--fh-sys-color-primary-text);
+      margin-bottom: var(--fh-ref-space-2);
+    }
+    .subtitle {
+      font-size: var(--fh-ref-size-body-lg);
+      color: var(--fh-sys-color-text-muted);
+    }
+    section {
+      background: var(--fh-comp-card-bg);
+      border-radius: var(--fh-comp-card-radius);
+      padding: var(--fh-comp-card-padding);
+      box-shadow: var(--fh-comp-card-shadow);
+      margin-bottom: var(--fh-ref-space-8);
+    }
+    h2 {
+      font-size: var(--fh-ref-size-headline);
+      color: var(--fh-sys-color-text-main);
+      margin-bottom: var(--fh-ref-space-4);
+      display: flex;
+      align-items: center;
+      gap: var(--fh-ref-space-2);
+    }
+    .grid-swatches {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--fh-ref-space-4);
+      margin-bottom: var(--fh-ref-space-6);
+    }
+    .swatch-card {
+      border: 1px solid var(--fh-sys-color-border-subtle);
+      border-radius: var(--fh-ref-radius-md);
+      overflow: hidden;
+      background: #fff;
+    }
+    .swatch-color {
+      height: 90px;
+      display: flex;
+      align-items: flex-end;
+      padding: var(--fh-ref-space-2);
+      font-weight: 600;
+      font-size: var(--fh-ref-size-caption);
+    }
+    .swatch-info {
+      padding: var(--fh-ref-space-3);
+    }
+    .swatch-title {
+      font-weight: 600;
+      font-size: var(--fh-ref-size-body-sm);
+    }
+    .swatch-hex {
+      font-size: var(--fh-ref-size-caption);
+      color: var(--fh-sys-color-text-muted);
+      font-family: monospace;
+    }
+    .badge-aa {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--fh-ref-color-green-tint);
+      color: var(--fh-ref-color-primary-dark);
+      border-radius: var(--fh-ref-radius-full);
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    /* Shape Scale Demo */
+    .shape-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--fh-ref-space-4);
+      align-items: center;
+    }
+    .shape-box {
+      background: var(--fh-ref-color-green-tint);
+      color: var(--fh-ref-color-primary-dark);
+      border: 1px solid var(--fh-ref-color-primary);
+      padding: var(--fh-ref-space-4) var(--fh-ref-space-6);
+      font-weight: 600;
+      font-size: var(--fh-ref-size-body-sm);
+    }
+
+    /* Component Demos */
+    .component-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--fh-ref-space-4);
+      align-items: center;
+      margin-bottom: var(--fh-ref-space-4);
+    }
+    .btn-primary {
+      background: var(--fh-comp-button-bg-primary);
+      color: var(--fh-comp-button-text-primary);
+      border: none;
+      border-radius: var(--fh-comp-button-radius);
+      padding: var(--fh-comp-button-padding-y) var(--fh-comp-button-padding-x);
+      font-size: var(--fh-ref-size-body-md);
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-secondary {
+      background: var(--fh-comp-button-bg-secondary);
+      color: var(--fh-comp-button-text-secondary);
+      border: none;
+      border-radius: var(--fh-comp-button-radius);
+      padding: var(--fh-comp-button-padding-y) var(--fh-comp-button-padding-x);
+      font-size: var(--fh-ref-size-body-md);
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .chip {
+      background: var(--fh-comp-chip-bg);
+      color: var(--fh-comp-chip-text);
+      border-radius: var(--fh-comp-chip-radius);
+      padding: var(--fh-ref-space-1) var(--fh-ref-space-4);
+      font-size: var(--fh-ref-size-body-sm);
+      font-weight: 600;
+    }
+    .accent-pill {
+      background: var(--fh-sys-color-accent);
+      color: var(--fh-sys-color-on-accent);
+      border-radius: var(--fh-sys-radius-pill);
+      padding: var(--fh-ref-space-2) var(--fh-ref-space-5);
+      font-size: var(--fh-ref-size-body-sm);
+      font-weight: 700;
+    }
+
+    /* Table Styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: var(--fh-ref-space-4);
+      font-size: var(--fh-ref-size-body-sm);
+    }
+    th, td {
+      padding: var(--fh-ref-space-3);
+      text-align: left;
+      border-bottom: 1px solid var(--fh-sys-color-border-subtle);
+    }
+    th {
+      background: var(--fh-ref-color-green-tint);
+      color: var(--fh-ref-color-primary-dark);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>FanHoard Design Core — Step C1 Tokens</h1>
+      <div class="subtitle">Material 3-Tier CSS Custom Properties System • Emerald Fresh Palette • Anuphan Google Font</div>
+    </header>
+
+    <!-- SECTION 1: COLOR PALETTE SWATCHES & CONTRAST -->
+    <section>
+      <h2>🎨 Approved Emerald Fresh Palette & AA Contrast</h2>
+      <div class="grid-swatches">
+        <div class="swatch-card">
+          <div class="swatch-color" style="background:#FAF8F1; color:#1B1A15;">Canvas</div>
+          <div class="swatch-info">
+            <div class="swatch-title">Canvas / Background</div>
+            <div class="swatch-hex">#FAF8F1</div>
+            <div class="badge-aa">Base Canvas</div>
+          </div>
+        </div>
+
+        <div class="swatch-card">
+          <div class="swatch-color" style="background:#FFFFFF; color:#1B1A15; border-bottom: 1px solid #eee;">Card</div>
+          <div class="swatch-info">
+            <div class="swatch-title">Card / Surface</div>
+            <div class="swatch-hex">#FFFFFF</div>
+            <div class="badge-aa">Base Surface</div>
+          </div>
+        </div>
+
+        <div class="swatch-card">
+          <div class="swatch-color" style="background:#0FA36B; color:#FFFFFF;">Primary</div>
+          <div class="swatch-info">
+            <div class="swatch-title">Primary Emerald</div>
+            <div class="swatch-hex">#0FA36B</div>
+            <div class="badge-aa">AA Large (3.24:1)</div>
+          </div>
+        </div>
+
+        <div class="swatch-card">
+          <div class="swatch-color" style="background:#087049; color:#FFFFFF;">Primary Dark</div>
+          <div class="swatch-info">
+            <div class="swatch-title">Primary Text/Solid</div>
+            <div class="swatch-hex">#087049</div>
+            <div class="badge-aa">AA Text (6.13:1)</div>
+          </div>
+        </div>
+
+        <div class="swatch-card">
+          <div class="swatch-color" style="background:#DDF3E7; color:#087049;">Green Tint</div>
+          <div class="swatch-info">
+            <div class="swatch-title">Green Tint / Container</div>
+            <div class="swatch-hex">#DDF3E7</div>
+            <div class="badge-aa">Container Tint</div>
+          </div>
+        </div>
+
+        <div class="swatch-card">
+          <div class="swatch-color" style="background:#F5B301; color:#1B1B17;">Accent Amber</div>
+          <div class="swatch-info">
+            <div class="swatch-title">Accent Amber</div>
+            <div class="swatch-hex">#F5B301</div>
+            <div class="badge-aa">AA Text (9.32:1)</div>
+          </div>
+        </div>
+
+        <div class="swatch-card">
+          <div class="swatch-color" style="background:#1B1B17; color:#FFFFFF;">Dark</div>
+          <div class="swatch-info">
+            <div class="swatch-title">Neutral Dark</div>
+            <div class="swatch-hex">#1B1B17</div>
+            <div class="badge-aa">AA Text (17.27:1)</div>
+          </div>
+        </div>
+
+        <div class="swatch-card">
+          <div class="swatch-color" style="background:#1B1A15; color:#FAF8F1;">Ink Primary</div>
+          <div class="swatch-info">
+            <div class="swatch-title">Ink Main Text</div>
+            <div class="swatch-hex">#1B1A15</div>
+            <div class="badge-aa">AA Text (16.40:1)</div>
+          </div>
+        </div>
+
+        <div class="swatch-card">
+          <div class="swatch-color" style="background:#57544A; color:#FAF8F1;">Ink Muted</div>
+          <div class="swatch-info">
+            <div class="swatch-title">Ink Secondary Text</div>
+            <div class="swatch-hex">#57544A</div>
+            <div class="badge-aa">AA Text (7.13:1)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: SHAPE SCALE & SPACING SCALE -->
+    <section>
+      <h2>📐 ArchiveTune Shape Scale (High Radius & Capsule)</h2>
+      <div class="shape-grid">
+        <div class="shape-box" style="border-radius: var(--fh-ref-radius-sm);">Small (8px)</div>
+        <div class="shape-box" style="border-radius: var(--fh-ref-radius-md);">Medium (14px)</div>
+        <div class="shape-box" style="border-radius: var(--fh-ref-radius-lg);">Large (20px)</div>
+        <div class="shape-box" style="border-radius: var(--fh-ref-radius-xl);">Extra Large (28px - Card)</div>
+        <div class="shape-box" style="border-radius: var(--fh-ref-radius-full);">Full Pill / Capsule (9999px)</div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: TYPOGRAPHY SCALE (ANUPHAN) -->
+    <section>
+      <h2>🔤 Type Scale (Anuphan Google Font)</h2>
+      <div style="display:flex; flex-direction:column; gap: var(--fh-ref-space-3);">
+        <div style="font-size: var(--fh-ref-size-display); font-weight: 700; color: var(--fh-sys-color-primary-text);">Display — 36px (2.25rem) / Anuphan Bold</div>
+        <div style="font-size: var(--fh-ref-size-headline); font-weight: 600;">Headline — 28px (1.75rem) / Anuphan SemiBold</div>
+        <div style="font-size: var(--fh-ref-size-title); font-weight: 600;">Title — 20px (1.25rem) / Anuphan SemiBold</div>
+        <div style="font-size: var(--fh-ref-size-body-lg); font-weight: 400;">Body Large — 18px (1.125rem) / Anuphan Regular — ระบบคลังสะสมแฟนดอมอันพรีเมียม</div>
+        <div style="font-size: var(--fh-ref-size-body-md); font-weight: 400;">Body Medium — 16px (1.0rem) / Anuphan Regular — ดีไซน์ระบบโทเคนกลาง 3 ชั้นตามมาตรฐาน Material</div>
+        <div style="font-size: var(--fh-ref-size-body-sm); font-weight: 400; color: var(--fh-sys-color-text-muted);">Body Small — 14px (0.875rem) / Anuphan Muted — รองรับการปรับแต่งธีมสว่างและธีมมืดอย่างสมบูรณ์</div>
+        <div style="font-size: var(--fh-ref-size-caption); font-weight: 400; color: var(--fh-sys-color-text-muted);">Caption — 12px (0.75rem) / Anuphan Caption — WCAG 2.1 AA Compliant</div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: LIVE COMPONENT CLASS TOKENS -->
+    <section>
+      <h2>🧩 Material Tier 3 Component Classes Demo</h2>
+      <div class="component-row">
+        <button class="btn-primary">Primary Solid Button</button>
+        <button class="btn-secondary">Secondary Pill Button</button>
+        <span class="chip">Emerald Chip Capsule</span>
+        <span class="accent-pill">Accent Amber Pill</span>
+      </div>
+    </section>
+
+    <!-- SECTION 5: FULL WCAG AA CONTRAST AUDIT TABLE -->
+    <section>
+      <h2>📊 Detailed Contrast Audit Report (WCAG 2.1 AA)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Color Pair Role</th>
+            <th>Foreground Hex</th>
+            <th>Background Hex</th>
+            <th>Measured Ratio</th>
+            <th>AA Requirement</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ink Main Text on Canvas</td>
+            <td>#1B1A15</td>
+            <td>#FAF8F1</td>
+            <td>16.40 : 1</td>
+            <td>≥ 4.5 : 1</td>
+            <td><span class="badge-aa">PASS (AAA)</span></td>
+          </tr>
+          <tr>
+            <td>Ink Muted Text on Canvas</td>
+            <td>#57544A</td>
+            <td>#FAF8F1</td>
+            <td>7.13 : 1</td>
+            <td>≥ 4.5 : 1</td>
+            <td><span class="badge-aa">PASS (AAA)</span></td>
+          </tr>
+          <tr>
+            <td>Ink Main Text on Card</td>
+            <td>#1B1A15</td>
+            <td>#FFFFFF</td>
+            <td>17.42 : 1</td>
+            <td>≥ 4.5 : 1</td>
+            <td><span class="badge-aa">PASS (AAA)</span></td>
+          </tr>
+          <tr>
+            <td>Ink Muted Text on Card</td>
+            <td>#57544A</td>
+            <td>#FFFFFF</td>
+            <td>7.58 : 1</td>
+            <td>≥ 4.5 : 1</td>
+            <td><span class="badge-aa">PASS (AAA)</span></td>
+          </tr>
+          <tr>
+            <td>Primary Dark Text on Canvas</td>
+            <td>#087049</td>
+            <td>#FAF8F1</td>
+            <td>5.77 : 1</td>
+            <td>≥ 4.5 : 1</td>
+            <td><span class="badge-aa">PASS (AA)</span></td>
+          </tr>
+          <tr>
+            <td>Primary Dark Text on Card</td>
+            <td>#087049</td>
+            <td>#FFFFFF</td>
+            <td>6.13 : 1</td>
+            <td>≥ 4.5 : 1</td>
+            <td><span class="badge-aa">PASS (AA)</span></td>
+          </tr>
+          <tr>
+            <td>Primary Emerald Large Text/UI</td>
+            <td>#0FA36B</td>
+            <td>#FFFFFF</td>
+            <td>3.24 : 1</td>
+            <td>≥ 3.0 : 1</td>
+            <td><span class="badge-aa">PASS (AA Large)</span></td>
+          </tr>
+          <tr>
+            <td>Ink Main Text on Green Tint</td>
+            <td>#1B1A15</td>
+            <td>#DDF3E7</td>
+            <td>14.98 : 1</td>
+            <td>≥ 4.5 : 1</td>
+            <td><span class="badge-aa">PASS (AAA)</span></td>
+          </tr>
+          <tr>
+            <td>Primary Dark Text on Green Tint</td>
+            <td>#087049</td>
+            <td>#DDF3E7</td>
+            <td>5.27 : 1</td>
+            <td>≥ 4.5 : 1</td>
+            <td><span class="badge-aa">PASS (AA)</span></td>
+          </tr>
+          <tr>
+            <td>Button White Text on Solid Primary Dark</td>
+            <td>#FFFFFF</td>
+            <td>#087049</td>
+            <td>6.13 : 1</td>
+            <td>≥ 4.5 : 1</td>
+            <td><span class="badge-aa">PASS (AA)</span></td>
+          </tr>
+          <tr>
+            <td>Dark Neutral Text on Accent Amber</td>
+            <td>#1B1B17</td>
+            <td>#F5B301</td>
+            <td>9.32 : 1</td>
+            <td>≥ 4.5 : 1</td>
+            <td><span class="badge-aa">PASS (AAA)</span></td>
+          </tr>
+          <tr>
+            <td>Accent Dark Text on Canvas</td>
+            <td>#945C00</td>
+            <td>#FAF8F1</td>
+            <td>5.21 : 1</td>
+            <td>≥ 4.5 : 1</td>
+            <td><span class="badge-aa">PASS (AA)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+
+</body>
+</html>

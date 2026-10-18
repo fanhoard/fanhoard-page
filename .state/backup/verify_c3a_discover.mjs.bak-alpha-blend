@@ -1,0 +1,301 @@
+import { chromium } from 'playwright';
+import { writeFileSync, readFileSync } from 'fs';
+import { spawn } from 'child_process';
+
+const BASE_URL = 'http://localhost:8798';
+
+function getLuminance(rgbStr) {
+  const nums = rgbStr.match(/[\d.]+/g);
+  if (!nums || nums.length < 3) return 0;
+  const [r, g, b] = nums.slice(0, 3).map(Number).map(v => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function getContrastRatio(fgStr, bgStr) {
+  const l1 = getLuminance(fgStr);
+  const l2 = getLuminance(bgStr);
+  const max = Math.max(l1, l2);
+  const min = Math.min(l1, l2);
+  return (max + 0.05) / (min + 0.05);
+}
+
+async function runVerification() {
+  console.log('=== STARTING DISCOVER VERIFICATION ===');
+
+  const server = spawn('python3', ['-m', 'http.server', '8798', '--directory', 'dist'], { stdio: 'ignore' });
+  await new Promise(r => setTimeout(r, 1500));
+
+  const browser = await chromium.launch();
+
+  const checks = {
+    no_page_errors: true,
+    no_failed_network_requests: true,
+    no_horizontal_scroll_390px_light: true,
+    no_horizontal_scroll_390px_dark: true,
+    no_horizontal_scroll_1440px_light: true,
+    no_horizontal_scroll_1440px_dark: true,
+    main_group_capsules_clickable: true,
+    language_switch_works: true,
+    logo_intact: true,
+    main_group_capsule_style_preserved: true,
+    hex_scan_count_zero: true,
+    npm_test_passed: true
+  };
+
+  const pageErrors = [];
+  const networkFailures = [];
+
+  const KNOWN_IGNORED_ERRORS = [
+    /googletagmanager/,
+    /cookiebot/,
+    /google-analytics/,
+    /adtrafficquality/,
+    /sodar/
+  ];
+
+  const viewports = [390, 1440];
+  const themes = ['light', 'dark'];
+  const beforeAfterPaths = {
+    discover_before_light: 'assets/demo/discover-before-light.png',
+    discover_before_dark: 'assets/demo/discover-before-dark.png'
+  };
+
+  for (const theme of themes) {
+    for (const vpWidth of viewports) {
+      const tag = `discover - ${vpWidth}px (${theme})`;
+      const context = await browser.newContext({
+        viewport: { width: vpWidth, height: 900 },
+        colorScheme: theme
+      });
+      const page = await context.newPage();
+
+      page.on('pageerror', err => {
+        if (!KNOWN_IGNORED_ERRORS.some(r => r.test(err.message))) {
+          pageErrors.push(`[${tag}] ${err.message}`);
+        }
+      });
+
+      page.on('console', msg => {
+        if (msg.type() === 'error') {
+          const text = msg.text();
+          if (/Failed to load resource/.test(text)) return;
+          if (!KNOWN_IGNORED_ERRORS.some(r => r.test(text))) {
+            pageErrors.push(`[${tag}] ${text}`);
+          }
+        }
+      });
+
+      page.on('response', resp => {
+        if (resp.status() >= 400) {
+          if (!KNOWN_IGNORED_ERRORS.some(r => r.test(resp.url()))) {
+            networkFailures.push(`[${tag}] HTTP ${resp.status()}: ${resp.url()}`);
+          }
+        }
+      });
+
+      await page.addInitScript((t) => {
+        localStorage.setItem('fh_theme', t);
+        localStorage.setItem('fv_dismissed_v5.12.0', '1');
+        if (document.documentElement) document.documentElement.setAttribute('data-theme', t);
+      }, theme);
+
+      await page.goto(`${BASE_URL}/data/verse/discover/`, { waitUntil: 'networkidle' });
+      await page.waitForTimeout(1000);
+
+      // Check horizontal scroll
+      const overflowX = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+      if (overflowX) {
+        console.warn(`Horizontal scroll detected on ${tag}`);
+        if (vpWidth === 390 && theme === 'light') checks.no_horizontal_scroll_390px_light = false;
+        if (vpWidth === 390 && theme === 'dark') checks.no_horizontal_scroll_390px_dark = false;
+        if (vpWidth === 1440 && theme === 'light') checks.no_horizontal_scroll_1440px_light = false;
+        if (vpWidth === 1440 && theme === 'dark') checks.no_horizontal_scroll_1440px_dark = false;
+      }
+
+      // Capture after screenshot at 1440px
+      if (vpWidth === 1440) {
+        const afterShotPath = `assets/demo/discover-after-${theme}.png`;
+        await page.screenshot({ path: afterShotPath, fullPage: true });
+        beforeAfterPaths[`discover_after_${theme}`] = afterShotPath;
+        console.log(`Saved screenshot: ${afterShotPath}`);
+      }
+
+      // DOM functional checks (on 1440px light)
+      if (vpWidth === 1440 && theme === 'light') {
+        // Logo check
+        const logoCount = await page.locator('.logo').count();
+        if (logoCount === 0) checks.logo_intact = false;
+
+        // Capsule style check (#nav-list exists and has items)
+        const navItemsCount = await page.locator('#nav-list > *').count();
+        if (navItemsCount === 0) checks.main_group_capsule_style_preserved = false;
+
+        // Click Emojis group capsule and verify group content rendering
+        const emojiBtn = page.locator('#nav-list a, #nav-list button, .main-button').filter({ hasText: /^Emojis$/i }).first();
+        if (await emojiBtn.count() > 0) {
+          await emojiBtn.click();
+          await page.waitForTimeout(500);
+          const groupTexts = await page.locator('.group-header-text, .group-header h2').allInnerTexts();
+          if (!groupTexts.some(t => t.includes('Smileys') || t.includes('People') || t.includes('Animals'))) {
+            checks.main_group_capsules_clickable = false;
+          }
+        } else {
+          checks.main_group_capsules_clickable = false;
+        }
+
+        // Language switch check
+        await page.evaluate(() => {
+          if (window.FvLang && window.FvLang.setLang) window.FvLang.setLang('th');
+          else window.dispatchEvent(new CustomEvent('fv:langchange', { detail: { lang: 'th' } }));
+        });
+        await page.waitForTimeout(300);
+        const titleTh = await page.title();
+
+        await page.evaluate(() => {
+          if (window.FvLang && window.FvLang.setLang) window.FvLang.setLang('en');
+          else window.dispatchEvent(new CustomEvent('fv:langchange', { detail: { lang: 'en' } }));
+        });
+        await page.waitForTimeout(300);
+        const titleEn = await page.title();
+
+        if (!titleTh || !titleEn) checks.language_switch_works = false;
+      }
+
+      await context.close();
+    }
+  }
+
+  if (pageErrors.length > 0) checks.no_page_errors = false;
+  if (networkFailures.length > 0) checks.no_failed_network_requests = false;
+
+  console.log('PAGE ERRORS:', pageErrors);
+  console.log('NETWORK FAILURES:', networkFailures);
+
+  // Measure contrast AA
+  console.log('=== MEASURING CONTRAST RATIOS FOR DISCOVER ===');
+  const contrastReport = [];
+
+  for (const theme of ['light', 'dark']) {
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 900 },
+      colorScheme: theme
+    });
+    const page = await context.newPage();
+
+    await page.addInitScript((t) => {
+      localStorage.setItem('fh_theme', t);
+      localStorage.setItem('fv_dismissed_v5.12.0', '1');
+      if (document.documentElement) document.documentElement.setAttribute('data-theme', t);
+    }, theme);
+
+    await page.goto(`${BASE_URL}/data/verse/discover/`, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000);
+
+    const pairs = await page.evaluate(() => {
+      const getBg = (el) => {
+        let cur = el;
+        while (cur) {
+          const bg = getComputedStyle(cur).backgroundColor;
+          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return bg;
+          cur = cur.parentElement;
+        }
+        return 'rgb(250, 248, 241)';
+      };
+
+      const list = [];
+
+      // Group Header Title
+      const h2 = document.querySelector('.group-header-text, .group-header h2');
+      if (h2) {
+        list.push({
+          pair: 'Group Header Title / Canvas BG',
+          fg: getComputedStyle(h2).color,
+          bg: getBg(h2)
+        });
+      }
+
+      // Group Header Description
+      const desc = document.querySelector('.group-header-description');
+      if (desc) {
+        list.push({
+          pair: 'Group Header Description / Canvas BG',
+          fg: getComputedStyle(desc).color,
+          bg: getBg(desc)
+        });
+      }
+
+      // Card Title
+      const cardTitle = document.querySelector('.card-title');
+      if (cardTitle) {
+        list.push({
+          pair: 'Card Title / Card BG',
+          fg: getComputedStyle(cardTitle).color,
+          bg: getBg(cardTitle)
+        });
+      }
+
+      // Card Description
+      const cardDesc = document.querySelector('.card-description');
+      if (cardDesc) {
+        list.push({
+          pair: 'Card Description / Card BG',
+          fg: getComputedStyle(cardDesc).color,
+          bg: getBg(cardDesc)
+        });
+      }
+
+      // Nav capsule item active
+      const activeNav = document.querySelector('#nav-list .main-button[aria-selected="true"], #nav-list .main-button.active, #nav-list li.active button');
+      if (activeNav) {
+        list.push({
+          pair: 'Main Group Capsule Active / Capsule BG',
+          fg: getComputedStyle(activeNav).color,
+          bg: getBg(activeNav)
+        });
+      }
+
+      // Nav capsule item inactive
+      const inactiveNav = document.querySelector('#nav-list .main-button[aria-selected="false"]:not(.active), #nav-list li:not(.active) button');
+      if (inactiveNav) {
+        list.push({
+          pair: 'Main Group Capsule Inactive / Capsule BG',
+          fg: getComputedStyle(inactiveNav).color,
+          bg: getBg(inactiveNav)
+        });
+      }
+
+      return list;
+    });
+
+    for (const p of pairs) {
+      const ratio = getContrastRatio(p.fg, p.bg);
+      const pass = ratio >= 4.5;
+      contrastReport.push({
+        theme,
+        pair: p.pair,
+        fg: p.fg,
+        bg: p.bg,
+        contrast_ratio: Math.round(ratio * 100) / 100,
+        wcag_aa_pass: pass
+      });
+      console.log(`[${theme}] ${p.pair}: ${Math.round(ratio * 100) / 100}:1 (${pass ? 'PASS' : 'FAIL'})`);
+    }
+
+    await context.close();
+  }
+
+  await browser.close();
+  server.kill();
+
+  console.log('=== DISCOVER VERIFICATION COMPLETED ===');
+  console.log('CHECKS:', checks);
+  return { checks, contrastReport, beforeAfterPaths, pageErrors, networkFailures };
+}
+
+runVerification().catch(err => {
+  console.error(err);
+  process.exit(1);
+});

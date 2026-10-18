@@ -1,0 +1,153 @@
+/* ==========================================================================
+   FANHOARD DESIGN CORE TOKENS (Material 3-Tier System)
+   Path: assets/css/design-core-tokens.css
+   Palette: Emerald Fresh (Canvas #FAF8F1, Card #FFFFFF, Primary #0FA36B, Green Tint #DDF3E7, Accent #F5B301, Dark #1B1B17, Ink #1B1A15 / #57544A)
+   Typography: Anuphan (Google Fonts)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* ------------------------------------------------------------------------
+     TIER 1: PRIMITIVE TOKENS (--fh-ref-*)
+     Raw design values, hex codes, absolute radii, base font families
+     ------------------------------------------------------------------------ */
+
+  /* Primitive Palette (Emerald Fresh) */
+  --fh-ref-color-canvas: #FAF8F1;
+  --fh-ref-color-card: #FFFFFF;
+  --fh-ref-color-primary: #0FA36B;
+  --fh-ref-color-primary-dark: #087049;
+  --fh-ref-color-primary-deep: #054A30;
+  --fh-ref-color-green-tint: #DDF3E7;
+  --fh-ref-color-accent-amber: #F5B301;
+  --fh-ref-color-accent-dark: #945C00;
+  --fh-ref-color-dark: #1B1B17;
+  --fh-ref-color-ink-primary: #1B1A15;
+  --fh-ref-color-ink-secondary: #57544A;
+  --fh-ref-color-white: #FFFFFF;
+
+  /* Dark Theme Primitives */
+  --fh-ref-color-dark-surface: #141411;
+  --fh-ref-color-dark-card: #22221D;
+  --fh-ref-color-dark-ink-primary: #F5F3EC;
+  --fh-ref-color-dark-ink-secondary: #BDBAA9;
+
+  /* Primitive Shape Scale (High Radius & Capsule - ArchiveTune Style) */
+  --fh-ref-radius-none: 0px;
+  --fh-ref-radius-xs: 4px;
+  --fh-ref-radius-sm: 8px;
+  --fh-ref-radius-md: 14px;
+  --fh-ref-radius-lg: 20px;
+  --fh-ref-radius-xl: 28px;
+  --fh-ref-radius-full: 9999px;
+
+  /* Primitive Spacing Scale (ArchiveTune Spacious Concept) */
+  --fh-ref-space-0: 0px;
+  --fh-ref-space-1: 4px;
+  --fh-ref-space-2: 8px;
+  --fh-ref-space-3: 12px;
+  --fh-ref-space-4: 16px;
+  --fh-ref-space-5: 20px;
+  --fh-ref-space-6: 24px;
+  --fh-ref-space-8: 32px;
+  --fh-ref-space-10: 40px;
+  --fh-ref-space-12: 48px;
+  --fh-ref-space-16: 64px;
+
+  /* Primitive Font Families */
+  --fh-ref-font-body: 'Anuphan', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --fh-ref-font-brand: 'FoglihtenNo07calt', 'Anuphan', serif;
+
+  /* Primitive Type Sizes */
+  --fh-ref-size-display: 2.25rem;   /* 36px */
+  --fh-ref-size-headline: 1.75rem;  /* 28px */
+  --fh-ref-size-title: 1.25rem;     /* 20px */
+  --fh-ref-size-body-lg: 1.125rem;  /* 18px */
+  --fh-ref-size-body-md: 1.0rem;    /* 16px */
+  --fh-ref-size-body-sm: 0.875rem;  /* 14px */
+  --fh-ref-size-caption: 0.75rem;   /* 12px */
+
+
+  /* ------------------------------------------------------------------------
+     TIER 2: SEMANTIC ROLE TOKENS (--fh-sys-*)
+     Role-based semantics mapped to primitives
+     ------------------------------------------------------------------------ */
+
+  /* Surface & Canvas Roles */
+  --fh-sys-color-bg: var(--fh-ref-color-canvas);
+  --fh-sys-color-surface: var(--fh-ref-color-card);
+  --fh-sys-color-surface-tint: var(--fh-ref-color-green-tint);
+
+  /* Primary Accent Roles */
+  --fh-sys-color-primary: var(--fh-ref-color-primary);
+  --fh-sys-color-primary-text: var(--fh-ref-color-primary-dark);
+  --fh-sys-color-on-primary: var(--fh-ref-color-white);
+  --fh-sys-color-primary-container: var(--fh-ref-color-green-tint);
+  --fh-sys-color-on-primary-container: var(--fh-ref-color-primary-dark);
+
+  /* Amber Accent Roles */
+  --fh-sys-color-accent: var(--fh-ref-color-accent-amber);
+  --fh-sys-color-accent-text: var(--fh-ref-color-accent-dark);
+  --fh-sys-color-on-accent: var(--fh-ref-color-dark);
+
+  /* Text & Border Roles */
+  --fh-sys-color-text-main: var(--fh-ref-color-ink-primary);
+  --fh-sys-color-text-muted: var(--fh-ref-color-ink-secondary);
+  --fh-sys-color-border: rgba(27, 26, 21, 0.12);
+  --fh-sys-color-border-subtle: rgba(27, 26, 21, 0.06);
+
+  /* Shape & Radius Semantics */
+  --fh-sys-radius-card: var(--fh-ref-radius-xl);
+  --fh-sys-radius-pill: var(--fh-ref-radius-full);
+  --fh-sys-radius-button: var(--fh-ref-radius-full);
+  --fh-sys-radius-chip: var(--fh-ref-radius-full);
+  --fh-sys-radius-input: var(--fh-ref-radius-lg);
+  --fh-sys-radius-modal: var(--fh-ref-radius-xl);
+
+  /* Typography Semantics */
+  --fh-sys-font-body: var(--fh-ref-font-body);
+  --fh-sys-font-brand: var(--fh-ref-font-brand);
+
+
+  /* ------------------------------------------------------------------------
+     TIER 3: COMPONENT CLASS TOKENS (--fh-comp-*)
+     Component specific element tokens
+     ------------------------------------------------------------------------ */
+
+  /* Button Tokens */
+  --fh-comp-button-bg-primary: var(--fh-ref-color-primary-dark);
+  --fh-comp-button-text-primary: var(--fh-ref-color-white);
+  --fh-comp-button-bg-secondary: var(--fh-sys-color-surface-tint);
+  --fh-comp-button-text-secondary: var(--fh-ref-color-primary-dark);
+  --fh-comp-button-radius: var(--fh-sys-radius-pill);
+  --fh-comp-button-padding-y: var(--fh-ref-space-3);
+  --fh-comp-button-padding-x: var(--fh-ref-space-6);
+
+  /* Card Tokens */
+  --fh-comp-card-bg: var(--fh-sys-color-surface);
+  --fh-comp-card-radius: var(--fh-sys-radius-card);
+  --fh-comp-card-padding: var(--fh-ref-space-6);
+  --fh-comp-card-shadow: 0 8px 24px rgba(27, 26, 21, 0.06);
+
+  /* Pill & Tab Tokens */
+  --fh-comp-pill-bg: var(--fh-sys-color-surface-tint);
+  --fh-comp-pill-text: var(--fh-ref-color-primary-dark);
+  --fh-comp-pill-radius: var(--fh-sys-radius-pill);
+
+  /* Chip Tokens */
+  --fh-comp-chip-bg: var(--fh-sys-color-surface-tint);
+  --fh-comp-chip-text: var(--fh-ref-color-primary-dark);
+  --fh-comp-chip-radius: var(--fh-sys-radius-pill);
+
+  /* Form Input Tokens */
+  --fh-comp-input-bg: var(--fh-sys-color-surface);
+  --fh-comp-input-border: var(--fh-sys-color-border);
+  --fh-comp-input-radius: var(--fh-sys-radius-input);
+  --fh-comp-input-text: var(--fh-sys-color-text-main);
+
+  /* Modal / Dialog Tokens */
+  --fh-comp-dialog-bg: var(--fh-sys-color-surface);
+  --fh-comp-dialog-radius: var(--fh-sys-radius-modal);
+  --fh-comp-dialog-shadow: 0 16px 40px rgba(27, 26, 21, 0.12);
+}

@@ -9,7 +9,7 @@
   <title>Planned Features — FanHoard Roadmap</title>
   <meta name="description" content="See what's coming next to FanHoard — our roadmap of planned features and upcoming improvements.">
 
-  <meta name="theme-color" content="#13b47f" />
+  <meta name="theme-color" content="rgb(15, 163, 107)" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-PJ397CLS');</script>
@@ -17,7 +17,11 @@
 
   <link rel="icon" href="/assets/images/fanhoard-verse360.ico" type="image/x-icon" />
 
-  <!-- 1. Tokens -->
+  <!-- 1. Tokens & Design Core -->
+  <link rel="preload" href="/assets/css/design-core-tokens.css" as="style">
+  <link rel="stylesheet" href="/assets/css/design-core-tokens.css">
+  <link rel="preload" href="/assets/css/design-core.css" as="style">
+  <link rel="stylesheet" href="/assets/css/design-core.css">
   <link rel="preload" href="/assets/css/tokens.css" as="style">
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/ds.css">
@@ -60,24 +64,24 @@
 
     <!-- Main Landmark -->
     <main id="fv-main" class="fv-main" role="main" tabindex="-1">
-      <div class="container-lg container stack-md">
+      <div class="container-narrow stack-md">
 
         <!-- Header card -->
-        <div class="fv-card roadmap-header">
+        <section class="fv-section section c-card roadmap-header">
           <div class="roadmap-version-badge" id="version-badge-display">
             <span data-translate="CV"></span>
             <span id="version-number"></span>
           </div>
-          <!-- h1 จริง SEO-friendly -->
+          <!-- h1 SEO-friendly -->
           <h1 class="roadmap-title" data-translate="h1F">Planned Features</h1>
           <p class="roadmap-subtitle" data-translate="pE">
-            <a href="/platform/whats_new/" class="new-feature-link" >What's New</a>
+            <a href="/platform/whats_new/" class="new-feature-link">What's New</a>
           </p>
-        </div>
+        </section>
 
         <!-- Feature list (JS renders here) -->
-        <section id="features" class="fv-section" aria-label="Feature list">
-          <h2 data-translate="FBV"></h2>
+        <section id="features" class="fv-section section c-card" aria-label="Feature list">
+          <h2 data-translate="FBV" class="c-card__title"></h2>
           <ul id="feature-list" aria-label="Planned features"></ul>
         </section>
 

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- GTM, Cookiebot, GA4 — เหมือนเดิม -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-PJ397CLS');</script>
   <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="16a70d79-a7a7-4b66-89da-afb49e453c67" data-blockingmode="auto" type="text/javascript"></script>
 
@@ -10,37 +9,23 @@
 
   <!--
     [FIX 2026-07-28 v2]
-    ไฟล์นี้เป็น CUSTOM 404 PAGE ของ FanHoard — ใช้สำหรับทุก URL ที่ไม่มี
-    หน้าจริง (รวมถึง /, /index.html, และ path อื่นๆ ที่ไม่ match กับ
-    _redirects rules ใดๆ)
-
-    วิธีการทำงาน (production):
-      Cloudflare Pages _redirects rule สุดท้าย:
-        /* /index.html 404
-      จะส่ง HTTP 404 status พร้อม content ของ index.html นี้ออกไป
-      → browser ไม่ขึ้น default 404 page เอง
-      → ระบบเราควบคุม UX ของ 404 page ทั้งหมด
-      → Google ไม่ index หน้านี้ (เพราะ noindex + 404 status)
-      → ไม่ใช่ "Page with redirect" → แก้ปัญหา GSC indexing
-
-    ห้ามใส่:
-      - lang-proxy.js (จะทำให้เกิด JS redirect ซ้ำ → Google เห็นเป็น redirect)
-      - meta refresh (จะทำให้ Google มองเป็น redirect ด้วย)
-      - canonical / hreflang (เป็น 404 ไม่ควรมี canonical)
-      - "index, follow" (ต้องเป็น noindex เพราะเป็น 404)
+    CUSTOM 404 PAGE ของ FanHoard — ใช้สำหรับทุก URL ที่ไม่มีหน้าจริง
   -->
 
   <title>Page Not Found — FanHoard</title>
   <meta name="description" content="The page you're looking for doesn't exist. Let's get you back to FanHoard.">
   <meta name="robots" content="noindex, nofollow">
 
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FAFAFC">
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0F172A">
+  <meta name="theme-color" content="rgb(15, 163, 107)" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <link rel="icon" type="image/x-icon" href="/assets/images/fanhoard-verse360.ico">
 
-  <!-- 1. Tokens -->
+  <!-- 1. Tokens & Design Core -->
+  <link rel="preload" href="/assets/css/design-core-tokens.css" as="style">
+  <link rel="stylesheet" href="/assets/css/design-core-tokens.css">
+  <link rel="preload" href="/assets/css/design-core.css" as="style">
+  <link rel="stylesheet" href="/assets/css/design-core.css">
   <link rel="preload" href="/assets/css/tokens.css" as="style">
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/ds.css">
@@ -48,13 +33,12 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8233915433564101" crossorigin="anonymous"></script>
 
   <style>
-    /* 404 landing shell styles — minimal centered Read/Persuade design */
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-      background: #ffffff;
-      color: var(--text-main, #0f172a);
+      font-family: var(--fh-sys-font-body, system-ui, sans-serif);
+      background-color: var(--fh-sys-color-bg);
+      color: var(--fh-sys-color-text-main);
     }
 
     .fv-app {
@@ -63,7 +47,7 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: var(--space-8, 32px) var(--space-4, 16px);
+      padding: var(--fh-ref-space-8) var(--fh-ref-space-4);
     }
 
     .wrap {
@@ -72,7 +56,7 @@
     }
 
     .brand-name {
-      font-family: 'FoglihtenNo07calt', Georgia, serif;
+      font-family: var(--fh-sys-font-brand, 'FoglihtenNo07calt', Georgia, serif);
     }
 
     .badge {
@@ -81,45 +65,44 @@
       justify-content: center;
       padding: 0;
       background: transparent;
-      color: var(--color-brand-primary, #009688);
+      color: var(--fh-sys-color-primary-text);
       border: none;
-      font-size: var(--step-0, 16px);
-      font-weight: var(--font-semibold, 600);
+      font-size: var(--fh-ref-size-body-md);
+      font-weight: 600;
       letter-spacing: 0.04em;
-      margin-bottom: var(--space-4, 16px);
+      margin-bottom: var(--fh-ref-space-4);
     }
 
-    /* Visual 404 heading */
     h1 {
-      font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+      font-family: var(--fh-sys-font-body, system-ui, sans-serif);
       font-size: clamp(4rem, 8vw, 6rem);
-      margin: 0 0 var(--space-2, 8px);
+      margin: 0 0 var(--fh-ref-space-2);
       line-height: 1;
-      color: var(--color-brand-primary, #009688);
+      color: var(--fh-sys-color-primary-text);
       letter-spacing: -0.04em;
-      font-weight: var(--font-bold, 700);
+      font-weight: 700;
     }
 
     h2 {
-      font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-      margin: 0 0 var(--space-2, 8px);
-      font-size: var(--step-2, 22px);
-      font-weight: var(--font-semibold, 600);
+      font-family: var(--fh-sys-font-body, system-ui, sans-serif);
+      margin: 0 0 var(--fh-ref-space-2);
+      font-size: var(--fh-ref-size-title);
+      font-weight: 600;
       letter-spacing: -0.02em;
-      color: var(--text-main, #0f172a);
+      color: var(--fh-sys-color-text-main);
     }
 
     p {
-      margin: 0 auto var(--space-6, 24px);
-      color: var(--text-muted, #757575);
-      font-size: var(--step-0, 16px);
-      line-height: var(--lh-normal, 1.6);
+      margin: 0 auto var(--fh-ref-space-6);
+      color: var(--fh-sys-color-text-muted);
+      font-size: var(--fh-ref-size-body-md);
+      line-height: 1.6;
       max-width: 480px;
     }
 
     .actions {
       display: flex;
-      gap: var(--space-3, 12px);
+      gap: var(--fh-ref-space-3);
       justify-content: center;
       flex-wrap: wrap;
     }
@@ -128,13 +111,13 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: var(--space-2, 8px);
+      gap: var(--fh-ref-space-2);
       -webkit-tap-highlight-color: transparent;
-      font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-      font-weight: var(--font-semibold, 600);
-      font-size: var(--step-0, 16px);
-      padding: var(--space-3, 12px) var(--space-6, 24px);
-      border-radius: var(--radius-full, 9999px);
+      font-family: var(--fh-sys-font-body, system-ui, sans-serif);
+      font-weight: 600;
+      font-size: var(--fh-ref-size-body-md);
+      padding: var(--fh-ref-space-3) var(--fh-ref-space-6);
+      border-radius: var(--fh-sys-radius-pill);
       text-decoration: none;
       line-height: 1.5;
       cursor: pointer;
@@ -142,47 +125,45 @@
       min-height: 44px;
       min-width: 44px;
       box-shadow: none !important;
-      transition: background-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
-                  color var(--duration-fast, 150ms) var(--ease-out, ease-out),
-                  border-color var(--duration-fast, 150ms) var(--ease-out, ease-out);
+      transition: all 0.2s ease-in-out;
     }
 
-    .btn-primary {
-      background: var(--color-brand-primary, #009688);
-      color: #ffffff;
-      border: 1px solid transparent;
+    a.btn-primary, .btn-primary {
+      background-color: var(--fh-comp-button-bg-primary) !important;
+      color: var(--fh-comp-button-text-primary) !important;
+      border: 1.5px solid transparent;
     }
 
     .btn-primary:hover {
-      background: var(--color-brand-hover, #00796b);
-      color: #ffffff;
+      background: var(--fh-ref-color-primary-deep);
+      color: var(--fh-sys-color-on-primary);
     }
 
     .btn-secondary {
-      background: transparent;
-      color: var(--text-muted, #757575);
-      border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
+      background: var(--fh-sys-color-surface);
+      color: var(--fh-sys-color-text-main);
+      border: 1.5px solid var(--fh-sys-color-border-subtle);
     }
 
     .btn-secondary:hover {
-      background: rgba(0, 0, 0, 0.03);
-      color: var(--text-main, #0f172a);
-      border-color: rgba(0, 0, 0, 0.12);
+      background: var(--fh-sys-color-surface-tint);
+      color: var(--fh-sys-color-primary-text);
+      border-color: var(--fh-sys-color-border);
     }
 
     .fv-hero {
-      padding: var(--space-8, 32px) var(--space-4, 16px);
+      padding: var(--fh-ref-space-8) var(--fh-ref-space-4);
     }
 
     .note {
-      margin-top: var(--space-5, 20px);
-      font-size: var(--step--1, 13px);
-      color: var(--text-muted, #757575);
+      margin-top: var(--fh-ref-space-5);
+      font-size: var(--fh-ref-size-body-sm);
+      color: var(--fh-sys-color-text-muted);
     }
 
     .btn-primary:focus-visible,
     .btn-secondary:focus-visible {
-      outline: 3px solid rgba(13, 148, 136, 0.35);
+      outline: 2px solid var(--fh-sys-color-primary-text);
       outline-offset: 2px;
     }
 
@@ -190,19 +171,19 @@
       position: fixed; top: 8px; left: 8px; z-index: 1000;
       width: auto; height: auto; clip: auto; overflow: visible; white-space: normal;
       padding: 8px 16px; margin: 0;
-      background: var(--color-brand-primary, #0d9488);
-      color: #ffffff; font-weight: 700; text-decoration: none;
-      border-radius: var(--radius-md, 12px);
+      background: var(--fh-sys-color-primary);
+      color: var(--fh-sys-color-on-primary); font-weight: 700; text-decoration: none;
+      border-radius: var(--fh-sys-radius-input);
     }
 
     @media (max-width: 480px) {
       h1 { font-size: 3.5rem; }
       h2 { font-size: 1.25rem; }
       p { font-size: 0.95rem; }
-      .fv-hero { padding: var(--space-6, 24px) var(--space-3, 12px); }
+      .fv-hero { padding: var(--fh-ref-space-6) var(--fh-ref-space-3); }
       .btn-primary, .btn-secondary {
-        font-size: var(--step-0, 16px);
-        padding: var(--space-3, 12px) var(--space-5, 20px);
+        font-size: var(--fh-ref-size-body-md);
+        padding: var(--fh-ref-space-3) var(--fh-ref-space-5);
         min-height: 44px;
         width: 100%;
       }
@@ -223,9 +204,8 @@
     <main id="fv-main" class="fv-main fv-app" role="main" tabindex="-1" data-page="404">
       <section class="fv-section fv-hero">
         <div class="container-lg">
-          <div class="wrap">
+          <div class="wrap c-card" style="margin: 0 auto; padding: var(--fh-comp-card-padding);">
             <div class="badge brand-name">FanHoard</div>
-            <!-- h1 เป็น visual "404" — เหมาะสมสำหรับ error page -->
             <h1>404</h1>
             <h2>Oops! Lost your way?</h2>
             <p>This page doesn't exist. Maybe it moved, or maybe the URL's off. Either way, let's get you somewhere better.</p>

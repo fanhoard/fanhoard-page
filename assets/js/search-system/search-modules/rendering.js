@@ -102,7 +102,7 @@
                        + (catName  ? `<span class="result-card__tag">${esc(catName)}</span>`  : '');
         const encodedName = nameStr ? StringService.encodeUrl(nameStr) : '';
 
-        return `<div class="result-card${vertical ? ' result-card--vertical' : ''}" role="button" tabindex="0" aria-label="${esc(nameStr || text)}" data-text="${StringService.encodeUrl(text)}" data-name="${encodedName}"><div class="result-card__glyph">${esc(disp)}</div><div class="result-card__body"><div class="result-card__title">${esc(titleStr)}</div><div class="result-card__subtitle">${esc(subStr)}</div>${tags ? `<div class="result-card__tags" aria-hidden="true">${tags}</div>` : ''}</div></div>`;
+        return `<div class="result-card c-card${vertical ? ' result-card--vertical' : ''}" role="button" tabindex="0" aria-label="${esc(nameStr || text)}" data-text="${StringService.encodeUrl(text)}" data-name="${encodedName}"><div class="result-card__glyph">${esc(disp)}</div><div class="result-card__body"><div class="result-card__title">${esc(titleStr)}</div><div class="result-card__subtitle">${esc(subStr)}</div>${tags ? `<div class="result-card__tags" aria-hidden="true">${tags}</div>` : ''}</div></div>`;
       } catch {
         return '<div class="result-card"><div class="result-card__glyph">-</div></div>';
       }
@@ -353,7 +353,7 @@
         const pills  = [];
 
         pills.push(
-          `<button class="filter-pill ds-pill${active === 'all' ? ' active' : ''}" data-filter-type="all" aria-pressed="${active === 'all'}">`
+          `<button class="filter-pill c-chip${active === 'all' ? ' active' : ''}" data-filter-type="all" aria-pressed="${active === 'all'}">`
           + StringService.escapeHtml(LanguageService.t('all_types'))
           + `</button>`
         );
@@ -367,7 +367,7 @@
           const escVal = StringService.escapeHtml(val);
           const esc = StringService.escapeHtml(lbl);
           pills.push(
-            `<button class="filter-pill ds-pill${active === val ? ' active' : ''}" data-filter-type="${escVal}" aria-pressed="${active === val}">`
+            `<button class="filter-pill c-chip${active === val ? ' active' : ''}" data-filter-type="${escVal}" aria-pressed="${active === val}">`
             + esc
             + `</button>`
           );
@@ -409,7 +409,7 @@
         const pills  = [];
 
         pills.push(
-          `<button class="filter-pill filter-pill--cat${active === 'all' ? ' active' : ''}" data-filter-cat="all" aria-pressed="${active === 'all'}">`
+          `<button class="filter-pill filter-pill--cat c-chip${active === 'all' ? ' active' : ''}" data-filter-cat="all" aria-pressed="${active === 'all'}">`
           + StringService.escapeHtml(LanguageService.t('all_categories'))
           + `</button>`
         );
@@ -419,7 +419,7 @@
           if (!lbl) continue;
           const esc = StringService.escapeHtml(lbl);
           pills.push(
-            `<button class="filter-pill filter-pill--cat${active === c.key ? ' active' : ''}" data-filter-cat="${StringService.escapeHtml(c.key)}" aria-pressed="${active === c.key}">`
+            `<button class="filter-pill filter-pill--cat c-chip${active === c.key ? ' active' : ''}" data-filter-cat="${StringService.escapeHtml(c.key)}" aria-pressed="${active === c.key}">`
             + esc
             + `</button>`
           );

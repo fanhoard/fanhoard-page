@@ -1,0 +1,300 @@
+@import './design-core-tokens.css';
+@import './base.css';
+@import './layout.css';
+
+/* ── Font Assets (WOFF2) ── */
+@font-face {
+  font-family: 'FoglihtenNo07calt';
+  src: url('/assets/fonts/FoglihtenNo07calt.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'FoglihtenNo07';
+  src: url('/assets/fonts/FoglihtenNo07.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MunroSmall';
+  src: url('/assets/fonts/MunroSmall.woff2') format('woff2');
+  font-display: swap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FANHOARD DESIGN TOKENS v3.0 (Phase 1 Native Foundation - Pastel Green Teal)
+   assets/css/tokens.css
+   Single Source of Truth for Design Custom Properties
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Shell & Navigation Layout Tokens ── */
+  --fv-nav-height: 56px;
+  --fv-nav-offset: var(--fv-nav-height);
+  --fv-scroll-offset: calc(var(--fv-nav-height) + var(--space-4));
+  --fv-nav-top-h: var(--fv-nav-height);
+
+  /* ── Brand Core Palette (Pastel Green-Leaning Teal) ── */
+  --color-teal-50:  #f0fdf6;
+  --color-teal-100: #d1fae5;
+  --color-teal-400: #34d399;
+  --color-teal-500: #10b981;
+  --color-teal-600: #0f836c; /* Primary interactive AA (4.68:1 on light) */
+  --color-teal-700: #0d6f5c;
+  --color-teal-800: #0b5b4c;
+  --color-teal-900: #08473c;
+
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+
+  --color-slate-50:  #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+
+  /* ── Semantic Colors (Light Default) ── */
+  --color-brand-primary: var(--color-teal-600);
+  --color-brand-hover:   var(--color-teal-700);
+  --color-brand-active:  var(--color-teal-800);
+  --color-brand-text:    #0d7360; /* AA >= 4.9:1 on white, accent tint and neutral hover rows */
+  --color-on-brand:      #ffffff; /* ตัวอักษรบนพื้น --color-brand-primary (ขาว 4.7:1 ขึ้นไป) ห้ามเขียน #fff ตายตัวบนพื้นแบรนด์ */
+  --color-brand-accent:  var(--color-emerald-500);
+
+  /* Surfaces are NEUTRAL (60-30-10): the brand color is an accent, never a background.
+     Page and card are white; --surface-hover is a quiet cool neutral for rows and
+     inactive controls. Brand-tinted fills exist only as --surface-accent (selected). */
+  --surface-base:   #ffffff;
+  --surface-card:   #ffffff;
+  --surface-hover:  #f4f7f6;
+  --surface-active: #e9eeec;
+  --surface-accent: var(--color-teal-50);
+
+  --text-main:      var(--color-slate-900);
+  --text-muted:     var(--color-slate-700);
+  --text-faint:     var(--color-slate-500);
+  --text-inverse:   #ffffff;
+
+  --border-subtle:  var(--color-slate-200);
+  --border-strong:  var(--color-slate-300);
+  --border-brand:   var(--color-teal-600);
+
+  --color-success:  #16a34a;
+  --color-warning:  #d97706;
+  --color-danger:   #dc2626;
+  --color-info:     #2563eb;
+
+  /* ── Legacy Backward-Compatibility Mappings ── */
+  --fv-brand-teal:       var(--color-brand-primary);
+  --fv-brand-teal-light: var(--color-brand-primary);
+  --fv-brand-teal-dark:  var(--color-brand-hover);
+
+  --fv-gradient-teal: var(--color-brand-primary, #0f836c);
+  --fv-gradient-btn:  var(--color-brand-primary, #0f836c);
+
+  --fv-surface-page:       var(--surface-card);
+  --fv-surface-soft:       var(--surface-hover);
+  --fv-surface-hover:      var(--surface-hover);
+  --fv-surface-teal-hover: var(--surface-accent);
+
+  --fv-text-primary:   var(--text-main);
+  --fv-text-secondary: var(--text-muted);
+  --fv-text-faint:     var(--text-faint);
+  --fv-text-inverse:   var(--text-inverse);
+
+  --c-teal-border: var(--border-subtle);
+  --c-heading:     var(--text-main);
+  --c-body:        var(--text-muted);
+
+  /* ── Typography Scale (Calm Fluid Scale) ── */
+  --font-sans:    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-heading: var(--font-sans);
+  --font-mono:    ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+
+  --font-normal:   400;
+  --font-medium:   500;
+  --font-semibold: 600;
+  --font-bold:     700;
+
+  --step--1: clamp(0.8125rem, 0.80rem + 0.12vw, 0.875rem);
+  --step-0:  clamp(1.00rem, 0.96rem + 0.20vw, 1.125rem);
+  --step-1:  clamp(1.1875rem, 1.12rem + 0.35vw, 1.3125rem);
+  --step-2:  clamp(1.375rem, 1.28rem + 0.50vw, 1.5625rem);
+  --step-3:  clamp(1.625rem, 1.48rem + 0.75vw, 1.875rem);
+  --step-4:  clamp(1.9375rem, 1.72rem + 1.10vw, 2.25rem);
+  --step-5:  clamp(2.3125rem, 2.02rem + 1.50vw, 2.75rem);
+
+  /* ── Spacious Spacing Scale ── */
+  --space-1:  0.25rem;  /* 4px */
+  --space-2:  0.5rem;   /* 8px */
+  --space-3:  0.875rem; /* 14px */
+  --space-4:  1.25rem;  /* 20px */
+  --space-5:  1.5rem;   /* 24px */
+  --space-6:  2rem;     /* 32px */
+  --space-7:  2.5rem;   /* 40px */
+  --space-8:  3rem;     /* 48px */
+  --space-10: 3.5rem;   /* 56px */
+  --space-12: 4.5rem;   /* 72px */
+  --space-16: 6rem;     /* 96px */
+
+  --space-section-desktop: var(--space-12); /* 72px */
+  --space-section-mobile:  var(--space-8);  /* 48px */
+
+  --fv-space-1: var(--space-1);
+  --fv-space-2: var(--space-2);
+  --fv-space-3: var(--space-3);
+  --fv-space-4: var(--space-4);
+  --fv-space-5: var(--space-5);
+  --fv-space-6: var(--space-6);
+  --fv-space-7: var(--space-7);
+
+  /* ── Corner Radii Harmonized Scale (Raised Scale) ── */
+  --radius-xs:   16px;   /* small elements 16px */
+  --radius-sm:   16px;   /* small elements 16px */
+  --radius-md:   20px;   /* medium elements 20px */
+  --radius-lg:   24px;   /* large elements 24px */
+  --radius-xl:   28px;   /* cards 28px */
+  --radius-2xl:  32px;   /* large panels/sheets 32px */
+  --radius-full: 9999px; /* pill 9999px */
+
+  --fv-radius-xs:   var(--radius-xs);
+  --fv-radius-sm:   var(--radius-sm);
+  --fv-radius-md:   var(--radius-md);
+  --fv-radius-lg:   var(--radius-lg);
+  --fv-radius-xl:   var(--radius-xl);
+  --fv-radius-2xl:  var(--radius-2xl);
+  --fv-radius-pill: var(--radius-full);
+  --r-btn:  var(--radius-full);
+  --r-card: var(--radius-xl);
+
+  /* ── Elevation Tokens (Soft Layered Shadows) ── */
+  --shadow-sm:    0 2px 8px -2px rgba(15, 131, 108, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+  --shadow-md:    0 8px 24px -4px rgba(15, 131, 108, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg:    0 20px 36px -8px rgba(15, 131, 108, 0.12), 0 8px 16px -4px rgba(0, 0, 0, 0.04);
+  --focus-ring-color: rgba(15, 131, 108, 0.45);
+  --shadow-focus: 0 0 0 3px var(--focus-ring-color);
+  --fv-shadow-teal: 0 8px 20px -4px rgba(15, 131, 108, 0.18);
+
+  /* ── Motion & Transitions (Spring-like cubic-bezier) ── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Spring overshoot: opt-in for transform/scale ONLY (never color, opacity or shadow) */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast:   150ms;
+  --duration-normal: 250ms;
+  --duration-slow:   350ms;
+
+  --transition-fast:   var(--duration-fast) var(--ease-out);
+  --transition-normal: var(--duration-normal) var(--ease-out);
+  --transition-slow:   var(--duration-slow) var(--ease-out);
+
+  --fv-transition-fast:   var(--transition-fast);
+  --fv-transition-normal: var(--transition-normal);
+  --fv-transition-slow:   var(--transition-slow);
+
+  /* ── Standardized 8-Tier Z-Index Scale ── */
+  --z-base:     0;
+  --z-sticky:   100;
+  --z-dropdown: 200;
+  --z-popover:  300;
+  --z-tooltip:  400;
+  --z-overlay:  500;
+  --z-modal:    600;
+  --z-toast:    700;
+
+  --fv-z-base:     var(--z-base);
+  --fv-z-nav:      var(--z-sticky);
+  --fv-z-dropdown: var(--z-dropdown);
+  --fv-z-overlay:  var(--z-overlay);
+  --fv-z-modal:    var(--z-modal);
+  --fv-z-toast:    var(--z-toast);
+}
+
+@media (max-width: 640px) {
+  :root {
+    --fv-nav-height: 52px;
+    --fv-scroll-offset: calc(var(--fv-nav-height) + var(--space-3));
+  }
+}
+
+/* ── Dark Mode Semantic Token Overrides ── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-brand-primary: var(--color-teal-400);
+    --color-brand-hover:   #6ee7b7;
+    --color-brand-text:    var(--color-teal-400);
+    --color-on-brand:      #0b1714; /* ธีมมืด: พื้นแบรนด์เป็นเขียวอ่อน ต้องใช้ตัวอักษรเข้ม (9.5:1) ขาวได้แค่ 1.9:1 */
+
+    --surface-base:   #0b1714;
+    --surface-card:   #132621;
+    --surface-hover:  #1c362d;
+    --surface-active: #26473b;
+    --surface-accent: rgba(52, 211, 153, 0.14);
+
+    --text-main:    var(--color-slate-50);
+    --text-muted:   var(--color-slate-300);
+    --text-faint:   var(--color-slate-400);
+
+    --border-subtle: #1c362d;
+    --border-strong: #26473b;
+
+    --fv-surface-page:       var(--surface-card);
+    --fv-surface-soft:       var(--surface-hover);
+    --fv-surface-hover:      var(--surface-hover);
+    --fv-surface-teal-hover: rgba(52, 211, 153, 0.15);
+
+    --fv-text-primary:   var(--text-main);
+    --fv-text-secondary: var(--text-muted);
+    --fv-text-faint:     var(--text-faint);
+
+    --c-teal-border: var(--border-subtle);
+    --c-heading:     var(--text-main);
+    --c-body:        var(--text-muted);
+
+    --shadow-sm: 0 2px 8px 0 rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 20px 36px -8px rgba(0, 0, 0, 0.60);
+  }
+}
+
+[data-theme="dark"] {
+  --color-brand-primary: var(--color-teal-400);
+  --color-brand-hover:   #6ee7b7;
+  --color-brand-text:    var(--color-teal-400);
+  --color-on-brand:      #0b1714;
+
+  --surface-base:   #0b1714;
+  --surface-card:   #132621;
+  --surface-hover:  #1c362d;
+  --surface-active: #26473b;
+  --surface-accent: rgba(52, 211, 153, 0.14);
+
+  --text-main:    var(--color-slate-50);
+  --text-muted:   var(--color-slate-300);
+  --text-faint:   var(--color-slate-400);
+
+  --border-subtle: #1c362d;
+  --border-strong: #26473b;
+
+  --fv-surface-page:       var(--surface-card);
+  --fv-surface-soft:       var(--surface-hover);
+  --fv-surface-hover:      var(--surface-hover);
+  --fv-surface-teal-hover: rgba(52, 211, 153, 0.15);
+
+  --fv-text-primary:   var(--text-main);
+  --fv-text-secondary: var(--text-muted);
+  --fv-text-faint:     var(--text-faint);
+
+  --c-teal-border: var(--border-subtle);
+  --c-heading:     var(--text-main);
+  --c-body:        var(--text-muted);
+
+  --shadow-sm: 0 2px 8px 0 rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 36px -8px rgba(0, 0, 0, 0.60);
+}

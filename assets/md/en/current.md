@@ -1,21 +1,23 @@
 ---
-version: 5.12.0
-date: 2026-10-17T23:14:45.691Z
+version: 6.0.0
+date: 2026-10-18T03:22:18.636Z
 notify: true
-title: Language switching now works in every browser, and every page shares one design system
-subtitle: The red error box when changing language is gone for good, and all 14 pages load the same design system styles.
+title: Redesigned entire site with Design Core and brand new dark theme
+subtitle: All 14 pages updated with Emerald Fresh palette, Anuphan typography, high curved capsules, and full theme support.
 ---
 
-**TL;DR** — On some browsers, the site's security policy blocked the part of the site that translates the page, so changing the language showed a red error box and parts of the page stayed untranslated. That whole path is rebuilt and tested in a real browser, and every page now loads the design system the same way.
+**TL;DR** — The entire site across all 14 pages has been redesigned with the new Design Core system featuring an Emerald Fresh palette on warm cream background, Anuphan font, high curved capsule design, and a modern dark theme while keeping 100% of existing functionality.
 
-### Fixed
+### Added
 
-- **Red error box when changing language** The security policy of the site blocks small helper threads, and on some browsers the translator did not notice in time, showing a red error box instead of switching the language. The translator now notices both immediately and mid-way through, and finishes the translation on the main thread instead.
-- **Half-translated pages** If the translator stopped mid-way, the sections still waiting could stay in the old language. Every pending section now completes even after such a failure.
-- **Silently blocked stylesheet on every page** One small stylesheet was squeezed into the page in a way the security policy blocks, so it never loaded anywhere. All stylesheets now load as proper files.
-- **Missing logos in Discover** The AI tool cards (OpenAI and Anthropic) on the Discover page had no logos. The logos are now included and load correctly.
+- **Design Core system** Redesigned all 14 pages with standardized Design Core tokens, Emerald Fresh color palette (#0FA36B), cream canvas background (#FAF8F1), and Anuphan typography.
+- **Brand new dark theme** Introduced a modern warm dark theme with high contrast (WCAG AA compliant) across all pages.
+- **High-radius capsule layout** Rebuilt component cards, pills, and navigation bars with soft high-curved capsules for a native minimal look and feel.
 
 ### Changed
 
-- **One design system for all pages** All 14 pages now load the design system stylesheet the same way, instead of a mix of page-specific methods.
-- **Contact page** The contact page now shows a single status card saying the contact form is under development and will arrive in a future release.
+- **Unified design structure** All pages (Home, Search, Discover, Scope, Setting, Community pages, and Platform pages) now share the same Design Core design system.
+
+### Preserved
+
+- **Full functionality & brand assets** All features, main group capsules in Discover, original animations, and brand logo remain untouched and 100% functional.

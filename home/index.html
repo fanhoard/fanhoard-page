@@ -157,7 +157,7 @@
     }
   </script>
   
-  <meta name="theme-color" content="#13b47f" />
+  <meta name="theme-color" content="rgb(15, 163, 107)" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <link rel="icon" type="image/x-icon" href="/assets/images/fanhoard-verse360.ico" />
 
@@ -166,7 +166,11 @@
   <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
   <link rel="preconnect" href="https://www.googletagmanager.com" />
 
-  <!-- 1. Tokens ก่อนสุดเสมอ -->
+  <!-- 1. Tokens & Design Core Components -->
+  <link rel="preload" href="/assets/css/design-core-tokens.css" as="style">
+  <link rel="stylesheet" href="/assets/css/design-core-tokens.css">
+  <link rel="preload" href="/assets/css/design-core.css" as="style">
+  <link rel="stylesheet" href="/assets/css/design-core.css">
   <link rel="preload" href="/assets/css/tokens.css" as="style">
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/ds.css">
@@ -227,7 +231,7 @@
         </p>
         <div class="hero-btns">
           <a href="/data/verse/discover/?type=emojis__&page=1"
-            class="button button-secondary btn btn-secondary oc"
+            class="button button-secondary btn btn-secondary oc c-btn c-btn--soft c-btn--lg"
             data-translate="home-hero-btn-emoji">
             <span class="btn-icon" data-translate-slot="1">
               <img class="im" src="https://twemoji.maxcdn.com/v/latest/svg/2764.svg" alt="heart" width="20" height="20">
@@ -235,13 +239,13 @@
             <span></span>
           </a>
           <a href="/data/verse/discover/?type=symbols__&page=1"
-            class="button button-secondary btn btn-secondary oc"
+            class="button button-secondary btn btn-secondary oc c-btn c-btn--soft c-btn--lg"
             data-translate="home-hero-btn-symbol">
             <span class="btn-icon" data-translate-slot="1">✦</span>
             <span></span>
           </a>
           <a href="/data/verse/discover/?type=fancy"
-            class="button button-secondary btn btn-secondary oc"
+            class="button button-secondary btn btn-secondary oc c-btn c-btn--soft c-btn--lg"
             data-translate="home-hero-btn-fancy">
             <span class="btn-icon" data-translate-slot="1">Aa</span>
             <span></span>
@@ -257,22 +261,22 @@
           <h2 id="features-heading" data-translate="home-features-title"></h2>
 
           <div class="features-grid grid-4">
-            <div class="feature-card">
-              <span class="feature-icon" aria-hidden="true">🔍</span>
+            <div class="feature-card c-card">
+              <span class="feature-icon c-icon-circle c-icon-circle--sm" aria-hidden="true">🔍</span>
               <div>
                 <h3 data-translate="home-feature1-title"></h3>
                 <div data-translate="home-feature1-desc"></div>
               </div>
             </div>
-            <div class="feature-card">
-              <span class="feature-icon" aria-hidden="true">📋</span>
+            <div class="feature-card c-card">
+              <span class="feature-icon c-icon-circle c-icon-circle--sm" aria-hidden="true">📋</span>
               <div>
                 <h3 data-translate="home-feature2-title"></h3>
                 <div data-translate="home-feature2-desc"></div>
               </div>
             </div>
-            <div class="feature-card">
-              <span class="feature-icon" aria-hidden="true">✨</span>
+            <div class="feature-card c-card">
+              <span class="feature-icon c-icon-circle c-icon-circle--sm" aria-hidden="true">✨</span>
               <div>
                 <h3 data-translate="home-feature3-title"></h3>
                 <div data-translate="home-feature3-desc"></div>
@@ -286,7 +290,7 @@
           <h2 id="faq-heading" data-translate="home-faq-title"></h2>
 
           <div class="faq-grid stack-md">
-            <div class="faq-card">
+            <div class="faq-card c-card">
               <details class="faq-item">
                 <summary class="faq-question" id="faq1-title" data-translate="home-faq-q1" aria-expanded="false" aria-controls="faq1-answer">What is FanHoard?</summary>
                 <div class="faq-answer" id="faq1-answer" role="region" aria-labelledby="faq1-title">
@@ -294,7 +298,7 @@
                 </div>
               </details>
             </div>
-            <div class="faq-card">
+            <div class="faq-card c-card">
               <details class="faq-item">
                 <summary class="faq-question" id="faq2-title" data-translate="home-faq-q2" aria-expanded="false" aria-controls="faq2-answer">How do I access symbol data?</summary>
                 <div class="faq-answer" id="faq2-answer" role="region" aria-labelledby="faq2-title">
@@ -302,7 +306,7 @@
                 </div>
               </details>
             </div>
-            <div class="faq-card">
+            <div class="faq-card c-card">
               <details class="faq-item">
                 <summary class="faq-question" id="faq3-title" data-translate="home-faq-q3" aria-expanded="false" aria-controls="faq3-answer">Is FanHoard free to use?</summary>
                 <div class="faq-answer" id="faq3-answer" role="region" aria-labelledby="faq3-title">
