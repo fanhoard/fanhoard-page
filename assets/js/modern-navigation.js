@@ -138,7 +138,8 @@
       const base = this.normalizePath(path);
       const parsed = this.parse(base);
       if (parsed.hasLangPrefix) return base;
-      const lang = explicitLang || (this.readSelectedLang && this.readSelectedLang()) || this.defaultLang;
+      const lang = explicitLang || null;
+      if (!lang) return base;
       if (this.isDevMode) return base;
       return '/' + lang + (base === '/' ? '/' : (base.startsWith('/') ? base : '/' + base));
     }
@@ -202,8 +203,7 @@
           if (item.go_url) a.dataset.goUrl = item.go_url;
           a.dataset.isExternal = (baseUrl.startsWith('http') || baseUrl.startsWith('//')) ? 'true' : 'false';
           try {
-            const storedLang = (function(){ try { return localStorage.getItem('selectedLang'); } catch (e) { return null; } })();
-            a.href = navPrefixManager.addPrefix(baseUrl, storedLang || navPrefixManager.defaultLang);
+            a.href = navPrefixManager.addPrefix(baseUrl, currentLang);
           } catch (e) { a.href = baseUrl; }
           a.setAttribute('wave-delegate', `.${this.svgWrapperClass}`);
           if (item.icon) {
@@ -285,24 +285,17 @@
       this._initialized = false;
       this._navEl = null;
 
-      this._onClickBound = this._onClick.bind(this);
       this._onScrollBound = throttle(this._onScrollForActiveState.bind(this), 120);
-      this._onStorageBound = this._onStorageEvent.bind(this);
       this._onPopStateBound = this._onPopState.bind(this);
       this._onLangChangedBound = this._onLangChanged.bind(this);
 
-      try { this._bc = SUPPORTS_BC ? new BroadcastChannel('fv-lang') : null; } catch (e) { this._bc = null; }
-      if (this._bc) this._bc.onmessage = (ev) => { try { if (ev && ev.data && ev.data.lang) this._onLangChanged(ev.data.lang); } catch (e) {} };
-
-      this.RECENT_WINDOW_MS = 45000;
       this._healthInterval = null;
       this._healthChecksRun = 0;
       this._maxInitRetries = 4;
       this._initAttempt = 0;
 
-      this.syncAllToStoredLang = throttle(this.syncAllToStoredLang.bind(this), 200);
+      this.syncAllToPageLang = throttle(this.syncAllToPageLang.bind(this), 200);
       this._updateActiveState = throttle(this._updateActiveState.bind(this), 150);
-      this._updateLinksIn = debounce(this._updateLinksIn.bind(this), 120);
     }
 
     static _isLocalDev() {
@@ -324,15 +317,15 @@
         await this._ensureDOMReady(2500);
         await this._ensureCSSWithTimeout(2500);
         const cfg = await this.configLoader.load();
-        const storedLang = this._readStoredLang() || this.defaultLang;
-        const frag = this.navRenderer.createFragment(cfg.navigation || [], storedLang, this.navPrefixManager);
+        const pageLang = this._getPageLang();
+        const frag = this.navRenderer.createFragment(cfg.navigation || [], pageLang, this.navPrefixManager);
         const navEl = this.navRenderer.createNavElement(frag);
         this.navRenderer.mount(navEl);
         this._navEl = this.navRenderer.getNavElement();
         this._bind();
         this._initialized = true;
         this._initAttempt = 0;
-        this.syncAllToStoredLang();
+        this.syncAllToPageLang();
         this._updateActiveState();
         this._applyScreenBehavior();
         setTimeout(() => { try { this.navRenderer.reveal(this._navEl); } catch (e) {} }, 120);
@@ -383,23 +376,11 @@
       try {
         if (!this._navEl) return;
         if (this._bound) return;
-        this._navEl.addEventListener('click', this._onClickBound, { passive: false });
         window.addEventListener('scroll', this._onScrollBound, { passive: true });
-        window.addEventListener('storage', this._onStorageBound);
         window.addEventListener('popstate', this._onPopStateBound);
         // v5.0: ฟังทั้ง languageChange (backward compat) และ fv:langchange (FvLang central)
         window.addEventListener('languageChange', (e) => { try { if (e?.detail?.language) this._onLangChanged(e.detail.language); } catch (e) {} });
         window.addEventListener('fv:langchange', (e) => { try { if (e?.detail?.lang) this._onLangChanged(e.detail.lang); } catch (e) {} });
-        try {
-          this._mo = new MutationObserver(muts => {
-            try {
-              muts.forEach(m => {
-                m.addedNodes.forEach(node => { if (node && node.nodeType === 1) this._updateLinksIn(node); });
-              });
-            } catch (e) {}
-          });
-          this._mo.observe(document.body || document.documentElement, { childList: true, subtree: true });
-        } catch (e) {}
         this._bound = true;
       } catch (e) {}
     }
@@ -417,70 +398,34 @@
       } catch (e) {}
     }
 
-    _readStoredLang() { try { return localStorage.getItem('selectedLang'); } catch (e) { return null; } }
-    _writeStoredLang(lang) { try { localStorage.setItem('selectedLang', lang); } catch (e) {} }
-
-    getPredictedLangForPath(path) {
+    // ภาษาของหน้าปัจจุบัน: ยึดจากตัวหน้า (built lang หรือ URL prefix) เท่านั้น
+    // หน้าที่ไม่มี prefix -> null -> ลิงก์เมนูไม่เติม prefix ใดๆ (ไม่มีการเปลี่ยนเส้นทางอัตโนมัติ)
+    _getPageLang() {
       try {
-        if (!path) return null;
-        const tmp = new URL(path, location.origin);
-        const pathname = tmp.pathname || '/';
-        const search = tmp.search || '';
-        const exact = pathname + search;
-        const raw = sessionStorage.getItem('fv-nav-lang-map') || '{}';
-        const map = safeJSONParse(raw, {});
-        if (map[exact] && map[exact].lang) return map[exact].lang;
-        const variants = new Set();
-        function addVariants(p, s) {
-          let v = p;
-          if (v.endsWith('/index.html')) v = v.slice(0, -11) || '/';
-          if (v.endsWith('/home/index.html')) v = v.replace(/\/home\/index\.html$/, '/');
-          if (v !== '/' && v.endsWith('/')) v = v.slice(0, -1);
-          variants.add(v + s);
-          variants.add(v + (s ? s : ''));
-        }
-        addVariants(pathname, search);
-        for (const v of variants) { if (map[v] && map[v].lang) return map[v].lang; }
-        const parts = pathname.split('/').filter(Boolean);
-        for (let i = parts.length - 1; i >= 0; i--) {
-          const p = '/' + parts.slice(0, i).join('/');
-          const k1 = (p === '/' ? '/' : p) + '';
-          if (map[k1] && map[k1].lang) return map[k1].lang;
-          if (map[k1 + '/'] && map[k1 + '/'].lang) return map[k1 + '/'].lang;
-        }
-        try {
-          const recentRaw = sessionStorage.getItem('fv-lang-recent') || '[]';
-          const recent = safeJSONParse(recentRaw, []);
-          if (Array.isArray(recent) && recent.length) {
-            const now = Date.now();
-            for (let i = recent.length - 1; i >= 0; i--) {
-              const rec = recent[i];
-              if (rec && rec.lang && (now - (rec.ts || 0) < this.RECENT_WINDOW_MS)) { return rec.lang; }
-              if (now - (rec.ts || 0) > 120000) break;
-            }
-          }
-        } catch (e) {}
-        return null;
+        const built = document.documentElement.getAttribute('data-fv-built');
+        if (built) return built;
+        const m = (location.pathname || '').match(/^\/(en|th)(\/|$)/);
+        return m ? m[1] : null;
       } catch (e) { return null; }
     }
 
-    async syncAllToStoredLang() {
+    async syncAllToPageLang() {
       try {
-        const storedLang = this._readStoredLang() || this.defaultLang;
+        const pageLang = this._getPageLang();
         const items = this.navRenderer.getItems();
         items.forEach(it => {
           try {
             const base = it.dataset.baseUrl || it.dataset.goUrl || it.dataset.link;
             if (!base) return;
             if (it.dataset.isExternal === 'true') return;
-            const newHref = this.navPrefixManager.addPrefix(base, storedLang);
+            const newHref = this.navPrefixManager.addPrefix(base, pageLang);
             this.navRenderer.updateHref(it, newHref);
           } catch (e) {}
           try {
             const cfgList = this.configLoader._cached && this.configLoader._cached.navigation ? this.configLoader._cached.navigation : [];
             const cfg = cfgList.find(n => (n.url === (it.dataset.link || '')) || (n.go_url === (it.dataset.goUrl || '')));
             if (cfg) {
-              const newLabel = cfg[`${storedLang}_label`] || cfg.en_label || '';
+              const newLabel = cfg[`${pageLang || 'en'}_label`] || cfg.en_label || '';
               if (newLabel) this.navRenderer.updateLabel(it, newLabel);
             }
           } catch (e) {}
@@ -488,152 +433,13 @@
       } catch (e) {}
     }
 
-    _updateLinksIn(root) {
-      try {
-        const anchors = root.querySelectorAll ? root.querySelectorAll('a[href]') : [];
-        const storedLang = this._readStoredLang() || this.defaultLang;
-        const SKIP_PREFIXES = ['/assets/', '/static/', '/api/', '/_next/', '/favicon.ico', '/robots.txt', '/sitemap.xml'];
-        anchors.forEach(a => {
-          try {
-            const raw = a.getAttribute('href') || '';
-            if (/^(mailto:|tel:|javascript:|#)/i.test(raw)) return;
-            const url = new URL(raw, location.origin);
-            if (url.origin !== location.origin) return;
-            for (const p of SKIP_PREFIXES) if (url.pathname.startsWith(p)) return;
-            if (this.navPrefixManager.hasPrefix(url.pathname)) {
-              const parsed = this.navPrefixManager.parse(url.pathname);
-              if (parsed.hasLangPrefix && parsed.lang !== storedLang) {
-                const newHref = this.navPrefixManager.addPrefix(parsed.cleanPath, storedLang) + url.search + url.hash;
-                a.setAttribute('href', newHref);
-              }
-              return;
-            }
-            if (!this.isDevMode) {
-              const newHref = this.navPrefixManager.addPrefix(url.pathname, storedLang) + url.search + url.hash;
-              a.setAttribute('href', newHref);
-            }
-          } catch (e) {}
-        });
-      } catch (e) {}
-    }
-
-    _onClick(ev) {
-      try {
-        const anchor = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
-        if (!anchor) return;
-        const raw = anchor.getAttribute('href') || '';
-        if (/^(mailto:|tel:|javascript:|#)/i.test(raw)) return;
-        const url = new URL(raw, location.origin);
-        if (url.origin !== location.origin) return;
-        const path = url.pathname || '/';
-        const SKIP_PREFIXES = ['/assets/', '/static/', '/api/', '/_next/', '/favicon.ico', '/robots.txt', '/sitemap.xml'];
-        for (const p of SKIP_PREFIXES) if (path.startsWith(p)) return;
-        const storedLang = this._readStoredLang() || this.defaultLang;
-        const parsed = this.navPrefixManager.parse(path);
-        if (parsed.hasLangPrefix && parsed.lang !== storedLang) {
-          ev.preventDefault();
-          try {
-            const targetUrl = this.navPrefixManager.addPrefix(parsed.cleanPath, storedLang) + url.search + url.hash;
-            window.location.assign(targetUrl);
-            return;
-          } catch (e) {}
-        }
-        if (!parsed.hasLangPrefix && !this.isDevMode) {
-          ev.preventDefault();
-          try {
-            const key = path + (url.search || '');
-            const rawMap = sessionStorage.getItem('fv-nav-lang-map') || '{}';
-            const map = safeJSONParse(rawMap, {});
-            map[key] = { lang: storedLang, ts: NOW(), evidence: 'click' };
-            sessionStorage.setItem('fv-nav-lang-map', JSON.stringify(map));
-          } catch (e) {}
-          (async () => {
-            const done = await this._attemptCandidates(path, ev);
-            if (!done) {
-              try { window.location.assign(anchor.href); } catch (e) { window.location.href = anchor.href; }
-            }
-          })();
-        }
-      } catch (e) {}
-    }
-
-    async _attemptCandidates(destPath, originalEvent) {
-      if (this.isDevMode) return false;
-      const candidates = this.navPrefixManager.buildCandidates(destPath);
-      for (const c of candidates) {
-        try {
-          const resp = await fetch(c, { method: 'HEAD', cache: 'no-store', credentials: 'same-origin' });
-          if (resp && resp.ok) {
-            const parsed = this.navPrefixManager.parse(c);
-            if (parsed.hasLangPrefix) {
-              try { this._writeStoredLang(parsed.lang); } catch (e) {}
-              try {
-                const rawMap = sessionStorage.getItem('fv-nav-lang-map') || '{}';
-                const map = safeJSONParse(rawMap, {});
-                map[parsed.originalPath] = { lang: parsed.lang, ts: NOW(), evidence: 'head-found' };
-                sessionStorage.setItem('fv-nav-lang-map', JSON.stringify(map));
-              } catch (e) {}
-            }
-            const urlObj = new URL(c, location.origin);
-            try {
-              const linkEl = originalEvent && originalEvent.target && originalEvent.target.closest ? originalEvent.target.closest('a[href]') : null;
-              if (linkEl) {
-                const raw = linkEl.getAttribute('href') || '';
-                const resolved = new URL(raw, location.origin);
-                if (resolved.search) urlObj.search = resolved.search;
-                if (resolved.hash) urlObj.hash = resolved.hash;
-              }
-            } catch (e) {}
-            try { window.location.assign(urlObj.toString()); } catch (e) { window.location.href = urlObj.toString(); }
-            return true;
-          }
-        } catch (e) {}
-      }
-      return false;
-    }
-
     _onPopState(ev) {
-      try {
-        let desiredLang = null;
-        try {
-          const st = ev && ev.state && typeof ev.state === 'object' ? ev.state : null;
-          if (st && st.lang) desiredLang = st.lang;
-        } catch (e) {}
-        if (!desiredLang) {
-          try {
-            const predicted = this.getPredictedLangForPath(location.pathname + (location.search || ''));
-            if (predicted) desiredLang = predicted;
-          } catch (e) {}
-        }
-        const stored = this._readStoredLang() || this.defaultLang;
-        if (!desiredLang) desiredLang = stored;
-        if (desiredLang && desiredLang !== stored) {
-          try { this._writeStoredLang(desiredLang); } catch (e) {}
-          try { if (this._bc) this._bc.postMessage({ lang: desiredLang, version: (Number(localStorage.getItem('langVersion')||0) + 1) }); } catch (e) {}
-          try { window.dispatchEvent(new CustomEvent('languageChange', { detail: { language: desiredLang } })); } catch (e) {}
-          this.syncAllToStoredLang();
-        } else {
-          this.syncAllToStoredLang();
-        }
-        this._updateActiveState();
-      } catch (e) {}
-    }
-
-    _onStorageEvent(e) {
-      try {
-        if (e.key === 'selectedLang' || e.key === 'langVersion') {
-          const newLang = localStorage.getItem('selectedLang') || this.defaultLang;
-          this.syncAllToStoredLang();
-          try { window.dispatchEvent(new CustomEvent('languageChange', { detail: { language: newLang } })); } catch (e) {}
-        }
-      } catch (e) {}
+      // ไม่มีการเปลี่ยนภาษา/เส้นทางอัตโนมัติเมื่อย้อน-ไปหน้า อัปเดตแค่สถานะ active ของเมนู
+      try { this._updateActiveState(); } catch (e) {}
     }
 
     _onLangChanged(lang) {
       if (!lang) return;
-      const stored = this._readStoredLang();
-      if (lang !== stored) { try { this._writeStoredLang(lang); } catch (e) {} }
-      this.syncAllToStoredLang();
       this._updateActiveState();
       if (typeof window.announceToScreenReader === "function") {
         const msg = lang === "th" ? "เปลี่ยนภาษาเป็นภาษาไทยแล้ว" : "Language changed to English";
@@ -683,7 +489,7 @@
       return false;
     }
 
-    forceResyncToStoredLang() { this.syncAllToStoredLang(); this._updateActiveState(); }
+    forceResyncToPageLang() { this.syncAllToPageLang(); this._updateActiveState(); }
 
     _applyScreenBehavior() {
       try {
@@ -809,7 +615,7 @@
       this._navVisible = true;
     }
 
-    forceResync() { this.syncAllToStoredLang(); }
+    forceResync() { this.syncAllToPageLang(); }
 
     destroy() { try { this._unbind(); this.navRenderer.unmount(); this._navEl = null; this._initialized = false; this._stopHealthChecks(); } catch (e) {} }
 
@@ -838,12 +644,12 @@
         if (!nav) {
           try {
             const cfg = this.configLoader._cached || { navigation: [] };
-            const frag = this.navRenderer.createFragment(cfg.navigation || [], this._readStoredLang() || this.defaultLang, this.navPrefixManager);
+            const frag = this.navRenderer.createFragment(cfg.navigation || [], this._getPageLang(), this.navPrefixManager);
             const navEl = this.navRenderer.createNavElement(frag);
             this.navRenderer.mount(navEl);
             this._navEl = this.navRenderer.getNavElement();
             this._bind();
-            this.syncAllToStoredLang();
+            this.syncAllToPageLang();
             this._updateActiveState();
             return;
           } catch (e) {}
@@ -853,12 +659,12 @@
           this.configLoader.load(true).then(cfg => {
             try {
               this.navRenderer.unmount();
-              const frag = this.navRenderer.createFragment(cfg.navigation || [], this._readStoredLang() || this.defaultLang, this.navPrefixManager);
+              const frag = this.navRenderer.createFragment(cfg.navigation || [], this._getPageLang(), this.navPrefixManager);
               const navEl = this.navRenderer.createNavElement(frag);
               this.navRenderer.mount(navEl);
               this._navEl = this.navRenderer.getNavElement();
               this._bind();
-              this.syncAllToStoredLang();
+              this.syncAllToPageLang();
               this._updateActiveState();
             } catch (e) {}
           }).catch(() => {});

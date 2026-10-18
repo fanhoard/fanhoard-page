@@ -121,22 +121,15 @@
     // URL prefix อาจต่าง (เช่น user พิมพ์ URL เอง) แต่ built page content
     // ถูก bake เป็น builtLang แล้ว → ใช้ builtLang
     resolvedLang = builtLang;
-  } else if (!isLocalDev()) {
-    // Production ที่ยังไม่ build (หรือ dev ที่ไม่ใช่ localhost)
-    // Priority: URL > localStorage > browser
-    resolvedLang = getUrlLang() || getStoredLang() || getBrowserLang();
   } else {
-    // Dev mode (localhost): localStorage > browser
-    resolvedLang = getStoredLang() || getBrowserLang();
+    // ไม่มี prefix ภาษา = ไม่มีภาษา ใช้ค่าเริ่มต้นเท่านั้น
+    // ยกเลิกการสำรวจจาก localStorage และ browser อัตโนมัติ (คำสั่ง Master 18 ต.ค. 2026)
+    resolvedLang = getUrlLang() || DEFAULT_LANG;
   }
   
   // Ensure valid
   if (SUPPORTED.indexOf(resolvedLang) < 0) resolvedLang = DEFAULT_LANG;
   
-  // Sync to localStorage (เพื่อความสอดคล้อง)
-  if (!isLocalDev()) {
-    try { localStorage.setItem(LS_KEY, resolvedLang); } catch (e) {}
-  }
   
   // ── Subscriber system ──────────────────────────────────────────────────
   

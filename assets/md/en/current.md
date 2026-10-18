@@ -1,14 +1,16 @@
 ---
-version: 6.1.0
-date: 2026-10-18T08:21:04.840Z
+version: 6.2.0
+date: 2026-10-18T09:59:59.973Z
 notify: true
-title: We brought back the previous design
-subtitle: The big v6.0.0 redesign is rolled back, and the familiar clean design is back on every page.
+title: No more automatic language redirects
+subtitle: Pages without a language code now stay exactly where they are, which also fixes Google Search Console redirect issues.
 ---
 
-**TL;DR** — The visual overhaul from v6.0.0 went further than it should have. This release rolls it back, so every page looks and works like it did before v6.0.0.
+**TL;DR** — The site no longer moves you to a language-coded address on its own. Links are no longer rewritten behind the scenes, and your browser language no longer decides anything at load time. You change language only with the language menu.
 
 ### Changed
 
-- **Previous design restored** All pages are back to the colors, sizes, and layout you were used to before the v6.0.0 redesign. Nothing about how the site works has changed.
-- **v6.0.0 stays in history** The redesign is not lost. It remains in the release history, and what we learned from it will shape future improvements.
+- **No automatic redirects** Opening any page without a language code (for example /home/) keeps you right there. No silent switch to /en/ or /th/ anymore.
+- **Links stay as written** Internal links are no longer automatically rewritten to add a language code while you browse.
+- **Your choice still works** Picking a language from the language menu still takes you to that language's address, exactly as before.
+- **Search engine friendly** With the automatic redirects gone, pages no longer register as "Page with redirect" in Google Search Console.

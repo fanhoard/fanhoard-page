@@ -125,22 +125,10 @@
       
       TranslatorService.storeOriginalContent();
       
-      // v5.0: ใช้ FvLang.lang แทน detect เอง (FvLang อ่านแล้ว)
-      var initialLang = (window.FvLang && FvLang.lang) || 'en';
-      
-      // แต่ full mode ยังต้อง resolve แบบเดิมเพื่อได้ source info
-      const decision = DetectorService.resolveCurrentLang();
-      State.selectedLang = decision.lang;
-      
-      if (!DetectorService.isLocalDev()) {
-        if (decision.source === 'storage' || decision.source === 'browser') {
-          URLService.updateURLForLanguage(State.selectedLang);
-        }
-      }
-      
-      if (decision.source === 'url') {
-        try { localStorage.setItem(M.CONFIG.LS_KEY, State.selectedLang); } catch (e) {}
-      }
+      // ยกเลิกระบบเปลี่ยนเส้นทางอัตโนมัติ (Master สั่ง 18 ต.ค. 2026)
+      // หน้าที่ไม่มี prefix ภาษา = ไม่มีภาษา ใช้ค่าเริ่มต้นเท่านั้น
+      // ห้ามอ่าน storage/browser มาเปลี่ยนภาษาหรือแก้ URL ตอนบูต
+      State.selectedLang = DetectorService.getLangFromURL() || M.CONFIG.DEFAULT_LANG;
       
       UIService.showButtonTextForLang(State.selectedLang);
       

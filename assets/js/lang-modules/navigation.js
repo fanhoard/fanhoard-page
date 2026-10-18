@@ -47,10 +47,8 @@
      * เรียกจาก LanguageManager.initialize()
      */
     setupHandlers() {
+      // ยกเลิกระบบเปลี่ยนเส้นทาง/ภาษาอัตโนมัติ: เหลือเฉพาะ pageshow (BFCache content refresh)
       this._setupPageshow();
-      this._setupPopstate();
-      this._setupStorage();
-      this._setupVisibilityChange();
     },
     
     // ── pageshow (BFCache fix — v3.2) ─────────────────────────────────────────
@@ -87,150 +85,13 @@
             }
           }
 
-          const { State, DetectorService, URLService } = M;
-          if (DetectorService) {
-            const storedLang = DetectorService.getLangFromStorage();
-            if (storedLang && storedLang !== State?.selectedLang) {
-              State._userExplicitLang = storedLang;
-              M.LanguageManager?.updatePageLanguage(storedLang, true).catch(e => {
-                console.error('[NavigationService/pageshow] language sync error:', e);
-              });
-            } else if (storedLang && URLService) {
-              URLService.updateURLForLanguage(storedLang);
-            }
-          }
+          // ไม่มีการเปลี่ยนภาษา/URL อัตโนมัติจาก storage อีกต่อไป
         } catch (e) {
           console.error('[NavigationService/pageshow] handler error:', e);
         }
       });
     },
     
-    // ── popstate (SPA navigation) ─────────────────────────────────────────────
-    
-    /**
-     * จัดการ popstate จาก SPA navigation (pushState/popstate)
-     * กรณีนี้เกิดเฉพาะ SPA ที่ใช้ pushState (lang-links.js)
-     * ถ้าเป็น full page navigation → lang-proxy.js จัดการก่อนแล้ว
-     *
-     * Core logic:
-     *   ถ้า user เคยเลือกภาษาแล้ว (_userExplicitLang หรือ localStorage)
-     *   → ยึดภาษานั้นเสมอ ไม่ยึดตาม URL prefix ของหน้าเก่า
-     *
-     * @private
-     */
-    _setupPopstate() {
-      window.addEventListener('popstate', async (event) => {
-        try {
-          const { State, DetectorService, URLService } = M;
-          
-          if (DetectorService.isLocalDev()) return;
-          
-          const preferredLang = State._userExplicitLang || DetectorService.getLangFromStorage();
-          
-          if (preferredLang) {
-            if (preferredLang !== State.selectedLang) {
-              await M.LanguageManager.updatePageLanguage(preferredLang, true);
-            } else {
-              URLService.updateURLForLanguage(preferredLang);
-            }
-            return;
-          }
-          
-          // Fallback: ไม่มี user preference → ดูจาก history state หรือ URL
-          if (event.state && event.state.lang && event.state.lang !== State.selectedLang) {
-            await M.LanguageManager.updatePageLanguage(event.state.lang, false);
-            return;
-          }
-          
-          const urlLang = DetectorService.getLangFromURL();
-          if (urlLang && urlLang !== State.selectedLang) {
-            await M.LanguageManager.updatePageLanguage(urlLang, false);
-            try { localStorage.setItem(M.CONFIG.LS_KEY, urlLang); } catch (e) {}
-          }
-          
-        } catch (e) {
-          console.error('[NavigationService/popstate] handler error:', e);
-        }
-      });
-    },
-    
-    // ── storage (cross-tab sync) ──────────────────────────────────────────────
-    
-    /**
-     * sync ภาษาเมื่อ tab อื่นเปลี่ยน localStorage
-     * @private
-     */
-    _setupStorage() {
-      window.addEventListener('storage', (e) => {
-        if (e.key !== M.CONFIG.LS_KEY) return;
-        
-        const { State, DetectorService, URLService } = M;
-        const newLang = e.newValue;
-        const urlLang = DetectorService.getLangFromURL();
-        
-        // ถ้า URL ไม่ตรงกับภาษาใหม่ ให้ fix URL (production only)
-        if (!DetectorService.isLocalDev() && urlLang && urlLang !== newLang) {
-          URLService.updateURLForLanguage(newLang);
-        }
-        
-        if (newLang && newLang !== State.selectedLang) {
-          M.LanguageManager.updatePageLanguage(newLang, false).catch(() => {});
-        }
-      });
-    },
-    
-    // ── visibilitychange (กลับมาที่ tab) ─────────────────────────────────────
-    
-    /**
-     * ตรวจสอบและ sync ภาษาเมื่อ user กลับมาที่ tab นี้
-     * @private
-     */
-    _setupVisibilityChange() {
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState !== 'visible') return;
-        
-        const { State, DetectorService, URLService } = M;
-        if (DetectorService.isLocalDev()) return;
-        
-        const preferredLang = State._userExplicitLang || DetectorService.getLangFromStorage();
-        if (preferredLang && preferredLang !== State.selectedLang) {
-          M.LanguageManager.updatePageLanguage(preferredLang, true).catch(() => {});
-          return;
-        }
-        
-        const urlLang = DetectorService.getLangFromURL();
-        if (urlLang && urlLang !== State.selectedLang) {
-          M.LanguageManager.updatePageLanguage(urlLang, false).catch(() => {});
-        }
-      });
-    },
-    
-    // ── BroadcastChannel message ──────────────────────────────────────────────
-    
-    /**
-     * รับ message ภาษาจาก tab อื่น แล้ว sync
-     * @param {Object} msg  — { lang, url, ts }
-     */
-    _onBroadcastLang(msg) {
-      try {
-        if (!msg || typeof msg !== 'object') return;
-        const { lang, url } = msg;
-        if (!lang || lang === M.State.selectedLang) return;
-        if (url && url === location.href) return; // ตัวเองส่งมา ไม่ต้องทำ
-        
-        const { DetectorService, URLService } = M;
-        
-        if (!DetectorService.isLocalDev()) {
-          const currentUrlLang = DetectorService.getLangFromURL();
-          if (currentUrlLang && currentUrlLang !== lang) {
-            URLService.updateURLForLanguage(lang);
-          }
-        }
-        
-        M.LanguageManager.updatePageLanguage(lang, DetectorService.isLocalDev() ? false : true)
-          .catch(() => {});
-      } catch (e) {}
-    },
   };
   
   M.NavigationService = NavigationService;
