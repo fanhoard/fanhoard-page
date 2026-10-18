@@ -23,14 +23,15 @@
   const LanguageService = {
     /**
      * Returns the active UI language code.
-     * Priority: localStorage → browser lang → default ('en').
+     * Priority: FvLang (built page) → localStorage → default ('en').
      * @returns {'th'|'en'}
      */
     getLang() {
       try {
         return (
+          (window.FvLang && FvLang.lang) ||
           localStorage.getItem(CONFIG.STORAGE.langKey) ||
-          (CONFIG.LANG.autoDetect && navigator.language?.startsWith('th') ? 'th' : CONFIG.LANG.default)
+          CONFIG.LANG.default
         );
       } catch {
         return CONFIG.LANG.default;

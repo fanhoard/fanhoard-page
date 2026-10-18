@@ -28,13 +28,9 @@
 # /home/ เป็น landing page จริงของเรา — ตอบ 200 OK
 /home/* /home/:splat 200
 
-# ── Language root → home (REWRITE, not redirect) ───────────────────────────
-# /en, /en/, /th, /th/ ตอบ 200 + ส่ง content ของ home page ของภาษานั้น
-# URL คงเดิมใน address bar (เป็น valid path ที่ใช้งานได้)
-/en  /home/page.html 200
-/en/ /home/page.html 200
-/th  /home/page.html 200
-/th/ /home/page.html 200
+# ── Language root → 404 (prefix เปล่า = ไม่มีหน้าจริง) ─────────────────
+# /en /th ไม่มีกฎ rewrite → ตก catch-all 404
+# (ทุกหน้าถูก generate เฉพาะภาษา/เฉพาะหน้า — URL ที่ไม่ใช่ของหน้านั้นต้องไม่เห็น)
 
 # ── Explicitly route language pages ────────────────────────────────────────
 # ลบ prefix ภาษาออก แล้วส่งต่อไปยัง static file ที่อยู่จริง

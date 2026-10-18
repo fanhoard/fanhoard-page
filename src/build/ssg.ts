@@ -132,21 +132,11 @@ export function generateRedirects(langs: string[], passThroughDirs: string[]): s
 
   lines.push(
     '',
-    '# ── Static assets ───────────────────────────────────────────────────',
+    '# ── Static assets ──────────────────────────────────────────────────────',
     '/assets/*    /assets/:splat    200',
     '/robots.txt  /robots.txt       200',
     '/sitemap.xml /sitemap.xml      200',
     '/favicon.ico /assets/images/fanhoard-hub360.ico 200',
-    '',
-    '# ── Language root -> home (REWRITE 200) ───────────────────',
-  );
-
-  for (const lang of langs) {
-    lines.push(`/${lang}  /${lang}/home/ 200`);
-    lines.push(`/${lang}/ /${lang}/home/ 200`);
-  }
-
-  lines.push(
     '',
     '# ── Language-specific pages (static HTML rewrite) ───────────────────',
   );

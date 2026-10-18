@@ -1,51 +1,51 @@
+// @ts-check
 /**
- * lang-core.js — v1.0.0
+ * lang-core.js — v2.0.0 (static-only)
  * Central Language API for FanHoard
  *
  * โหลดก่อนทุกอย่าง (script แรกใน <head> ก่อน language.js)
- * อ่านภาษาทันทีจาก:
- *   1. data-fv-built (production static mode — เร็วสุด)
- *   2. URL path prefix (/en/..., /th/...)
- *   3. localStorage (user choice)
- *   4. Browser language detection
+ * อ่านภาษาแบบ static ทันทีจาก:
+ *   1. data-fv-built attribute (production built page — บอกภาษาของหน้าที่ bake ไว้)
+ *   2. URL path prefix (/en/..., /th/... — สำหรับหน้าที่ยังไม่ผ่าน build)
+ *   3. ค่าเริ่มต้น 'en'
+ *
+ * ยกเลิกแล้ว (static เต็มรูปแบบ — Master สั่ง 18 ต.ค. 2026):
+ *   - การสำรวจภาษาจาก localStorage / browser ณ ตอน resolve
+ *   - ระบบ dynamic translation ทั้งหมด (คงไว้เฉพาะปุ่มเปลี่ยนภาษาใน language.js)
+ *   หน้าที่ไม่มี prefix ภาษา = ไม่มีภาษา ใช้ค่าเริ่มต้นเท่านั้น
+ *   ห้ามอ่าน storage/browser มาเปลี่ยนภาษาหรือแก้ URL โดยอัตโนมัติ
  *
  * Public API — window.FvLang:
- *   .lang              — ภาษาปัจจุบัน ('en' | 'th')
+ *   .lang              — ภาษาปัจจุบันของหน้า ('en' | 'th')
  *   .supportedLangs    — ['en', 'th']
- *   .isReady           — true เมื่อตั้งค่าเรียบร้อยแล้ว
- *   .isStaticMode      — true ถ้าเป็น production built page
- *   .onChange(fn)      — subscribe ถ้าภาษาเปลี่ยน (return unsubscribe fn)
- *   .forceRefresh()    — dispatch fv:langchange ให้ทุกระบบ refresh ทั้งหน้า
- *   .setLang(lang)     — ตั้งภาษาใหม่ + dispatch event (ใช้โดย language.js)
+ *   .isReady           — true เสมอ (resolve แบบ synchronous)
+ *   .isStaticMode      — true ถ้าเป็น production built page (มี data-fv-built)
+ *   .onChange(fn)      — subscribe เมื่อภาษาเปลี่ยน (return unsubscribe fn)
+ *   .forceRefresh()    — dispatch fv:langchange ให้ระบบทั้งหน้า render ตามภาษาปัจจุบัน
+ *   .setLang(lang)     — ตั้งค่าภาษาใหม่ + dispatch event (ใช้โดย language.js ก่อน redirect)
  *
  * Events:
- *   'fv:langchange'  — CustomEvent บน window, detail: { lang, previousLang }
- *     ทุกระบบ JS ควรฟัง event นี้แทนอ่าน localStorage เอง
+ *   'fv:langchange' — CustomEvent บน window, detail: { lang, previousLang }
+ *     ระบบ JS อื่นควรฟัง event นี้แทนอ่าน localStorage เอง
  *
- * ใน production (static mode):
- *   - อ่านภาษาจาก data-fv-built + URL prefix ทันที
- *   - ไม่ต้องรอ language.js โหลดเสร็จ
- *   - language.js ยังทำงานได้ (UI dropdown) แต่เมื่อ user เลือกภาษา
- *     จะเรียก FvLang.setLang() ก่อน redirect
- *
- * Architecture:
- *   lang-core.js (สร้าง FvLang ทันที)
- *     → language.js (รอ FvLang.isReady หรือใช้ FvLang.lang)
- *     → ทุก script อื่น (ใช้ FvLang.lang แทน localStorage)
+ * Backward compat:
+ *   - setLang() ยัง sync localStorage 'selectedLang' เพื่อให้ระบบที่ยังอ่านค่านี้
+ *     (nav/popup/search) เห็นภาษาปัจจุบันของหน้า
+ *   - window.languageReady / window.onLanguageReady ยังคงใช้ได้
  */
 
 (function() {
   'use strict';
-  
+
   // Guard: ไม่ init ซ้ำ
   if (window.FvLang && window.FvLang._v) return;
-  
+
   var SUPPORTED = ['en', 'th'];
   var DEFAULT_LANG = 'en';
   var LS_KEY = 'selectedLang';
-  
-  // ── Detect language — synchronous, deterministic ──────────────────────
-  
+
+  // ── Detect language — synchronous, deterministic, static-only ──────────
+
   /**
    * อ่านภาษาจาก data-fv-built attribute (production only)
    * @returns {string|null}
@@ -57,9 +57,9 @@
     } catch (e) {}
     return null;
   }
-  
+
   /**
-   * ตรวจสอบ URL มี prefix ภาษาหรือไม่
+   * อ่านภาษาจาก URL prefix (/en/... /th/...) — สำหรับหน้าที่ยังไม่ผ่าน build
    * @returns {string|null}
    */
   function getUrlLang() {
@@ -69,90 +69,39 @@
     } catch (e) {}
     return null;
   }
-  
-  /**
-   * อ่านจาก localStorage
-   * @returns {string|null}
-   */
-  function getStoredLang() {
-    try {
-      var l = localStorage.getItem(LS_KEY);
-      return (l && SUPPORTED.indexOf(l) >= 0) ? l : null;
-    } catch (e) {}
-    return null;
-  }
-  
-  /**
-   * Detect จาก browser
-   * @returns {string}
-   */
-  function getBrowserLang() {
-    try {
-      var langs = navigator.languages || [navigator.language || navigator.userLanguage];
-      for (var i = 0; i < langs.length; i++) {
-        var code = (langs[i] || '').split('-')[0];
-        if (SUPPORTED.indexOf(code) >= 0) return code;
-      }
-    } catch (e) {}
-    return DEFAULT_LANG;
-  }
-  
-  /**
-   * ตรวจสอบว่าเป็น localhost หรือไม่ (dev mode)
-   * @returns {boolean}
-   */
-  function isLocalDev() {
-    try {
-      var host = location.hostname || '';
-      return host === 'localhost' || host === '127.0.0.1' ||
-        host === '0.0.0.0' || host.endsWith('.local');
-    } catch (e) {}
-    return false;
-  }
-  
+
   // ── Resolve language immediately ───────────────────────────────────────
-  
+
   var builtLang = getBuiltLang();
   var isStatic = !!builtLang;
-  
-  var resolvedLang;
-  if (isStatic) {
-    // Production static mode: ยึด built language เป็นหลัก
-    // URL prefix อาจต่าง (เช่น user พิมพ์ URL เอง) แต่ built page content
-    // ถูก bake เป็น builtLang แล้ว → ใช้ builtLang
-    resolvedLang = builtLang;
-  } else {
-    // ไม่มี prefix ภาษา = ไม่มีภาษา ใช้ค่าเริ่มต้นเท่านั้น
-    // ยกเลิกการสำรวจจาก localStorage และ browser อัตโนมัติ (คำสั่ง Master 18 ต.ค. 2026)
-    resolvedLang = getUrlLang() || DEFAULT_LANG;
-  }
-  
-  // Ensure valid
+
+  // Static mode: ยึด built language เป็นหลัก (content ถูก bake มาแล้ว)
+  // ไม่มี data-fv-built → ใช้ URL prefix (dev) → ค่าเริ่มต้น
+  var resolvedLang = builtLang || getUrlLang() || DEFAULT_LANG;
   if (SUPPORTED.indexOf(resolvedLang) < 0) resolvedLang = DEFAULT_LANG;
-  
-  
+
   // ── Subscriber system ──────────────────────────────────────────────────
-  
+
   /** @type {Array<Function>} */
   var _subscribers = [];
-  
+
   // ── FvLang API ─────────────────────────────────────────────────────────
-  
+
   var FvLang = {
-    _v: '1.0.0',
-    
-    /** ภาษาปัจจุบัน */
+    _v: '2.0.0',
+
+    /** ภาษาปัจจุบันของหน้า */
     lang: resolvedLang,
-    
+
     /** ภาษาที่รองรับ */
     supportedLangs: SUPPORTED,
-    
+
     /** เรียบร้อยแล้ว — เสมอ true เพราะ resolve แบบ sync */
     isReady: true,
-    
-    /** Production built page หรือไม่ */
+
+    /** Production built page หรือไม่ (มี data-fv-built) */
     isStaticMode: isStatic,
-    
+
     /**
      * Subscribe เมื่อภาษาเปลี่ยน
      * @param {Function} fn — callback(lang, previousLang)
@@ -166,10 +115,10 @@
         if (idx >= 0) _subscribers.splice(idx, 1);
       };
     },
-    
+
     /**
-     * ตั้งภาษาใหม่ + dispatch event ให้ทักทายระบบทั้งหน้า refresh
-     * เรียกจาก language.js เมื่อ user เลือกภาษาใหม่
+     * ตั้งภาษาใหม่ + แจ้งทุกระบบ (fv:langchange)
+     * เรียกจาก language.js เมื่อ user เลือกภาษาใหม่จากปุ่มเปลี่ยนภาษา
      *
      * @param {string} newLang
      * @param {Object} [opts]
@@ -178,23 +127,23 @@
     setLang: function(newLang, opts) {
       if (!newLang || SUPPORTED.indexOf(newLang) < 0) return;
       if (newLang === this.lang) return;
-      
+
       var previous = this.lang;
       this.lang = newLang;
-      
-      // Sync localStorage
+
+      // Sync localStorage (compat ให้ระบบที่ยังอ่าน selectedLang เห็นค่าถูกต้อง)
       try { localStorage.setItem(LS_KEY, newLang); } catch (e) {}
-      
+
       // Update <html lang>
       try { document.documentElement.setAttribute('lang', newLang); } catch (e) {}
-      
+
       if (opts && opts.silent) return;
-      
+
       // Call subscribers
       for (var i = 0; i < _subscribers.length; i++) {
         try { _subscribers[i](newLang, previous); } catch (e) {}
       }
-      
+
       // Dispatch global event
       try {
         window.dispatchEvent(new CustomEvent('fv:langchange', {
@@ -208,19 +157,16 @@
         }
       } catch (e) {}
     },
-    
+
     /**
-     * Force refresh ทุกระบบในหน้าให้ render ใหม่ตามภาษาปัจจุบัน
-     * ใช้เมื่อต้องการบังคับให้ทุกอย่าง refresh โดยไม่เปลี่ยนภาษา
+     * Force refresh ระบบในหน้าให้ render ตามภาษาปัจจุบัน
      * (เช่น หลัง dynamic content โหลดเสร็จ)
      */
     forceRefresh: function() {
       var currentLang = this.lang;
-      // Call subscribers with same lang (they should re-render)
       for (var i = 0; i < _subscribers.length; i++) {
         try { _subscribers[i](currentLang, currentLang); } catch (e) {}
       }
-      // Dispatch event with previousLang === lang (signal: refresh, not change)
       try {
         window.dispatchEvent(new CustomEvent('fv:langchange', {
           detail: { lang: currentLang, previousLang: currentLang },
@@ -230,21 +176,19 @@
       } catch (e) {}
     }
   };
-  
+
   // ── Expose ─────────────────────────────────────────────────────────────
-  
+
   window.FvLang = FvLang;
-  
-  // Also set on languageReady promise for backward compat
-  // (scripts ที่ยังใช้ await window.languageReady อยู่)
+
+  // Backward compat: บางสคริปต์ยัง await window.languageReady
   if (!window.languageReady) {
     window.languageReady = Promise.resolve({ lang: FvLang.lang, translations: null });
   }
   if (!window.onLanguageReady) {
     window.onLanguageReady = function(fn) {
-      if (typeof fn === 'function') {
-        try { fn({ lang: FvLang.lang, translations: null }); } catch (e) {}
-      }
+      if (typeof fn !== 'function') return;
+      try { fn({ lang: FvLang.lang, translations: null }); } catch (e) {}
     };
   }
 
