@@ -45,7 +45,9 @@ function buildUrlEntries(htmlFiles: string[], langs: string[]): UrlEntry[] {
     let rel = path.relative(CONFIG.srcDir, file).replace(/\\/g, '/');
     if (!rel) continue;
 
-    if (rel.endsWith('index.html')) {
+    if (rel.endsWith('page.html')) {
+      rel = rel.replace(/page\.html$/, '');
+    } else if (rel.endsWith('index.html')) {
       rel = rel.replace(/index\.html$/, '');
     } else if (rel.endsWith('.html')) {
       rel = rel.replace(/\.html$/, '/');
@@ -129,7 +131,7 @@ export function generateSitemap(): void {
     'src',
     '.cloudflare',
     'google6b646fa60e0f9f2f.html',
-    'index.html',
+    '404.html',
   ]);
   console.log(`[sitemap] Found ${htmlFiles.length} HTML files`);
 

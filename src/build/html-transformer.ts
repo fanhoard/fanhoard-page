@@ -27,7 +27,7 @@ export interface BuildConfig {
 let _config: BuildConfig | null = null;
 
 /**
- * Maps page source paths (e.g. 'data/verse/discover/index.html') to the hashed
+ * Maps page source paths (e.g. 'data/verse/discover/page.html') to the hashed
  * Vite bundle URL emitted for that page's module scripts, so localized SSG
  * output references real built assets instead of raw TS sources.
  */
@@ -348,7 +348,7 @@ function _escHtml(str: string): string {
 function _deriveCanonicalPath(srcFilePath: string): string | null {
   if (!srcFilePath) return null;
   let p = srcFilePath.replace(/\\/g, '/').replace(/^\.\//, '');
-  p = p.replace(/index\.html$/, '').replace(/\.html$/, '/');
+  p = p.replace(/(index|page)\.html$/, '').replace(/\.html$/, '/');
   if (!p.startsWith('/')) p = '/' + p;
   if (!p.endsWith('/')) p += '/';
   return p;

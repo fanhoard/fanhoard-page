@@ -63,7 +63,7 @@ export const CONFIG: BuildConfig = {
     'src',
     '.cloudflare',
     'google6b646fa60e0f9f2f.html',
-    'index.html',
+    '404.html',
   ],
   removeScriptPatterns: [
     'lang-proxy.js',
@@ -79,11 +79,38 @@ export const CONFIG: BuildConfig = {
     'console.css',
     'console.js',
     'console.html',
-    'index.html',
+    '404.html',
   ],
   passThroughHiddenDirs: ['.well-known'],
   footerTemplatePath: path.join(ROOT, 'assets/template-html/footer-template.html'),
 };
+
+/**
+ * Vite emits each source template (page.html) at its source-relative path in
+ * dist/. Rename those raw outputs to index.html so language-less folder URLs
+ * (e.g. /home/) keep serving the raw template exactly as before the rename.
+ */
+function normalizeViteOutputs(): number {
+  let renamed = 0;
+  const walk = (dir: string): void => {
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e of entries) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) walk(full);
+      else if (e.name === 'page.html') {
+        fs.renameSync(full, path.join(dir, 'index.html'));
+        renamed++;
+      }
+    }
+  };
+  walk(CONFIG.distDir);
+  return renamed;
+}
 
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
@@ -129,7 +156,7 @@ export function generateRedirects(langs: string[], passThroughDirs: string[]): s
   lines.push(
     '',
     '# ── Catch-all 404 ───────────────────────────────────────────────────',
-    '/* /index.html 404',
+    '/* /404.html 404',
     '',
   );
 
@@ -205,6 +232,8 @@ export async function runSSG(): Promise<void> {
   // 4. Transform & write
   if (!DRY_RUN) {
     ensureDir(CONFIG.distDir);
+    const renamed = normalizeViteOutputs();
+    if (renamed) console.log(`[vite]   Normalized ${renamed} raw template output(s) page.html -> index.html`);
   }
 
   // 3.5 Map pages to their Vite bundle (after `vite build` emitted dist pages)
@@ -243,12 +272,13 @@ export async function runSSG(): Promise<void> {
         continue;
       }
 
-      const outPath = path.join(CONFIG.distDir, lang, relPath);
+      const outRel = relPath.replace(/(^|\/)page\.html$/, '$1index.html');
+      const outPath = path.join(CONFIG.distDir, lang, outRel);
       if (!DRY_RUN) {
         writeFile(outPath, builtHtml);
       }
 
-      if (VERBOSE) process.stdout.write(`    ✓ ${lang}  ->  ${path.join(lang, relPath)}\n`);
+      if (VERBOSE) process.stdout.write(`    ✓ ${lang}  ->  ${path.join(lang, outRel)}\n`);
       totalPages++;
     }
   }

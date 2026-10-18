@@ -198,9 +198,9 @@ describe('Discover UI Defects Regression Suite (DS-03, DS-04, DS-08, DS-10, DS-1
     expect(inst.state).toBe('hidden');
   });
 
-  // DS-19: search/index.html obsolete comments check
-  it('DS-19: search/index.html header comments do not mention obsolete scripts', () => {
-    const htmlPath = path.join(__dirname, '../search/index.html');
+  // DS-19: search/page.html obsolete comments check
+  it('DS-19: search/page.html header comments do not mention obsolete scripts', () => {
+    const htmlPath = path.join(__dirname, '../search/page.html');
     if (fs.existsSync(htmlPath)) {
       const content = fs.readFileSync(htmlPath, 'utf8');
       expect(content).not.toContain('render-engine.js');

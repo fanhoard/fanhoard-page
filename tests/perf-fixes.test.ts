@@ -15,8 +15,8 @@ describe('PF-05: Dead Asset References & Boot 404 Elimination', () => {
     expect(modernNav).not.toContain('wave-effect.js');
   });
 
-  it('uses absolute leading slash for lang-proxy script in home/index.html', () => {
-    const homeHtmlPath = path.join(__dirname, '../home/index.html');
+  it('uses absolute leading slash for lang-proxy script in home/page.html', () => {
+    const homeHtmlPath = path.join(__dirname, '../home/page.html');
     const homeHtml = fs.readFileSync(homeHtmlPath, 'utf8');
 
     expect(homeHtml).toContain('src="/assets/js/lang-proxy.js');
