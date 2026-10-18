@@ -107,7 +107,11 @@
 
   // Minimal renderer: render main buttons and first content items (fast)
   async function renderMinimal(uiConfig) {
-    const lang = (window.FvLang && FvLang.lang) || 'en';
+    // Order-safe: read the baked page language directly (async script may run
+    // before lang-core.js). data-fv-built is baked into the HTML at build time.
+    const lang = (window.FvLang && FvLang.lang) ||
+                 document.documentElement.getAttribute('data-fv-built') ||
+                 'en';
     const mainButtons = (uiConfig && uiConfig.mainButtons) || [];
     const ul = document.getElementById('nav-list');
     if (!ul) return;
