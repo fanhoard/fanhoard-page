@@ -138,5 +138,10 @@
   "license-sec2-title": "2. อิสระในการใช้งาน",
   "license-sec2-content": "คุณสามารถคัดลอก ดัดแปลง เผยแพร่ และนำไปใช้งานเพื่อการค้าหรือวัตถุประสงค์อื่นใดได้โดยอิสระ โดยไม่จำเป็นต้องขออนุญาตหรือระบุอ้างอิงถึง FanHoard",
   "footer-info": "ข้อมูล",
-  "loading-text": "กำลังโหลด…"
+  "loading-text": "กำลังโหลด…",
+  "community-h1": "ติดต่อ FanHoard",
+  "whatsnew-h1": "มีอะไรใหม่ใน FanHoard — บันทึกปรับปรุงรุ่น",
+  "setting-h1": "การตั้งค่า — FanHoard",
+  "about-h1": "เกี่ยวกับ FanHoard",
+  "report-page-custom-label": "หน้าหรือ URL เฉพาะที่เกิดปัญหา"
 }

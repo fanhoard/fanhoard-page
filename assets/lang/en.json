@@ -138,5 +138,10 @@
   "license-sec2-title": "2. Freedom of Use",
   "license-sec2-content": "You can copy, modify, distribute, and perform the work, even for commercial purposes, all without asking permission or giving credit to FanHoard.",
   "footer-info": "Info",
-  "loading-text": "Loading…"
+  "loading-text": "Loading…",
+  "community-h1": "Contact FanHoard",
+  "whatsnew-h1": "What's New in FanHoard — Release Notes",
+  "setting-h1": "Settings — FanHoard",
+  "about-h1": "About FanHoard",
+  "report-page-custom-label": "Specific Page or URL"
 }
