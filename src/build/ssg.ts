@@ -90,8 +90,10 @@ export const CONFIG: BuildConfig = {
  * dist/. Rename those raw outputs to index.html so language-less folder URLs
  * (e.g. /home/) keep serving the raw template exactly as before the rename.
  */
-function normalizeViteOutputs(): number {
-  let renamed = 0;
+function removeViteRawOutputs(): number {
+  // ไม่มีหน้าส่วนกลาง: ลบผลลัพธ์ raw ของ vite ทิ้ง
+  // หน้าเว็บมีเฉพาะแบบมีรหัสภาษา (en/th) + 404.html ตามคำสั่ง Master (18 ต.ค. 2026)
+  let removed = 0;
   const walk = (dir: string): void => {
     let entries: fs.Dirent[];
     try {
@@ -102,14 +104,14 @@ function normalizeViteOutputs(): number {
     for (const e of entries) {
       const full = path.join(dir, e.name);
       if (e.isDirectory()) walk(full);
-      else if (e.name === 'page.html') {
-        fs.renameSync(full, path.join(dir, 'index.html'));
-        renamed++;
+      else if (e.name === 'page.html' || (path.dirname(full) === CONFIG.distDir && e.name === 'index.html')) {
+        fs.unlinkSync(full);
+        removed++;
       }
     }
   };
   walk(CONFIG.distDir);
-  return renamed;
+  return removed;
 }
 
 const args = process.argv.slice(2);
@@ -232,8 +234,8 @@ export async function runSSG(): Promise<void> {
   // 4. Transform & write
   if (!DRY_RUN) {
     ensureDir(CONFIG.distDir);
-    const renamed = normalizeViteOutputs();
-    if (renamed) console.log(`[vite]   Normalized ${renamed} raw template output(s) page.html -> index.html`);
+    const removed = removeViteRawOutputs();
+    if (removed) console.log(`[vite]   Removed ${removed} raw template output(s) (no central pages)`);
   }
 
   // 3.5 Map pages to their Vite bundle (after `vite build` emitted dist pages)

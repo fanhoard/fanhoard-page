@@ -1,16 +1,15 @@
 ---
-version: 6.2.0
-date: 2026-10-18T09:59:59.973Z
+version: 6.2.1
+date: 2026-10-18T10:07:15.568Z
 notify: true
-title: No more automatic language redirects
-subtitle: Pages without a language code now stay exactly where they are, which also fixes Google Search Console redirect issues.
+title: Central pages removed
+subtitle: Addresses without a language code no longer serve any page. Only /en/ and /th/ addresses exist.
 ---
 
-**TL;DR** — The site no longer moves you to a language-coded address on its own. Links are no longer rewritten behind the scenes, and your browser language no longer decides anything at load time. You change language only with the language menu.
+**TL;DR** — Following up on v6.2.0: leftover central (language-less) pages are now removed from the build entirely. Opening an address without /en/ or /th/ now lands on the not-found page instead of showing page content.
 
 ### Changed
 
-- **No automatic redirects** Opening any page without a language code (for example /home/) keeps you right there. No silent switch to /en/ or /th/ anymore.
-- **Links stay as written** Internal links are no longer automatically rewritten to add a language code while you browse.
-- **Your choice still works** Picking a language from the language menu still takes you to that language's address, exactly as before.
-- **Search engine friendly** With the automatic redirects gone, pages no longer register as "Page with redirect" in Google Search Console.
+- **No central pages** Every page now exists only under its language address (/en/... and /th/...). The unprefixed copies of pages are gone from the server.
+- **Clear not-found behavior** Opening an address without a language code shows the not-found page with a working link to the English home page.
+- **Footer and error page links fixed** All links on the not-found page and the footer now point to proper language addresses, so nothing leads to a dead end.
