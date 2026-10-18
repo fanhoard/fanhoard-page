@@ -219,6 +219,21 @@ function _injectSeoTags($: cheerio.CheerioAPI, lang: string, srcFilePath: string
   });
   head.append(`<link rel="alternate" hreflang="x-default" href="${baseUrl}/${defLang}${canonPath}" />\n`);
   head.append(`<link rel="canonical" href="${baseUrl}/${lang}${canonPath}" />\n`);
+
+  // og:url / og:locale must follow the built language variant
+  const localeMap: Record<string, string> = { en: 'en_US', th: 'th_TH' };
+  if ($('meta[property="og:url"]').length) {
+    $('meta[property="og:url"]').attr('content', `${baseUrl}/${lang}${canonPath}`);
+  }
+  if ($('meta[property="og:locale"]').length) {
+    $('meta[property="og:locale"]').attr('content', localeMap[lang] || 'en_US');
+    $('meta[property="og:locale:alternate"]').remove();
+    langs
+      .filter((l) => l !== lang)
+      .forEach((l) => {
+        head.append(`<meta property="og:locale:alternate" content="${localeMap[l] || l}" />\n`);
+      });
+  }
 }
 
 /**

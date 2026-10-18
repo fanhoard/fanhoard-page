@@ -12,7 +12,27 @@
   </url>
 
   <url>
+    <loc>https://fanhoard.pages.dev/th/community/contact/</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/community/contact/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/community/contact/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/community/contact/"/>
+  </url>
+
+  <url>
     <loc>https://fanhoard.pages.dev/en/community/</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/community/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/community/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/community/"/>
+  </url>
+
+  <url>
+    <loc>https://fanhoard.pages.dev/th/community/</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -32,6 +52,16 @@
   </url>
 
   <url>
+    <loc>https://fanhoard.pages.dev/th/community/report/</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/community/report/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/community/report/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/community/report/"/>
+  </url>
+
+  <url>
     <loc>https://fanhoard.pages.dev/en/data/verse/discover/</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
@@ -42,17 +72,27 @@
   </url>
 
   <url>
-    <loc>https://fanhoard.pages.dev/en/data/verse/scope/</loc>
+    <loc>https://fanhoard.pages.dev/th/data/verse/discover/</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/data/verse/scope/"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/data/verse/scope/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/data/verse/scope/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/data/verse/discover/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/data/verse/discover/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/data/verse/discover/"/>
   </url>
 
   <url>
     <loc>https://fanhoard.pages.dev/en/home/</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/home/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/home/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/home/"/>
+  </url>
+
+  <url>
+    <loc>https://fanhoard.pages.dev/th/home/</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -72,7 +112,27 @@
   </url>
 
   <url>
+    <loc>https://fanhoard.pages.dev/th/platform/about/</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/platform/about/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/platform/about/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/platform/about/"/>
+  </url>
+
+  <url>
     <loc>https://fanhoard.pages.dev/en/platform/license/</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/platform/license/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/platform/license/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/platform/license/"/>
+  </url>
+
+  <url>
+    <loc>https://fanhoard.pages.dev/th/platform/license/</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -92,7 +152,27 @@
   </url>
 
   <url>
+    <loc>https://fanhoard.pages.dev/th/platform/privacy/</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/platform/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/platform/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/platform/privacy/"/>
+  </url>
+
+  <url>
     <loc>https://fanhoard.pages.dev/en/platform/roadmap/</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/platform/roadmap/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/platform/roadmap/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/platform/roadmap/"/>
+  </url>
+
+  <url>
+    <loc>https://fanhoard.pages.dev/th/platform/roadmap/</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -112,6 +192,16 @@
   </url>
 
   <url>
+    <loc>https://fanhoard.pages.dev/th/platform/whats_new/</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/platform/whats_new/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/platform/whats_new/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/platform/whats_new/"/>
+  </url>
+
+  <url>
     <loc>https://fanhoard.pages.dev/en/search/</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
@@ -122,7 +212,27 @@
   </url>
 
   <url>
+    <loc>https://fanhoard.pages.dev/th/search/</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/search/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/search/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/search/"/>
+  </url>
+
+  <url>
     <loc>https://fanhoard.pages.dev/en/setting/</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/setting/"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/setting/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/setting/"/>
+  </url>
+
+  <url>
+    <loc>https://fanhoard.pages.dev/th/setting/</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
