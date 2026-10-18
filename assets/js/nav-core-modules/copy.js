@@ -67,7 +67,7 @@
      * @returns {Promise<void>}
      */
     async copy(copyInfo = {}) {
-      const lang = localStorage.getItem('selectedLang') || 'en';
+      const lang = (window.FvLang && FvLang.lang) || 'en';
       
       try {
         if (!copyInfo || !copyInfo.text) throw new Error('No content to copy');

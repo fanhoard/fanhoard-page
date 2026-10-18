@@ -91,12 +91,13 @@
           try { SourcePaginator?.invalidate?.(); }                  catch (_) {}
         }, { passive: true });
 
-        let _resizeTimer;
+        let _resizeRaf = null;
         window.addEventListener('resize', () => {
-          clearTimeout(_resizeTimer);
-          _resizeTimer = setTimeout(() => {
+          if (_resizeRaf) cancelAnimationFrame(_resizeRaf);
+          _resizeRaf = requestAnimationFrame(() => {
+            _resizeRaf = null;
             try { RouterService.scrollActiveButtonsIntoView?.(); } catch (_) {}
-          }, 150);
+          });
         }, { passive: true });
 
         // ── Phase 5: Load button config ────────────────────────────────────

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<!--
+  search/index.html — FanHoard Search subsystem.
+  Uses unified search system (search-system/search.js) with URE virtual scrolling.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta name="theme-color" content="#13b47f" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-translate="search-seo-title">Search Emoji &amp; Symbols — FanHoard</title>
+  <meta name="description" data-translate="search-seo-desc" content="Search our database of emojis, symbols, and special characters. Find and copy what you need instantly.">
+  <!-- Open Graph / Twitter (og:url is rewritten per language at build) -->
+  <meta property="og:site_name" content="FanHoard" />
+  <meta property="og:title" content="Search Emoji &amp; Symbols — FanHoard" />
+  <meta property="og:description" content="Search our database of emojis, symbols, and special characters. Find and copy what you need instantly." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://fanhoard.pages.dev/en/search/" />
+  <meta property="og:image" content="https://fanhoard.pages.dev/assets/images/OG/fanhoard-hub-og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Search Emoji &amp; Symbols — FanHoard" />
+  <meta name="twitter:description" content="Search our database of emojis, symbols, and special characters. Find and copy what you need instantly." />
+  <meta name="twitter:image" content="https://fanhoard.pages.dev/assets/images/OG/fanhoard-hub-og.png" />
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/fanhoard-verse360.ico" />
+
+  <!-- 1. Tokens -->
+  <link rel="preload" href="/assets/css/tokens.css" as="style">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/ds.css">
+
+  <!-- 2. CSS (legacy CSS kept — search-system.css is auto-injected by search.js) -->
+  <link rel="preload" href="/assets/css/search.css?v=5.11.2-202610172134" as="style" onload="this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="/assets/css/search.css?v=5.11.2-202610172134" /></noscript>
+  <link rel="preload" href="/assets/css/bg.css?v=5.11.2-202610172134" as="style" onload="this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="/assets/css/bg.css?v=5.11.2-202610172134" /></noscript>
+  <link rel="stylesheet" href="/assets/css/back-to-top.css?v=5.11.2-202610172134">
+
+  <link rel="modulepreload" href="/assets/js/con-data-service/con-data-registry.js?v=5.11.2-202610172134" />
+  <link rel="modulepreload" href="/assets/js/con-data-service/con-data-service.js?v=5.11.2-202610172134" />
+</head>
+
+<body class="fv-body">
+  <div id="fv-app" class="fv-app fv-page-shell" data-page="search">
+
+    <!-- Header Landmark & Sticky Search Hero -->
+    <header class="fv-header" role="banner">
+      <a href="#fv-main" class="skip-link fv-skip-link" data-translate="home-skip-link">Skip to main content</a>
+      <!-- SEO h1 ซ่อน -->
+      <h1 class="fv-sr-only" data-translate="search-h1">Search Emoji and Symbols — FanHoard</h1>
+      <div id="search-sticky">
+        <div class="search-header">
+          <div class="container-lg">
+            <form id="searchForm" autocomplete="off" role="search" aria-label="FanHoard Search">
+              <div class="search-pill">
+                <span class="search-pill__icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--tmd)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                  </svg>
+                </span>
+                <input type="search" id="searchInput" name="q"
+                  placeholder="ค้นหาข้อมูล…"
+                  inputmode="search" enterkeyhint="search"
+                  aria-label="Search emojis and symbols"
+                  autocomplete="off" spellcheck="false" />
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!--
+      FILTER PILLS (non-sticky — scrolls with the page)
+      ──────────────────────────────────────────────────────────────
+      Sits directly under the sticky header. Both rows are horizontally
+      scrollable on narrow viewports. The category row auto-collapses
+      (display:none) when empty via the `.filter-pills-row--cat:empty`
+      CSS rule in search.css.
+    -->
+    <nav class="search-filters-panel" aria-label="Search filters">
+      <div id="typeFilter" class="filter-pills-row" role="group" aria-label="Type filter"></div>
+      <div id="categoryFilter" class="filter-pills-row filter-pills-row--cat" role="group" aria-label="Category filter"></div>
+    </nav>
+
+    <!-- Main Landmark -->
+    <main id="fv-main" class="fv-main search-main-layout" role="main" tabindex="-1">
+      <div id="searchResults" role="region" aria-live="polite" aria-label="Search results" tabindex="0"></div>
+      <div id="searchLiveAnnouncer" class="fv-sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+    </main>
+
+    <!-- Footer Landmark Mount -->
+    <footer class="fv-footer" id="fv-footer-mount" role="contentinfo"></footer>
+
+  </div><!-- /#fv-app -->
+
+  <!--
+    v3.0 SCRIPT LOADING — only 1 search script instead of 2.
+
+    con-data-service modules are type="module" → deferred by spec.
+    URE must execute before search-system/search.js (same defer order = document order).
+    search-system/search.js auto-loads its 13 modules + injects search-system.css.
+  -->
+    <script src="/assets/js/lang-core.js?v=5.11.2-202610172134"></script>
+<script type="module" src="/assets/js/con-data-service/con-data-registry.js?v=5.11.2-202610172134"></script>
+  <script type="module" src="/assets/js/con-data-service/con-data-service.js?v=5.11.2-202610172134"></script>
+  <!-- URE must execute before search-system/search.js (same defer order = document order) -->
+  <script defer src="/assets/js/ure/ure.js?v=5.11.2-202610172134"></script>
+  <!-- v3.0: Single unified entry point (replaces legacy search scripts) -->
+  <script defer src="/assets/js/search-system/search.js?v=5.11.2-202610172134"></script>
+  <script defer src="/assets/js/copyNotification.js?v=5.11.2-202610172134"></script>
+  <script defer src="/assets/js/modern-navigation.js?v=5.11.2-202610172134"></script>
+  <script defer src="/assets/js/back-to-top.js?v=5.11.2-202610172134"></script>
+  <script defer src="/assets/js/popup.js?v=5.11.2-202610172134"></script>
+  <script defer src="/assets/js/version-core.js?v=5.11.2-202610172134"></script>
+  <script defer src="/assets/js/reload-top.js?v=5.11.2-202610172134"></script>
+  <script defer src="/assets/js/footer-template.js?v=5.11.2-202610172134"></script>
+
+  <!--
+    Sticky header behavior — inline, runs immediately, no deps
+    ──────────────────────────────────────────────────────────────
+    v7 — Filter pills are now outside #search-sticky (Google-like).
+    This script only manages the show/hide-on-scroll behavior of the
+    sticky search bar itself. The old category-toggle logic
+    (filterCatToggle / _closeCatBar / _updateCatBarHeight / cat-spacer)
+    has been removed — category pills are always visible in normal flow.
+  -->
+  <script>
+  (function(){
+    'use strict';
+    var sticky = document.getElementById('search-sticky');
+    if (!sticky) return;
+    var _visible = true, _touching = false, _lastY = 0, _raf = null, _touchStartY = 0;
+
+    function _hide() {
+      sticky.style.transform = 'translateZ(0) translateY(-100%)';
+      sticky.style.pointerEvents = 'none';
+      _visible = false;
+    }
+    function _show() {
+      sticky.style.transform = 'translateZ(0) translateY(0%)';
+      sticky.style.pointerEvents = '';
+      _visible = true;
+    }
+    window._revealStickyHeader = function() { if (!_visible) _show(); };
+
+    sticky.style.transition = 'transform 0.22s cubic-bezier(0.33,1,0.68,1)';
+    _lastY = window.scrollY;
+
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') {
+        requestAnimationFrame(function() { _lastY = window.scrollY; _touchStartY = window.scrollY; });
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchstart', function() {
+      _touching = true; _lastY = window.scrollY; _touchStartY = window.scrollY;
+    }, { passive: true });
+    window.addEventListener('touchend',  function() { _touching = false; }, { passive: true });
+
+    window.addEventListener('scroll', function() {
+      if (_raf) return;
+      _raf = requestAnimationFrame(function() {
+        _raf = null;
+        var y = window.scrollY, delta = y - _lastY;
+        _lastY = y;
+        if (delta === 0) return;
+        if (y <= 40) { if (!_visible) _show(); return; }
+        if (_touching) {
+          if (delta > 5 && _visible && (y - _touchStartY) > 30) _hide();
+          else if (delta < -15 && !_visible && (_touchStartY - y) > 30) _show();
+        }
+      });
+    }, { passive: true });
+  })();
+  </script>
+</body>
+</html>

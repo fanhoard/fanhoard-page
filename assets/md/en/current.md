@@ -1,16 +1,20 @@
 ---
-version: 3.0.5
-date: 2026-10-17T16:07:57.000Z
+version: 3.1.0
+date: 2026-10-18T22:34:16.859Z
 notify: true
-title: Update times are now the real release time
-subtitle: Each update shows the exact time it was released, and that time can no longer change.
+title: A fully bilingual FanHoard
+subtitle: Every page now exists in proper English and Thai versions, the language you choose is recognized instantly, and search visibility is greatly improved.
 ---
 
-**TL;DR** — The time shown on an update used to be a value typed in by hand, so it could be wrong. It is now taken from the real moment the update was released, and it stays fixed after that. The previous update was also released without its pop-up, so it is summarized here.
+**TL;DR** — FanHoard's biggest refresh: all pages live at clear /en/ and /th/ addresses and are fully written in one language, the language switch works instantly, and the site is cleaner and faster.
 
-### Fixed
+### Changed
 
-- **Real release time** The time on each update (in the update pop-up and on the What's New page) is now the actual time it was released, not a typed-in value.
-- **Time never changes afterwards** Once an update has been released, its time is locked. Editing its notes later no longer moves it.
-- **Update pop-up** The previous update did not show its pop-up. This update does, and it includes what that update changed.
-- **Update history order** Past updates are listed by version number, newest first, and missing past updates can be rebuilt.
+- **Dedicated language addresses** — every page exists at /en/... and /th/... The site never changes your language on its own anymore; you choose with the language button.
+- **Complete Thai coverage** — titles, descriptions, menus, categories and all emoji names are fully Thai on Thai pages (many used to stay in English).
+- **Clearer not-found behavior** — an address without a real page now shows the not-found page instead of quietly showing the home page.
+
+### Improved
+
+- **Search visibility** — a clean sitemap covers every page in both languages, language tags are correct for search engines, and social share previews (Open Graph) work on every page.
+- **Faster and lighter** — the old in-page translation engine was removed (~3,300 lines less code); pages are now pre-built in your language.

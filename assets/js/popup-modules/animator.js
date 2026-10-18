@@ -81,18 +81,23 @@
       popupEl.classList.remove(CONFIG.DOM.CLOSING_CLASS);
       popupEl.classList.add(CONFIG.DOM.ENTERING_CLASS);
       
-      // Show overlay with fade-in
-      if (overlayEl) {
-        overlayEl.style.transition = 'opacity ' + CONFIG.TIMING.OVERLAY_FADE_IN + 'ms ' + easing;
-        overlayEl.style.opacity = '1';
-      }
-      
       if (reducedMotion) {
-        // Skip animation entirely — just show
+        // Skip animation entirely — just show immediately
+        if (overlayEl) {
+          overlayEl.style.transition = 'none';
+          overlayEl.style.opacity = '1';
+        }
+        popupEl.style.transition = 'none';
         popupEl.classList.remove(CONFIG.DOM.ENTERING_CLASS);
         popupEl.classList.add(CONFIG.DOM.VISIBLE_CLASS);
         resolve();
         return;
+      }
+
+      // Show overlay with fade-in
+      if (overlayEl) {
+        overlayEl.style.transition = 'opacity ' + CONFIG.TIMING.OVERLAY_FADE_IN + 'ms ' + easing;
+        overlayEl.style.opacity = '1';
       }
       
       // Double-rAF: ensures the initial (pre-animation) state has been
@@ -157,16 +162,21 @@
       popupEl.classList.remove(CONFIG.DOM.ENTERING_CLASS);
       popupEl.classList.add(CONFIG.DOM.CLOSING_CLASS);
       
+      if (reducedMotion) {
+        if (overlayEl) {
+          overlayEl.style.transition = 'none';
+          overlayEl.style.opacity = '0';
+        }
+        popupEl.style.transition = 'none';
+        popupEl.classList.remove(CONFIG.DOM.CLOSING_CLASS, CONFIG.DOM.VISIBLE_CLASS);
+        resolve();
+        return;
+      }
+
       // Fade out overlay
       if (overlayEl) {
         overlayEl.style.transition = 'opacity ' + CONFIG.TIMING.OVERLAY_FADE_OUT + 'ms ' + easing;
         overlayEl.style.opacity = '0';
-      }
-      
-      if (reducedMotion) {
-        popupEl.classList.remove(CONFIG.DOM.CLOSING_CLASS, CONFIG.DOM.VISIBLE_CLASS);
-        resolve();
-        return;
       }
       
       // Apply exit transition

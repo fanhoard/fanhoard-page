@@ -32,16 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // หน่วงเวลาเล็กน้อยเพื่อเช็คว่าเอกสารมี referrer หรือไม่
   setTimeout(() => {
    if (!document.referrer) {
-    try {
-     const lm = window.languageManager;
-     if (lm && typeof lm.getPredictedLangForPath === 'function') {
-      const predicted = lm.getPredictedLangForPath(location.pathname + (location.search || ''));
-      if (predicted && predicted !== (lm.selectedLang || 'en')) {
-       // เปลี่ยนภาษาก่อนจะปล่อยให้หน้า continue (non-blocking)
-       lm.updatePageLanguage(predicted).catch(() => {});
-      }
-     }
-    } catch (e) {}
     redirectToHome();
    }
   }, 100);

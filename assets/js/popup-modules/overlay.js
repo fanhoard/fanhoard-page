@@ -71,18 +71,28 @@
 
   /**
    * Attach overlay click-to-dismiss for a popup instance.
-   * Only fires if the click is directly on the overlay (not the popup content).
+   * Only fires if mousedown and click both land directly on the overlay element
+   * (prevents drag-and-release text selection inside popup from closing overlay).
    *
    * @param {string} instanceId
    * @param {HTMLElement} overlayEl
    * @param {Function} closeFn - Called when overlay is clicked
    */
   function attachOverlayClick(instanceId, overlayEl, closeFn) {
+    var mouseDownTarget = null;
+
+    var downHandler = function(e) {
+      mouseDownTarget = e.target;
+    };
+    downHandler._instanceId = instanceId;
+    on(overlayEl, 'mousedown', downHandler, { passive: true });
+
     var handler = function(e) {
-      if (e.target === overlayEl) {
+      if (e.target === overlayEl && mouseDownTarget === overlayEl) {
         e.preventDefault();
         closeFn();
       }
+      mouseDownTarget = null;
     };
     handler._instanceId = instanceId;
     on(overlayEl, 'click', handler, { passive: false });
@@ -100,6 +110,7 @@
   function attachEscapeKey(instanceId, closeFn) {
     var handler = function(e) {
       if (e.key !== 'Escape') return;
+      if (e.defaultPrevented) return;
 
       // Only respond if this instance is the topmost active popup
       var top = State.getTopInstance();

@@ -36,7 +36,7 @@
  *  ARCHITECTURE
  * ════════════════════════════════════════════════════════════════════════
  *
- *   SearchService.doSearch()
+ *   SearchController.doSearch()
  *     ↓
  *   RenderingService.renderResults(primaryResults)
  *     ↓
@@ -85,7 +85,7 @@
   //
   // WHY a module-private handle (not in State):
   //   State.discoveryHandle is exposed for transparency (so
-  //   window.__searchUI.getState() can report whether discovery is
+  //   window.__searchUIController.getState() can report whether discovery is
   //   active), but the canonical reference lives here. This keeps
   //   DiscoveryService the single owner of the URE handle lifecycle
   //   — nobody else can call .destroy() on it accidentally.
@@ -246,7 +246,7 @@
    *   the same .result-card markup (we use the same renderResultItem template),
    *   so we want the same behaviour: tap → copy → show notification.
    *
-   *   However, RenderingService's guard (window._copyResultTextHandlerSet)
+   *   However, RenderingService's guard (window._hasCopyResultHandler)
    *   is attached to #searchResults only — clicks on .result-card inside
    *   #searchDiscovery won't trigger it because the listener is on a
    *   different container.
@@ -259,54 +259,16 @@
    * @param {Element} listEl
    */
   function _attachCopyHandler(listEl) {
-    try {
-      if (!listEl || listEl._discoveryCopyAttached) return;
-
-      const _copy = (card) => {
-        if (!card?.hasAttribute('data-text')) return;
-        const text = StringService.decodeUrl(card.getAttribute('data-text'));
-        const name = StringService.decodeUrl(card.getAttribute('data-name') || '');
-        if (M.NotificationService?.copyText) {
-          M.NotificationService.copyText(text, name || undefined);
-        }
-      };
-
-      const clickHandler = (e) => {
-        const card = e.target.closest('.result-card');
-        if (card) { e.preventDefault(); _copy(card); }
-      };
-
-      const keydownHandler = (e) => {
-        if (e.key !== 'Enter' && e.key !== ' ') return;
-        const card = e.target.closest('.result-card');
-        if (card) { e.preventDefault(); _copy(card); }
-      };
-
-      listEl.addEventListener('click', clickHandler);
-      listEl.addEventListener('keydown', keydownHandler);
-
-      listEl._discoveryClickHandler = clickHandler;
-      listEl._discoveryKeydownHandler = keydownHandler;
-      listEl._discoveryCopyAttached = true;
-    } catch (e) {
-      console.warn('[Discovery] _attachCopyHandler failed:', e);
+    const RS = M.RenderingService || window.SearchModules?.RenderingService;
+    if (RS && RS._attachCopyHandler) {
+      RS._attachCopyHandler(listEl);
     }
   }
 
   function _detachCopyHandler(listEl) {
-    try {
-      if (!listEl) return;
-      if (listEl._discoveryClickHandler) {
-        listEl.removeEventListener('click', listEl._discoveryClickHandler);
-        delete listEl._discoveryClickHandler;
-      }
-      if (listEl._discoveryKeydownHandler) {
-        listEl.removeEventListener('keydown', listEl._discoveryKeydownHandler);
-        delete listEl._discoveryKeydownHandler;
-      }
-      delete listEl._discoveryCopyAttached;
-    } catch (e) {
-      console.warn('[Discovery] _detachCopyHandler failed:', e);
+    const RS = M.RenderingService || window.SearchModules?.RenderingService;
+    if (RS && RS._detachCopyHandler) {
+      RS._detachCopyHandler(listEl);
     }
   }
 

@@ -57,7 +57,7 @@ ul li {
 }
 
 .wn-release--past {
-  opacity: 0.85;
+  /* ไม่ลด opacity ทั้งบล็อก: ทำให้ตัวอักษรป้ายสีเขียวตกเหลือ 3.5:1 (ธีมสว่าง) ความเด่นที่ลดของรุ่นเก่ามาจากป้ายเวอร์ชัน/ชิปเวลาที่มีสไตล์แยกอยู่แล้ว */
 }
 
 .wn-history-label {
@@ -65,7 +65,7 @@ ul li {
   font-weight: var(--font-semibold, 600);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #0f766e;
+  color: var(--color-brand-text, #0f766e);
   padding: var(--space-6, 1.5rem) 0 var(--space-3, 0.75rem);
 }
 
@@ -80,7 +80,7 @@ ul li {
 .wn-version-badge {
   display: inline-block;
   background: var(--color-brand-primary, #009688);
-  color: #ffffff;
+  color: var(--color-on-brand, #ffffff);
   font-size: var(--step--1, 0.875rem);
   font-weight: var(--font-bold, 700);
   padding: var(--space-1, 0.25rem) var(--space-3, 0.75rem);
@@ -242,4 +242,11 @@ h3.wn-title {
   * {
     transition: none !important;
   }
+}
+
+
+/* Focus ring accessibility */
+a:focus-visible, button:focus-visible, [role="button"]:focus-visible {
+  outline: 2px solid var(--color-brand-primary, #009688);
+  outline-offset: 2px;
 }

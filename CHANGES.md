@@ -1,139 +1,49 @@
-# FanHoard Feed System v2.1 — Per-User Persistent Discovery Feed
+# Global Consistency Sweep v3.2.24 (r11) — Final Code Round
 
-## What changed
+## What changed in v3.2.24
 
-The discover-page feed now randomizes content **per user** (per browser) and
-**persists** the randomized order in `localStorage` for a configurable TTL
-(default 30 minutes). Within the TTL window, every refresh / re-visit shows the
-same feed — so it feels "delivered" rather than "re-rolled every time". After
-TTL expires, a fresh seed is generated → new feed rotation.
+### Shared components normalized to v3 (uncommitted r11 sweep, committed here)
+- `assets/css/footer.css`: legacy `--ease-in-out`/`--ease-out` transition groups → `var(--transition-fast/normal)`; nested var() fallbacks simplified; 3 focus outlines → 3px solid rgba(13,148,136,0.35)
+- `assets/css/back-to-top.css`: #009688 → #0d9488; hover fallback #00897b → #0F766E; enter/exit curves → transition tokens; outline → 3px teal
+- `assets/css/base.css`: 2 ghost `--ease-out` transitions → transition tokens
+- `assets/css/modern-styles.css`: #757575 → #475569
+- `assets/js/footer-template.js` (from the audit worker): footer injection guard `footer.fv-footer` → `footer.fv-footer a` — an empty (linkless) footer no longer blocks re-injection
 
-The user also resumes scrolling exactly where they left off, even after closing
-the tab and coming back within the TTL window.
+### REAL BUG FIXED — settings first-visit theme (found by the 14-page audit)
+- `theme-core.js` `_getStoredTheme()` returned hardcoded `'dark'` when no preference stored ("FanHoard default theme is dark" — a v2-era decision). The other 13 pages follow the OS via CSS (`@media prefers-color-scheme { :root:not([data-theme="light"]) }`), so a fresh OS-light visitor got a DARK settings page while the rest of the site was light. Default changed to `'system'` — now resolves via matchMedia like every other page.
+- `setting-ui.js` radio/effective fallbacks `'dark'` → `'system'` (consistency)
+- `tests/settings-polish.test.ts` default pin updated 'dark' → 'system' per v3 spec (assertion structure unchanged, same class as the r03 timing pin)
 
-## Files in this package
+### Audit false alarms cleared (no product change)
+- 404 "white focus ring": outline-style is `none` (color=currentColor artifact in computed read); the skip-link indicates focus by appearing, standard pattern
+- license "white ring": the first interactive element is a hidden Cookiebot iframe — not user-facing
 
-| File | Status | Purpose |
-|---|---|---|
-| `feed-cache.js` | **NEW** | FeedCache module — localStorage-backed seed + state with TTL |
-| `feed.js` | MODIFIED | FeedService v2.1 — uses FeedCache for seed + state restore/save |
-| `content.js` | MODIFIED | renderFeed now calls `tryRestoreFromCache()` before `reset()`; saves to cache after every page |
-| `config.js` | MODIFIED | Adds `FEED_SEED_TTL: 30 * 60 * 1000` to `ALL_BUTTON` |
-| `nav-core.js` | MODIFIED | Adds `feed-cache.js` to Phase 2 of the module loader |
+## Full-site audit results (14 pages × light+dark, 1280 + 375 overflow spot-check)
 
-## How to install
+All 28 combos: body themed (#FAFAFC light / #0F172A dark), footer present with 12 links (no dupes, no empty footers), 0 horizontal overflow at 1280 and 375, focus rings 3px teal on real interactive elements. Screenshots in `r11-shots/` (28 files, committed). Reduced-motion verified in r07 (0.00001s transitions).
 
-### Option A — apply the patch
+| Page | Light | Dark | Overflow 1280/375 |
+|---|---|---|---|
+| 404 (/) | ✓ #FAFAFC | ✓ #0F172A | none |
+| /home/ | ✓ | ✓ | none |
+| /search/?q=heart | ✓ | ✓ | none |
+| /setting/ | ✓ (fixed) | ✓ | none |
+| /community/ | ✓ | ✓ | none |
+| /community/contact/ | ✓ | ✓ | none |
+| /community/report/ | ✓ | ✓ | none |
+| /platform/about/ | ✓ | ✓ | none |
+| /platform/license/ | ✓ | ✓ | none |
+| /platform/privacy/ | ✓ | ✓ | none |
+| /platform/roadmap/ | ✓ | ✓ | none |
+| /platform/whats_new/ | ✓ | ✓ | none |
+| /data/verse/discover/ | ✓ | ✓ | none |
+| /data/verse/scope/ | ✓ | ✓ | none |
 
-From the root of your local `fanhoard-page` clone:
+## Verification
 
-```bash
-git apply feed-system-v2.1.patch
-# Then copy the new file (not tracked by patch since it's a new file)
-cp feed-cache.js assets/js/nav-core-modules/feed-cache.js
-```
+- Unit 234/234 (37 files) | build clean | full e2e 16/16 (incl. scroll-lock 3/3, theme-toggle, report-submission)
+- Live fix verification: fresh OS-light context → settings body #FAFAFC, radio=System, data-theme=light; fresh OS-dark → body #0F172A, radio=System, data-theme=dark
 
-### Option B — copy files directly
+## Notes format
 
-Copy each file to its corresponding path under `assets/js/`:
-
-```
-feed-cache.js → assets/js/nav-core-modules/feed-cache.js   (NEW)
-feed.js       → assets/js/nav-core-modules/feed.js
-content.js    → assets/js/nav-core-modules/content.js
-config.js     → assets/js/nav-core-modules/config.js
-nav-core.js   → assets/js/nav-core.js
-```
-
-No build step is required — these are plain ES5-compatible modules loaded
-dynamically by `nav-core.js`.
-
-## How it works (architectural summary)
-
-### Seed strategy
-
-```
-Old (v2.0):  _seed = Date.now() ^ Math.random()
-             → new seed every reset()
-             → every page load = brand-new feed order
-             → effectively all users see a "fresh" feed (no real personalization)
-
-New (v2.1):  _seed = FeedCache.getOrCreateSeed()
-             → seed persisted in localStorage with timestamp
-             → within TTL (30 min): same seed = same feed order
-             → different browsers → different seeds → different feeds
-             → after TTL: new seed generated → fresh rotation
-```
-
-### State persistence
-
-Feed state (which segments were already emitted, per-category show counts,
-diversity windows, soft-reset progress, slot index) is also persisted to
-`localStorage` so the user resumes exactly where they left off.
-
-What we store (lightweight, < 50 KB typically):
-- `seed`, `softResets`, `isExhausted`, `slotIndex` — cycle progress
-- `catShowCounts` (as entries array) — novelty tracking
-- `recentCats`, `recentTypes` — diversity windows
-- `emittedIds` (ordered list of segment IDs) — lets us rebuild the unseen
-  pool accurately on restore without storing full segment objects
-
-What we **do not** store:
-- Full segment objects (too big — they're deterministically rebuilt from DB +
-  seed)
-- DOM snapshots (content.js handles its own DOM via RouteCache)
-
-### Cache-first flow in `content.js → renderFeed()`
-
-```
-1. Try RouteCache (in-session, 5 min TTL) → if hit, restore DOM + state + scroll
-2. Else → try FeedCache (localStorage, 30 min TTL) → if hit, queue state restore
-3. Else → FeedService.reset() → FeedCache.getOrCreateSeed() (may return same seed if within TTL)
-4. After loadNextPage() → FeedService.saveToCache()  ← persists for next visit
-```
-
-### Storage layout (localStorage keys)
-
-- `fv_feed_seed_v1`: `{ seed:number, createdAt:number }`
-- `fv_feed_state_v1`: `{ seed, softResets, isExhausted, slotIndex, catShowCounts, recentCats, recentTypes, emittedIds, savedAt }`
-
-Both keys are versioned (`_v1` suffix) for future schema migrations.
-
-### Graceful degradation
-
-- If `localStorage` is unavailable (private browsing, quota exceeded) → FeedCache
-  silently degrades; the feed still works, just doesn't persist across reloads.
-- If `FeedCache` module fails to load → `FeedService.reset()` falls back to the
-  original `Date.now() ^ Math.random()` seed behavior.
-- If a cached state's seed doesn't match the current seed (user cleared seed
-  manually, or seed was refreshed) → state is discarded as stale.
-
-## Configuration
-
-In `config.js → ALL_BUTTON`:
-
-```js
-FEED_SEED_TTL: 30 * 60 * 1000,  // 30 minutes — adjust to taste
-```
-
-- Shorter TTL → feed feels fresher, less persistent
-- Longer TTL → feed feels more "delivered", more stable across visits
-
-## Alignment with discovery focus
-
-This change directly serves the project's pivot toward **discovery as the core
-feature**:
-
-1. **Different users see different content** — per-browser seed breaks the
-   "everyone sees the same feed" anti-pattern of v2.0.
-2. **Feed feels delivered, not re-rolled** — within TTL, the same feed greets
-   the user across visits, reinforcing the sense of a personalized discovery
-   surface.
-3. **Resume where you left off** — even after closing the tab, users return to
-   the same point in their feed, supporting long discovery sessions.
-4. **Fresh rotation over time** — TTL-based seed refresh ensures content
-   doesn't go stale over a day, keeping discovery feeling alive.
-
-## Validation
-
-All 5 files pass `node --check` syntax validation. No build step required.
+Release notes EN/TH use the parser-compatible `- **Bold** — desc` bullet format (in-app update modal renders full item lists).

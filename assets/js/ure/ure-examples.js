@@ -88,7 +88,7 @@ async function example_home() {
         recycling   : true,
         estimatedItemHeight: 80,
         onItemClick : (e, item) => {
-          const lang = localStorage.getItem('selectedLang') || 'en';
+          const lang = (window.FvLang && FvLang.lang) || 'en';
           const name = item.name?.[lang] || item.name?.en || '';
           navigator.clipboard?.writeText(item.text || '').then(() => {
             window.showCopyNotification?.({ text: item.text, name, typeId: typeObj.id, lang });

@@ -8,7 +8,7 @@
   'use strict';
   
   // ── Timing constants ──────────────────────────────────────
-  const FADE_IN_MS = 260;
+  const FADE_IN_MS = 250;
   const DISPLAY_MS = 1800;
   const FADE_OUT_MS = 300;
   
@@ -155,7 +155,7 @@
       _holdTimer = null;
     }
     
-    el.style.transition = `opacity ${FADE_OUT_MS}ms ease-in`;
+    el.style.transition = `opacity ${FADE_OUT_MS}ms cubic-bezier(0.2, 0, 0, 1)`;
     el.style.opacity = '0';
     
     setTimeout(() => el.parentNode?.removeChild(el), FADE_OUT_MS + 40);
@@ -165,9 +165,7 @@
   async function showCopyNotification({ text, name, typeId, lang } = {}) {
     _injectStyles();
     
-    const resolvedLang = lang ||
-      (typeof localStorage !== 'undefined' && localStorage.getItem('selectedLang')) ||
-      'en';
+    const resolvedLang = lang || (window.FvLang && FvLang.lang) || 'en';
     
     const label = COPIED_LABEL[resolvedLang] || COPIED_LABEL.en;
     let resolvedName = (typeof name === 'string') ? name.trim() : '';
@@ -192,7 +190,7 @@
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (_activeEl !== el) return;
-        el.style.transition = `opacity ${FADE_IN_MS}ms ease-out`;
+        el.style.transition = `opacity ${FADE_IN_MS}ms cubic-bezier(0.2, 0, 0, 1)`;
         el.style.opacity = '1';
       });
     });

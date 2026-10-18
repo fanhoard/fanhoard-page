@@ -221,3 +221,13 @@ Verify data service structures and validation logic by running:
 ```bash
 npm run test
 ```
+
+
+---
+
+## 8. Polish & Stability Foundation (Data Service Abort Safety)
+
+ในรอบปรับปรุงความเสถียร (Polish Foundation Round) `DataService` (`assets/js/nav-core-modules/data.js`) ได้รับการปรับปรุงการจัดการ Exception เมื่อ request ถูกยกเลิก:
+
+- **AbortError Catch Guard**: เมื่อ request ถูกยกเลิกโดย `AbortController` (เนื่องจาก timeout 10 วินาที หรือผู้ใช้นำทางไปหน้าอื่น) `_enqueueFetch` จะตรวจจับ `DOMException` ประเภท `AbortError` และ คืนค่า `{ ok: false, aborted: true }` อย่างปลอดภัย
+- **Uncaught Rejection Elimination**: ป้องกันไม่ให้เกิด Unhandled Promise Rejections หรือ Error Overlay เมื่อการสื่อสารเครือข่ายถูก Abort

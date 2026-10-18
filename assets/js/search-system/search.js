@@ -1,7 +1,7 @@
 // Path:    assets/js/search-system/search.js
 // Purpose: Self-loading entry point for the new unified search system.
 //          Loads all search-modules/* in dependency order, then exposes
-//          the public __searchUI + SearchEngine global APIs.
+//          the public __searchUIController + SearchEngine global APIs.
 //
 // This file consolidates the legacy `search-engine.js` and `search-ui.js`
 // into a single entry point, following the same pattern used by the
@@ -16,13 +16,13 @@
 //   Phase 3 (parallel): url-history, keyboard,         — need phase 2
 //                       rendering, suggestions, input-bar
 //   Phase 4 (parallel): overlay, discovery             — need phase 3
-//   Phase 5 (parallel): engine, search-service         — need everything
+//   Phase 5 (parallel): engine, search-controller         — need everything
 //
 // ARCHITECTURE (aerospace-grade, SpaceX/NASA-inspired):
 //   Layer 1: Data ingestion    (ConDataService → engine.init)
 //   Layer 2: Index             (engine builds docs + keywords + type/cat indexes + Fuse)
 //   Layer 3: Search            (engine.search + engine.querySuggestions + engine.queryRelated)
-//   Layer 4: Service           (search-service orchestrates search + history + render)
+//   Layer 4: Service           (search-controller orchestrates search + history + render)
 //   Layer 5: UI                (overlay, input-bar, suggestions, rendering, discovery)
 //
 // v4.0 — Discovery system + smart language detection
@@ -37,7 +37,7 @@
 //
 // Public API:
 //   window.SearchEngine  — search engine (init, search, querySuggestions, _internals)
-//   window.__searchUI    — UI orchestrator (init, destroy, getState, getConfig, ...)
+//   window.__searchUIController    — UI orchestrator (init, destroy, getState, getConfig, ...)
 //
 // RELIABILITY:
 //   • Early data prefetch starts polling ConDataService the moment this script runs.
@@ -49,14 +49,14 @@
 (function () {
   'use strict';
 
-  if (window.__searchUI?._initialized) return;
+  if (window.__searchUIController?._initialized) return;
 
   // ── Build ID (replaced at build time by scripts/update-version.js) ──────────
   // WHY: search-modules/*.js don't appear in HTML directly, so the
   // update-version.js ?v= regex can't catch them. FV_BUILD_ID is injected
   // with the real buildId at build time → appended to module URLs as ?v=.
   // Dev mode: '' → _v() returns '' → URLs have no ?v= → normal browser cache.
-  var FV_BUILD_ID = '';
+  var FV_BUILD_ID = '3.2.26-202610040621';
 
   /** Returns '?v=<buildId>' if a buildId exists, otherwise ''. */
   function _v() { return FV_BUILD_ID ? '?v=' + FV_BUILD_ID : ''; }
@@ -75,9 +75,9 @@
     //   v4.0: discovery.js added here. It uses lazy lookups for
     //   RenderingService and SearchEngine so it can safely load before
     //   engine.js (Phase 5) — those references are resolved at runtime.
-    ['overlay.js', 'discovery.js'],
+    ['overlay.js', 'discovery.js', 'engine-data.js', 'data-loader.js'],
     // Phase 5: Engine + Search service — depend on everything above
-    ['engine.js', 'search-service.js'],
+    ['engine.js', 'search-controller.js'],
   ];
 
   // ── Early data prefetch ───────────────────────────────────────────────────
@@ -181,7 +181,22 @@
   // loaded by the page HTML — this file only adds new badge styles.
   _injectCSS(base);
 
-  loadPhases(LOAD_PHASES, base)
+  // ── Shared scroll-lock core (single source of truth for all overlays) ──
+  // search overlay delegates scroll locking to window.ScrollLockCore so
+  // search locks compose with FVL/popup overlays instead of destroying
+  // each other. On pages without FVL we load the core ourselves first.
+  function ensureScrollLockCore() {
+    if (window.ScrollLockCore) return Promise.resolve();
+    return loadScript('/assets/js/loading-system/fvl-modules/scroll-lock-core.js')
+      .catch(function (err) {
+        // Do not initialize overlays without the shared lock authority.
+        console.error('[Search] ScrollLockCore failed to load; search boot aborted:', err);
+        throw err;
+      });
+  }
+
+  ensureScrollLockCore()
+    .then(() => loadPhases(LOAD_PHASES, base))
     .then(() => _boot())
     .catch(err => console.error('[Search] Module loading failed:', err));
 
@@ -199,6 +214,7 @@
       link.href = cssUrl;
       link.setAttribute('data-search-system-css', 'true');
       document.head.appendChild(link);
+      // S6: ds.css โหลดผ่าน <link> ใน HTML ของทุกหน้าแล้ว (ยกเลิกการฉีดจาก JS)
     } catch (e) {
       console.warn('[Search] CSS auto-inject failed:', e);
     }
@@ -216,7 +232,7 @@
       CONFIG, State, Handlers,
       DOMService, StorageService, URLService,
       KeyboardService, FilterService,
-      SearchService, UIService, OverlayService,
+      SearchController, UIService, OverlayService,
       ClearBtnService, IconSlotService,
       VirtualScrollEngine, KeyboardAutoToggleService,
       SearchEngine,
@@ -227,60 +243,28 @@
       return;
     }
 
-    // ── Data loading ────────────────────────────────────────────────────────
-    // Uses _earlyDataPromise if the prefetch already has data.
-    // Falls back to the normal ConDataService poll + fetch chain.
+    // ── Data loading (delegates to DataLoader in data-loader.js) ───────────
 
-    /**
-     * Poll for ConDataService availability up to `ms` milliseconds.
-     * @param {number} ms
-     * @returns {Promise<Object|null>}
-     */
-    function waitForConDataService(ms) {
-      return new Promise(function (resolve) {
-        if (window.ConDataService?.getAssembled) return resolve(window.ConDataService);
-        const start = Date.now();
-        const id = setInterval(function () {
-          if (window.ConDataService?.getAssembled) {
-            clearInterval(id);
-            resolve(window.ConDataService);
-          } else if (Date.now() - start >= ms) {
-            clearInterval(id);
-            resolve(null);
-          }
-        }, CONFIG.TIMING.conDataServicePollMs);
-      });
+    function _dataHasTypes(data) {
+      const DL = M.DataLoader || window.SearchModules?.DataLoader;
+      return DL ? DL._dataHasTypes(data) : !!(data && Array.isArray(data.type) && data.type.length);
     }
 
-    /**
-     * Load data via early-prefetch promise, or fall back to direct fetch.
-     * @returns {Promise<Object>}
-     */
-    function loadData() {
-      // Fast path: prefetch already resolved
-      if (_earlyDataPromise) {
+    function loadDataWithRetry(maxAttempts, backoffMs) {
+      const DL = M.DataLoader || window.SearchModules?.DataLoader;
+      if (DL) {
         const p = _earlyDataPromise;
         _earlyDataPromise = null;
-        return p.then(function (data) {
-          if (data) return data;
-          // Prefetch returned null — fall through to normal path
-          return _normalLoadData();
-        });
+        return DL.loadDataWithRetry(maxAttempts, backoffMs, p);
       }
       return _normalLoadData();
     }
 
-    function _normalLoadData() {
-      return waitForConDataService(CONFIG.TIMING.conDataServiceWaitMs).then(function (svc) {
-        if (svc) {
-          return svc.getAssembled().catch(function (err) {
-            console.warn('[Search] ConDataService failed, using fallback:', err);
-            return fetch(CONFIG.DB.path).then(r => r.json()).catch(() => ({}));
-          });
-        }
-        console.warn('[Search] ConDataService not ready — using fallback db');
-        return fetch(CONFIG.DB.path).then(r => r.json()).catch(() => ({}));
-      });
+    function _watchForLateData() {
+      const DL = M.DataLoader || window.SearchModules?.DataLoader;
+      if (DL) {
+        return DL.watchForLateData();
+      }
     }
 
     // ── Init ────────────────────────────────────────────────────────────────
@@ -289,7 +273,7 @@
       try {
         KeyboardService.initKeyboardDetection();
 
-        loadData()
+        loadDataWithRetry(4, 2000)
           .then(function (data) {
             State.apiData = data || {};
             if (!Array.isArray(State.apiData.type))
@@ -300,7 +284,7 @@
           })
           .then(function () {
             try { State.allKeywordsCache = SearchEngine.generateAllKeywords?.() ?? []; }
-            catch { State.allKeywordsCache = []; }
+            catch (e) { console.warn('[SearchModule:search]', e); State.allKeywordsCache = []; }
 
             UIService.buildWrapper();
             FilterService.setupTypeFilter('all');
@@ -314,7 +298,7 @@
                 const navH = DOMService.getNavHeight ? DOMService.getNavHeight() : 56;
                 sticky.style.setProperty("--fv-nav-height", navH + "px");
               }
-            } catch (_) {}
+            } catch (e) { console.warn('[SearchModule:search]', e); }
 
             document.body.style.marginBottom = '';
             const sr = DOMService.get(CONFIG.DOM.searchResultsId) || (DOMService.getMainLandmark ? DOMService.getMainLandmark() : null);
@@ -338,7 +322,7 @@
               if (inp) inp.value = pending.q;
               State.selectedType = pending.type || 'all';
               FilterService.setupTypeFilter(State.selectedType);
-              SearchService.doSearch(null, false);
+              SearchController.doSearch(null, false);
               URLService.replaceSearch({ q: pending.q, type: State.selectedType, category: 'all' });
               return;
             }
@@ -346,14 +330,22 @@
             // ── Normal path: URL-based search ─────────────────────────────────
             const urlState = URLService.readStateFromURL();
             if (urlState.q) {
-              SearchService.doSearchFromURL(urlState.q, urlState.type || 'all', urlState.category || 'all');
+              SearchController.doSearchFromURL(urlState.q, urlState.type || 'all', urlState.category || 'all');
             } else {
               URLService.replaceSearch({ q: '', type: 'all', category: 'all' });
             }
+
+            // If data never arrived (all retries empty), watch for late data
+            // so a refresh always ends up showing results on its own.
+            const _bootDocs = (() => {
+              try { return (SearchEngine._internals && SearchEngine._internals.getDocs && SearchEngine._internals.getDocs()) || []; }
+              catch (e) { console.warn('[SearchModule:search]', e); return []; }
+            })();
+            if (!_bootDocs.length) _watchForLateData();
           })
           .catch(e => {
             console.error('[Search] Initialisation failed:', e);
-            if (window.__searchUI) window.__searchUI._initialized = false;
+            if (window.__searchUIController) window.__searchUIController._initialized = false;
           });
 
         // Form/Enter handlers — attached synchronously so they work immediately.
@@ -366,7 +358,7 @@
             if (typeof window.announceToScreenReader === "function") {
               window.announceToScreenReader(lang === "th" ? "กำลังค้นหา..." : "Searching...", "polite");
             }
-            SearchService.doSearch();
+            SearchController.doSearch();
             UIService.closeKB();
           };
           DOMService.on(form, 'submit', Handlers.formSubmit);
@@ -377,7 +369,7 @@
           DOMService.on(inp, 'keydown', e => {
             if (e.key === 'Enter') {
               e.preventDefault();
-              SearchService.doSearch();
+              SearchController.doSearch();
               UIService.closeKB();
             }
           });
@@ -451,7 +443,7 @@
             State.lastCommittedSearchState = null;
           }
         }
-      } catch { State.lastCommittedSearchState = null; }
+      } catch (e) { console.warn('[SearchModule:search]', e); State.lastCommittedSearchState = null; }
     }
 
     function _restoreUIState(st) {
@@ -462,7 +454,7 @@
         State.selectedType     = st.type     || 'all';
         State.selectedCategory = st.category || 'all';
         FilterService.setupTypeFilter(State.selectedType);
-        SearchService.doSearch(null, true);
+        SearchController.doSearch(null, true);
         ClearBtnService.sync();
         IconSlotService.update();
       } finally { State.suppressHistoryPush = false; }
@@ -471,18 +463,18 @@
     // ── Destroy ─────────────────────────────────────────────────────────────
 
     function destroy() {
-      if (window.__searchUI && window.__searchUI._beforeUnloadHandler) {
-        try { window.removeEventListener('beforeunload', window.__searchUI._beforeUnloadHandler); } catch (_) {}
-        window.__searchUI._beforeUnloadHandler = null;
+      if (window.__searchUIController && window.__searchUIController._beforeUnloadHandler) {
+        try { window.removeEventListener('beforeunload', window.__searchUIController._beforeUnloadHandler); } catch (e) { console.warn('[SearchModule:search]', e); }
+        window.__searchUIController._beforeUnloadHandler = null;
       }
       try {
         if (State.overlayOpen) OverlayService.close('manual');
         // v4.0 — Tear down discovery section before the rest so URE
         // handles inside discovery get a clean shutdown.
         if (M.DiscoveryService?.destroy) {
-          try { M.DiscoveryService.destroy(); } catch (_) {}
+          try { M.DiscoveryService.destroy(); } catch (e) { console.warn('[SearchModule:search]', e); }
         }
-        VirtualScrollEngine.destroy();
+        VirtualScrollEngine?.destroy?.();
         KeyboardAutoToggleService.disableAutoToggle();
 
         DOMService.off(window,   'resize',   Handlers.resize);
@@ -501,8 +493,7 @@
         if (Handlers.documentKeydownOverlay)
           DOMService.off(document, 'keydown', Handlers.documentKeydownOverlay);
 
-        State._timeouts.forEach(t => { try { clearTimeout(t); } catch {} });
-        State._timeouts.clear();
+        if (typeof State.clearTimeouts === 'function') State.clearTimeouts();
 
         DOMService.remove(DOMService.get(CONFIG.DOM.suggestionContainerId));
         DOMService.remove(DOMService.get(CONFIG.DOM.overlayContainerId));
@@ -524,17 +515,17 @@
         State.lastCommittedSearchState  = null;
         State._handlersAttached         = false;
         State.keyboardAutoToggleEnabled = false;
-        try { KeyboardService?.destroy?.(); } catch (_) {}
+        try { KeyboardService?.destroy?.(); } catch (e) { console.warn('[SearchModule:search]', e); }
         UIService._wrapperBuilt         = false;
-        window._copyResultTextHandlerSet  = false;
+        window._hasCopyResultHandler  = false;
 
-        if (window.__searchUI) window.__searchUI._initialized = false;
+        if (window.__searchUIController) window.__searchUIController._initialized = false;
       } catch (e) { console.error('[Search] destroy failed', e); }
     }
 
     // ── Public API ───────────────────────────────────────────────────────────
 
-    window.__searchUI = {
+    window.__searchUIController = {
       _initialized : true,
       init,
       destroy,
@@ -553,26 +544,26 @@
       isKeyboardOpen  : () => M.KeyboardService.isKeyboardOpen(),
 
       getVSStats: () => ({
-        itemCount   : VirtualScrollEngine._items.length,
-        visibleCount: VirtualScrollEngine._vis?.size ?? 0,
-        poolSize    : VirtualScrollEngine._pool.length,
-        totalHeight : VirtualScrollEngine._total,
+        itemCount   : VirtualScrollEngine?._items?.length ?? 0,
+        visibleCount: VirtualScrollEngine?._vis?.size ?? 0,
+        poolSize    : VirtualScrollEngine?._pool?.length ?? 0,
+        totalHeight : VirtualScrollEngine?._total ?? 0,
       }),
     };
 
     init();
-    if (window.__searchUI) {
-      if (window.__searchUI._beforeUnloadHandler) {
-        window.removeEventListener('beforeunload', window.__searchUI._beforeUnloadHandler);
+    if (window.__searchUIController) {
+      if (window.__searchUIController._beforeUnloadHandler) {
+        try { window.removeEventListener('beforeunload', window.__searchUIController._beforeUnloadHandler); } catch (e) { console.warn('[SearchModule:search]', e); }
       }
-      window.__searchUI._beforeUnloadHandler = () => { try { destroy(); } catch (_) {} };
-      window.addEventListener('beforeunload', window.__searchUI._beforeUnloadHandler, { passive: true });
+      window.__searchUIController._beforeUnloadHandler = () => { try { destroy(); } catch (e) { console.warn('[SearchModule:search]', e); } };
+      window.addEventListener('beforeunload', window.__searchUIController._beforeUnloadHandler, { passive: true });
     }
 
     // Dispatch ready event for any listeners (matches URE pattern)
     try {
       window.dispatchEvent(new CustomEvent('search:ready', { detail: { version: '4.0.0' } }));
-    } catch (_) {}
+    } catch (e) { console.warn('[SearchModule:search]', e); }
   }
 
 })();

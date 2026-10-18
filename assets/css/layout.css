@@ -331,3 +331,17 @@ main,
 }
 
 
+
+/* ── Reduced Motion Support ── */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  .modal-card,
+  .overlay,
+  .fade-enter,
+  .fade-leave {
+    animation: none !important;
+    transition: none !important;
+  }
+}

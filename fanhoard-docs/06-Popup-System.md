@@ -578,6 +578,7 @@ showErrorFullscreen(error, { lang: 'th' });
 |-----------|---------------|
 | **v1.0.0** | ระบบฐาน — 8 presets (dialog, alert, confirm, sheet, toast, drawer, tooltip, popover) |
 | **v1.1.0** | เพิ่ม **fullscreen** preset, เพิ่ม `PopupSystem.fullscreen()` API, History API back button support, z-index 28000 |
+| **v1.2.0** | Polish & Stability — เพิ่ม active trap registry (`_activeTraps`) และล้าง keydown listener เก่าก่อนลงทะเบียนใหม่ ป้องกัน memory leaks และการวนโฟกัสซ้ำซ้อนใน `installFocusTrap` (`a11y.js`) |
 
 ---
 
@@ -594,3 +595,13 @@ showErrorFullscreen(error, { lang: 'th' });
 - [`AI_CODING_GUIDE.md`](./AI_CODING_GUIDE.md) — มาตรฐานโค้ดที่ต้องยึดเมื่อแก้ Popup System
 - [`AI_FORBIDDEN.md`](./AI_FORBIDDEN.md) — กฎเหล็ก (โดยเฉพาะห้ามใช้ `alert()`/`confirm()`/`prompt()` — ใช้ PopupSystem แทน)
 - [`12-SEO-Guide.md`](./12-SEO-Guide.md) — ⭐ SEO considerations (priority สูงสุด) ที่เกี่ยวข้องกับระบบนี้
+
+
+---
+
+## 12. Polish & Stability Foundation (Focus Trap Leak Prevention)
+
+โมดูล `a11y.js` (`assets/js/popup-modules/a11y.js`) ใน Popup System ได้รับการปรับปรุงด้านความเสถียร:
+
+- **Focus Trap Registry & Listener Cleanup**: `installFocusTrap` ปรับปรุงให้ลงทะเบียนตัวจัดการเหตุการณ์ลงใน `_activeTraps` และ ถอดตัวดักจับ `keydown` เดิมบน `document` ออกก่อนสร้าง focus trap ใหม่เสมอ
+- **Memory Leak & Duplicate Trap Protection**: ขจัดปัญหา Memory Leaks และการวนลูปโฟกัสซ้ำซ้อนเมื่อมีการเปิด Modal Popups หลายชั้นหรือลงทะเบียน Focus Trap ซ้ำ

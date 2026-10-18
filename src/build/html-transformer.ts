@@ -27,7 +27,7 @@ export interface BuildConfig {
 let _config: BuildConfig | null = null;
 
 /**
- * Maps page source paths (e.g. 'data/verse/discover/index.html') to the hashed
+ * Maps page source paths (e.g. 'data/verse/discover/page.html') to the hashed
  * Vite bundle URL emitted for that page's module scripts, so localized SSG
  * output references real built assets instead of raw TS sources.
  */
@@ -69,8 +69,12 @@ export function transformHtml(
     const key = $el.attr('data-translate');
 
     if (key && translations[key]) {
-      const parts = normalizeParts(parseTranslation(translations[key]));
-      $el.html(_partsToHtml($, $el, parts));
+      if ($el.is('meta')) {
+        $el.attr('content', _stripMarkersToText(translations[key]));
+      } else {
+        const parts = normalizeParts(parseTranslation(translations[key]));
+        $el.html(_partsToHtml($, $el, parts));
+      }
     }
 
     $el.removeAttr('data-translate')
@@ -219,6 +223,21 @@ function _injectSeoTags($: cheerio.CheerioAPI, lang: string, srcFilePath: string
   });
   head.append(`<link rel="alternate" hreflang="x-default" href="${baseUrl}/${defLang}${canonPath}" />\n`);
   head.append(`<link rel="canonical" href="${baseUrl}/${lang}${canonPath}" />\n`);
+
+  // og:url / og:locale must follow the built language variant
+  const localeMap: Record<string, string> = { en: 'en_US', th: 'th_TH' };
+  if ($('meta[property="og:url"]').length) {
+    $('meta[property="og:url"]').attr('content', `${baseUrl}/${lang}${canonPath}`);
+  }
+  if ($('meta[property="og:locale"]').length) {
+    $('meta[property="og:locale"]').attr('content', localeMap[lang] || 'en_US');
+    $('meta[property="og:locale:alternate"]').remove();
+    langs
+      .filter((l) => l !== lang)
+      .forEach((l) => {
+        head.append(`<meta property="og:locale:alternate" content="${localeMap[l] || l}" />\n`);
+      });
+  }
 }
 
 /**
@@ -348,7 +367,7 @@ function _escHtml(str: string): string {
 function _deriveCanonicalPath(srcFilePath: string): string | null {
   if (!srcFilePath) return null;
   let p = srcFilePath.replace(/\\/g, '/').replace(/^\.\//, '');
-  p = p.replace(/index\.html$/, '').replace(/\.html$/, '/');
+  p = p.replace(/(index|page)\.html$/, '').replace(/\.html$/, '/');
   if (!p.startsWith('/')) p = '/' + p;
   if (!p.endsWith('/')) p += '/';
   return p;

@@ -6,11 +6,11 @@
  * ┌─────────────────────────────────────────────────────────────┐
  * │  Overlay structure                                          │
  * │                                                             │
- * │  #searchOverlayContainer  (position:fixed, full screen)    │
+ * │  #search-overlay-container  (position:fixed, full screen)    │
  * │  ├── #overlay-header-bar                                    │
  * │  │    └── .search-pill  ← moved from header       │
  * │  └── .search-overlay-scrollable-content                     │
- * │       └── #searchSuggestions                                │
+ * │       └── #search-suggestions-list                                │
  * │                                                             │
  * │  Results stay on the MAIN PAGE (#searchResults).           │
  * └─────────────────────────────────────────────────────────────┘
@@ -106,6 +106,7 @@
         let ov = DOMService.get(CONFIG.DOM.overlayContainerId);
         if (ov) {
           ov.innerHTML = '';
+          ov.className = 'search-overlay search-overlay-open search-overlay-active';
         } else {
           ov = DOMService.create('div', CONFIG.DOM.overlayContainerId, 'search-overlay search-overlay-open', {
             position       : 'fixed',
@@ -115,23 +116,29 @@
             flexDirection  : 'column',
             alignItems     : 'stretch',
             overflow       : 'hidden',
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--surface-base, #ffffff)',
           });
           document.body.appendChild(ov);
+          if (typeof requestAnimationFrame === 'function') {
+            requestAnimationFrame(() => {
+              if (ov) ov.classList.add('search-overlay-active');
+            });
+          } else {
+            ov.classList.add('search-overlay-active');
+          }
         }
 
         // Move .search-pill into the overlay header bar
         const wrapper = DOMService.query('.search-pill');
         if (wrapper) {
-          State._wrapperParent = wrapper.parentNode;
-          State._wrapperNext   = wrapper.nextSibling;
+          State.setWrapperParent(wrapper.parentNode, wrapper.nextSibling);
 
           const bar = DOMService.create('div', 'overlay-header-bar', null, {
             display      : 'flex',
             alignItems   : 'center',
             padding      : '8px 10px',
-            background   : '#fff',
-            borderBottom : '1px solid rgba(0,0,0,.08)',
+            background   : 'var(--surface-base, #ffffff)',
+            borderBottom : '1px solid var(--border-subtle, rgba(0,0,0,.08))',
             flexShrink   : '0',
             width        : '100%',
             boxSizing    : 'border-box',
@@ -165,29 +172,21 @@
         DOMService.on(sg, 'mouseleave', () => { State.suggestionsLocked = false; });
 
         // ── Scroll-lock: no layout shift technique ─────────────────────────
-        // BAD: document.documentElement.overflow='hidden' removes the scrollbar
-        //      → page widens by ~15px → all fixed elements shift → results jump.
-        //
-        // CORRECT (Bootstrap/MUI/Headless UI pattern):
-        //   Save scrollY → body position:fixed + top:-scrollY + width:100%
-        //   Body stays visually in place, scrollbar stays visible → zero shift.
-        //
-        // BUG 2 fix (overlay clipped when keyboard open + scrolled):
-        //   When keyboard is open, visualViewport.offsetTop can be > 0.
-        //   Scroll window to top FIRST, then lock. overlay inset:0 then
-        //   correctly anchors to the actual viewport top edge.
         const _savedScrollY = window.scrollY || window.pageYOffset || 0;
-        State._savedScrollY = _savedScrollY;
+        State.setSavedScrollY(_savedScrollY);
 
         // Bring page to top so overlay position:fixed inset:0 is correct
         if (_savedScrollY > 0) {
           window.scrollTo({ top: 0, behavior: 'instant' });
         }
 
-        // Lock scroll — body fixed keeps it visually in place, no scrollbar jump
-        document.body.style.position = 'fixed';
-        document.body.style.top      = `-${_savedScrollY}px`;
-        document.body.style.width    = '100%';
+        // Lock scroll — body fixed keeps it visually in place, no scrollbar jump.
+        // ScrollLockCore is the only lock authority; search.js guarantees it
+        // is loaded before these modules are initialized.
+        const _lockCore = window.ScrollLockCore;
+        if (!_lockCore) throw new Error('[Search/Overlay] ScrollLockCore unavailable');
+        _lockCore.allowScrollIn('.search-overlay-scrollable-content');
+        _lockCore.lock('search');
 
         // Escape → close (routed through OverlayService.close, the one authority)
         Handlers.documentKeydownOverlay = (e) => { if (e.key === 'Escape') OverlayService.close('escape'); };
@@ -206,13 +205,9 @@
         URLService.pushOverlayEntry(State.preOverlayState);
 
         // Clear transitioning flag BEFORE rendering suggestions.
-        // renderQuerySuggestions() guards on overlayTransitioning — if still true
-        // when called, it returns early and suggestions never appear.
-        // Sequence: mark open → clear flag → render → focus.
         State.overlayTransitioning = false;
 
         // Show suggestions for the current input value immediately.
-        // Must happen AFTER overlayTransitioning=false (see above).
         const currentQ = (inp?.value || '').trim();
         if (currentQ) SuggestionService.renderQuerySuggestions(currentQ);
         else          ReadyModeService.renderReadyModeSuggestions();
@@ -224,7 +219,7 @@
               inp.focus({ preventScroll: true });
               const l = inp.value.length;
               inp.setSelectionRange(l, l);
-            } catch { try { inp.focus(); } catch {} }
+            } catch (e) { try { inp.focus(); } catch (err) { console.warn('[SearchModule:overlay]', err); } }
           }, CONFIG.TIMING.focusDelayMs);
         }
       } catch (e) {
@@ -239,8 +234,6 @@
      * Close the overlay. This is the ONLY function allowed to close it.
      *
      * @param {'escape'|'back-btn'|'popstate'|'manual'|string} src
-     *   'popstate' = browser already popped the entry — skip collapseOverlayEntry.
-     *   All other values = we must collapse the overlay history entry ourselves.
      */
     close(src = 'manual') {
       try {
@@ -275,30 +268,28 @@
         State._wrapperParent = null;
         State._wrapperNext   = null;
 
-        // ④ Remove overlay DOM
-        DOMService.remove(DOMService.get(CONFIG.DOM.overlayContainerId));
+        // ④ Remove overlay DOM with active animation class cleanup
+        const ovEl = DOMService.get(CONFIG.DOM.overlayContainerId);
+        if (ovEl) {
+          ovEl.classList.remove('search-overlay-active');
+        }
+        DOMService.remove(ovEl);
 
         // ⑤ Restore scroll-lock — reverse of the body-fixed technique
-        // Remove fixed lock first, then restore scroll position atomically.
-        const savedScrollY = State._savedScrollY || 0;
+        const savedScrollY = State.getSavedScrollY() || 0;
         const _didSearch = !!window.__overlayDidSearch;
         window.__overlayDidSearch = false;
 
-        // Hide #searchResults during body restoration to prevent VS flash.
-        // When body position:fixed is removed, scrollY briefly appears as 0.
-        // VS sees this and re-renders items from top before scrollTo fires.
-        // visibility:hidden hides that transient re-render without layout cost.
         const _sr = DOMService.get(CONFIG.DOM.searchResultsId || 'searchResults');
         if (_sr && savedScrollY > 0 && !_didSearch) _sr.style.visibility = 'hidden';
 
-        document.body.style.position = '';
-        document.body.style.top      = '';
-        document.body.style.width    = '';
-        State._savedScrollY = 0;
+        const _lockCore = window.ScrollLockCore;
+        if (!_lockCore) throw new Error('[Search/Overlay] ScrollLockCore unavailable');
+        _lockCore.unlock('search');
+        State.setSavedScrollY(0);
 
         if (savedScrollY > 0 && !_didSearch) {
           window.scrollTo({ top: savedScrollY, behavior: 'instant' });
-          // Restore visibility after scroll settles (next paint frame)
           requestAnimationFrame(() => {
             if (_sr) _sr.style.visibility = '';
           });
@@ -306,11 +297,6 @@
           _sr.style.visibility = '';
         }
 
-        // Restore scroll restoration to its original mode now that our
-        // manual scrollTo has fired. The browser's auto-restore for this
-        // popstate entry is already suppressed by the 'manual' override
-        // set in open(). Restoring here keeps normal back-navigation
-        // (between search entries, no overlay) working as before.
         if (_scrollRestorationOrig !== null && 'scrollRestoration' in history) {
           history.scrollRestoration = _scrollRestorationOrig;
           _scrollRestorationOrig = null;
@@ -330,11 +316,11 @@
         if (inpClose) {
           inpClose.setAttribute('aria-expanded', 'false');
           if (document.activeElement && document.activeElement !== inpClose && document.activeElement.closest && document.activeElement.closest('#' + CONFIG.DOM.overlayContainerId)) {
-            try { inpClose.focus(); } catch {}
+            try { inpClose.focus(); } catch (e) { console.warn('[SearchModule:overlay]', e); }
           }
         }
         
-        // ⑧ Update icon slot (may show ← if query is still present, or 🔍)
+        // ⑧ Update icon slot
         IconSlotService.update();
         ClearBtnService.sync();
 
@@ -342,13 +328,7 @@
         this._showNav();
 
         // Clear any pending timeouts registered during overlay lifetime
-        if (Array.isArray(State._timeouts)) {
-          State._timeouts.forEach(t => { try { clearTimeout(t); } catch {} });
-          State._timeouts = [];
-        } else if (State._timeouts && typeof State._timeouts.clear === "function") {
-          State._timeouts.forEach(t => { try { clearTimeout(t); } catch {} });
-          State._timeouts.clear();
-        }
+        State.clearTimeouts();
 
         setTimeout(() => { State.overlayTransitioning = false; }, CONFIG.TIMING.transitionDelayMs);
       } catch (e) {
@@ -360,7 +340,7 @@
     // ── Nav helpers ────────────────────────────────────────────────────────
 
     _hideNav() {
-      try { State.navHiddenBySearch = true; window.modernNav?.hideNav?.('search-overlay'); } catch {}
+      try { State.navHiddenBySearch = true; window.modernNav?.hideNav?.('search-overlay'); } catch (e) { console.warn('[SearchModule:overlay]', e); }
     },
 
     _showNav() {
@@ -369,7 +349,7 @@
           State.navHiddenBySearch = false;
           window.modernNav.showNav('search-overlay-closed');
         }
-      } catch {}
+      } catch (e) { console.warn('[SearchModule:overlay]', e); }
     },
   };
 

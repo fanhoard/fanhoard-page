@@ -4,7 +4,7 @@
 >
 > **สำหรับ:** AI และนักพัฒนาที่จะแก้/ขยายระบบ Search
 >
-> **ไฟล์หลัก (v4.0):** `assets/js/search-system/search.js` (entry point หลัก ที่โหลดทุก module) + `assets/js/search-system/search-modules/` (14 modules รวม `engine.js` และ `discovery.js`)
+> **ไฟล์หลัก (v4.0):** `assets/js/search-system/search.js` (entry point หลัก ที่โหลดทุก module) + `assets/js/search-system/search-modules/` (16 modules รวม `engine.js`, `discovery.js`, `engine-data.js`, และ `data-loader.js`)
 >
 > **ไฟล์ legacy (ยังคงอยู่ชั่วคราว):** `assets/js/search-engine.js` + `assets/js/search-ui.js` + `assets/js/search-modules/` — ดู [`assets/js/search-system/MIGRATION.md`](../assets/js/search-system/MIGRATION.md) สำหรับการ migrate
 >
@@ -44,7 +44,7 @@
 
 - **`search-system/search.js`** — Entry point หลัก (IIFE, ไม่มี dependency) ที่โหลด modules ทั้งหมดแบบ 5-phase parallel, จัดการ data prefetch, และบูตระบบ — เหมือน `ure.js` ของระบบ URE
 - **`search-system/search-modules/engine.js`** — เอนจินค้นหา (IIFE module) ใช้ **substring search** แบบเบาสำหรับผลลัพธ์ทันที และ **Fuse.js** สำหรับ fuzzy search ที่แม่นยำกว่า — แทนที่ `search-engine.js` แบบ standalone เดิม
-- **`search-system/search-modules/`** — กลุ่มโมดูล 13 ไฟล์ แบ่งเป็น 5 phases ตาม dependency
+- **`search-system/search-modules/`** — กลุ่มโมดูล 16 ไฟล์ แบ่งเป็น 5 phases ตาม dependency
 
 ### โครงสร้างข้อมูล (Data Shape)
 
@@ -90,7 +90,7 @@
              │                                 │
              ▼                                 ▼
 ┌─────────────────────────┐    ┌──────────────────────────────┐
-│  search-engine.js       │    │  search-modules/ (12 files)  │
+│  search-engine.js       │    │  search-modules/ (16 files)  │
 │  • Immediate substring  │    │  Phase 1: types, config,     │
 │    search (O(n))        │    │          state               │
 │  • Fuse.js (CDN, async) │    │  Phase 2: utils,             │
@@ -120,7 +120,7 @@
 
 | ไฟล์ | บทบาท | Global API |
 |------|--------|------------|
-| `assets/js/search-system/search.js` | Entry point หลัก (load ทุก module + boot) | `window.__searchUI` |
+| `assets/js/search-system/search.js` | Entry point หลัก (load ทุก module + boot) | `window.__searchUIController` |
 | `assets/js/search-system/search-modules/engine.js` | เอนจินค้นหา (modular IIFE) | `window.SearchModules.SearchEngine` + `window.SearchEngine` |
 | `assets/js/search-system/search-system.css` | CSS เสริม (auto-inject โดย search.js) | — |
 
@@ -149,8 +149,11 @@
 | 3 | `suggestions.js` | `SuggestionService`, `ReadyModeService` | ข้อเสนอแนะระหว่างพิมพ์ + trending เมื่อ input ว่าง (v2.0: multi-source + badges) |
 | 3 | `input-bar.js` | `UIService`, `IconSlotService`, `ClearBtnService` | จัดการ input bar, ปุ่มล้าง, ไอคอน search/back |
 | 4 | `overlay.js` | `OverlayService` | จัดการ fullscreen search overlay |
-| 5 | `engine.js` | `SearchEngine` | ★ v3.0 — comprehensive search engine (modular IIFE) |
-| 5 | `search-service.js` | `SearchService` | ดำเนินการค้นหา จัดการ history commit, Fuse upgrade (rename จาก `search.js` เดิม) |
+| 4 | `discovery.js` | `DiscoveryService` | Render related content section |
+| 4 | `engine-data.js` | `EngineData` | Raw data normalization, flattenDataToDocs, type/category indexing |
+| 4 | `data-loader.js` | `DataLoader` | Resilient data loading with retry backoff & late-data watcher |
+| 5 | `engine.js` | `SearchEngine` | ★ v3.0 — comprehensive search engine core & query scoring |
+| 5 | `search-controller.js` | `SearchController` | ดำเนินการค้นหา จัดการ history commit, Fuse upgrade (rename จาก `search.js` เดิม) |
 
 ### Namespace
 
@@ -165,7 +168,8 @@ window.SearchModules = {
   KeyboardAutoToggleService, RenderingService, FilterService,
   SuggestionService, ReadyModeService, UIService,
   IconSlotService, ClearBtnService, OverlayService,
-  SearchService, VirtualScrollEngine,
+  DiscoveryService, EngineData, DataLoader,
+  SearchController, VirtualScrollEngine,
   SearchEngine,  // ★ v3.0 — engine อยู่ใน namespace เดียวกับ modules อื่น
 };
 ```
@@ -189,7 +193,7 @@ const LOAD_PHASES = [
   // Phase 4: Overlay — โหลด 1 ไฟล์
   ['overlay.js'],
   // Phase 5: Engine + Search service — โหลดพร้อมกัน 2 ไฟล์
-  ['engine.js', 'search-service.js'],
+  ['engine.js', 'search-controller.js'],
 ];
 ```
 
@@ -262,7 +266,7 @@ search.js รัน
   ├── loadPhase(2) → utils, virtual-scroll
   ├── loadPhase(3) → url-history, keyboard, rendering, suggestions, input-bar
   ├── loadPhase(4) → overlay
-  ├── loadPhase(5) → engine, search-service    ← v3.0 เพิ่ม engine.js
+  ├── loadPhase(5) → engine, search-controller    ← v3.0 เพิ่ม engine.js
   └── _boot()
        ├── KeyboardService.initKeyboardDetection()
        ├── loadData() → ใช้ _earlyDataPromise (อาจเรียบร้อยแล้ว)
@@ -359,7 +363,7 @@ function defaultNormalizeText(s) {
 - ★ v3.0: สร้าง `_typeIndex` (entry สำหรับ type names ทุกภาษา)
 - ★ v3.0: สร้าง `_categoryIndex` (entry สำหรับ category names ทุกภาษา)
 
-**`flattenDataToDocs(data, normalizeFn)`** — เต็มรูปแบบ ใช้สำหรับ Fuse.js:
+**`flattenDataToDocs(data, normalizeFn)`** — เต็มรูปแบบ อยู่ใน `engine-data.js` (`EngineData.flattenDataToDocs`):
 - ทำ normalization ผ่าน `normalizeFn` ที่ส่งเข้ามา
 - รวม field เพิ่มเติม: `*_name` fields (เช่น `short_name`, `official_name`)
 - ใช้เมื่อสร้าง Fuse index เท่านั้น
@@ -724,6 +728,16 @@ _graphemeClusters(text) {
 
 ## 7. การเรนเดอร์ผลลัพธ์และการผสาน URE
 
+### 7.0 Search Pending State & FVL Spinner Integration
+
+ระบบค้นหาใช้ FVL bare spinner ในการแสดงสถานะกำลังโหลดสำหรับ 2 กรณี:
+
+1. **Pending Index Documents (`SearchController.doSearch`)**:
+   - เมื่อผู้ใช้ส่งคำค้นหาขณะที่เอกสารดัชนียังโหลดไม่เสร็จ (`!docsReady`) ระบบจะตั้งค่า `aria-busy="true"` บน `#searchResults` และ mount bare FVL spinner ลงใน `#searchResults` พร้อมเก็บบันทึกคำค้นหาไว้ใน `window.__pendingSearch`
+2. **Pending URE Engine (`RenderingService.renderResults`)**:
+   - เมื่อเรนเดอร์ผลลัพธ์ขณะที่ `window.URE` ยังโหลดไม่เสร็จ ระบบจะตั้งค่า `aria-busy="true"` บน `#searchResults` และ mount bare FVL spinner ลงใน `#searchResults`
+   - เมื่อ `window.URE` พร้อมและเรนเดอร์ผลลัพธ์หรือ empty state สำเร็จ ระบบจะรีเซ็ต `aria-busy="false"` และเรนเดอร์ DOM ผลลัพธ์ทับ spinner cleanly
+
 ### 7.1 การผสานกับ URE (Universal Render Engine)
 
 `rendering.js` ใช้ **URE** (`window.URE`) สำหรับเรนเดอร์ผลลัพธ์แทน VirtualScrollEngine แบบเดิม
@@ -826,7 +840,7 @@ extractResultCategories(results) {
 
 ```javascript
 _attachCopyHandler(container) {
-  if (window._copyResultTextHandlerSet) return;
+  if (window._hasCopyResultHandler) return;
 
   const _copy = (card) => {
     const text = StringService.decodeUrl(card.getAttribute('data-text'));
@@ -848,7 +862,7 @@ _attachCopyHandler(container) {
     }
   });
 
-  window._copyResultTextHandlerSet = true;
+  window._hasCopyResultHandler = true;
 }
 ```
 
@@ -878,14 +892,14 @@ async copyText(text, name) {
 ### 8.1 โครงสร้าง DOM
 
 ```
-#searchOverlayContainer (position:fixed, full screen, z-index:9998)
+#search-overlay-container (position:fixed, full screen, z-index:9998)
 ├── #overlay-header-bar
 │    └── .search-input-wrapper  ← ย้ายมาจาก header ชั่วคราว
 │         ├── .search-input-icon (🔍 หรือ ←)
 │         ├── #searchInput
 │         └── #search-clear-btn
 └── .search-overlay-scrollable-content (flex:1, overflow:auto)
-     └── #searchSuggestions
+     └── #search-suggestions-list
           ├── .suggestions-head ("ข้อเสนอแนะ" / "Suggestions")
           └── .suggestion-item × N
 ```
@@ -946,7 +960,7 @@ close(src = 'manual') {
   wrapper.parentNode.insertBefore(wrapper, State._wrapperNext);
 
   // ④ ลบ overlay DOM
-  DOMService.remove(DOMService.get('searchOverlayContainer'));
+  DOMService.remove(DOMService.get('search-overlay-container'));
 
   // ⑤ คืน scroll-lock
   document.body.style.position = '';
@@ -1030,7 +1044,7 @@ URLService = {
   replaceSearch(searchState),   // replaceState (URL init, ล้าง)
 
   // Stack B: overlay
-  pushOverlayEntry(searchState),     // pushState + __searchUI_overlay_open__ marker
+  pushOverlayEntry(searchState),     // pushState + __searchUIController_overlay_open__ marker
   collapseOverlayEntry(searchState), // replaceState — ยุบ overlay entry
 
   isEqual(a, b),  // เปรียบเทียบ state (ignore timestamp)
@@ -1042,7 +1056,7 @@ URLService = {
 Entry ของ overlay ถูกทำเครื่องหมายด้วย:
 
 ```javascript
-State._overlayStateMarker = '__searchUI_overlay_open__';
+State._overlayStateMarker = '__searchUIController_overlay_open__';
 
 // เมื่อ push:
 const st = { ...searchState, [State._overlayStateMarker]: true };
@@ -1317,7 +1331,7 @@ build() {
     inp.focus();
     this.sync();
     IconSlotService.update();
-    SearchService.doSearch(null, false);
+    SearchController.doSearch(null, false);
   });
 }
 
@@ -1345,7 +1359,7 @@ setupAutoSearchInput() {
   // Keydown: Enter → search, ArrowDown → focus suggestion, Backspace → debounced
   Handlers.inputKeydown = (e) => {
     if (e.key === 'Enter') {
-      SearchService.doSearch();
+      SearchController.doSearch();
       this.closeKB();  // ปิด keyboard
     } else if (e.key === 'ArrowDown') {
       // focus ตัวแรกใน suggestion list
@@ -1377,7 +1391,7 @@ setupTypeFilter(selected = 'all') {
   el._pillHandler = (e) => {
     State.selectedType = val;
     State.selectedCategory = 'all';  // รีเซ็ต category
-    SearchService.doSearch(null, false);  // ค้นหาใหม่
+    SearchController.doSearch(null, false);  // ค้นหาใหม่
   };
 }
 ```
@@ -1437,9 +1451,9 @@ CONFIG = {
     vsEstimatedItemHeight: 96,     // ความสูงเริ่มต้นของ item
   },
   DOM: {
-    suggestionContainerId: 'searchSuggestions',
-    overlayContainerId: 'searchOverlayContainer',
-    sentinelId: 'search-render-sentinel',
+    suggestionContainerId: 'search-suggestions-list',
+    overlayContainerId: 'search-overlay-container',
+    sentinelId: 'search-sentinel-el',
     searchInputId: 'searchInput',
     searchFormId: 'searchForm',
     typeFilterId: 'typeFilter',
@@ -1471,7 +1485,7 @@ State = {
   currentResults: [],               // ผลลัพธ์ค้นหาปัจจุบัน
   currentFilteredResults: [],       // ผลลัพธ์หลัง category filter
 
-  // Filter (owned by UIService / SearchService)
+  // Filter (owned by UIService / SearchController)
   selectedType: 'all',
   selectedCategory: 'all',
   lastCommittedSearchState: null,   // state ล่าสุดที่ push ลง history
@@ -1487,7 +1501,7 @@ State = {
   _wrapperParent: null,             // ตำแหน่งเดิมของ input wrapper
   _wrapperNext: null,
 
-  // History (owned by URLService / SearchService)
+  // History (owned by URLService / SearchController)
   suppressHistoryPush: false,
 
   // Keyboard (owned by KeyboardService)
@@ -1506,7 +1520,7 @@ State = {
   // Internals
   _timeouts: new Set(),             // timeout IDs สำหรับ cleanup
   _handlersAttached: false,
-  _overlayStateMarker: '__searchUI_overlay_open__',
+  _overlayStateMarker: '__searchUIController_overlay_open__',
 };
 ```
 
@@ -1550,12 +1564,12 @@ Handlers = {
 |--------|------|----------|---------|
 | `window.SearchEngine` | Object | `search-modules/engine.js` (v3.0) | เอนจินค้นหาหลัก |
 | `window.SearchModules` | Object | ทุกโมดูล | Namespace ของทุก service |
-| `window.__searchUI` | Object | `search-system/search.js` | Public API ของระบบ (init, destroy, getState) |
+| `window.__searchUIController` | Object | `search-system/search.js` | Public API ของระบบ (init, destroy, getState) |
 | `window.__pendingSearch` | Object\|null | `search.js` | Stash query เมื่อ docs ยังไม่พร้อม |
-| `window.__renderIsRestore` | boolean | `search.js` | Flag ป้องกัน scroll-to-top ตอน restore |
+| `window.__isRestoringScroll` | boolean | `search.js` | Flag ป้องกัน scroll-to-top ตอน restore |
 | `window.__overlayDidSearch` | boolean | `rendering.js` | Flag บอกว่าค้นหาจาก overlay |
-| `window._copyResultTextHandlerSet` | boolean | `rendering.js` | Guard ป้องกัน attach copy handler ซ้ำ |
-| `window._showStickyHeader` | Function | ภายนอก | แสดง sticky header หลังค้นหา |
+| `window._hasCopyResultHandler` | boolean | `rendering.js` | Guard ป้องกัน attach copy handler ซ้ำ |
+| `window._revealStickyHeader` | Function | ภายนอก | แสดง sticky header หลังค้นหา |
 | `window.showCopyNotification` | Function | `copyNotification.js` | แสดง notification เมื่อคัดลอก |
 | `window.ConDataService` | Object | ภายนอก | บริการข้อมูลหลัก |
 | `window.URE` | Object | `ure.js` | Universal Render Engine |
@@ -1578,14 +1592,14 @@ Handlers = {
 | `keydown` (Enter/Space) | `#searchResults` | anonymous | Copy ด้วย keyboard |
 | `keydown` (Escape) | `document` | `Handlers.documentKeydownOverlay` | ปิด overlay |
 | `scroll` | overlay scrollable | `keyboardAutoToggleHandler` | Auto toggle keyboard |
-| `click` | `#searchSuggestions` | `Handlers.suggestionClick` | เลือก suggestion |
-| `keydown` | `#searchSuggestions` | `Handlers.suggestionKeydown` | นำทางด้วย arrow keys |
+| `click` | `#search-suggestions-list` | `Handlers.suggestionClick` | เลือก suggestion |
+| `keydown` | `#search-suggestions-list` | `Handlers.suggestionKeydown` | นำทางด้วย arrow keys |
 | `beforeunload` | `window` | anonymous | เรียก destroy() |
 
-### 14.3 `window.__searchUI` Public API
+### 14.3 `window.__searchUIController` Public API
 
 ```javascript
-window.__searchUI = {
+window.__searchUIController = {
   _initialized: true,
   init,                              // เริ่มต้นระบบ
   destroy,                           // ทำลายระบบ
@@ -1694,7 +1708,7 @@ HTML: <script defer src="search-system/search.js">
   │
   ▼
 search.js IIFE รัน
-  ├── ตรวจ window.__searchUI._initialized → ถ้า true, return
+  ├── ตรวจ window.__searchUIController._initialized → ถ้า true, return
   ├── เริ่ม _earlyDataPromise (poll ConDataService)
   ├── loadPhases(LOAD_PHASES, base)
   │    ├── Phase 1: types + config + state (parallel)
@@ -1731,7 +1745,7 @@ _boot()
 ผู้ใช้พิมพ์ → input event → debounce 120ms
   → SuggestionService.renderQuerySuggestions()
   → SearchEngine.querySuggestions() → 3-tier fallback
-  → Highlight + render ใน #searchSuggestions
+  → Highlight + render ใน #search-suggestions-list
 
 ผู้ใช้กด Enter:
   ├── doSearch()
@@ -1778,7 +1792,7 @@ destroy() {
   State.apiData = null;
   State.currentResults = [];
   window.__pendingSearch = null;
-  window.__searchUI._initialized = false;
+  window.__searchUIController._initialized = false;
 }
 ```
 
@@ -1837,7 +1851,7 @@ NotificationService.copyText(text, name)
 
 ### สิ่งที่ยังเหมือนเดิม (Backward Compatible)
 
-- Public API: `window.__searchUI`, `window.SearchEngine`, `window.SearchModules`
+- Public API: `window.__searchUIController`, `window.SearchEngine`, `window.SearchModules`
 - IIFE pattern, `'use strict'`, 2-space indent, single quotes
 - 5-phase parallel module loading
 - Two-tier search (immediate + Fuse upgrade)
@@ -1890,7 +1904,7 @@ v4.0 เพิ่ม **Discovery Section** — section ใหม่ที่ป�
 ### 19.2 Discovery System — สถาปัตยกรรม
 
 ```
-SearchService.doSearch()
+SearchController.doSearch()
   ↓
 RenderingService.renderResults(primaryResults)
   ├── URE.mount() บน #searchResults (primary)
@@ -2065,7 +2079,7 @@ window.SearchModules.DiscoveryService.getItems()  // → DiscoveryItem[]
 ### 19.14 Backward Compatibility
 
 v4.0 เป็น **drop-in replacement** สำหรับ v3.0 — public API เดิมทั้งหมดยังทำงานเหมือนเดิม:
-- `window.__searchUI` API — เหมือนเดิม
+- `window.__searchUIController` API — เหมือนเดิม
 - `window.SearchEngine.search()`, `querySuggestions()`, `generateAllKeywords()` — เหมือนเดิม
 - IIFE pattern, 2-space indent, single quotes — เหมือนเดิม
 - 5-phase parallel module loading — เหมือนเดิม (Phase 4 มี 2 ไฟล์แทน 1)
@@ -2099,3 +2113,24 @@ Test cases ครอบคลุม:
 - [`AI_CODING_GUIDE.md`](./AI_CODING_GUIDE.md) — มาตรฐานโค้ดที่ยึดใน v4.0 (IIFE, 2-space, single quotes)
 - [`AI_FORBIDDEN.md`](./AI_FORBIDDEN.md) — กฎเหล็กที่ v4.0 ปฏิบัติตาม (no ES modules, no jQuery, no innerHTML with user input)
 - [`13-Documentation-Standard.md`](./13-Documentation-Standard.md) — มาตรฐานเอกสารที่ section นี้ปฏิบัติตาม
+
+
+### 19.17 Structural Architecture Refactoring (Slice A + Slice B)
+
+ในเวอร์ชันล่าสุด ระบบ Search ได้รับการปรับปรุงโครงสร้างภายในเพื่อเพิ่มเสถียรภาพและ Dev Experience โดยคงพฤติกรรม ผลลัพธ์ และ Public API เดิม 100%:
+
+1. **สกัด `engine-data.js` จาก `engine.js`**: แยกฟังก์ชัน `flattenDataToDocs` และ helpers ในการแปลงโครงสร้างข้อมูลดิบออกจากเอนจินค้นหา ทำให้ `engine.js` กระชับและมุ่งเน้นที่การให้คะแนนและค้นหา
+2. **สกัด `data-loader.js` จาก `search.js`**: แยก `loadDataWithRetry` และ late-data watcher ออกจาก `search.js` ทำให้ `search.js` ทำหน้าที่เป็นเพียง lifecycle orchestrator
+3. **Encapsulate State Accessors**: เพิ่ม accessor methods บน `State` (`setWrapperParent`, `getSavedScrollY`/`setSavedScrollY`, `clearTimeouts`) เพื่อเลิกการแก้ไข property ตรงๆ ใน `overlay.js` และ `rendering.js`
+4. **Deduplicate Card Copy Handler**: ย้าย copy listener ใน `discovery.js` ให้เรียกผ่าน `RenderingService._attachCopyHandler` ลดการผูก event ซ้ำซ้อนและลบ duplicate discovery copy flag
+5. **Canonical HTML Escaping**: รวมการ escape HTML ใน `engine.js` ให้ผ่าน `StringService.escapeHtml` ใน `utils.js`
+6. **Guarded Lifecycle Listeners**: เพิ่ม guard ใน `search.js` สำหรับ cleanup/bind `beforeunload` listener เพื่อป้องกัน listener leak เมื่อ re-init
+7. **Structured Log Safety**: เปลี่ยน empty catch blocks ทั้งหมดเป็น `console.warn('[SearchModule:<name>]', e)` โดยคงค่า fallback return contract เดิม
+
+
+### 19.18 Polish & Stability Foundation (Search Subsystem)
+
+ในรอบ Polish & Stability Foundation ระบบ Search ได้รับการปรับปรุงเพื่อเพิ่มเสถียรภาพและรองรับ Accessibility:
+
+1. **HTTP Response Validation in Data Loader (`data-loader.js`)**: เพิ่มการตรวจสอบ `r.ok` ก่อนเรียก `r.json()` ใน `loadDataWithRetry` ป้องกัน `SyntaxError: Unexpected token < in JSON` เมื่อเซิร์ฟเวอร์ตอบกลับเป็นหน้า 404/500 HTML
+2. **Reduced Motion Overrides (`search.css`)**: เพิ่มบล็อก `@media (prefers-reduced-motion: reduce)` ปิดอนิเมชันและทรานซิชันทั้งหมดสำหรับ Search Modal, Backdrop, และ Result Item Animations เพื่อรองรับมาตรฐาน WCAG AA สำหรับผู้ใช้ที่เปิดโหมดลดการเคลื่อนไหว

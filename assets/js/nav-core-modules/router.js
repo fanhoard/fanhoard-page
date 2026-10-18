@@ -30,6 +30,8 @@
 
   const RouterService = {
 
+    _navSequenceId: 0,
+
     state: {
       isNavigating:       false,
       currentMainRoute:   '',
@@ -213,9 +215,11 @@
       // Show content-scoped loading overlay for Discover main/sub action transitions
       try {
         if (M.LoadingService?.showInContent) {
-          M.LoadingService.showInContent();
+          M.LoadingService.showInContent({ bare: true, size: 'md' });
+        } else if (window.FVL?.scoped) {
+          window.FVL.scoped({ target: '#content-loading', bare: true, size: 'md' });
         } else {
-          M.LoadingService?.show?.({ mode: 'scoped', target: '#content-loading' });
+          M.LoadingService?.show?.({ mode: 'scoped', target: '#content-loading', bare: true, size: 'md' });
         }
       } catch (_) {}
 
@@ -295,7 +299,7 @@
 
         // ── Smart loading message: use the active language label of the button ──
         try {
-          const lang = localStorage.getItem('selectedLang') || 'en';
+          const lang = (window.FvLang && FvLang.lang) || 'en';
           const btnLabel = mainButton.label?.[lang]
                         || mainButton.name?.[lang]
                         || mainButton.label?.en
@@ -309,7 +313,7 @@
           }
         } catch (_) {}
 
-        const lang          = localStorage.getItem('selectedLang') || 'en';
+        const lang          = (window.FvLang && FvLang.lang) || 'en';
         const hasSubButtons = mainButton.subButtons?.length > 0;
         let   chosenSub     = null;
 
@@ -426,6 +430,10 @@
         // เฉพาะ navigation ล่าสุดเท่านั้นที่แสดง error
         if (myGen === this._navGen) {
           console.error('[NavCore/Router] navigateTo error:', err);
+          // FIX (scroll-lock): release the FVL lock before showing the error
+          // page — otherwise the page could stay frozen behind the overlay.
+          try { M.LoadingService?.hideInstant(); } catch (_) {}
+          try { window.ScrollLockCore?.releaseAll?.('fvl'); } catch (_) {}
           try { Utils.showErrorFullscreen(err, { label: 'Navigation' }); } catch (_) {}
         }
       } finally {
@@ -442,18 +450,13 @@
           try {
             requestAnimationFrame(() => {
               this._setNavLoading(false);
-              // v2 DEFENSIVE: ensure body scroll-lock is released even if
-              // content.js or LoadingService.hideInstant() threw before
-              // reaching _removeOverlayNow(). This is a no-op when the lock
-              // was already properly restored — it only catches the edge case
-              // where an exception left body stuck at position:fixed.
-              try {
-                if (document.body.style.position === 'fixed') {
-                  document.body.style.position = '';
-                  document.body.style.top      = '';
-                  document.body.style.width    = '';
-                }
-              } catch (_) {}
+              // v3 FIX (scroll-lock): body scroll-lock release is owned by
+              // ScrollLockCore via LoadingService.hideInstant()/
+              // readinessHandshake() ONLY. Clearing body inline styles here
+              // released the lock while a fullscreen overlay was still visible
+              // (MIN_VISIBLE_MS 300ms delayed hide) — background scrolled
+              // behind the loading overlay. If hideInstant ever throws, the
+              // 20s safety timer + _forceReset() handle the recovery instead.
             });
           } catch (_) {}
         }
@@ -510,10 +513,14 @@
 
       // Default browser behavior is 'auto'. Do not set history.scrollRestoration = 'manual' site-wide.
       window.addEventListener('popstate', async () => {
+        this._navSequenceId = (this._navSequenceId || 0) + 1;
+        const seq = this._navSequenceId;
         try {
           const search = window.location.search || '';
           const { main } = this.parseUrl(search);
           const isRenderRoute = main === CONFIG.ALL_BUTTON.URL || await this.validateUrl(search);
+
+          if (seq !== this._navSequenceId) return;
 
           if (!isRenderRoute) {
             // Normal page / non-render route: let browser handle scroll restoration natively

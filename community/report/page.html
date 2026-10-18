@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-translate="report-seo-title">Report an Issue</title>
+  <meta name="description" data-translate="report-seo-desc" content="Report a bug, issue, or suggestion to help improve FanHoard.">
+  <!-- Open Graph / Twitter (og:url is rewritten per language at build) -->
+  <meta property="og:site_name" content="FanHoard" />
+  <meta property="og:title" content="Report an Issue — FanHoard" />
+  <meta property="og:description" content="Report a bug, issue, or suggestion to help improve FanHoard." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://fanhoard.pages.dev/en/community/report/" />
+  <meta property="og:image" content="https://fanhoard.pages.dev/assets/images/OG/fanhoard-hub-og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Report an Issue — FanHoard" />
+  <meta name="twitter:description" content="Report a bug, issue, or suggestion to help improve FanHoard." />
+  <meta name="twitter:image" content="https://fanhoard.pages.dev/assets/images/OG/fanhoard-hub-og.png" />
+  <meta name="theme-color" content="#0d9488" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="icon" type="image/x-icon" href="/assets/images/fanhoard-verse360.ico" />
+
+  <!-- 1. Tokens -->
+  <link rel="preload" href="/assets/css/tokens.css" as="style">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/ds.css">
+
+  <!-- 2. CSS -->
+  <link rel="preload" href="/assets/css/setting.css?v=5.11.2-202610172134" as="style" onload="this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="/assets/css/setting.css?v=5.11.2-202610172134" /></noscript>
+  <link rel="preload" href="/assets/css/bg.css?v=5.11.2-202610172134" as="style" onload="this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="/assets/css/bg.css?v=5.11.2-202610172134" /></noscript>
+  <link rel="stylesheet" href="/assets/css/top-navigation-bar.css?v=5.11.2-202610172134" media="all" />
+  <link rel="stylesheet" href="/assets/css/report.css?v=5.11.2-202610172134" media="all" />
+</head>
+
+<body>
+
+  <a href="#fv-main" class="skip-link fv-skip-link" data-translate="home-skip-link">Skip to main content</a>
+
+  <div id="fv-app" class="fv-app fv-page-shell" data-page="report">
+
+    <!-- Top Navigation Header with Back Button -->
+    <header class="fv-header" role="banner">
+      <nav class="fv-nav" role="navigation" aria-label="Page navigation">
+        <button class="back-button" id="back-button" aria-label="Go back">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="m15 19-7-7 7-7" />
+          </svg>
+        </button>
+        <span class="page-title" data-translate="page-report">Report an Issue</span>
+      </nav>
+    </header>
+
+    <h1 class="fv-sr-only" data-translate="page-report">Report an Issue</h1>
+
+    <!-- Main Landmark -->
+    <main id="fv-main" class="fv-main" role="main" tabindex="-1">
+      <div class="container-md stack-md">
+
+        <section class="fv-section fv-card con">
+          <p class="fv-section-label" data-translate="report-new-title">Report an Issue</p>
+          <p class="report-desc" data-translate="report-new-desc">Found a bug or have a suggestion? Let us know so we can improve FanHoard.</p>
+        </section>
+
+        <section class="fv-section report-form-section">
+          <form id="report-form" class="stack-md" novalidate>
+
+            <!-- Issue Type -->
+            <div class="setting-item fv-setting-row">
+              <label for="report-category" data-translate="report-category-label">Issue Category</label>
+              <select id="report-category" class="setting-item select" required>
+                <option value="" disabled selected data-translate="report-select-placeholder">Select a category…</option>
+              </select>
+              <p class="report-error-text" id="error-category"></p>
+            </div>
+
+            <!-- Problem Details -->
+            <div class="setting-item fv-setting-row">
+              <label for="report-details" data-translate="report-details-label">Problem Details</label>
+              <textarea id="report-details" class="report-textarea" rows="4" required></textarea>
+              <p class="report-error-text" id="error-details"></p>
+            </div>
+
+            <!-- Expected Behavior (optional) -->
+            <div class="setting-item fv-setting-row">
+              <label for="report-expected">
+                <span data-translate="report-expected-label">Expected Behavior</span>
+                <span class="report-optional" data-translate="report-optional">(Optional)</span>
+              </label>
+              <textarea id="report-expected" class="report-textarea" rows="3"></textarea>
+            </div>
+
+            <!-- Page where issue occurred -->
+            <div class="setting-item fv-setting-row">
+              <label for="report-page" data-translate="report-page-label">Page Where Issue Occurred</label>
+              <select id="report-page" class="setting-item select" required>
+                <option value="" disabled selected data-translate="report-select-placeholder">Select a page…</option>
+              </select>
+              <label for="report-page-custom" id="label-report-page-custom" class="fv-sr-only" data-translate="report-page-custom-label">Specific Page or URL</label>
+              <input type="text" id="report-page-custom" class="report-textinput report-page-custom" autocomplete="off" />
+              <p class="report-error-text" id="error-page"></p>
+            </div>
+
+            <!-- Browser -->
+            <div class="setting-item fv-setting-row">
+              <label for="report-browser" data-translate="report-browser-label">Browser / Device</label>
+              <select id="report-browser" class="setting-item select">
+                <option value="" disabled selected data-translate="report-select-placeholder">Select a browser…</option>
+              </select>
+            </div>
+
+            <!-- Contact Email (optional) -->
+            <div class="setting-item fv-setting-row">
+              <label for="report-email">
+                <span data-translate="report-email-label">Your Email</span>
+                <span class="report-optional" data-translate="report-optional">(Optional)</span>
+              </label>
+              <input type="email" id="report-email" class="report-textinput" autocomplete="email" />
+            </div>
+
+            <!-- Submit -->
+            <div class="fv-setting-row">
+              <button type="submit" class="report-submit" id="report-submit" data-translate="report-submit-btn">Submit Report</button>
+            </div>
+
+          </form>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- Footer Landmark -->
+    <footer class="fv-footer" role="contentinfo">
+      <div id="fv-footer-mount"></div>
+    </footer>
+
+  </div><!-- /#fv-app -->
+
+  <script src="/assets/js/back-button.js?v=5.11.2-202610172134"></script>
+  <script src="/assets/js/lang-core.js?v=5.11.2-202610172134"></script>
+  <script src="/assets/js/language.js?v=5.11.2-202610172134"></script>
+  <script defer src="/assets/js/footer-template.js?v=5.11.2-202610172134"></script>
+  <script defer src="/assets/js/popup.js?v=5.11.2-202610172134"></script>
+  <script defer src="/assets/js/version-core.js?v=5.11.2-202610172134"></script>
+  <script defer src="/assets/js/reload-top.js?v=5.11.2-202610172134"></script>
+
+  <script>
+  (function() {
+    'use strict';
+
+    /* ══════════════════════════════════════════════
+       CONFIG
+       ══════════════════════════════════════════════ */
+    var API_ENDPOINT = 'https://community.nontakorn2600.workers.dev/report';
+    var VERSION_FALLBACK = '1.6.2_2';
+
+    /* ── Issue categories ── */
+    var CATEGORIES = [
+      { value: 'bug',            label: { en: '\u{1F41B} Bug',                   th: '\u{1F41B} \u0E1A\u0E31\u0E4A\u0E01' } },
+      { value: 'translation',    label: { en: '\u{1F310} Translation Issue',      th: '\u{1F310} \u0E1B\u0E31\u0E0D\u0E2B\u0E32\u0E01\u0E32\u0E23\u0E41\u0E1B\u0E25' } },
+      { value: 'broken-link',    label: { en: '\u{1F517} Broken Link',            th: '\u{1F517} \u0E25\u0E34\u0E07\u0E01\u0E4C\u0E40\u0E2A\u0E35\u0E22' } },
+      { value: 'mobile-ui',      label: { en: '\u{1F4F1} Mobile UI Issue',        th: '\u{1F4F1} \u0E1B\u0E31\u0E0D\u0E2B\u0E32 UI \u0E1A\u0E19\u0E21\u0E37\u0E2D\u0E16\u0E37\u0E2D' } },
+      { value: 'performance',    label: { en: '\u{26A1} Performance Issue',       th: '\u{26A1} \u0E1B\u0E31\u0E0D\u0E2B\u0E32\u0E1B\u0E23\u0E30\u0E2A\u0E34\u0E17\u0E18\u0E34\u0E20\u0E32\u0E1E' } },
+      { value: 'incorrect-info', label: { en: '\u{1F4C4} Incorrect Information',  th: '\u{1F4C4} \u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E44\u0E21\u0E48\u0E16\u0E39\u0E01\u0E15\u0E49\u0E2D\u0E07' } },
+      { value: 'suggestion',     label: { en: '\u{1F4A1} Suggestion',             th: '\u{1F4A1} \u0E02\u0E49\u0E2D\u0E40\u0E2A\u0E19\u0E2D\u0E41\u0E19\u0E30' } },
+      { value: 'other',          label: { en: '\u{2753} Other',                   th: '\u{2753} \u0E2D\u0E37\u0E48\u0E19\u0E46' } }
+    ];
+
+    /* ── Site pages ── */
+    var PAGES = [
+      { value: '/home/',                label: { en: 'Home',            th: '\u0E2B\u0E19\u0E49\u0E32\u0E2B\u0E25\u0E31\u0E01' } },
+      { value: '/platform/about/',      label: { en: 'About',           th: '\u0E40\u0E01\u0E35\u0E48\u0E22\u0E27\u0E01\u0E31\u0E1A' } },
+      { value: '/platform/whats_new/',  label: { en: "What's New",      th: '\u0E2D\u0E30\u0E44\u0E23\u0E43\u0E2B\u0E21\u0E48' } },
+      { value: '/platform/roadmap/',    label: { en: 'Roadmap',         th: '\u0E41\u0E1C\u0E19\u0E07\u0E32\u0E19' } },
+      { value: '/platform/privacy/',    label: { en: 'Privacy Policy',  th: '\u0E19\u0E42\u0E22\u0E1A\u0E32\u0E22\u0E04\u0E27\u0E32\u0E21\u0E40\u0E1B\u0E47\u0E19\u0E2A\u0E48\u0E27\u0E19\u0E15\u0E31\u0E27' } },
+      { value: '/platform/license/',    label: { en: 'Content License', th: '\u0E2A\u0E31\u0E0D\u0E0D\u0E32\u0E2D\u0E19\u0E38\u0E0D\u0E32\u0E15\u0E40\u0E19\u0E37\u0E49\u0E2D\u0E2B\u0E32' } },
+      { value: '/community/contact/',   label: { en: 'Contact',         th: '\u0E15\u0E34\u0E14\u0E15\u0E48\u0E2D' } },
+      { value: '/data/verse/discover/', label: { en: 'Verse Discover',  th: 'Verse \u0E04\u0E49\u0E19\u0E1E\u0E1A' } },
+      { value: '/data/verse/scope/',    label: { en: 'Verse Scope',     th: 'Verse \u0E02\u0E2D\u0E1A\u0E40\u0E02\u0E15' } },
+      { value: '/setting/',             label: { en: 'Settings',        th: '\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32' } },
+      { value: '/search/',              label: { en: 'Search',          th: '\u0E04\u0E49\u0E19\u0E2B\u0E32' } },
+      { value: 'custom',                label: { en: 'Other / Specific URL', th: '\u0E2D\u0E37\u0E48\u0E19\u0E46 / URL \u0E40\u0E09\u0E1E\u0E32\u0E30' } }
+    ];
+
+    /* ── Common Browsers ── */
+    var BROWSERS = [
+      { value: 'chrome-desktop',  label: 'Chrome (Desktop)' },
+      { value: 'safari-desktop',  label: 'Safari (Desktop)' },
+      { value: 'firefox-desktop', label: 'Firefox (Desktop)' },
+      { value: 'edge-desktop',    label: 'Edge (Desktop)' },
+      { value: 'safari-ios',      label: 'Safari (iPhone / iPad)' },
+      { value: 'chrome-android',  label: 'Chrome (Android)' },
+      { value: 'samsung-internet',label: 'Samsung Internet' },
+      { value: 'other',           label: { en: 'Other', th: '\u0E2D\u0E37\u0E48\u0E19\u0E46' } }
+    ];
+
+    /* ══════════════════════════════════════════════
+       HELPERS
+       ══════════════════════════════════════════════ */
+    function getLang() {
+      // คำนำหน้า URL (/th/ หรือ /en/) รู้ตั้งแต่ก่อนโหลด ส่วน selectedLang ถูกเขียนทีหลัง DOMContentLoaded
+      var m = location.pathname.match(/^\/(th|en)(\/|$)/);
+      if (m) return m[1];
+      return localStorage.getItem('selectedLang') || localStorage.getItem('fv_lang') || 'en';
+    }
+
+    function populateSelect(selectEl, items) {
+      var lang = getLang();
+      items.forEach(function(item) {
+        var opt = document.createElement('option');
+        opt.value = item.value;
+        if (typeof item.label === 'object') {
+          opt.textContent = item.label[lang] || item.label.en;
+        } else {
+          opt.textContent = item.label;
+        }
+        selectEl.appendChild(opt);
+      });
+    }
+
+    function getAppVersion() {
+      if (window.FANHOARD_VERSION && window.FANHOARD_VERSION.VERSION) {
+        return window.FANHOARD_VERSION.VERSION;
+      }
+      return VERSION_FALLBACK;
+    }
+
+    function detectUserAgent() {
+      var ua = navigator.userAgent;
+      if (/iPhone|iPad|iPod/.test(ua) && /Safari/.test(ua)) return 'safari-ios';
+      if (/Android/.test(ua) && /Chrome/.test(ua)) return 'chrome-android';
+      if (/SamsungBrowser/.test(ua)) return 'samsung-internet';
+      if (/Chrome/.test(ua)) return 'chrome-desktop';
+      if (/Safari/.test(ua)) return 'safari-desktop';
+      if (/Firefox/.test(ua)) return 'firefox-desktop';
+      if (/Edg/.test(ua)) return 'edge-desktop';
+      return 'other';
+    }
+
+    /* ══════════════════════════════════════════════
+       VALIDATION
+       ══════════════════════════════════════════════ */
+    function clearErrors() {
+      var errorEls = document.querySelectorAll('.report-error-text');
+      errorEls.forEach(function(el) {
+        el.textContent = '';
+        el.classList.remove('visible');
+      });
+      var fieldEls = document.querySelectorAll('.report-field-error');
+      fieldEls.forEach(function(el) {
+        el.classList.remove('report-field-error');
+        el.setAttribute('aria-invalid', 'false');
+        el.removeAttribute('aria-describedby');
+      });
+    }
+
+    function showError(fieldId, errorId, msgEn, msgTh) {
+      var lang = getLang();
+      var msg = lang === 'th' ? msgTh : msgEn;
+      var field = document.getElementById(fieldId);
+      var errEl = document.getElementById(errorId);
+      if (field) {
+        field.classList.add('report-field-error');
+        field.setAttribute('aria-invalid', 'true');
+        field.setAttribute('aria-describedby', errorId);
+      }
+      if (errEl) {
+        errEl.textContent = msg;
+        errEl.classList.add('visible');
+      }
+    }
+
+    function validateForm() {
+      clearErrors();
+      var valid = true;
+      var firstInvalidEl = null;
+
+      var category = document.getElementById('report-category').value;
+      if (!category) {
+        showError('report-category', 'error-category',
+          'Please select an issue category.',
+          '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E2B\u0E21\u0E27\u0E14\u0E2B\u0E21\u0E39\u0E48\u0E1B\u0E31\u0E0D\u0E2B\u0E32');
+        valid = false;
+      }
+
+      var details = document.getElementById('report-details').value.trim();
+      if (!details) {
+        showError('report-details', 'error-details',
+          'Please describe the problem details.',
+          '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E23\u0E30\u0E1A\u0E38\u0E23\u0E32\u0E22\u0E25\u0E30\u0E40\u0E2D\u0E35\u0E22\u0E14\u0E1B\u0E31\u0E0D\u0E2B\u0E32');
+        valid = false;
+      }
+
+      var pageVal = document.getElementById('report-page').value;
+      if (!pageVal) {
+        showError('report-page', 'error-page',
+          'Please select the page where the issue occurred.',
+          '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E2B\u0E19\u0E49\u0E32\u0E17\u0E35\u0E48\u0E1E\u0E1A\u0E1B\u0E31\u0E0D\u0E2B\u0E32');
+        valid = false;
+      } else if (pageVal === 'custom') {
+        var customPage = document.getElementById('report-page-custom').value.trim();
+        if (!customPage) {
+          showError('report-page-custom', 'error-page',
+            'Please specify the page URL or name.',
+            '\u0E01\u0E23\u0E38\u0E13\u0E32\u0E23\u0E30\u0E1A\u0E38 URL \u0E2B\u0E23\u0E37\u0E2D\u0E0A\u0E37\u0E48\u0E2D\u0E2B\u0E19\u0E49\u0E32');
+          valid = false;
+        }
+      }
+
+      if (firstInvalidEl) {
+        firstInvalidEl.focus();
+      }
+
+      return valid;
+    }
+
+    /* ══════════════════════════════════════════════
+       SUBMISSION
+       ══════════════════════════════════════════════ */
+    function handleSubmit(e) {
+      e.preventDefault();
+
+      if (!validateForm()) return;
+
+      var submitBtn = document.getElementById('report-submit');
+      var origText = submitBtn.textContent;
+      var lang = getLang();
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = lang === 'th' ? '\u0E01\u0E33\u0E25\u0E31\u0E07\u0E2A\u0E48\u0E07...' : 'Submitting…';
+
+      var category = document.getElementById('report-category').value;
+      var details  = document.getElementById('report-details').value.trim();
+      var expected = document.getElementById('report-expected').value.trim();
+      var pageVal  = document.getElementById('report-page').value;
+      var customPage = document.getElementById('report-page-custom').value.trim();
+      var browser  = document.getElementById('report-browser').value;
+      var email    = document.getElementById('report-email').value.trim();
+
+      var finalPage = pageVal === 'custom' ? customPage : pageVal;
+
+      var categorySelect = document.getElementById('report-category');
+      var categoryLabel = categorySelect.options[categorySelect.selectedIndex] ? categorySelect.options[categorySelect.selectedIndex].text : category;
+
+      var payload = {
+        category: categoryLabel,
+        message: details,
+        expected: expected || null,
+        page: finalPage,
+        browser: browser || detectUserAgent(),
+        email: email || null,
+        language: lang,
+        version: getAppVersion(),
+        device: window.screen.width + 'x' + window.screen.height + ' (' + window.innerWidth + 'x' + window.innerHeight + ')'
+      };
+
+      fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(function(res) {
+        return res.json().catch(function() { return {}; }).then(function(data) {
+          if (!res.ok) {
+            var err = new Error((data && data.error) ? data.error : 'HTTP ' + res.status);
+            err.status = res.status;
+            throw err;
+          }
+          return data;
+        });
+      })
+      .then(function() {
+        showSuccessModal();
+        document.getElementById('report-form').reset();
+      })
+      .catch(function(err) {
+        showErrorModal(err && err.message ? err.message : null, err && err.status);
+      })
+      .finally(function() {
+        submitBtn.disabled = false;
+        submitBtn.textContent = origText;
+      });
+    }
+
+    function showSuccessModal() {
+      var lang = getLang();
+      var title = lang === 'th' ? '\u0E2A\u0E48\u0E07\u0E23\u0E32\u0E22\u0E07\u0E32\u0E19\u0E41\u0E25\u0E49\u0E27' : 'Report Sent!';
+      var body  = lang === 'th'
+        ? '\u0E02\u0E2D\u0E1A\u0E04\u0E38\u0E13\u0E2A\u0E33\u0E2B\u0E23\u0E31\u0E1A\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25 \u0E40\u0E23\u0E32\u0E0A\u0E48\u0E27\u0E22\u0E1B\u0E23\u0E31\u0E1A\u0E1B\u0E23\u0E38\u0E07 FanHoard \u0E43\u0E2B\u0E49\u0E14\u0E35\u0E02\u0E36\u0E42\u0E19\u0E21\u0E35\u0E41\u0E25\u0E49\u0E27'
+        : 'Thank you for your feedback! Your report helps us make FanHoard better.';
+
+      if (window.showPopup) {
+        window.showPopup({ title: title, message: body });
+      } else {
+        alert(title + '\n\n' + body);
+      }
+    }
+
+    function showErrorModal(serverError, status) {
+      var lang = getLang();
+      var title = lang === 'th' ? 'เกิดข้อผิดพลาด' : 'Submission Failed';
+      var body;
+      if (serverError === 'Report service is not configured') {
+        body = lang === 'th'
+          ? 'ระบบรายงานยังปรับปรุงอยู่ ทีมงานรู้อยู่แล้ว โปรดลองอีกครั้งภายหลัง'
+          : 'The report service is temporarily not ready. Our team already knows about it — please try again later.';
+      } else if (status === 429) {
+        body = lang === 'th'
+          ? 'ส่งซ้ำชิ้นเกินไป โปรดรอสักครู่แล้วลองอีกครั้ง'
+          : 'You are sending reports too quickly. Please wait a moment and try again.';
+      } else if (status === 400) {
+        body = lang === 'th'
+          ? 'ข้อมูลในฟอร์มไม่ถูกต้อง โปรดตรวจสอบและกรอกอีกครั้ง'
+          : 'Some details in the form are not valid. Please check them and try again.';
+      } else {
+        body = lang === 'th'
+          ? 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง'
+          : 'Could not reach the report server. Please check your connection and try again.';
+      }
+
+      if (window.showPopup) {
+        window.showPopup({ title: title, message: body });
+      } else {
+        alert(title + '\n\n' + body);
+      }
+    }
+
+    /* ══════════════════════════════════════════════
+       INIT
+       ══════════════════════════════════════════════ */
+    document.addEventListener('DOMContentLoaded', function() {
+      var categorySelect = document.getElementById('report-category');
+      var pageSelect     = document.getElementById('report-page');
+      var browserSelect  = document.getElementById('report-browser');
+      var customPageInp  = document.getElementById('report-page-custom');
+
+      populateSelect(categorySelect, CATEGORIES);
+      populateSelect(pageSelect, PAGES);
+      populateSelect(browserSelect, BROWSERS);
+
+      function refreshSelects() {
+        if (categorySelect) {
+          var curCat = categorySelect.value;
+          categorySelect.innerHTML = '<option value="" disabled data-translate="report-select-placeholder">Select a category…</option>';
+          populateSelect(categorySelect, CATEGORIES);
+          categorySelect.value = curCat;
+        }
+        if (pageSelect) {
+          var curPage = pageSelect.value;
+          pageSelect.innerHTML = '<option value="" disabled data-translate="report-select-placeholder">Select a page…</option>';
+          populateSelect(pageSelect, PAGES);
+          pageSelect.value = curPage;
+        }
+        if (browserSelect) {
+          var curBrowser = browserSelect.value;
+          browserSelect.innerHTML = '<option value="" disabled data-translate="report-select-placeholder">Select a browser…</option>';
+          populateSelect(browserSelect, BROWSERS);
+          browserSelect.value = curBrowser;
+        }
+      }
+      window.addEventListener('fv:langchange', refreshSelects);
+      window.addEventListener('languageChange', refreshSelects);
+
+      /* Auto-select browser */
+      var detectedBrowser = detectUserAgent();
+      if (detectedBrowser && browserSelect) {
+        browserSelect.value = detectedBrowser;
+      }
+
+      /* Toggle custom page field */
+      pageSelect.addEventListener('change', function() {
+        if (pageSelect.value === 'custom') {
+          customPageInp.classList.add('visible');
+          customPageInp.focus();
+        } else {
+          customPageInp.classList.remove('visible');
+          customPageInp.value = '';
+        }
+      });
+
+      /* Form submission handler */
+      var form = document.getElementById('report-form');
+      if (form) {
+        form.addEventListener('submit', handleSubmit);
+      }
+    });
+
+  })();
+  </script>
+</body>
+</html>

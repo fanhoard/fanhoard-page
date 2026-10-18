@@ -15,12 +15,12 @@ describe('PF-05: Dead Asset References & Boot 404 Elimination', () => {
     expect(modernNav).not.toContain('wave-effect.js');
   });
 
-  it('uses absolute leading slash for lang-proxy script in home/index.html', () => {
-    const homeHtmlPath = path.join(__dirname, '../home/index.html');
+  it('no automatic language routing: lang-proxy and lang-links are not loaded', () => {
+    const homeHtmlPath = path.join(__dirname, '../home/page.html');
     const homeHtml = fs.readFileSync(homeHtmlPath, 'utf8');
 
-    expect(homeHtml).toContain('src="/assets/js/lang-proxy.js');
-    expect(homeHtml).not.toContain('src="assets/js/lang-proxy.js');
+    expect(homeHtml).not.toContain('lang-proxy.js');
+    expect(homeHtml).not.toContain('lang-links.js');
   });
 });
 
@@ -56,7 +56,7 @@ describe('PF-03: Unified Debounce Timers & Cancellation on Enter', () => {
       LanguageService: { t: (k: string) => k },
       OverlayService: { open: vi.fn() },
       SuggestionService: { renderQuerySuggestions: vi.fn() },
-      SearchService: { doSearch: vi.fn() }
+      SearchController: { doSearch: vi.fn() }
     };
 
     (window as any).SearchModules = M;
@@ -76,7 +76,7 @@ describe('PF-03: Unified Debounce Timers & Cancellation on Enter', () => {
     M.Handlers.inputKeydown(enterEvent);
 
     expect(M.State.debounceTimeout).toBeNull();
-    expect(M.SearchService.doSearch).toHaveBeenCalled();
+    expect(M.SearchController.doSearch).toHaveBeenCalled();
   });
 });
 

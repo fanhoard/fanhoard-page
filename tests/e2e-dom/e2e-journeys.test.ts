@@ -17,7 +17,7 @@ describe('Main User Journeys (DOM Integration Verification)', () => {
 
   describe('Home & Copy Symbol Journey', () => {
     it('renders home page and triggers copy notification', async () => {
-      const html = loadCleanHtml(path.resolve(__dirname, '../../home/index.html'));
+      const html = loadCleanHtml(path.resolve(__dirname, '../../home/page.html'));
       document.body.innerHTML = html;
 
       const showCopyNotification = (opts: { text: string; name?: string }) => {
@@ -65,7 +65,7 @@ describe('Main User Journeys (DOM Integration Verification)', () => {
 
   describe('Community Report Form Journey', () => {
     it('fills and validates bug report form inputs', () => {
-      const html = loadCleanHtml(path.resolve(__dirname, '../../community/report/index.html'));
+      const html = loadCleanHtml(path.resolve(__dirname, '../../community/report/page.html'));
       document.body.innerHTML = html;
 
       const form = document.querySelector('#report-form') as HTMLFormElement;

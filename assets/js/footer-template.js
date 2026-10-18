@@ -24,12 +24,26 @@
   
   /* ── Inject footer HTML ───────────────────────────── */
   function inject(html) {
-    if (document.querySelector('footer.fv-footer, footer.footer-minimal')) return;
+    if (document.querySelector('footer.fv-footer a, footer.footer-minimal a')) return;
     
     const tmp = document.createElement('div');
     tmp.innerHTML = html.trim();
     const footerEl = tmp.querySelector('footer') || tmp.firstElementChild;
     if (!footerEl) return;
+
+    // เติม prefix ภาษาตามภาษาของหน้า (ไม่มี = ค่าเริ่มต้น en) — ไม่มีการเปลี่ยนเส้นทางอัตโนมัติ
+    try {
+      const built = document.documentElement.getAttribute('data-fv-built');
+      const m = (location.pathname || '').match(/^\/(en|th)(\/|$)/);
+      const lang = built || (m ? m[1] : null) || 'en';
+      footerEl.querySelectorAll('a[href^="/"]').forEach(a => {
+        const href = a.getAttribute('href') || '';
+        if (!href || /^\/(en|th)(\/|$)/.test(href)) return;
+        if (/^\/(assets|api|_|\.well-known)/.test(href)) return;
+        const suffix = (href.endsWith('/') || /[?#]/.test(href)) ? href : href + '/';
+        a.setAttribute('href', '/' + lang + suffix);
+      });
+    } catch (e) {}
 
     const mount = document.getElementById('fv-footer-mount');
     if (mount) {
@@ -41,7 +55,7 @@
   
   /* ── Fallback inline footer ───────────────────────── */
   function fallback() {
-    if (document.querySelector('footer.fv-footer, footer.footer-minimal')) return;
+    if (document.querySelector('footer.fv-footer a, footer.footer-minimal a')) return;
     const el = document.createElement('footer');
     el.className = 'fv-footer footer-minimal';
     el.setAttribute('role', 'contentinfo');
@@ -62,7 +76,7 @@
     
     if (
       document.documentElement.dataset.fvBuilt &&
-      document.querySelector('footer.fv-footer, footer.footer-minimal')
+      document.querySelector('footer.fv-footer a, footer.footer-minimal a')
     ) return;
     
     fetch(FOOTER_TEMPLATE_PATH, { cache: 'force-cache' })

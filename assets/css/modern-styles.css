@@ -59,7 +59,7 @@
 
 .nav-item.active-1 svg                  { stroke: var(--color-brand-primary, #009688); }
 .nav-item.active-1 .svg-wrapper::before { opacity: 1; }
-.nav-item.active-1 .label              { color: #0f766e; letter-spacing: .02em; font-weight: var(--font-semibold, 600); }
+.nav-item.active-1 .label              { color: var(--color-brand-text, #0f766e); letter-spacing: .02em; font-weight: var(--font-semibold, 600); }
 
 @media (min-width: 768px) {
   body.has-left-rail { display: flex; min-height: 100vh; }

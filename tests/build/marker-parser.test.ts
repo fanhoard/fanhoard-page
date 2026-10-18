@@ -75,10 +75,15 @@ describe('marker-parser', () => {
       };
       const flat = flattenJson(input);
       expect(flat).toEqual({
+        // full dotted paths
+        'app.title': 'FanHoard',
+        'app.nav.home': 'Home',
+        'app.nav.search': 'Search',
+        footer: 'Copyright',
+        // leaf-only fallbacks (never overwrite dotted/top-level keys)
         title: 'FanHoard',
         home: 'Home',
-        search: 'Search',
-        footer: 'Copyright'
+        search: 'Search'
       });
     });
   });

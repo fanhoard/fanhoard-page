@@ -32,8 +32,7 @@
   function getLang() {
     try {
       if (window.FvLang && FvLang.lang) return FvLang.lang;
-      var l = localStorage.getItem('selectedLang') || 'en'; 
-      return SUPPORTED_LANGS.indexOf(l) >= 0 ? l : 'en'; 
+      return 'en';
     } catch(e) { return 'en'; }
   }
 
@@ -112,11 +111,19 @@
 
   // ── Section config ──────────────────────────────────────────────────────────
 
+  // Dark surfaces need the lighter chip text; light surfaces need the deeper one (both >= 4.5:1).
+  function isDarkTheme() {
+    var t = document.documentElement.getAttribute('data-theme');
+    if (t === 'dark') return true;
+    if (t === 'light') return false;
+    return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+
   var SECTION_CFG = {
-    'new':      { color:'#13b47f', bg:'rgba(19,180,127,.09)',  border:'rgba(19,180,127,.2)',  label:{en:'New',      th:'ใหม่'        } },
-    'improved': { color:'#0eb0d5', bg:'rgba(14,176,213,.09)',  border:'rgba(14,176,213,.2)',  label:{en:'Improved', th:'ปรับปรุง'    } },
-    'fixed':    { color:'#f59e0b', bg:'rgba(245,158,11,.09)',  border:'rgba(245,158,11,.2)',  label:{en:'Fixed',    th:'แก้ไขปัญหา' } },
-    'removed':  { color:'#ef4444', bg:'rgba(239,68,68,.09)',   border:'rgba(239,68,68,.2)',   label:{en:'Removed',  th:'ลบออก'      } }
+    'new':      { color:'#0e805a', darkColor:'#13b47f', bar:'#13b47f', bg:'rgba(19,180,127,.09)',  border:'rgba(19,180,127,.2)',  label:{en:'New',      th:'ใหม่'        } },
+    'improved': { color:'#0a7b95', darkColor:'#0eb0d5', bar:'#0eb0d5', bg:'rgba(14,176,213,.09)',  border:'rgba(14,176,213,.2)',  label:{en:'Improved', th:'ปรับปรุง'    } },
+    'fixed':    { color:'#9d6507', darkColor:'#f59e0b', bar:'#f59e0b', bg:'rgba(245,158,11,.09)',  border:'rgba(245,158,11,.2)',  label:{en:'Fixed',    th:'แก้ไขปัญหา' } },
+    'removed':  { color:'#c73939', darkColor:'#f15d5d', bar:'#ef4444', bg:'rgba(239,68,68,.09)',   border:'rgba(239,68,68,.2)',   label:{en:'Removed',  th:'ลบออก'      } }
   };
 
   // ══════════════════════════════════════════════════════════════════════════════
@@ -126,7 +133,15 @@
   //  1. Per-language: title/subtitle เป็น string ธรรมดา → wrap เป็น {lang: value}
   //  2. Legacy i18n: title/subtitle เป็น {en:..., th:...} → ใช้ตรงนั้น
 
-  function parseMD(mdText, lang) {
+  function classifySection(headingText) {
+  var h = (headingText || '').toLowerCase();
+  if (h.indexOf('new') >= 0 || h.indexOf('ใหม่') >= 0) return 'new';
+  if (h.indexOf('fix') >= 0 || h.indexOf('แก้') >= 0 || h.indexOf('reliab') >= 0 || h.indexOf('ความเสถียร') >= 0) return 'fixed';
+  if (h.indexOf('remove') >= 0 || h.indexOf('ลบ') >= 0) return 'removed';
+  return 'improved';
+}
+
+function parseMD(mdText, lang) {
     var result = { version: '', date: null, title: null, subtitle: null, notify: true, sections: [] };
     try {
       var body = mdText;
@@ -172,10 +187,10 @@
       var currentSection = null, currentItem = null;
       for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
-        var headingMatch = line.match(/^###\s+(New|Improved|Fixed|Removed)\s*$/i);
+        var headingMatch = line.match(/^###\s+(.+)$/);
         if (headingMatch) {
           if (currentSection) result.sections.push(currentSection);
-          currentSection = { type: headingMatch[1].toLowerCase(), items: [] };
+          currentSection = { type: classifySection(headingMatch[1].trim()), items: [] };
           currentItem = null; continue;
         }
         if (line.match(/^\s*-\s+\*\*/)) {
@@ -366,7 +381,13 @@
       var container = document.getElementById('whats-new-container');
       if (!container) return;
       container.innerHTML = '';
-      if (current) { _lastVersion = current.version; container.appendChild(buildRelease(current, true)); }
+      if (current) {
+        _lastVersion = current.version;
+        if (current.version) {
+          try { localStorage.setItem('fv_dismissed_v' + String(current.version).replace(/^v/i, ''), '1'); } catch(e) {}
+        }
+        container.appendChild(buildRelease(current, true));
+      }
       var releases = (historyData && historyData.releases) || [];
       if (releases.length) {
         var div = document.createElement('div');
@@ -430,13 +451,13 @@
     var wrap = document.createElement('div'); wrap.className = 'wn-section';
     var head = document.createElement('div'); head.className = 'wn-section-head';
     var pill = document.createElement('span'); pill.className = 'wn-section-pill';
-    pill.style.cssText = 'color:' + cfg.color + ';background:' + cfg.bg + ';border-color:' + cfg.border;
+    pill.style.cssText = 'color:' + (isDarkTheme() && cfg.darkColor ? cfg.darkColor : cfg.color) + ';background:' + cfg.bg + ';border-color:' + cfg.border;
     pill.textContent = t(cfg.label); head.appendChild(pill); wrap.appendChild(head);
     var list = document.createElement('ul'); list.className = 'wn-items';
     (section.items || []).forEach(function(item) {
       try {
         var li = document.createElement('li'); li.className = 'wn-item';
-        var bar = document.createElement('span'); bar.className = 'wn-item-bar'; bar.style.background = cfg.color; li.appendChild(bar);
+        var bar = document.createElement('span'); bar.className = 'wn-item-bar'; bar.style.background = cfg.bar || cfg.color; li.appendChild(bar);
         var body = document.createElement('div'); body.className = 'wn-item-body';
         var tt = document.createElement('div'); tt.className = 'wn-item-title'; tt.textContent = t(item.title); body.appendChild(tt);
         if (item.desc) { var dd = document.createElement('div'); dd.className = 'wn-item-desc'; dd.textContent = t(item.desc); body.appendChild(dd); }

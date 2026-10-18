@@ -128,6 +128,7 @@ export class DiscoverFeed {
       btn = document.createElement('button');
       btn.className = 'button-content';
     }
+    btn.type = 'button';
     btn.dataset.text = item.text;
     btn.dataset.api = item.api || '';
     btn.textContent = item.text;
@@ -141,6 +142,9 @@ export class DiscoverFeed {
       card.className = 'card';
       card.textContent = '';
       card.removeAttribute('data-link');
+      card.removeAttribute('role');
+      card.removeAttribute('tabindex');
+      card.removeAttribute('aria-label');
     } else {
       card = document.createElement('div');
       card.className = 'card';
@@ -151,6 +155,14 @@ export class DiscoverFeed {
     }
     if (item.link) {
       card.dataset.link = item.link;
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+    }
+
+    const titleText = this.getText(item.title, lang);
+
+    if (item.link && titleText) {
+      card.setAttribute('aria-label', titleText);
     }
 
     // Append image if present
@@ -171,7 +183,7 @@ export class DiscoverFeed {
 
     const titleEl = document.createElement('div');
     titleEl.className = 'card-title';
-    titleEl.textContent = this.getText(item.title, lang);
+    titleEl.textContent = titleText;
     content.appendChild(titleEl);
 
     const descEl = document.createElement('div');
@@ -321,6 +333,9 @@ export class DiscoverFeed {
         card.textContent = '';
         card.className = 'card';
         card.removeAttribute('data-link');
+        card.removeAttribute('role');
+        card.removeAttribute('tabindex');
+        card.removeAttribute('aria-label');
         if (this.pools.cards.length < this.maxPoolCap) {
           this.pools.cards.push(card);
         }

@@ -9,6 +9,31 @@
 
   const { CONFIG, Utils } = M;
 
+  var DEFAULT_FOCUS_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  /**
+   * Helper to query visible focusable elements within a root container.
+   * @param {HTMLElement} container
+   * @returns {HTMLElement[]}
+   */
+  function getFocusableElements(container) {
+    if (!container) return [];
+    var selector = (CONFIG.A11Y && CONFIG.A11Y.AUTO_FOCUS_SELECTOR) || DEFAULT_FOCUS_SELECTOR;
+    var raw = container.querySelectorAll(selector);
+    var result = [];
+    for (var i = 0; i < raw.length; i++) {
+      var el = raw[i];
+      if (el.disabled || el.getAttribute('tabindex') === '-1') continue;
+      var style = window.getComputedStyle ? window.getComputedStyle(el) : null;
+      if (style && (style.display === 'none' || style.visibility === 'hidden')) continue;
+      var rects = el.getClientRects ? el.getClientRects() : [];
+      if (rects.length > 0 || el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement) {
+        result.push(el);
+      }
+    }
+    return result;
+  }
+
   // ── Focus trap ─────────────────────────────────────────────────────────────
 
   /**
@@ -19,19 +44,37 @@
    * @param {HTMLElement} rootEl - The popup root
    * @returns {Function} Cleanup function
    */
+  var _activeTraps = new Map();
+
   function installFocusTrap(instanceId, rootEl) {
+    if (instanceId && _activeTraps.has(instanceId)) {
+      try { _activeTraps.get(instanceId)(); } catch (_) {}
+      _activeTraps.delete(instanceId);
+    }
     var handler = function(e) {
       if (e.key !== 'Tab') return;
 
-      var focusable = rootEl.querySelectorAll(CONFIG.A11Y.AUTO_FOCUS_SELECTOR);
+      var focusable = getFocusableElements(rootEl);
       if (focusable.length === 0) {
-        // If no focusable elements, prevent tab from escaping
+        // If no focusable elements, prevent tab from escaping and keep focus on root
         e.preventDefault();
+        try { rootEl.focus({ preventScroll: true }); } catch (_) {}
         return;
       }
 
       var first = focusable[0];
       var last = focusable[focusable.length - 1];
+
+      // If active focus is outside rootEl, wrap focus inside
+      if (!rootEl.contains(document.activeElement)) {
+        e.preventDefault();
+        if (e.shiftKey) {
+          last.focus();
+        } else {
+          first.focus();
+        }
+        return;
+      }
 
       if (e.shiftKey) {
         // Shift+Tab: if focus is on first element, wrap to last
@@ -51,10 +94,15 @@
 
     document.addEventListener('keydown', handler, false);
 
-    // Return cleanup function
-    return function() {
+    var cleanup = function() {
       document.removeEventListener('keydown', handler, false);
+      if (instanceId) _activeTraps.delete(instanceId);
     };
+    if (instanceId) {
+      _activeTraps.set(instanceId, cleanup);
+    }
+
+    return cleanup;
   }
 
   // ── Auto-focus ─────────────────────────────────────────────────────────────
@@ -65,33 +113,35 @@
    *
    * @param {HTMLElement} rootEl
    * @param {HTMLElement} bodyEl
-   * @param {number} [delayMs=CONFIG.A11Y.FOCUS_DELAY_MS]
+   * @param {number} [delayMs]
    */
   function autoFocus(rootEl, bodyEl, delayMs) {
-    var delay = delayMs !== undefined ? delayMs : CONFIG.A11Y.FOCUS_DELAY_MS;
+    var delay = delayMs !== undefined ? delayMs : (CONFIG.A11Y && CONFIG.A11Y.FOCUS_DELAY_MS) || 30;
     setTimeout(function() {
+      if (!rootEl || !rootEl.isConnected) return;
+
       // Priority 1: element with autofocus attribute inside popup
       var autoFocusEl = rootEl.querySelector('[autofocus]');
       if (autoFocusEl) {
-        try { autoFocusEl.focus({ preventScroll: true }); } catch(_) {}
-        return;
+        try { autoFocusEl.focus({ preventScroll: true }); return; } catch(_) {}
       }
 
       // Priority 2: first focusable in body
-      var first = bodyEl.querySelector(CONFIG.A11Y.AUTO_FOCUS_SELECTOR);
-      if (first) {
-        try { first.focus({ preventScroll: true }); } catch(_) {}
-        return;
+      var focusables = getFocusableElements(bodyEl);
+      if (focusables.length > 0) {
+        try { focusables[0].focus({ preventScroll: true }); return; } catch(_) {}
       }
 
       // Priority 3: close button (if exists)
       var closeBtn = rootEl.querySelector('[data-fp-close]');
       if (closeBtn) {
-        try { closeBtn.focus({ preventScroll: true }); } catch(_) {}
-        return;
+        try { closeBtn.focus({ preventScroll: true }); return; } catch(_) {}
       }
 
       // Fallback: focus the root itself for screen readers
+      if (!rootEl.hasAttribute('tabindex')) {
+        rootEl.setAttribute('tabindex', '-1');
+      }
       try { rootEl.focus({ preventScroll: true }); } catch(_) {}
     }, delay);
   }
@@ -108,7 +158,7 @@
     setTimeout(function() {
       try {
         // Only focus if the trigger is still in the DOM and visible
-        if (triggerEl.isConnected && triggerEl.offsetParent !== null) {
+        if (triggerEl.isConnected && (triggerEl.offsetParent !== null || triggerEl.offsetWidth > 0)) {
           triggerEl.focus({ preventScroll: true });
         }
       } catch(_) {}
@@ -156,7 +206,7 @@
   }
 
   M.A11yService = Object.freeze({
-    installFocusTrap, autoFocus, returnFocus, manageInertSiblings,
+    installFocusTrap, autoFocus, returnFocus, manageInertSiblings, getFocusableElements,
   });
 
 })(window.PopupModules = window.PopupModules || {});

@@ -191,7 +191,31 @@
       }
 
       const ctr = document.getElementById(CONFIG.DOM.CONTENT_LOADING_ID);
-      if (ctr) ctr.innerHTML = '';
+      if (ctr) {
+        if (ctr._fvlSafetyTimer) {
+          clearTimeout(ctr._fvlSafetyTimer);
+          ctr._fvlSafetyTimer = null;
+        }
+        ctr.innerHTML = '';
+        if (!options?.skipSpinner && !options?.skipScroll) {
+          ctr.setAttribute('aria-busy', 'true');
+          if (!ctr.querySelector('.fvl-spinner') && !ctr.querySelector('.fvl-scoped')) {
+            if (window.FVLSpinner) {
+              window.FVLSpinner.mount(ctr, { size: 'md' });
+            } else if (window.FVL?.scoped) {
+              window.FVL.scoped({ target: ctr, bare: true, size: 'md' });
+            }
+          }
+          ctr._fvlSafetyTimer = setTimeout(() => {
+            ctr.removeAttribute('aria-busy');
+            const sp = ctr.querySelector('.fvl-spinner, .fvl-scoped');
+            if (sp && sp.parentNode === ctr) sp.remove();
+            ctr._fvlSafetyTimer = null;
+          }, 10000);
+        } else {
+          ctr.setAttribute('aria-busy', 'false');
+        }
+      }
     },
 
     // ── renderContent (URE path — ใช้กับ route ทั่วไป) ──────────────────────────
@@ -209,7 +233,7 @@
         await _ensureURE();
         if (sess !== _sess) return;
 
-        const lang = localStorage.getItem('selectedLang') || 'en';
+        const lang = (window.FvLang && FvLang.lang) || 'en';
         await M.DataService.loadApiDatabase().catch(err => {
           console.warn('[Content] loadApiDatabase failed, continuing:', err);
         });
@@ -557,7 +581,16 @@
         }
 
         _loading = true;
+        sentinel.setAttribute('aria-busy', 'true');
+        let spinnerHandle = null;
         try {
+          if (!sentinel.querySelector('.fvl-spinner') && !sentinel.querySelector('.fvl-scoped')) {
+            if (window.FVLSpinner) {
+              spinnerHandle = window.FVLSpinner.mount(sentinel, { size: 'sm', speed: 'fast' });
+            } else if (window.FVL?.inline) {
+              spinnerHandle = window.FVL.inline({ target: sentinel, bare: true, size: 'sm' });
+            }
+          }
           const { groups, hasMore } =
             await M.SourcePaginator.loadNextPage(lang, M.SourcePaginator.PAGE_SIZE);
 
@@ -576,6 +609,18 @@
           console.error('[NavCore/Content] lazy loadMore error:', e);
         } finally {
           _loading = false;
+          if (sentinel && sentinel.parentNode) {
+            sentinel.setAttribute('aria-busy', 'false');
+            if (spinnerHandle) {
+              if (typeof spinnerHandle.destroy === 'function') spinnerHandle.destroy();
+              else if (typeof spinnerHandle.unmount === 'function') spinnerHandle.unmount();
+              else if (typeof spinnerHandle.hide === 'function') spinnerHandle.hide();
+              spinnerHandle = null;
+            } else {
+              const sp = sentinel.querySelector('.fvl-spinner, .fvl-scoped');
+              if (sp) sp.remove();
+            }
+          }
         }
       }, {
         rootMargin: '600px',
@@ -597,6 +642,16 @@
      */
     async _appendFeedGroups(ctr, groups, lang, sentinel) {
       if (!groups.length) return;
+
+      if (ctr) {
+        if (ctr._fvlSafetyTimer) {
+          clearTimeout(ctr._fvlSafetyTimer);
+          ctr._fvlSafetyTimer = null;
+        }
+        const spinners = ctr.querySelectorAll('.fvl-spinner, .fvl-scoped');
+        spinners.forEach(sp => sp.remove());
+        ctr.setAttribute('aria-busy', 'false');
+      }
 
       const resolvedItems = await this._resolveAll(groups, lang);
       if (!resolvedItems.length) return;
@@ -654,7 +709,16 @@
         }
 
         _loading = true;
+        sentinel.setAttribute('aria-busy', 'true');
+        let spinnerHandle = null;
         try {
+          if (!sentinel.querySelector('.fvl-spinner') && !sentinel.querySelector('.fvl-scoped')) {
+            if (window.FVLSpinner) {
+              spinnerHandle = window.FVLSpinner.mount(sentinel, { size: 'sm', speed: 'fast' });
+            } else if (window.FVL?.inline) {
+              spinnerHandle = window.FVL.inline({ target: sentinel, bare: true, size: 'sm' });
+            }
+          }
           const { groups, hasMore } = await M.FeedService.loadNextPage(lang, FEED_PAGE_SIZE);
 
           if (sess !== _sess) return; // ตรวจซ้ำหลัง async
@@ -680,6 +744,18 @@
           console.error('[NavCore/Content] feed loadMore error:', e);
         } finally {
           _loading = false;
+          if (sentinel && sentinel.parentNode) {
+            sentinel.setAttribute('aria-busy', 'false');
+            if (spinnerHandle) {
+              if (typeof spinnerHandle.destroy === 'function') spinnerHandle.destroy();
+              else if (typeof spinnerHandle.unmount === 'function') spinnerHandle.unmount();
+              else if (typeof spinnerHandle.hide === 'function') spinnerHandle.hide();
+              spinnerHandle = null;
+            } else {
+              const sp = sentinel.querySelector('.fvl-spinner, .fvl-scoped');
+              if (sp) sp.remove();
+            }
+          }
         }
       }, {
         rootMargin: '600px',
@@ -1023,11 +1099,26 @@
           window.sessionStorage.setItem(this._persistScrollKey(), JSON.stringify({ y, ts: Date.now() }));
         } catch (_) {}
       };
-      window.addEventListener('scroll', () => {
+      this._scrollPersistHandler = () => {
         if (deb) clearTimeout(deb);
         deb = setTimeout(write, 250);
-      }, { passive: true });
-      window.addEventListener('pagehide', write);
+      };
+      this._pagehideHandler = write;
+      window.addEventListener('scroll', this._scrollPersistHandler, { passive: true });
+      window.addEventListener('pagehide', this._pagehideHandler);
+    },
+
+    _cleanupScrollPersist() {
+      if (!this._scrollPersistBound) return;
+      if (this._scrollPersistHandler) {
+        window.removeEventListener('scroll', this._scrollPersistHandler);
+        this._scrollPersistHandler = null;
+      }
+      if (this._pagehideHandler) {
+        window.removeEventListener('pagehide', this._pagehideHandler);
+        this._pagehideHandler = null;
+      }
+      this._scrollPersistBound = false;
     },
 
     _readPersistedScroll(maxAgeMs) {

@@ -46,8 +46,7 @@ const VIEW_ALL_CONFIGS = {
 };
 
 // v5.0: ใช้ FvLang.lang แทน localStorage โดยตรง
-const getLang = () =>
-  (window.FvLang && FvLang.lang) || (typeof localStorage !== 'undefined' && localStorage.getItem('selectedLang')) || 'en';
+const getLang = () => (window.FvLang && FvLang.lang) || 'en';
 
 function pickLang(obj, lang) {
   if (!obj || typeof obj !== 'object') return String(obj || '');
@@ -78,6 +77,11 @@ async function copyToClipboard(text) {
     return true;
   } catch { return false; }
 }
+
+// S6: ds.css โหลดผ่าน <link> ใน HTML ของทุกหน้าแล้ว (ยกเลิกการฉีดจาก JS)
+const HOME_TAB_KEY = 'fv-home-tab';
+function readSavedTab() { try { return localStorage.getItem(HOME_TAB_KEY); } catch (_) { return null; } }
+function saveTab(id)    { try { localStorage.setItem(HOME_TAB_KEY, id); } catch (_) {} }
 
 function injectStyles() {
   if (document.getElementById('home-extra-styles')) return;
@@ -119,7 +123,7 @@ function injectStyles() {
     .carousel-wrapper {
       position: relative;
       overflow: hidden;
-      border-radius: var(--radius-lg, 12px);
+      border-radius: var(--radius-2xl, 32px);
     }
     .carousel-arrow {
       position: absolute; top: 0; bottom: 0; height: 100%;
@@ -155,7 +159,7 @@ function injectStyles() {
     }
     .carousel-wrapper::before, .carousel-wrapper::after { display: none !important; }
     .home-error {
-      padding: 2rem 1rem; border-radius: 12px;
+      padding: 2rem 1rem; border-radius: var(--radius-xl, 28px);
       background: #fff5f5; border: 1px solid #ffd0d0;
       color: #c0392b; font-size: .95rem; text-align: center;
     }
@@ -167,10 +171,11 @@ function injectStyles() {
 async function fetchIdOrder(url) {
   try {
     const r = await fetch(url);
-    if (!r.ok) return null;
-    const j = await r.json();
+    if (!r.ok) return [];
+    const j = await r.json().catch(() => null);
+    if (!j) return [];
     return (j.categories || j.category || []).map(c => c.id);
-  } catch { return null; }
+  } catch (_) { return []; }
 }
 
 async function reorderAssembled(assembled) {
@@ -345,9 +350,8 @@ function buildTypeSection(typeObj, lang) {
 
   const viewAllBtn = document.createElement('a');
   viewAllBtn.href      = getViewAllUrl(typeObj.id);
-  viewAllBtn.className = 'button-h';
+  viewAllBtn.className = 'button-h ds-btn ds-btn--solid';
   viewAllBtn.setAttribute('aria-label', getViewAllLabel(typeObj.id));
-  viewAllBtn.setAttribute('wave', 'c=#D7C7FF');
   viewAllBtn.innerHTML = `<span class="btn-content">${getViewAllLabel(typeObj.id)}</span>`;
   header.appendChild(viewAllBtn);
   wrapper.appendChild(header);
@@ -385,10 +389,61 @@ function renderToApp(assembled, lang) {
     ));
     return;
   }
-  const frag = document.createDocumentFragment();
-  copyableTypes.forEach(typeObj => frag.appendChild(buildTypeSection(typeObj, lang)));
+  const saved  = readSavedTab();
+  const active = copyableTypes.some(t => t.id === saved) ? saved : copyableTypes[0].id;
+
+  // แถบแท็บสลับชนิด (ARIA tabs: ลูกศรซ้ายขวาย้ายตัวเลือกได้)
+  const tabs = document.createElement('div');
+  tabs.className = 'ds-pills home-tabs';
+  tabs.setAttribute('role', 'tablist');
+  tabs.setAttribute('aria-label', lang === 'th' ? 'ชนิดเนื้อหา' : 'Content type');
+
+  const panels = document.createDocumentFragment();
+  const tabEls = [];
+  copyableTypes.forEach(typeObj => {
+    const isActive = typeObj.id === active;
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'ds-pill';
+    tab.id = `home-tab-${typeObj.id}`;
+    tab.setAttribute('role', 'tab');
+    tab.setAttribute('aria-controls', `home-panel-${typeObj.id}`);
+    tab.setAttribute('aria-selected', String(isActive));
+    tab.tabIndex = isActive ? 0 : -1;
+    tab.textContent = pickLang(typeObj.name, lang);
+    tabs.appendChild(tab); tabEls.push(tab);
+
+    const panel = buildTypeSection(typeObj, lang);
+    panel.id = `home-panel-${typeObj.id}`;
+    panel.className = 'home-panel';
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', tab.id);
+    panel.hidden = !isActive;
+    panels.appendChild(panel);
+  });
+
+  const select = (id, focus) => {
+    tabEls.forEach(t => {
+      const on = t.id === `home-tab-${id}`;
+      t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1;
+      if (on && focus) t.focus();
+    });
+    app.querySelectorAll('.home-panel').forEach(p => { p.hidden = p.id !== `home-panel-${id}`; });
+    saveTab(id);
+  };
+  tabEls.forEach((t, i) => {
+    t.addEventListener('click', () => select(t.id.replace('home-tab-', ''), false));
+    t.addEventListener('keydown', ev => {
+      if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
+      ev.preventDefault();
+      const n = (i + (ev.key === 'ArrowRight' ? 1 : -1) + tabEls.length) % tabEls.length;
+      select(tabEls[n].id.replace('home-tab-', ''), true);
+    });
+  });
+
   app.innerHTML = '';
-  app.appendChild(frag);
+  app.appendChild(tabs);
+  app.appendChild(panels);
 }
 
 function renderErrorToApp(msg, detail) {
@@ -429,6 +484,8 @@ _dataPromise.then(assembled => {
 });
 
 // v5.0: เมื่อภาษาเปลี่ยน → re-render ทั้งหน้า home ทันที
+let _langChangeHandler = null;
+
 try {
   if (window.FvLang) {
     FvLang.onChange(function(newLang) {
@@ -438,11 +495,15 @@ try {
     });
   } else {
     // Fallback: ฟัง fv:langchange event
-    window.addEventListener('fv:langchange', function(e) {
+    if (_langChangeHandler) {
+      window.removeEventListener('fv:langchange', _langChangeHandler);
+    }
+    _langChangeHandler = function(e) {
       if (_cachedAssembled && e.detail && e.detail.lang) {
         renderToApp(_cachedAssembled, e.detail.lang);
       }
-    });
+    };
+    window.addEventListener('fv:langchange', _langChangeHandler);
   }
 } catch(e) {}
 

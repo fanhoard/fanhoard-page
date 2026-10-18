@@ -258,6 +258,14 @@ async function _diagnose(base, names) {
 </div>
 ```
 
+### Content-Scoped Bare Spinner Integration (`showInContent`)
+
+`LoadingService.showInContent(opts)` ถูกปรับปรุงให้ใช้ดีฟอลต์เป็น `{ bare: true, size: 'md' }` เพื่อ mount FVL bare spinner เข้าไปยังคอนเทนเนอร์ `#content-loading` สำหรับ transition ระหว่างการเปลี่ยนแท็บและเปลี่ยนหมวดหมู่ โดยตั้งค่า `aria-busy="true"` บนคอนเทนเนอร์โดยอัตโนมัติ
+
+```javascript
+LoadingService.showInContent({ bare: true, size: 'md' });
+```
+
 ### API หลัก
 
 ```javascript
@@ -527,6 +535,20 @@ await ContentService.renderContent(data);
 // 4. _resolveAll(data, lang) — แปลง raw data → renderable groups
 // 5. URE.mount({ container, data, template, onItemClick })
 ```
+
+### Content Transition & Infinite Scroll Spinner Lifecycle
+
+1. **Category & Tab Navigation (`clearContent`)**:
+   - ล้างข้อมูลเดิมใน `#content-loading`
+   - ตรวจสอบ guard ป้องกัน spinner ซ้ำ (`!ctr.querySelector('.fvl-spinner')`)
+   - Mount bare FVL spinner (`FVLSpinner.mount(ctr, { size: 'md' })` หรือ `FVL.scoped({ target: ctr, bare: true })`)
+   - ตั้งค่า `aria-busy="true"`
+   - ตั้งค่า 10s fallback safety timer (`_fvlSafetyTimer`) เพื่อเคลียร์ spinner และ `aria-busy` โดยอัตโนมัติหากการโหลดค้าง
+2. **Batch Paint Completion (`_appendFeedGroups`)**:
+   - เมื่อ feed batch แรกเรนเดอร์สำเร็จ ทำการลบ spinner, ยกเลิก `_fvlSafetyTimer`, และรีเซ็ต `aria-busy="false"`
+3. **Infinite Scroll Pagination Sentinels (`_attachFeedSentinel` / `_attachLazySentinel`)**:
+   - เมื่อ intersection observer ทำงานบน `#nc-feed-sentinel` หรือ `#nc-lazy-sentinel` ตั้งค่า `aria-busy="true"` และ mount standalone small fast spinner (`FVLSpinner.mount(sentinel, { size: 'sm', speed: 'fast' })`)
+   - ทำงานภายใต้ `try...finally` block โดยใน `finally` block จะเรียก `spinnerHandle.destroy()` และตั้งค่า `aria-busy="false"` เพื่อรับประกันการเคลียร์ spinner แม้เกิด network/fetch error
 
 ### Feed Rendering Path
 
@@ -1401,3 +1423,16 @@ tService._onClick(e)
 - [`AI_CODING_GUIDE.md`](./AI_CODING_GUIDE.md) — มาตรฐานโค้ดที่ต้องยึดเมื่อแก้ Nav-Core
 - [`AI_FORBIDDEN.md`](./AI_FORBIDDEN.md) — กฎเหล็กก่อนแตะ Nav-Core
 - [`12-SEO-Guide.md`](./12-SEO-Guide.md) — ⭐ SEO considerations (priority สูงสุด) ที่เกี่ยวข้องกับระบบนี้
+
+
+---
+
+## 21. Polish & Stability Foundation Improvements
+
+ในการปรับปรุงเสถียรภาพ ประสิทธิภาพ และความลื่นไหลของระบบ Nav-Core & Content (Polish Round):
+
+1. **Popstate Navigation Sequence Guard (`RouterService` in `router.js`)**: เพิ่มตัวนับลำดับ `_navSequenceId` ใน `popstate` listener เพื่อตรวจสอบลำดับระหว่างเรียก `validateUrl` แบบอะซิงโครนัส ป้องกัน Race Condition เมื่อผู้ใช้กดปุ่ม ย้อนกลับ/ถัดไป (Back/Forward) รวดเร็ว
+2. **Scroll Persist Listener Cleanup & Passive Flag (`ContentService` in `content.js`)**: เพิ่มตัวเลือก `{ passive: true }` บน window scroll listener สำหรับบันทึกตำแหน่งเลื่อนหน้าจอ และเพิ่มเมธอด `_cleanupScrollPersist()` เพื่อคืนทรพยากรและป้องกัน Listener Leaks
+3. **Resize Listener Throttling via rAF (`Init` in `init.js`)**: เปลี่ยนการประมวลผล resize listener บน window จากการประมวลผลแบบซิงโครนัสหรือ timer เป็น `requestAnimationFrame` (`_resizeRaf`) ป้องกันปัญหา Layout Thrashing
+4. **Graceful Feed Fetching & Listener Deduplication (`home.js`)**: ครอบ `fetch` และ JSON parsing ใน `fetchIdOrder` ด้วย `try...catch` คืนค่า fallback array `[]` ป้องกัน Unhandled Promise Rejections และทำ Deduplication สำหรับ `fv:langchange` listener ผ่าน `_langChangeHandler`
+5. **AbortError Exception Safety (`DataService` in `data.js`)**: เพิ่มการตรวจจับ `AbortError` ใน `_enqueueFetch` ให้คืนค่า `{ ok: false, aborted: true }` โดยไม่พยายาม retry ซ้ำหรือโยน error ออกมาให้เกิด Overlay ไม่พึงประสงค์

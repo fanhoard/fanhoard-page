@@ -1,37 +1,25 @@
-# FanHoard Search — v6.1 Patch (Google-like non-sticky filters)
+# แพตช์ Global Consistency Sweep (v3.2.24) — รอบโค้ดสุดท้าย
 
-วางไฟล์ทั้งหมดใน patch นี้ทับลงบน repo ตามโครงสร้างเดิม — แตก ZIP แล้ว copy ทับได้เลย
+วางไฟล์ทั้งหมดใน patch นี้ทับลงบน repo ตามโครงสร้างเดิม — แตก ZIP แล้ว copy ทับได้เลย (โฟลเดอร์ `r11-shots/` คือหลักฐานสกรีนช็อต 28 ภาพ เก็บหรือทิ้งได้)
 
-## สรุปการเปลี่ยนแปลง
+## สรุปการเปลี่ยนแปลง (v3.2.24 - Global Consistency Sweep)
 
 | ไฟล์ | การเปลี่ยนแปลง |
 |------|----------------|
-| `search/index.html` | โครงสร้างใหม่ — ย้าย filter pills ออกจาก `#search-sticky` ไปเป็น sibling `.search-filters-panel`, ลบ `#filterCatToggle` (ลูกศร), ลบ `.filter-cat-wrap`, ลบ `#cat-spacer`, เขียน inline sticky script ใหม่แบบกระชับ |
-| `assets/css/search-compact-overrides.css` | ลบ style blocks ของ `.filter-cat-toggle`, `.filter-cat-wrap`, `.filter-row-end`, `.filter-row-wrapper` ออกทั้งหมด — เพิ่ม `:empty` auto-collapse สำหรับ category row — ปรับ `.search-header` padding ให้สมดุล (มี bottom padding บ้างเพราะ filter pills ไม่อยู่ใน header แล้ว) |
-| `assets/js/search-system/search-modules/rendering.js` | `setupCategoryFilter()` แบบใหม่ — ไม่อ้างถึง `filterCatToggle` / `filterCatWrap` / `_closeCatBar` / `_updateCatBarHeight` อีกต่อไป เมื่อไม่มี categories ก็แค่ clear innerHTML แล้ว CSS `:empty` จะ collapse row ให้เอง |
-| `fanhoard-docs/14-System-Design-And-UX.md` | เพิ่ม section 5.8.1 "Search Page Sticky Layout (Google-like, v6.1+)" อธิบายกฎการวาง structure ใหม่ + อัปเดต ARIA ตัวอย่างให้เป็น filter pills แทน toggle button |
-| `fanhoard-docs/02-Search-System.md` | อัปเดต section 12.4 setupCategoryFilter ให้สะท้อน behavior ใหม่ พร้อม callout box อธิบายการเปลี่ยนแปลง |
+| `assets/css/footer.css` | transition เก่า (--ease-in-out/--ease-out) → transition tokens v3, var ซ้อนคลาย, focus ring 3px เทล ×3 |
+| `assets/css/back-to-top.css` | เทลเก่า #009688 → #0d9488, hover → #0F766E, curve → tokens, ring 3px |
+| `assets/css/base.css`, `assets/css/modern-styles.css` | ghost ease-out → tokens, #757575 → #475569 |
+| `assets/js/setting-system/theme-core.js` | **บั๊กจริงจาก audit**: default theme เมื่อไม่มี preference เดิม `'dark'` (มรดก v2) → `'system'` ตาม OS — หน้า setting เคยบังคับมืดทั้งที่เว็บอื่นสว่าง |
+| `assets/js/setting-system/setting-ui.js` | fallback `'dark'` → `'system'` ×2 |
+| `assets/js/footer-template.js` | guard การแทรก footer เปลี่ยนเป็นเช็คจากลิงก์จริง (footer ว่างไม่ block การแทรกใหม่) |
+| `tests/settings-polish.test.ts` | default pin 'dark' → 'system' ตามสเปก v3 (โครงสร้าง assertion คงเดิม) |
+| `assets/md/{en,th}/current.md` + releases | โน้ตรีลีส v3.2.24 ฟอร์แมต parser-compatible |
 
-## พฤติกรรมใหม่
+## ผลการตรวจทั้งเว็บ (14 หน้า × light+dark)
 
-### ก่อนหน้า (v6.0)
-- `#search-sticky` บรรจุทั้ง search input, type filter pills, และ category filter wrap
-- ทั้งหมด stick อยู่กับหน้าจอเวลา scroll
-- มี toggle arrow สำหรับซ่อน/แสดง category bar
-- category bar เป็น absolute-positioned overlay ที่ dropdown ลงมาจาก header
+28/28 combos: พื้นตามธีมครบ, footer 12 ลิงก์ทุกหน้า ไม่ซ้ำไม่ว่าง, ไม่มี horizontal overflow ทั้ง 1280 และ 375, focus ring 3px เทลบน interactive จริงทุกหน้า (false positive ที่เคลียร์แล้ว: outline 404 มี style `none` จริง, license โดน Cookiebot iframe แฝก)
 
-### ตอนนี้ (v6.1 — Google-like)
-- `#search-sticky` บรรจุ **เฉพาะ** search input + nav bar background
-- type filter + category filter อยู่ใน sibling `.search-filters-panel` ที่ scroll ตามเนื้อหาปกติ
-- ไม่มี toggle arrow — category pills แสดงทันทีที่มี categories ให้เลือก
-- เมื่อไม่มี categories (เช่น ผลลัพธ์ว่าง หรือทุก item อยู่ใน category เดียวกัน) CSS rule `.filter-pills-row--cat:empty { display:none }` จะ collapse row อัตโนมัติ
-- inline sticky script ยังคง show/hide บน scroll down/up ของ search bar เหมือนเดิม เพื่อประหยัดพื้นที่หน้าจอบนมือถือ
+## ผลทดสอบ
 
-## การทดสอบ
-
-ทดสอบว่า:
-1. ค้นหาแล้วเลื่อนหน้าจอ → search bar ยัง stick อยู่ แต่ filter pills เลื่อนหายไปใต้ sticky header
-2. พิมพ์คำค้นที่มีหลาย categories → category row แสดงอัตโนมัติ ไม่ต้องกด toggle
-3. พิมพ์คำค้นที่ผลลัพธ์ทั้งหมดอยู่ใน category เดียว → category row หายไปเอง
-4. ลอง responsive บนมือถือ → ทั้ง type และ category rows ยัง horizontal scroll ได้ปกติ
-5. ทดสอบ sticky show/hide บน scroll down/up → search bar ยังทำงานเหมือนเดิม
+- Unit: 234/234 (37 ไฟล์) | Build: สะอาด | e2e เต็ม: 16/16
+- ยืนยันบั๊กแก้จริงบน browser: บริบท OS light สด → setting พื้น #FAFAFC + radio=System + data-theme=light; OS dark → #0F172A + System + dark

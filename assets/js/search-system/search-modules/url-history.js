@@ -72,7 +72,8 @@
       try {
         const p = this.parseQS(location.search);
         return { q: p.q || '', type: p.type || 'all', category: p.category || 'all' };
-      } catch {
+      } catch (e) {
+        console.warn('[SearchModule:url-history]', e);
         return { q: '', type: 'all', category: 'all' };
       }
     },
@@ -126,7 +127,7 @@
           } catch (replaceErr) {
             console.error('[URLService] history API failed:', replaceErr);
             if (st.q) {
-              try { location.hash = '#q=' + encodeURIComponent(st.q); } catch (_) {}
+              try { location.hash = '#q=' + encodeURIComponent(st.q); } catch (e) { console.warn('[SearchModule:url-history]', e); }
             }
           }
         }
@@ -151,7 +152,7 @@
         } catch (err) {
           console.error('[URLService] replaceState failed:', err);
           if (st.q) {
-            try { location.hash = '#q=' + encodeURIComponent(st.q); } catch (_) {}
+            try { location.hash = '#q=' + encodeURIComponent(st.q); } catch (e) { console.warn('[SearchModule:url-history]', e); }
           }
         }
         State.lastCommittedSearchState = st;
@@ -172,7 +173,7 @@
         const st = { ...searchState, [State._overlayStateMarker]: true };
         history.pushState(st, '', location.href);
         State.overlayHistoryPushed = true;
-      } catch {}
+      } catch (e) { console.warn('[SearchModule:url-history]', e); }
     },
 
     /**
@@ -192,7 +193,7 @@
         history.replaceState(st, '', url);
         State.lastCommittedSearchState = st;
         if (st.q) StorageService.addSearchToHistory(st);
-      } catch {}
+      } catch (e) { console.warn('[SearchModule:url-history]', e); }
       State.overlayHistoryPushed = false;
     },
   };

@@ -143,9 +143,9 @@
 
   /** @type {Readonly<Record<string,string>>} */
   const DOM = Object.freeze({
-    suggestionContainerId: 'searchSuggestions',
-    overlayContainerId: 'searchOverlayContainer',
-    sentinelId: 'search-render-sentinel',
+    suggestionContainerId: 'search-suggestions-list',
+    overlayContainerId: 'search-overlay-container',
+    sentinelId: 'search-sentinel-el',
     searchInputId: 'searchInput',
     searchFormId: 'searchForm',
     typeFilterId: 'typeFilter',
@@ -159,7 +159,8 @@
   });
 
   const STORAGE = Object.freeze({ historyKey: 'searchHistory_v1', langKey: 'selectedLang' });
-  const LANG = Object.freeze({ default: 'en', autoDetect: true });
+  // autoDetect: false — static เต็มรูปแบบ ห้ามใช้ภาษาเบราว์เซอร์ตัดสินภาษา (Master สั่ง 18 ต.ค. 2026)
+  const LANG = Object.freeze({ default: 'en', autoDetect: false });
   const DB = Object.freeze({ path: '/assets/db/db.min.json' });
 
   // ── i18n ──────────────────────────────────────────────────────────────────

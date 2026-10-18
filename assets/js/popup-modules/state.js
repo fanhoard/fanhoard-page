@@ -163,18 +163,15 @@
    */
   function lockScroll() {
     _scrollLockCount++;
-    if (_scrollLockCount === 1) {
-      _savedScrollY = window.scrollY || window.pageYOffset || 0;
-      if (_savedScrollY > 0) {
-        window.scrollTo({ top: 0, behavior: 'instant' });
-      }
-      document.body.style.position = 'fixed';
-      document.body.style.top = '-' + _savedScrollY + 'px';
-      document.body.style.width = '100%';
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.documentElement.style.overflow = 'hidden';
+    // ScrollLockCore is the only lock authority. The loader guarantees it is
+    // present before popup modules are initialized; fail closed if that contract breaks.
+    const _core = window.ScrollLockCore;
+    if (!_core) {
+      _scrollLockCount--;
+      throw new Error('[PopupSystem/State] ScrollLockCore unavailable');
     }
+    _core.allowScrollIn('.fp-body');
+    _core.lock('popup');
   }
 
   /**
@@ -183,18 +180,9 @@
   function unlockScroll() {
     if (_scrollLockCount <= 0) return;
     _scrollLockCount--;
-    if (_scrollLockCount === 0) {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.documentElement.style.overflow = '';
-      if (_savedScrollY > 0) {
-        window.scrollTo({ top: _savedScrollY, behavior: 'instant' });
-        _savedScrollY = 0;
-      }
-    }
+    const _core = window.ScrollLockCore;
+    if (!_core) throw new Error('[PopupSystem/State] ScrollLockCore unavailable');
+    _core.unlock('popup');
   }
 
   function getScrollLockCount() {
@@ -266,8 +254,14 @@
     _systemListeners.clear();
     // Force unlock scroll
     if (_scrollLockCount > 0) {
-      _scrollLockCount = 1;
-      unlockScroll();
+      const _core = window.ScrollLockCore;
+      if (_core) {
+        _core.releaseAll('popup');
+        _scrollLockCount = 0;
+      } else {
+        _scrollLockCount = 1;
+        unlockScroll();
+      }
     }
   }
 

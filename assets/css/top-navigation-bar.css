@@ -22,12 +22,17 @@ nav {
   background: none; border:none; cursor:pointer;
   padding:6px; z-index:var(--fv-z-overlay);
   border-radius:var(--fv-radius-sm);
-  transition: background-color 0.2s cubic-bezier(0.4,0,0.2,1), transform 0.2s cubic-bezier(0.4,0,0.2,1);
+  transition: background-color 180ms cubic-bezier(0.16, 1, 0.3, 1), transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
   display:flex; align-items:center; justify-content:center;
+  min-width: 44px; min-height: 44px;
 }
-.back-button:active        { background:rgba(0,0,0,0.07); }
-.back-button:active svg    { transform:scale(0.9); }
-.back-button svg           { width:auto; height:26px; color:var(--color-brand-primary, #0d9488); transition: color 0.2s ease, transform 0.2s ease; }
+.back-button:focus-visible {
+  outline: 2px solid var(--color-brand-primary, #0d9488);
+  outline-offset: 2px;
+}
+.back-button:active { background:rgba(0,0,0,0.07); }
+.back-button:active svg { transform:scale(0.9); }
+.back-button svg { width:auto; height:26px; color:var(--color-brand-primary, #0d9488); transition: color 180ms cubic-bezier(0.16, 1, 0.3, 1), transform 180ms cubic-bezier(0.16, 1, 0.3, 1); }
 
 .page-title {
   grid-column: 2;
@@ -41,5 +46,5 @@ nav {
 .date { font-size:0.8rem; font-weight:var(--fv-font-medium); }
 
 @media (prefers-reduced-motion: reduce) {
-  .back-button, .back-button svg { transition: none; }
+  .back-button, .back-button svg { transition: none !important; transform: none !important; }
 }

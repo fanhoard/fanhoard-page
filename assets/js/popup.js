@@ -36,7 +36,7 @@
   //   จึงไม่ถูก regex ?v= ของ update-version.js จับได้
   //   FV_BUILD_ID ถูก inject buildId จริงตอน build → ใช้ต่อ ?v= ท้าย URL
   //   dev mode: ค่า '' → _v() คืน '' → URL ไม่มี ?v= → browser cache ปกติ
-  var FV_BUILD_ID = '2.3.0-202609220313';
+  var FV_BUILD_ID = '3.2.26-202610040621';
   
   /** คืน query string '?v=<buildId>' ถ้าไม่มี buildId คืน '' */
   function _v() { return FV_BUILD_ID ? '?v=' + FV_BUILD_ID : ''; }
@@ -115,7 +115,25 @@
   var base = getBasePath();
   injectCSS(base);
   
-  loadSequential(MODULES.map(function(n) { return base + '/' + n; }))
+  // ── Shared scroll-lock core (single source of truth for all overlays) ──
+  // popup state.js delegates scroll locking to window.ScrollLockCore so
+  // popup locks compose with FVL/search overlays instead of destroying
+  // each other. The core ships with the loading system; on pages without
+  // FVL we load it ourselves before any popup module needs it.
+  function ensureScrollLockCore() {
+    if (window.ScrollLockCore) return Promise.resolve();
+    return loadScript('/assets/js/loading-system/fvl-modules/scroll-lock-core.js')
+      .catch(function (err) {
+        // Do not initialize overlays without the shared lock authority.
+        console.error('[PopupSystem] ScrollLockCore failed to load; popup boot aborted:', err);
+        throw err;
+      });
+  }
+
+  ensureScrollLockCore()
+    .then(function() {
+      return loadSequential(MODULES.map(function(n) { return base + '/' + n; }));
+    })
     .then(function() {
       var M = window.PopupModules;
       if (!M) {

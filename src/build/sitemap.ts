@@ -5,6 +5,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { findHtmlFiles, loadDbJson } from './file-utils';
 
@@ -19,6 +20,23 @@ const CONFIG = {
   dbJsonPath: path.join('assets', 'lang', 'options', 'db.json'),
   baseUrl: 'https://fanhoard.pages.dev',
 };
+
+/** Pages excluded from the sitemap (robots.txt-disallowed or non-public). */
+const PAGE_EXCLUDES = ['/data/verse/scope/'];
+
+/** lastmod from the page file's real last commit (fallback: today). */
+function gitLastmod(fileAbs: string): string {
+  const fallback = new Date().toISOString().slice(0, 10);
+  try {
+    const out = execSync(`git log -1 --format=%cI -- ${JSON.stringify(fileAbs)}`, {
+      cwd: ROOT,
+      encoding: 'utf-8',
+    }).trim();
+    return out ? out.slice(0, 10) : fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 interface UrlEntry {
   loc: string;
@@ -39,13 +57,14 @@ function loadDb(): Record<string, any> {
 
 function buildUrlEntries(htmlFiles: string[], langs: string[]): UrlEntry[] {
   const entries: UrlEntry[] = [];
-  const today = new Date().toISOString().slice(0, 10);
 
   for (const file of htmlFiles) {
     let rel = path.relative(CONFIG.srcDir, file).replace(/\\/g, '/');
     if (!rel) continue;
 
-    if (rel.endsWith('index.html')) {
+    if (rel.endsWith('page.html')) {
+      rel = rel.replace(/page\.html$/, '');
+    } else if (rel.endsWith('index.html')) {
       rel = rel.replace(/index\.html$/, '');
     } else if (rel.endsWith('.html')) {
       rel = rel.replace(/\.html$/, '/');
@@ -57,18 +76,25 @@ function buildUrlEntries(htmlFiles: string[], langs: string[]): UrlEntry[] {
     rel = rel === '/' ? ROOT_PAGE_PATH : rel;
     const pagePath = rel || ROOT_PAGE_PATH;
 
+    if (PAGE_EXCLUDES.includes(pagePath)) continue;
+
+    const lastmod = gitLastmod(file);
     const alternates = langs.map((l) => ({
       lang: l,
       href: `${CONFIG.baseUrl}/${l}${pagePath.startsWith('/') ? pagePath : '/' + pagePath}`,
     }));
 
-    entries.push({
-      loc: `${CONFIG.baseUrl}/${langs[0]}${pagePath}`,
-      lastmod: today,
-      changefreq: 'weekly',
-      priority: pagePath === ROOT_PAGE_PATH ? '1.0' : '0.6',
-      alternates,
-    });
+    // Every language variant gets its own <loc> entry (each with the full
+    // hreflang cluster) so Google discovers all URLs directly.
+    for (const l of langs) {
+      entries.push({
+        loc: `${CONFIG.baseUrl}/${l}${pagePath}`,
+        lastmod,
+        changefreq: 'weekly',
+        priority: pagePath === ROOT_PAGE_PATH ? '1.0' : '0.6',
+        alternates,
+      });
+    }
   }
 
   const map = new Map<string, UrlEntry>();
@@ -127,9 +153,10 @@ export function generateSitemap(): void {
     '.git',
     'scripts',
     'src',
+    'assets',
     '.cloudflare',
     'google6b646fa60e0f9f2f.html',
-    'index.html',
+    '404.html',
   ]);
   console.log(`[sitemap] Found ${htmlFiles.length} HTML files`);
 
