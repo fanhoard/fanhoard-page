@@ -32,8 +32,7 @@
   function getLang() {
     try {
       if (window.FvLang && FvLang.lang) return FvLang.lang;
-      var l = localStorage.getItem('selectedLang') || 'en'; 
-      return SUPPORTED_LANGS.indexOf(l) >= 0 ? l : 'en'; 
+      return 'en';
     } catch(e) { return 'en'; }
   }
 

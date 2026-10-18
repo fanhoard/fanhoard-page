@@ -87,7 +87,7 @@
       diffing     = true,
       keyField    = CONFIG.DIFF.FALLBACK_KEY_FIELD,
       itemKey,
-      lang        = (typeof localStorage !== 'undefined' && localStorage.getItem('selectedLang')) || 'en',
+      lang        = (window.FvLang && FvLang.lang) || 'en',
       poolCap     = CONFIG.RENDER.DEFAULT_POOL_CAP,
       horizontal  = false,
       columns     = CONFIG.GRID.DEFAULT_COLUMNS,
@@ -210,7 +210,7 @@
     window.addEventListener('languageChange', _onLangChange, { passive: true });
 
     function _onLangChange(e) {
-      const newLang = e?.detail?.language || localStorage.getItem('selectedLang') || 'en';
+      const newLang = e?.detail?.language || (window.FvLang && FvLang.lang) || 'en';
       if (newLang === store.get('lang')) return;
       store.set('lang', newLang);
       vl.setLang(newLang);

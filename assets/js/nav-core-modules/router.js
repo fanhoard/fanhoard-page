@@ -299,7 +299,7 @@
 
         // ── Smart loading message: use the active language label of the button ──
         try {
-          const lang = localStorage.getItem('selectedLang') || 'en';
+          const lang = (window.FvLang && FvLang.lang) || 'en';
           const btnLabel = mainButton.label?.[lang]
                         || mainButton.name?.[lang]
                         || mainButton.label?.en
@@ -313,7 +313,7 @@
           }
         } catch (_) {}
 
-        const lang          = localStorage.getItem('selectedLang') || 'en';
+        const lang          = (window.FvLang && FvLang.lang) || 'en';
         const hasSubButtons = mainButton.subButtons?.length > 0;
         let   chosenSub     = null;
 

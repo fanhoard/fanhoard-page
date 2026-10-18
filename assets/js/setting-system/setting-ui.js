@@ -23,7 +23,7 @@
   function _getLang() {
     if (global.FvLang && global.FvLang.lang) return global.FvLang.lang;
     try {
-      return localStorage.getItem('selectedLang') || localStorage.getItem('fv_lang') || 'en';
+      return 'en';
     } catch (_) {
       return 'en';
     }

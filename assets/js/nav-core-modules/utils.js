@@ -88,7 +88,7 @@
    * @returns {string}
    */
   function _buildErrorDetailHTML(error, opts) {
-    const lang = localStorage.getItem('selectedLang') || 'en';
+    const lang = (window.FvLang && FvLang.lang) || 'en';
     const labels = {
       th: { title: 'เกิดข้อผิดพลาด', subtitle: 'ระบบพบปัญหาที่ไม่คาดคิด รายละเอียดด้านล่าง', section: 'รายละเอียดข้อผิดพลาด', copy: 'คัดลอกรายงาน', copied: 'คัดลอกแล้ว!', hint: 'ส่งรายงานนี้ให้นักพัฒนาเพื่อช่วยแก้ไขปัญหา' },
       en: { title: 'Something went wrong', subtitle: 'An unexpected error occurred. Details below.', section: 'Error Details', copy: 'Copy Report', copied: 'Copied!', hint: 'Send this report to the developer to help fix the issue' },
@@ -179,11 +179,11 @@
             copyBtn.addEventListener('click', function() {
               navigator.clipboard.writeText(report).then(function() {
                 var label = document.getElementById('_nc_err_copy_label');
-                if (label) label.textContent = label.textContent.includes('Copied') || label.textContent.includes('คัดลอกแล้ว') ? label.textContent : (localStorage.getItem('selectedLang') === 'th' ? 'คัดลอกแล้ว!' : 'Copied!');
+                if (label) label.textContent = label.textContent.includes('Copied') || label.textContent.includes('คัดลอกแล้ว') ? label.textContent : ((window.FvLang && FvLang.lang) === 'th' ? 'คัดลอกแล้ว!' : 'Copied!');
                 copyBtn.classList.add('fp-error-detail__copy-btn--copied');
                 setTimeout(function() {
                   copyBtn.classList.remove('fp-error-detail__copy-btn--copied');
-                  if (label) label.textContent = localStorage.getItem('selectedLang') === 'th' ? 'คัดลอกรายงาน' : 'Copy Report';
+                  if (label) label.textContent = (window.FvLang && FvLang.lang) === 'th' ? 'คัดลอกรายงาน' : 'Copy Report';
                 }, 2000);
               }).catch(function() {
                 // Fallback: select text in pre
@@ -216,7 +216,7 @@
    * @returns {HTMLElement|undefined}
    */
   function showNotification(message, type = 'info', options = {}) {
-    const lang = localStorage.getItem('selectedLang') || 'en';
+    const lang = (window.FvLang && FvLang.lang) || 'en';
     const labels = {
       th: { success: '✨ สำเร็จ!', error: '❌ ข้อผิดพลาด', warning: '⚠️ คำเตือน', info: 'ℹ️ ข้อมูล', loading: '⌛ กำลังโหลด' },
       en: { success: '✨ Success!', error: '❌ Error',       warning: '⚠️ Warning', info: 'ℹ️ Information', loading: '⌛ Loading' },

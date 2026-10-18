@@ -201,9 +201,7 @@
     }
 
     // Resolve language
-    o.lang = o.lang ||
-      (typeof localStorage !== 'undefined' && localStorage.getItem('selectedLang')) ||
-      'en';
+    o.lang = o.lang || (window.FvLang && FvLang.lang) || 'en';
 
     // Easing resolution
     const easingMap = {

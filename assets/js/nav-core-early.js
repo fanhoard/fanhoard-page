@@ -107,7 +107,7 @@
 
   // Minimal renderer: render main buttons and first content items (fast)
   async function renderMinimal(uiConfig) {
-    const lang = localStorage.getItem('selectedLang') || 'en';
+    const lang = (window.FvLang && FvLang.lang) || 'en';
     const mainButtons = (uiConfig && uiConfig.mainButtons) || [];
     const ul = document.getElementById('nav-list');
     if (!ul) return;

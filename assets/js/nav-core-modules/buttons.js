@@ -177,7 +177,7 @@
     // ── Main button rendering ──────────────────────────────────────────────────
 
     async renderMainButtons() {
-      const lang            = localStorage.getItem('selectedLang') || 'en';
+      const lang            = (window.FvLang && FvLang.lang) || 'en';
       const { mainButtons } = State.buttons.config;
       const navList         = State.elements.navList;
       navList.innerHTML     = '';
@@ -277,7 +277,7 @@
       State.buttons.currentMainButton = btn;
       await M.ContentService.clearContent();
 
-      const lang = localStorage.getItem('selectedLang') || 'en';
+      const lang = (window.FvLang && FvLang.lang) || 'en';
       if (cfg.subButtons?.length) {
         SubNavService.showSubNav();
         await this.renderSubButtons(cfg.subButtons, cfg.url || cfg.jsonFile, lang);
@@ -294,7 +294,7 @@
       if (!cfg.subButtons?.length) { SubNavService.hideSubNav(); return; }
       SubNavService.showSubNav();
 
-      const lang = localStorage.getItem('selectedLang') || 'en';
+      const lang = (window.FvLang && FvLang.lang) || 'en';
       await this.renderSubButtons(cfg.subButtons, main, lang);
 
       const fullUrl = `${main}-${sub}`;

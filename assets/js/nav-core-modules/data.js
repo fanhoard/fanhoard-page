@@ -350,7 +350,7 @@
       const idRaw = categoryId.replace(/_category$/, '');
       const svc   = await _requireConDataService();
       const db    = await svc.getAssembled();
-      const lang  = localStorage.getItem('selectedLang') || 'en';
+      const lang  = (window.FvLang && FvLang.lang) || 'en';
 
       let foundCat = null;
       let typeObj  = null;
@@ -397,7 +397,7 @@
       if (cached) return cached;
 
       const svc  = await _requireConDataService();
-      const lang = localStorage.getItem('selectedLang') || 'en';
+      const lang = (window.FvLang && FvLang.lang) || 'en';
       const url  = svc.registry.paths.subcategoryData(typeId, categoryId);
       const raw  = await this._performFetch(url);
 

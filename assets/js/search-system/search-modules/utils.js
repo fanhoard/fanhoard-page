@@ -27,15 +27,7 @@
      * @returns {'th'|'en'}
      */
     getLang() {
-      try {
-        return (
-          (window.FvLang && FvLang.lang) ||
-          localStorage.getItem(CONFIG.STORAGE.langKey) ||
-          CONFIG.LANG.default
-        );
-      } catch {
-        return CONFIG.LANG.default;
-      }
+      return (window.FvLang && FvLang.lang) || CONFIG.LANG.default;
     },
 
     /**

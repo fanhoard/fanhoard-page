@@ -84,12 +84,7 @@
     // ── Language detection ──
     function detectLang(explicit) {
       if (explicit) return explicit;
-      try {
-        var CONFIG = M.CONFIG;
-        var key = (CONFIG && CONFIG.LANG_KEY) || 'selectedLang';
-        var ls = window.localStorage || (typeof localStorage !== 'undefined' ? localStorage : null);
-        return (ls && ls.getItem(key)) || 'en';
-      } catch (_) { return 'en'; }
+      return (window.FvLang && FvLang.lang) || 'en';
     }
 
     // ── i18n message resolver ──

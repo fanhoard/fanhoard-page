@@ -80,10 +80,7 @@
    * @returns {string}
    */
   function _loadingMessage() {
-    var lang = 'en';
-    try {
-      lang = localStorage.getItem('selectedLang') || 'en';
-    } catch (_) {}
+    var lang = (window.FvLang && FvLang.lang) || 'en';
     return LOADING_MESSAGE[lang] || LOADING_MESSAGE.en;
   }
 

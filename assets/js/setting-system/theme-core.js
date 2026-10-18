@@ -86,7 +86,7 @@
     try {
       window.dispatchEvent(new CustomEvent('fv:themechange', { detail: detail }));
       window.dispatchEvent(new CustomEvent('fv:preference-change', {
-        detail: { theme: theme, lang: (localStorage.getItem('fv_lang') || localStorage.getItem('selectedLang') || 'en') }
+        detail: { theme: theme, lang: (global.FvLang && global.FvLang.lang) || 'en' }
       }));
     } catch (_) {}
   }
@@ -133,9 +133,7 @@
     _dispatchThemeEvents(theme, effective);
 
     if (opts.toast && global.PopupSystem && typeof global.PopupSystem.toast === 'function') {
-      var isTh = (global.FvLang && global.FvLang.lang === 'th') ||
-                 localStorage.getItem('selectedLang') === 'th' ||
-                 localStorage.getItem('fv_lang') === 'th';
+      var isTh = (global.FvLang && global.FvLang.lang === 'th');
 
       var msg = '';
       if (effective === 'dark') {

@@ -46,8 +46,7 @@ const VIEW_ALL_CONFIGS = {
 };
 
 // v5.0: ใช้ FvLang.lang แทน localStorage โดยตรง
-const getLang = () =>
-  (window.FvLang && FvLang.lang) || (typeof localStorage !== 'undefined' && localStorage.getItem('selectedLang')) || 'en';
+const getLang = () => (window.FvLang && FvLang.lang) || 'en';
 
 function pickLang(obj, lang) {
   if (!obj || typeof obj !== 'object') return String(obj || '');

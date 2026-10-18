@@ -104,7 +104,8 @@
     URE must execute before search-system/search.js (same defer order = document order).
     search-system/search.js auto-loads its 13 modules + injects search-system.css.
   -->
-  <script type="module" src="/assets/js/con-data-service/con-data-registry.js?v=5.11.2-202610172134"></script>
+    <script src="/assets/js/lang-core.js?v=5.11.2-202610172134"></script>
+<script type="module" src="/assets/js/con-data-service/con-data-registry.js?v=5.11.2-202610172134"></script>
   <script type="module" src="/assets/js/con-data-service/con-data-service.js?v=5.11.2-202610172134"></script>
   <!-- URE must execute before search-system/search.js (same defer order = document order) -->
   <script defer src="/assets/js/ure/ure.js?v=5.11.2-202610172134"></script>

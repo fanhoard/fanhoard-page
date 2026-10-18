@@ -165,9 +165,7 @@
   async function showCopyNotification({ text, name, typeId, lang } = {}) {
     _injectStyles();
     
-    const resolvedLang = lang ||
-      (typeof localStorage !== 'undefined' && localStorage.getItem('selectedLang')) ||
-      'en';
+    const resolvedLang = lang || (window.FvLang && FvLang.lang) || 'en';
     
     const label = COPIED_LABEL[resolvedLang] || COPIED_LABEL.en;
     let resolvedName = (typeof name === 'string') ? name.trim() : '';

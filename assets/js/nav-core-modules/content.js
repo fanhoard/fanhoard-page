@@ -233,7 +233,7 @@
         await _ensureURE();
         if (sess !== _sess) return;
 
-        const lang = localStorage.getItem('selectedLang') || 'en';
+        const lang = (window.FvLang && FvLang.lang) || 'en';
         await M.DataService.loadApiDatabase().catch(err => {
           console.warn('[Content] loadApiDatabase failed, continuing:', err);
         });

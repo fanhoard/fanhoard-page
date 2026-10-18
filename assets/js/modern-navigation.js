@@ -103,7 +103,7 @@
       this.defaultLang = options.defaultLang || 'en';
       this.supportedLangCodes = options.supportedLangCodes || ['th','en','ja','ko','zh','fr','de','es','it','pt','ru','ar','vi','id','ms','tl'];
       this.readSelectedLang = options.readSelectedLang || (() => {
-        try { return localStorage.getItem('selectedLang') || this.defaultLang; } catch (e) { return this.defaultLang; }
+        return (window.FvLang && FvLang.lang) || this.defaultLang;
       });
       this.isDevMode = !!options.isDevMode;
     }
@@ -277,7 +277,7 @@
       this.navPrefixManager = new NavPrefixManager({
         defaultLang: this.defaultLang,
         supportedLangCodes: this.supportedLangCodes,
-        readSelectedLang: () => { try { return localStorage.getItem('selectedLang'); } catch (e) { return null; } },
+        readSelectedLang: () => (window.FvLang && FvLang.lang) || null,
         isDevMode: NavController._isLocalDev()
       });
       this.navRenderer = new NavRenderer({ defaultButtonClass: opts.defaultButtonClass || 'default-button' });
