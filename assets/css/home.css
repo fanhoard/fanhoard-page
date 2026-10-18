@@ -26,9 +26,9 @@ h2, .h2,
 #features-heading,
 #faq-heading {
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
-  font-size: var(--step-2, 1.375rem);
-  font-weight: var(--font-bold, 700);
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  font-size: var(--step-1, 1.0625rem);
+  font-weight: var(--font-semibold, 600);
+  color: var(--color-brand-text, #0f836c);
   margin: 0 0 var(--space-4, 1rem) 0;
   letter-spacing: 0.01em;
 }
@@ -42,7 +42,7 @@ h3, .h3 {
 }
 
 .lead {
-  font-size: var(--step-1, 1.0625rem);
+  font-size: var(--step-0, 0.9375rem);
   color: var(--text-muted, #757575);
   max-width: 34rem;
   margin-left: auto;
@@ -55,7 +55,7 @@ h3, .h3 {
 }
 
 strong, b {
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, #0f836c);
   font-weight: var(--font-bold, 700);
 }
 
@@ -87,7 +87,7 @@ section,
   border: none;
   box-shadow: none;
   padding: 0;
-  margin-bottom: clamp(var(--space-8, 2rem), 1.5rem + 2.5vw, var(--space-12, 4rem));
+  margin-bottom: clamp(var(--space-8, 2rem), 1.5rem + 2vw, var(--space-10, 2.75rem));
   display: flex;
   flex-direction: column;
   gap: var(--space-4, 1rem);
@@ -116,14 +116,14 @@ section.mn {
 .hero {
   background: transparent;
   border-radius: var(--radius-2xl, 32px);
-  padding: clamp(var(--space-8, 2rem), 1.5rem + 5vw, var(--space-16, 6rem)) 0 var(--space-6, 2rem) 0;
-  margin-bottom: clamp(var(--space-8, 2rem), 1.5rem + 2.5vw, var(--space-12, 4rem));
+  padding: clamp(var(--space-8, 2rem), 1.25rem + 4vw, var(--space-12, 3rem)) 0 var(--space-6, 2rem) 0;
+  margin-bottom: clamp(var(--space-8, 2rem), 1.5rem + 2vw, var(--space-10, 2.75rem));
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-5, 1.75rem);
-  min-height: clamp(180px, 34vh, 340px);
+  min-height: clamp(160px, 30vh, 300px);
   border: none;
   position: relative;
   z-index: 1;
@@ -137,7 +137,7 @@ section.mn {
   width: 100%;
   margin: 0 auto;
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
-  font-size: clamp(var(--step-4, 2.25rem), 1.6rem + 2vw, var(--step-5, 2.75rem));
+  font-size: clamp(var(--step-3, 1.75rem), 1.35rem + 1.6vw, var(--step-4, 2.25rem));
   font-weight: var(--font-bold, 700);
   line-height: 1.2;
   letter-spacing: -0.01em;
@@ -230,7 +230,7 @@ section.mn {
 
 /* ---------- FEATURES SECTION ---------- */
 .features-section {
-  margin-bottom: clamp(var(--space-8, 2rem), 1.5rem + 2.5vw, var(--space-12, 4rem));
+  margin-bottom: clamp(var(--space-8, 2rem), 1.5rem + 2vw, var(--space-10, 2.75rem));
 }
 
 .features-grid {
@@ -246,12 +246,12 @@ section.mn {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  gap: var(--space-4, 1rem);
+  gap: var(--space-3, 0.75rem);
   margin-bottom: 0;
   background-color: var(--surface-card, #ffffff);
   border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
   border-radius: var(--radius-xl, 28px);
-  padding: var(--space-5, 1.75rem);
+  padding: var(--space-4, 1rem);
   box-shadow: none;
 }
 
@@ -264,8 +264,8 @@ section.mn {
   color: var(--text-main, #0f172a);
   background-color: var(--surface-hover, rgba(0, 0, 0, 0.03));
   border-radius: var(--radius-full, 9999px);
-  width: var(--ds-target, 44px);
-  height: var(--ds-target, 44px);
+  width: 40px;
+  height: 40px;
   box-shadow: none;
   flex-shrink: 0;
 }
@@ -293,7 +293,7 @@ section.mn {
 
 /* ---------- FAQ SECTION ---------- */
 .faq-section {
-  margin-bottom: clamp(var(--space-8, 2rem), 1.5rem + 2.5vw, var(--space-12, 4rem));
+  margin-bottom: clamp(var(--space-8, 2rem), 1.5rem + 2vw, var(--space-10, 2.75rem));
 }
 
 .faq-grid {
@@ -306,7 +306,7 @@ section.mn {
 /* FAQ item — soft capsule card จาก DS token (ไม่มีเส้นคั่น) */
 .faq-card {
   margin-bottom: 0;
-  padding: var(--space-1, 0.25rem) var(--space-5, 1.75rem);
+  padding: var(--space-1, 0.25rem) var(--space-4, 1rem);
   background-color: var(--surface-card, #ffffff);
   border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
   border-radius: var(--radius-xl, 28px);
@@ -322,7 +322,7 @@ section.mn {
   color: var(--text-main, var(--text-main, #0f172a));
   cursor: pointer;
   position: relative;
-  padding: var(--space-4, 1rem) var(--space-8, 2rem) var(--space-4, 1rem) 0;
+  padding: var(--space-3, 0.75rem) var(--space-8, 2rem) var(--space-3, 0.75rem) 0;
   min-height: var(--ds-target, 44px);
   transition: color var(--duration-fast, 150ms) var(--ease-out, ease-out);
   display: flex;
@@ -342,7 +342,7 @@ section.mn {
 }
 
 .faq-question:hover {
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, #0f836c);
 }
 
 .faq-question::after {
@@ -358,13 +358,13 @@ section.mn {
 }
 
 .faq-question:hover::after {
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, #0f836c);
 }
 
 details[open] > .faq-question::after,
 details.faq-item[open] .faq-question::after {
   transform: translateY(-50%) rotate(-180deg);
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, #0f836c);
 }
 
 .faq-answer {
@@ -401,9 +401,9 @@ details[open] .faq-answer {
 }
 
 .text-h h2 {
-  font-size: var(--step-2, 1.375rem);
-  font-weight: var(--font-bold, 700);
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  font-size: var(--step-1, 1.0625rem);
+  font-weight: var(--font-semibold, 600);
+  color: var(--color-brand-text, #0f836c);
   margin: 0;
 }
 
@@ -458,7 +458,7 @@ details[open] .faq-answer {
   border-radius: var(--radius-xl, 28px);
   box-shadow: none;
   width: 130px;
-  padding: var(--space-4, 1rem) var(--space-2, 0.5rem) var(--space-3, 0.75rem) !important;
+  padding: var(--space-3, 0.75rem) var(--space-2, 0.5rem) var(--space-3, 0.75rem) !important;
   transition: border-color var(--duration-fast, 150ms) var(--ease-out, ease-out),
               transform var(--duration-fast, 150ms) var(--ease-out, ease-out);
   display: flex;
@@ -476,7 +476,7 @@ details[open] .faq-answer {
 }
 
 .item-card:hover, .item-card.fv-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   background-color: var(--surface-hover, rgba(0,0,0,0.02));
   transform: none;
@@ -484,7 +484,7 @@ details[open] .faq-answer {
 }
 
 .item-card .emoji {
-  font-size: var(--step-4, 2.25rem);
+  font-size: var(--step-3, 1.75rem);
   user-select: none;
   line-height: 1;
 }
@@ -523,7 +523,7 @@ details[open] .faq-answer {
   border-radius: var(--radius-full, 9999px);
   background: transparent;
   border: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, #0f836c);
   flex-shrink: 0;
 }
 
@@ -591,7 +591,7 @@ details[open] .faq-answer {
 
 .carousel-arrow:hover .ca-icon-wrap {
   background: var(--surface-base, #ffffff);
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, #0f836c);
   border-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   transform: none;
 }

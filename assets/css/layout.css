@@ -305,7 +305,7 @@ h1, h2, h3, h4, h5, h6, .page-title, .fv-section__title, .fv-hero__title {
   z-index: var(--z-toast, 700);
   padding: var(--space-3, 12px) var(--space-4, 16px);
   background-color: var(--surface-card, #ffffff);
-  color: var(--color-brand-primary, #0d9488);
+  color: var(--color-brand-text, #0f836c);
   border: 2px solid var(--color-brand-primary, #0d9488);
   border-radius: var(--radius-md, 8px);
   font-family: var(--font-sans, system-ui, sans-serif);

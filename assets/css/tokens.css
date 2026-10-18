@@ -58,12 +58,12 @@
   --color-slate-900: #0f172a;
 
   /* ── Semantic Colors (Light Default) ── */
-  --color-brand-primary: var(--color-teal-600);
-  --color-brand-hover:   var(--color-teal-700);
-  --color-brand-active:  var(--color-teal-800);
-  --color-brand-text:    #0d7360; /* AA >= 4.9:1 on white, accent tint and neutral hover rows */
-  --color-on-brand:      #ffffff; /* ตัวอักษรบนพื้น --color-brand-primary (ขาว 4.7:1 ขึ้นไป) ห้ามเขียน #fff ตายตัวบนพื้นแบรนด์ */
-  --color-brand-accent:  var(--color-emerald-500);
+  --color-brand-primary: var(--color-teal-500); /* #10b981 เขียวสดใสสร้างสรรค์ — ใช้กับพื้นปุ่ม/interactive เท่านั้น */
+  --color-brand-hover:   var(--color-teal-600);   /* #0f836c เข้มขึ้นเมื่อ hover */
+  --color-brand-active:  var(--color-teal-700);   /* #0d6f5c */
+  --color-brand-text:    #0f836c; /* AA 4.68:1 on white — สีข้อความแบรนด์ทั้งหมด (heading/link/strong) */
+  --color-on-brand:      #0b1714; /* ตัวอักษรเข้มบนปุ่มสดใส 7.2:1 — สไตล์ปุ่มสดใสตัวเข้มสมัยใหม่ */
+  --color-brand-accent:  var(--color-teal-400);   /* #34d399 accent สด */
 
   /* Surfaces are NEUTRAL (60-30-10): the brand color is an accent, never a background.
      Page and card are white; --surface-hover is a quiet cool neutral for rows and

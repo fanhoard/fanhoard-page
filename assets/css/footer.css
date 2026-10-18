@@ -81,7 +81,7 @@
   font-family: var(--font-sans);
   font-size: 1.7rem;
   font-weight: 700;
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, #0f836c);
   letter-spacing: -0.02em;
   line-height: 1;
 }
@@ -247,7 +247,7 @@
 }
 
 .footer-minimal .footer-bottom a:hover {
-  color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
+  color: var(--color-brand-text, #0f836c);
   border-bottom-color: var(--color-brand-primary, var(--color-brand-primary, #0d9488));
   text-decoration: none;
 }

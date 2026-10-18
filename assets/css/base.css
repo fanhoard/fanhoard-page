@@ -59,7 +59,7 @@ p {
 }
 
 a {
-  color: var(--color-brand-primary, #0d9488);
+  color: var(--color-brand-text, #0f836c);
   text-decoration: none;
   transition: color var(--duration-fast, 150ms) var(--ease-out, ease-out);
 }
