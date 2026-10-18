@@ -129,6 +129,7 @@ export function generateSitemap(): void {
     '.git',
     'scripts',
     'src',
+    'assets',
     '.cloudflare',
     'google6b646fa60e0f9f2f.html',
     '404.html',

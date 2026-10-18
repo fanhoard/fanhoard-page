@@ -2,56 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://fanhoard.pages.dev/en/assets/demo/c1-token-demo/</loc>
-    <lastmod>2026-10-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/assets/demo/c1-token-demo/"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/assets/demo/c1-token-demo/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/assets/demo/c1-token-demo/"/>
-  </url>
-
-  <url>
-    <loc>https://fanhoard.pages.dev/en/assets/demo/c2-components-demo/</loc>
-    <lastmod>2026-10-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/assets/demo/c2-components-demo/"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/assets/demo/c2-components-demo/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/assets/demo/c2-components-demo/"/>
-  </url>
-
-  <url>
-    <loc>https://fanhoard.pages.dev/en/assets/template-html/footer-template/</loc>
-    <lastmod>2026-10-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/assets/template-html/footer-template/"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/assets/template-html/footer-template/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/assets/template-html/footer-template/"/>
-  </url>
-
-  <url>
-    <loc>https://fanhoard.pages.dev/en/assets/template-html/home-templates/</loc>
-    <lastmod>2026-10-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/assets/template-html/home-templates/"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/assets/template-html/home-templates/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/assets/template-html/home-templates/"/>
-  </url>
-
-  <url>
-    <loc>https://fanhoard.pages.dev/en/assets/template-html/intro-template/</loc>
-    <lastmod>2026-10-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://fanhoard.pages.dev/en/assets/template-html/intro-template/"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://fanhoard.pages.dev/th/assets/template-html/intro-template/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://fanhoard.pages.dev/en/assets/template-html/intro-template/"/>
-  </url>
-
-  <url>
     <loc>https://fanhoard.pages.dev/en/community/contact/</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
