@@ -22,3 +22,7 @@ Thumbs.db
 assets/md/en/releases/index.json
 assets/md/th/releases/index.json
 assets/json/version.json
+
+# Design Core working files (local only)
+.state/
+assets/demo/
